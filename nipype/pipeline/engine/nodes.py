@@ -293,10 +293,8 @@ class Node(EngineBase):
         if self._hierarchy:
             outputdir = op.join(outputdir, *self._hierarchy.split("."))
         if self.parameterization:
-            params_str = ["{}".format(p) for p in self.parameterization]
-            if not str2bool(self.config["execution"]["parameterize_dirs"]):
-                params_str = [_parameterization_dir(p,32) for p in params_str]
-            params_str = [_parameterization_dir(p,252) for p in params_str]
+            maxlen = 252 if str2bool(self.config["execution"]["parameterize_dirs"]) else 32
+            params_str = [_parameterization_dir(str(p), maxlen) for p in self.parameterization]
             outputdir = op.join(outputdir, *params_str)
 
         self._output_dir = op.realpath(op.join(outputdir, self.name))
