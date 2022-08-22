@@ -12,6 +12,8 @@ from ..confounds import CompCor, TCompCor, ACompCor
 
 def close_up_to_column_sign(a, b, rtol=1e-05, atol=1e-08, equal_nan=False):
     """SVD can produce sign flips on a per-column basis."""
+    a = np.asanyarray(a)
+    b = np.asanyarray(b)
     kwargs = dict(rtol=rtol, atol=atol, equal_nan=equal_nan)
     if np.allclose(a, b, **kwargs):
         return True
