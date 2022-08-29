@@ -258,11 +258,13 @@ class FieldMap(SPMCommand):
 class ApplyVDMInputSpec(SPMCommandInputSpec):
 
     in_files = InputMultiObject(
-        ImageFileSPM(exists=True),
-        field="data.scans",
+        traits.Either(
+            ImageFileSPM(exists=True), traits.List(ImageFileSPM(exists=True))
+        ),
+        field='data.scans',
         mandatory=True,
         copyfile=True,
-        desc="list of filenames to apply the vdm to",
+        desc='list of filenames to apply the vdm to',
     )
     vdmfile = File(
         field="data.vdmfile",
@@ -337,7 +339,11 @@ class ApplyVDM(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
 
-        if opt in ["in_files", "vdmfile"]:
+        if opt == 'in_files':
+            return scans_for_fnames(
+                ensure_list(val), keep4d=False, separate_sessions=False
+            )
+        if opt == 'vdmfile':
             return scans_for_fname(ensure_list(val))
         return super(ApplyVDM, self)._format_arg(opt, spec, val)
 
