@@ -5,7 +5,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 
 # nipype version information
 # Remove .dev0 for release
-__version__ = "1.8.4.dev0"
+__version__ = "1.8.4"
 
 
 def get_nipype_gitversion():
@@ -171,6 +171,7 @@ EXTRA_REQUIRES = {
         "sphinxcontrib-apidoc",
     ],
     "duecredit": ["duecredit"],
+    "maint": ["GitPython", "fuzzywuzzy"],
     "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
     "profiler": ["psutil>=5.0"],
     "pybids": ["pybids>=0.7.0"],

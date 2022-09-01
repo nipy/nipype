@@ -1,3 +1,14 @@
+1.8.4 (September 01, 2022)
+==========================
+
+Bug-fix release in the 1.8.x series.
+
+This release sets a maximum traits version to avoid new, breaking changes.
+
+  * MNT: Pin traits < 6.4 (https://github.com/nipy/nipype/pull/3501)
+  * ENH: Add inputs to mrtrix3.DWIPreprocInputSpec and remove mandatory annotation for pe_dir (https://github.com/nipy/nipype/pull/3470)
+
+
 1.8.3 (July 14, 2022)
 =====================
 

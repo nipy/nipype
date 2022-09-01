@@ -319,6 +319,11 @@
       "orcid": "0000-0002-5112-405X"
     },
     {
+      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
+      "name": "Ben-Zvi, Gal",
+      "orcid": "0000-0002-5655-9423"
+    },
+    {
       "affiliation": "State Key Laboratory of Cognitive Neuroscience and Learning & IDG/McGovern Institute for Brain Research, Beijing Normal University, Beijing, China; Max Planck Institute for Psycholinguistics, Nijmegen, the Netherlands",
       "name": "Kong, Xiang-Zhen",
       "orcid": "0000-0002-0805-1350"
@@ -455,11 +460,6 @@
     {
       "affiliation": "University of Iowa",
       "name": "Welch, David"
-    },
-    {
-      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
-      "name": "Ben-Zvi, Gal",
-      "orcid": "0000-0002-5655-9423"
     },
     {
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences",
@@ -892,7 +892,11 @@
       "orcid": "0000-0002-5312-6729"
     }
   ],
-  "keywords": ["neuroimaging", "workflow", "pipeline"],
+  "keywords": [
+    "neuroimaging",
+    "workflow",
+    "pipeline"
+  ],
   "license": "Apache-2.0",
   "upload_type": "software"
 }
