@@ -258,9 +258,7 @@ class FieldMap(SPMCommand):
 class ApplyVDMInputSpec(SPMCommandInputSpec):
 
     in_files = InputMultiObject(
-        traits.Either(
-            ImageFileSPM(exists=True), traits.List(ImageFileSPM(exists=True))
-        ),
+        ImageFileSPM(exists=True),
         field='data.scans',
         mandatory=True,
         copyfile=True,
