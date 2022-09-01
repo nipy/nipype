@@ -171,6 +171,7 @@ EXTRA_REQUIRES = {
         "sphinxcontrib-apidoc",
     ],
     "duecredit": ["duecredit"],
+    "maint": ["GitPython", "fuzzywuzzy"],
     "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
     "profiler": ["psutil>=5.0"],
     "pybids": ["pybids>=0.7.0"],
