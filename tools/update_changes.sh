@@ -25,7 +25,8 @@ echo $HEADER >> newchanges
 echo $( printf "%${#HEADER}s" | tr " " "=" ) >> newchanges
 echo >> newchanges
 
-if [[ "x$2" != "x" ]]; then
+MILESTONE=${2:-""}
+if [[ "x$MILESTONE" != "x" ]]; then
     echo "(\`Full changelog <https://github.com/nipy/nipype/milestone/$2?closed=1>\`__)" >> newchanges
     echo >> newchanges
 fi
