@@ -259,10 +259,10 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
 
     in_files = InputMultiObject(
         ImageFileSPM(exists=True),
-        field='data.scans',
+        field="data.scans",
         mandatory=True,
         copyfile=True,
-        desc='list of filenames to apply the vdm to',
+        desc="list of filenames to apply the vdm to",
     )
     vdmfile = File(
         field="data.vdmfile",
