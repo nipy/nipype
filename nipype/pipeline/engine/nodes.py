@@ -752,10 +752,11 @@ Error populating the inputs of node "%s": the results file of the source node \
         if exc_tb:
             runtime = result.runtime
 
-            def _tab(field):
+            def _tab(text):
                 from textwrap import indent
-
-                return indent(field, '\t')
+                if not text:
+                    return ""
+                return indent(text, '\t')
 
             msg = f"Exception raised while executing Node {self.name}.\n\n"
             if hasattr(runtime, 'cmdline'):
