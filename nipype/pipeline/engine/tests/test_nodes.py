@@ -7,6 +7,7 @@ import pytest
 
 from .... import config
 from ....interfaces import utility as niu
+from ....interfaces import base as nib
 from ... import engine as pe
 from ..utils import merge_dict
 from .test_base import EngineTestInterface
@@ -334,3 +335,44 @@ def test_mapnode_single(tmpdir):
     wf.base_dir = os.path.abspath("./test_output")
     with pytest.raises(RuntimeError):
         wf.run(plugin="MultiProc")
+
+
+class FailCommandLine(nib.CommandLine):
+    input_spec = nib.CommandLineInputSpec
+    output_spec = nib.TraitedSpec
+    _cmd = 'nipype-node-execution-fail'
+
+
+def test_NodeExecutionError(tmp_path, monkeypatch):
+    import stat
+
+    monkeypatch.chdir('.')
+
+    # create basic executable and add to PATH
+    exebin = tmp_path / 'bin'
+    exebin.mkdir()
+    exe = exebin / 'nipype-node-execution-fail'
+    exe.write_text('#!/bin/bash\necho "Running"\necho "This should fail" >&2\nexit 1')
+    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("PATH", str(exe.parent.absolute()), prepend=os.pathsep)
+
+    # Test with cmdline interface
+    cmd = pe.Node(FailCommandLine(), name="cmd-fail", base_dir='cmd')
+    with pytest.raises(pe.nodes.NodeExecutionError) as exc:
+        cmd.run()
+    error_msg = str(exc.value)
+
+    for attr in ("Cmdline:", "Stdout:", "Stderr:", "Traceback:"):
+        assert attr in error_msg
+    assert "This should fail" in error_msg
+
+    # Test with function interface
+    def fail():
+        raise Exception("Functions can fail too")
+    func = pe.Node(niu.Function(function=fail), name='func-fail', base_dir='func')
+    with pytest.raises(pe.nodes.NodeExecutionError) as exc:
+        func.run()
+    error_msg = str(exc.value)
+    assert "Traceback:" in error_msg
+    assert "Cmdline:" not in error_msg
+    assert "Functions can fail too" in error_msg
