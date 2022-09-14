@@ -346,7 +346,7 @@ class FailCommandLine(nib.CommandLine):
 def test_NodeExecutionError(tmp_path, monkeypatch):
     import stat
 
-    monkeypatch.chdir('.')
+    monkeypatch.chdir(tmp_path)
 
     # create basic executable and add to PATH
     exebin = tmp_path / 'bin'
@@ -369,6 +369,7 @@ def test_NodeExecutionError(tmp_path, monkeypatch):
     # Test with function interface
     def fail():
         raise Exception("Functions can fail too")
+
     func = pe.Node(niu.Function(function=fail), name='func-fail', base_dir='func')
     with pytest.raises(pe.nodes.NodeExecutionError) as exc:
         func.run()

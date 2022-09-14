@@ -754,6 +754,7 @@ Error populating the inputs of node "%s": the results file of the source node \
 
             def _tab(text):
                 from textwrap import indent
+
                 if not text:
                     return ""
                 return indent(text, '\t')
