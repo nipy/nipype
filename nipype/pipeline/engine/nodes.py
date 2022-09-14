@@ -751,17 +751,22 @@ Error populating the inputs of node "%s": the results file of the source node \
 
         if exc_tb:
             runtime = result.runtime
+
             def _tab(field):
                 from textwrap import indent
+
                 return indent(field, '\t')
 
-            raise NodeExecutionError(
-                f"Exception raised while executing Node {self.name}.\n\n"
-                f"Cmdline:\n{_tab(runtime.cmdline)}\n"
-                f"Stdout:\n{_tab(runtime.stdout)}\n"
-                f"Stderr:\n{_tab(runtime.stderr)}\n"
-                f"Traceback:\n{_tab(runtime.traceback)}"
-            )
+            msg = f"Exception raised while executing Node {self.name}.\n\n"
+            if hasattr(runtime, 'cmdline'):
+                msg += (
+                    f"Cmdline:\n{_tab(runtime.cmdline)}\n"
+                    f"Stdout:\n{_tab(runtime.stdout)}\n"
+                    f"Stderr:\n{_tab(runtime.stderr)}\n"
+                )
+            # Always pass along the traceback
+            msg += f"Traceback:\n{_tab(runtime.traceback)}"
+            raise NodeExecutionError(msg)
 
         return result
 
