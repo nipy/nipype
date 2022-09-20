@@ -191,7 +191,7 @@ class MatlabCommand(CommandLine):
         else:
             prescript.insert(0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
-            prescript.append("addpath('%s');\n" % path)
+            prescript.append("if ~(ismcc || isdeployed), addpath('%s'); end;\n" % path)
 
         if not mfile:
             # clean up the code of comments and replace newlines with commas
