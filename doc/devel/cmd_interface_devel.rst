@@ -65,7 +65,7 @@ extra inputs: environ (a dictionary of environmental variables), and args (a
 string defining extra flags). In addition input spec can define the relation
 between the inputs and the generated command line. To achieve this we have
 added two metadata: ``argstr`` (string defining how the argument should be
-formated) and ``position`` (number defining the order of the arguments).
+formatted) and ``position`` (number defining the order of the arguments).
 For example
 
 .. testcode::
@@ -204,7 +204,7 @@ keep_extension (optional)
 
 In addition one can add functionality to your class or base class, to allow
 changing extensions specific to package or interface. This overload function is
-trigerred only if keep_extension is not defined.
+triggered only if keep_extension is not defined.
 
 .. testcode::
 

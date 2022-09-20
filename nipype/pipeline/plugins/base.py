@@ -81,7 +81,7 @@ class DistributedPluginBase(PluginBase):
         a boolean numpy array (N,) signifying whether a
         process is currently running.
     depidx : :obj:`numpy.matrix`
-        a boolean matrix (NxN) storing the dependency structure accross
+        a boolean matrix (NxN) storing the dependency structure across
         processes. Process dependencies are derived from each column.
 
     """

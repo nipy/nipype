@@ -1178,7 +1178,7 @@ class NormalizeProbabilityMapSet(BaseInterface):
 
 
 class SplitROIsInputSpec(TraitedSpec):
-    in_file = File(exists=True, mandatory=True, desc="file to be splitted")
+    in_file = File(exists=True, mandatory=True, desc="file to be split")
     in_mask = File(exists=True, desc="only process files inside mask")
     roi_size = traits.Tuple(traits.Int, traits.Int, traits.Int, desc="desired ROI size")
 

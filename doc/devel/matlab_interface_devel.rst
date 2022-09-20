@@ -9,7 +9,7 @@ Example 1
 +++++++++
 
 This is a minimal script for wrapping MATLAB code. You should replace the MATLAB
-code template, and define approriate inputs and outputs.
+code template, and define appropriate inputs and outputs.
 
 .. literalinclude:: matlab_example1.py
 

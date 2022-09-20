@@ -52,7 +52,7 @@ class ResampleScalarVectorDWIVolumeInputSpec(CommandLineInputSpec):
         "nn",
         "ws",
         "bs",
-        desc="Sampling algorithm (linear or nn (nearest neighborhoor), ws (WindowedSinc), bs (BSpline) )",
+        desc="Sampling algorithm (linear or nn (nearest neighbor), ws (WindowedSinc), bs (BSpline) )",
         argstr="--interpolation %s",
     )
     transform_order = traits.Enum(

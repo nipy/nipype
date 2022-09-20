@@ -453,7 +453,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         usedefault=True,  # This should be true for explicit completeness
         desc=(
             "Initialize linear transforms from the previous stage. By enabling this option, "
-            "the current linear stage transform is directly intialized from the previous "
+            "the current linear stage transform is directly initialized from the previous "
             "stages linear transform; this allows multiple linear stages to be run where "
             "each stage directly updates the estimated linear transform from the previous "
             "stage. (e.g. Translation -> Rigid -> Affine). "
@@ -641,7 +641,7 @@ class Registration(ANTSCommand):
     *stages*. For example first an Affine, then a Rigid, and ultimately a non-linear
     (Syn)-transformation.
 
-    antsRegistration can be initialized using one ore more transforms from moving_image
+    antsRegistration can be initialized using one or more transforms from moving_image
     to fixed_image with the ``initial_moving_transform``-input. For example, when you
     already have a warpfield that corrects for geometrical distortions in an EPI (functional) image,
     that you want to apply before an Affine registration to a structural image.

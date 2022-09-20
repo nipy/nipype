@@ -154,7 +154,7 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     # Create testing files
     files, cwd = create_files_in_directory_plus_dummy_file
 
-    # Test input settins
+    # Test input settings
     fotos.inputs.subject_id = "fsaverage"
     fotos.inputs.hemi = "lh"
     fotos.inputs.surface = "pial"

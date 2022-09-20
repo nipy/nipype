@@ -764,7 +764,7 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
         exists=True,
         argstr="-K %s",
         position=2,
-        desc="generate seperate n submasks from indexMask, "
+        desc="generate separate n submasks from indexMask, "
         "for indexvalues 1..n where n is the maximum index "
         "value in indexMask, and generate statistics for each submask",
     )
@@ -1282,7 +1282,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
     labels = traits.Either(
         traits.Str, traits.List(traits.Str), argstr="%s", desc="label or list of labels"
     )
-    y_min = traits.Float(argstr="--ymin=%.2f", desc="minumum y value", xor=("y_range",))
+    y_min = traits.Float(argstr="--ymin=%.2f", desc="minimum y value", xor=("y_range",))
     y_max = traits.Float(argstr="--ymax=%.2f", desc="maximum y value", xor=("y_range",))
     y_range = traits.Tuple(
         traits.Float,
@@ -1434,7 +1434,7 @@ class PlotMotionParams(FSLCommand):
     translations, while SPM prints them in the opposite order.  This interface
     should be able to plot timecourses of motion parameters generated from
     other sources as long as they fall under one of these two patterns.  For
-    more flexibilty, see the :class:`fsl.PlotTimeSeries` interface.
+    more flexibility, see the :class:`fsl.PlotTimeSeries` interface.
 
     """
 
@@ -1873,7 +1873,7 @@ class InvWarpInputSpec(FSLCommandInputSpec):
         ),
     )
     regularise = traits.Float(
-        argstr="--regularise=%f", desc="Regularization strength (deafult=1.0)."
+        argstr="--regularise=%f", desc="Regularization strength (default=1.0)."
     )
     noconstraint = traits.Bool(
         argstr="--noconstraint", desc="Do not apply Jacobian constraint"

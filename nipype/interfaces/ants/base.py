@@ -11,7 +11,7 @@ from ..base import CommandLine, CommandLineInputSpec, traits, isdefined, Package
 
 iflogger = logging.getLogger("nipype.interface")
 
-# -Using -1 gives primary responsibilty to ITKv4 to do the correct
+# -Using -1 gives primary responsibility to ITKv4 to do the correct
 #  thread limitings.
 # -Using 1 takes a very conservative approach to avoid overloading
 #  the computer (when running MultiProc) by forcing everything to
@@ -20,7 +20,7 @@ iflogger = logging.getLogger("nipype.interface")
 LOCAL_DEFAULT_NUMBER_OF_THREADS = 1
 # -Using NSLOTS has the same behavior as ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS
 #  as long as ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS is not set.  Otherwise
-#  ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS takes precidence.
+#  ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS takes precedence.
 #  This behavior states that you the user explicitly specifies
 #  num_threads, then respect that no matter what SGE tries to limit.
 PREFERED_ITKv4_THREAD_LIMIT_VARIABLE = "NSLOTS"

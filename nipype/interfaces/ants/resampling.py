@@ -34,7 +34,7 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
     tightest_box = traits.Bool(
         argstr="--tightest-bounding-box",
         desc=(
-            "computes tightest bounding box (overrided by " "reference_image if given)"
+            "computes tightest bounding box (overridden by " "reference_image if given)"
         ),
         xor=["reference_image"],
     )
@@ -186,7 +186,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     tightest_box = traits.Bool(
         argstr="--tightest-bounding-box",
         desc=(
-            "computes tightest bounding box (overrided by " "reference_image if given)"
+            "computes tightest bounding box (overridden by " "reference_image if given)"
         ),
         xor=["reference_image"],
     )

@@ -269,7 +269,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
         return self._taskid
 
     def _prerun_check(self, graph):
-        """Check if any node exeeds the available resources"""
+        """Check if any node exceeds the available resources"""
         tasks_mem_gb = []
         tasks_num_th = []
         for node in graph.nodes():

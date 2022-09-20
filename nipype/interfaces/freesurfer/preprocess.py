@@ -135,7 +135,7 @@ class UnpackSDICOMDirInputSpec(FSTraitedSpec):
         argstr="-scanonly %s",
         desc="only scan the directory and put result in file",
     )
-    log_file = File(exists=True, argstr="-log %s", desc="explicilty set log file")
+    log_file = File(exists=True, argstr="-log %s", desc="explicitly set log file")
     spm_zeropad = traits.Int(
         argstr="-nspmzeropad %d", desc="set frame number zero padding width for SPM"
     )
@@ -2415,7 +2415,7 @@ class FitMSParamsOutputSpec(TraitedSpec):
 
 
 class FitMSParams(FSCommand):
-    """Estimate tissue paramaters from a set of FLASH images.
+    """Estimate tissue parameters from a set of FLASH images.
 
     Examples
     --------
@@ -2655,7 +2655,7 @@ class WatershedSkullStrip(FSCommand):
     """This program strips skull and other outer non-brain tissue and
     produces the brain volume from T1 volume or the scanned volume.
 
-    The "watershed" segmentation algorithm was used to dertermine the
+    The "watershed" segmentation algorithm was used to determine the
     intensity values for white matter, grey matter, and CSF.
     A force field was then used to fit a spherical surface to the brain.
     The shape of the surface fit was then evaluated against a previously
@@ -2716,7 +2716,7 @@ class NormalizeInputSpec(FSTraitedSpec):
         argstr="-aseg %s", exists=True, desc="The input segmentation for Normalize"
     )
     transform = File(
-        exists=True, desc="Tranform file from the header of the input file"
+        exists=True, desc="Transform file from the header of the input file"
     )
 
 
@@ -2779,7 +2779,7 @@ class CANormalizeInputSpec(FSTraitedSpec):
         exists=True,
         mandatory=True,
         position=-2,
-        desc="The tranform file in lta format",
+        desc="The transform file in lta format",
     )
     # optional
     mask = File(argstr="-mask %s", exists=True, desc="Specifies volume to use as mask")
@@ -3257,7 +3257,7 @@ class SegmentCC(FSCommand):
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         # it is necessary to find the output files and move
-        # them to the correct loacation
+        # them to the correct location
         predicted_outputs = self._list_outputs()
         for name in ["out_file", "out_rotation"]:
             out_file = predicted_outputs[name]

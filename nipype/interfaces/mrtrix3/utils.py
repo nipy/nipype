@@ -453,7 +453,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         argstr="-upsample %d",
         desc="upsample the tracks by"
         " some ratio using Hermite interpolation before "
-        "mappping",
+        "mapping",
     )
 
     precise = traits.Bool(
@@ -938,7 +938,7 @@ class MRMathInputSpec(MRTrix3BaseInputSpec):
         desc="operation to computer along a specified axis",
     )
     axis = traits.Int(
-        0, argstr="-axis %d", desc="specfied axis to perform the operation along"
+        0, argstr="-axis %d", desc="specified axis to perform the operation along"
     )
 
 

@@ -27,7 +27,7 @@ class OARPlugin(SGELikeBatchManagerBase):
 
     """
 
-    # Addtional class variables
+    # Additional class variables
     _max_jobname_len = 15
     _oarsub_args = ""
 

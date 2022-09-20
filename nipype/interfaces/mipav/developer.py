@@ -481,7 +481,7 @@ class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
         desc="Atlas File - No Lesion - T1 Only", exists=True, argstr="--inAtlas4 %s"
     )
     inMaximum = traits.Int(
-        desc="Maximum distance from the interventricular WM boundary to downweight the lesion membership to avoid false postives",
+        desc="Maximum distance from the interventricular WM boundary to downweight the lesion membership to avoid false positives",
         argstr="--inMaximum %d",
     )
     inMaximum2 = traits.Int(desc="Maximum Ventircle Distance", argstr="--inMaximum2 %d")
@@ -499,7 +499,7 @@ class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
         argstr="--inAtlas5 %f",
     )
     inSmooting = traits.Float(
-        desc="Controls the effect of neighberhood voxels on the membership",
+        desc="Controls the effect of neighborhood voxels on the membership",
         argstr="--inSmooting %f",
     )
     inMaximum4 = traits.Float(
@@ -603,7 +603,7 @@ class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
 
 
 class MedicAlgorithmLesionToads(SEMLikeCommandLine):
-    """Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains.
+    """Algorithm for simultaneous brain structures and MS lesion segmentation of MS Brains.
 
     The brain segmentation is topologically consistent and the algorithm can use multiple
     MR sequences as input data.
@@ -1085,7 +1085,7 @@ class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
         argstr="--inAtlas %s",
     )
     inInitial = traits.Int(
-        desc="Erosion of the inital mask, which is based on the probability mask and the classification., The initial mask is ouput as the d0 volume at the conclusion of SPECTRE.",
+        desc="Erosion of the initial mask, which is based on the probability mask and the classification., The initial mask is output as the d0 volume at the conclusion of SPECTRE.",
         argstr="--inInitial %d",
     )
     inImage = traits.Enum(

@@ -78,7 +78,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
     fixed_timepoint = traits.Bool(
         default_value=False,
         argstr="--fixtp",
-        desc="map everthing to init TP# (init TP is not resampled)",
+        desc="map everything to init TP# (init TP is not resampled)",
     )
     no_iteration = traits.Bool(
         default_value=False,

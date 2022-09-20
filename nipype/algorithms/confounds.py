@@ -1152,7 +1152,7 @@ def is_outlier(points, thresh=3.5):
         a modified z-score (based on the median absolute deviation) greater
         than this value will be classified as outliers.
 
-    :return: A bolean mask, of size numobservations-length array.
+    :return: A boolean mask, of size numobservations-length array.
 
     .. note:: References
 
