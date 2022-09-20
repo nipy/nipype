@@ -191,6 +191,9 @@ class MatlabCommand(CommandLine):
         else:
             prescript.insert(0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
+            # addpath() is not available after compliation
+            # https://www.mathworks.com/help/compiler/ismcc.html
+            # https://www.mathworks.com/help/compiler/isdeployed.html
             prescript.append("if ~(ismcc || isdeployed), addpath('%s'); end;\n" % path)
 
         if not mfile:
