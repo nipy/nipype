@@ -352,7 +352,10 @@ def test_NodeExecutionError(tmp_path, monkeypatch):
     exebin = tmp_path / 'bin'
     exebin.mkdir()
     exe = exebin / 'nipype-node-execution-fail'
-    exe.write_text('#!/bin/bash\necho "Running"\necho "This should fail" >&2\nexit 1')
+    exe.write_text(
+        '#!/bin/bash\necho "Running"\necho "This should fail" >&2\nexit 1',
+        encoding='utf-8',
+    )
     exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
     monkeypatch.setenv("PATH", str(exe.parent.absolute()), prepend=os.pathsep)
 
