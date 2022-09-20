@@ -1,3 +1,17 @@
+1.8.5 (September 20, 2022)
+==========================
+
+Bug-fix release in the 1.8.x series.
+
+  * FIX: Use interpolation/method in numpy.percentile as available (https://github.com/nipy/nipype/pull/3506)
+  * FIX: Deployed Matlab applications must not call addpath() (https://github.com/nipy/nipype/pull/3509)
+  * FIX: Provide more runtime information when node execution fails (https://github.com/nipy/nipype/pull/3505)
+  * FIX: Fixed bug for work dirs longer than 255 characters, fixes #2061  (https://github.com/nipy/nipype/pull/3495)
+  * FIX: Update ApplyVDM to handle 4D inputs  (https://github.com/nipy/nipype/pull/3500)
+  * ENH: Explicitly specify write_text encoding format (https://github.com/nipy/nipype/pull/3508)
+  * DOC: Fix typos found by copdespell (https://github.com/nipy/nipype/pull/3510)
+
+
 1.8.4 (September 01, 2022)
 ==========================
 
