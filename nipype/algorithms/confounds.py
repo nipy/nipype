@@ -1059,10 +1059,16 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
 
     # Robust standard deviation (we are using "lower" interpolation
     # because this is what FSL is doing
-    func_sd = (
-        np.percentile(mfunc, 75, axis=1, method="lower")
-        - np.percentile(mfunc, 25, axis=1, method="lower")
-    ) / 1.349
+    try:
+        func_sd = (
+            np.percentile(mfunc, 75, axis=1, method="lower")
+            - np.percentile(mfunc, 25, axis=1, method="lower")
+        ) / 1.349
+    except TypeError:  # NP < 1.22
+        func_sd = (
+            np.percentile(mfunc, 75, axis=1, interpolation="lower")
+            - np.percentile(mfunc, 25, axis=1, interpolation="lower")
+        ) / 1.349
 
     if remove_zerovariance:
         zero_variance_voxels = func_sd > variance_tol
