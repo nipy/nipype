@@ -47,8 +47,8 @@ graph nodes might conflict with pydot parsing.
 Bug-fix release in the 1.8.x series.
 
 The previous release vendored ``distutils.version.LooseVersion``, and the vendored objects did not
-preserve compatiblity with the ``distutils`` objects. This release switches to the
-``looseversion`` package that ensures compatiblity.
+preserve compatibility with the ``distutils`` objects. This release switches to the
+``looseversion`` package that ensures compatibility.
 
 
 1.8.0 (May 10, 2022)

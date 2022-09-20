@@ -698,7 +698,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
 class CorticalThicknessOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc="brain extraction mask")
     ExtractedBrainN4 = File(exists=True, desc="extracted brain from N4 image")
-    BrainSegmentation = File(exists=True, desc="brain segmentaion image")
+    BrainSegmentation = File(exists=True, desc="brain segmentation image")
     BrainSegmentationN4 = File(exists=True, desc="N4 corrected image")
     BrainSegmentationPosteriors = OutputMultiPath(
         File(exists=True), desc="Posterior probability images"

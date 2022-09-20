@@ -58,7 +58,7 @@ class antsIntroductionInputSpec(ANTSCommandInputSpec):
             "maximum number of iterations (must be "
             "list of integers in the form [J,K,L...]: "
             "J = coarsest resolution iterations, K = "
-            "middle resolution interations, L = fine "
+            "middle resolution iterations, L = fine "
             "resolution iterations"
         ),
     )
@@ -231,7 +231,7 @@ class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
             "maximum number of iterations (must be "
             "list of integers in the form [J,K,L...]: "
             "J = coarsest resolution iterations, K = "
-            "middle resolution interations, L = fine "
+            "middle resolution iterations, L = fine "
             "resolution iterations"
         ),
     )

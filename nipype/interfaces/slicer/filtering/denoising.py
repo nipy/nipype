@@ -153,7 +153,7 @@ class GaussianBlurImageFilter(SEMLikeCommandLine):
 
     category: Filtering.Denoising
 
-    description: Apply a gaussian blurr to an image
+    description: Apply a gaussian blur to an image
 
     version: 0.1.0.$Revision: 1.1 $(alpha)
 

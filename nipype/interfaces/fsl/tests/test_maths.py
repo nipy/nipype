@@ -132,7 +132,7 @@ def test_meanimage(create_files_in_directory_plus_output_type):
     # Test the underlying command
     assert meaner.cmd == "fslmaths"
 
-    # Test the defualt opstring
+    # Test the default opstring
     assert meaner.cmdline == "fslmaths a.nii -Tmean b.nii"
 
     # Test the other dimensions
@@ -158,7 +158,7 @@ def test_stdimage(create_files_in_directory_plus_output_type):
     # Test the underlying command
     assert stder.cmd == "fslmaths"
 
-    # Test the defualt opstring
+    # Test the default opstring
     assert stder.cmdline == "fslmaths a.nii -Tstd b.nii"
 
     # Test the other dimensions
@@ -184,7 +184,7 @@ def test_maximage(create_files_in_directory_plus_output_type):
     # Test the underlying command
     assert maxer.cmd == "fslmaths"
 
-    # Test the defualt opstring
+    # Test the default opstring
     assert maxer.cmdline == "fslmaths a.nii -Tmax b.nii"
 
     # Test the other dimensions

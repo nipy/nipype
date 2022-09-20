@@ -211,7 +211,7 @@ class EMRegisterOutputSpec(TraitedSpec):
 
 
 class EMRegister(FSCommandOpenMP):
-    """This program creates a tranform in lta format
+    """This program creates a transform in lta format
 
     Examples
     ========

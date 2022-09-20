@@ -170,7 +170,7 @@ class LinRecon(StdOutCommandLine):
     Reads  a  linear  transformation from the matrix file assuming the
     imaging scheme specified in the scheme file. Performs the linear
     transformation on the data in every voxel and outputs the result to
-    the standard output. The ouput in every voxel is actually: ::
+    the standard output. The output in every voxel is actually: ::
 
         [exit code, ln(S(0)), p1, ..., pR]
 

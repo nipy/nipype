@@ -43,7 +43,7 @@ class ICA_AROMAInputSpec(CommandLineInputSpec):
     dim = traits.Int(
         argstr="-dim %d",
         desc="Dimensionality reduction when running "
-        "MELODIC (defualt is automatic estimation)",
+        "MELODIC (default is automatic estimation)",
     )
     TR = traits.Float(
         argstr="-tr %.3f",

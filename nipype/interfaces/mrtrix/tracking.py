@@ -119,7 +119,7 @@ class Tracks2ProbInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-template %s",
         position=1,
-        desc="an image file to be used as a template for the output (the output image wil have the same transform and field of view)",
+        desc="an image file to be used as a template for the output (the output image will have the same transform and field of view)",
     )
     voxel_dims = traits.List(
         traits.Float,
@@ -215,7 +215,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
         mandatory=True,
         position=-2,
         desc="the image containing the source data."
-        "The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, "
+        "The type of data required depends on the type of tracking as set in the preceding argument. For DT methods, "
         "the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.",
     )
 

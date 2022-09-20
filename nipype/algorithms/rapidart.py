@@ -38,7 +38,7 @@ iflogger = logging.getLogger("nipype.interface")
 def _get_affine_matrix(params, source):
     """Return affine matrix given a set of translation and rotation parameters
 
-    params : np.array (upto 12 long) in native package format
+    params : np.array (up to 12 long) in native package format
     source : the package that generated the parameters
              supports SPM, AFNI, FSFAST, FSL, NIPY
     """

@@ -987,7 +987,7 @@ class MpiCommandLine(CommandLine):
 
     @property
     def cmdline(self):
-        """Adds 'mpiexec' to begining of command"""
+        """Adds 'mpiexec' to beginning of command"""
         result = []
         if self.inputs.use_mpi:
             result.append("mpiexec")

@@ -173,7 +173,7 @@ class DTITrackerInputSpec(CommandLineInputSpec):
 Input and output file type. Accepted values are:
 
 * analyze -> analyze format 7.5
-* ni1     -> nifti format saved in seperate .hdr and .img file
+* ni1     -> nifti format saved in separate .hdr and .img file
 * nii     -> nifti format with one .nii file
 * nii.gz  -> nifti format with compression
 

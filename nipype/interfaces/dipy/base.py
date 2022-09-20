@@ -265,7 +265,7 @@ def get_dipy_workflows(module):
     -------
     l_wkflw : list of tuple
         This a list of tuple containing 2 elements:
-        Worflow name, Workflow class obj
+        Workflow name, Workflow class obj
 
     Examples
     --------

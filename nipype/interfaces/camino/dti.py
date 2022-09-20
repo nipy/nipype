@@ -621,7 +621,7 @@ Specifies the PDF to use. There are three choices:
         units="NA",
         desc="The maximum number of PDs in a voxel (default 3) for PD data."
         "This option determines the size of the input and output voxels."
-        "This means that the data file may be large enough to accomodate three or more PDs,"
+        "This means that the data file may be large enough to accommodate three or more PDs,"
         "but does not mean that any of the voxels are classified as containing three or more PDs.",
     )
 
@@ -1251,7 +1251,7 @@ The mask file contains zero in background voxels and non-zero in foreground.""",
 
 class TrackBootstrap(Track):
     """
-    Performs bootstrap streamline tractography using mulitple scans of the same subject
+    Performs bootstrap streamline tractography using multiple scans of the same subject
 
     Example
     -------

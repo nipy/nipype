@@ -65,7 +65,7 @@ class MathsCommand(NiftySegCommand):
     The executable seg_maths enables the sequential execution of arithmetic
     operations, like multiplication (-mul), division (-div) or addition
     (-add), binarisation (-bin) or thresholding (-thr) operations and
-    convolution by a Gaussian kernel (-smo). It also alows mathematical
+    convolution by a Gaussian kernel (-smo). It also allows mathematical
     morphology based operations like dilation (-dil), erosion (-ero),
     connected components (-lconcomp) and hole filling (-fill), Euclidean
     (- euc) and geodesic (-geo) distance transforms, local image similarity

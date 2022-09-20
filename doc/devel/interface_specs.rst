@@ -437,7 +437,7 @@ SPM
 ^^^
 
 ``field``
-	name of the structure refered by the SPM job manager
+	name of the structure referred by the SPM job manager
 
 	**Required:** This metadata is required by all SPM-mediated
 	  interface classes.

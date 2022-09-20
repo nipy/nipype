@@ -420,7 +420,7 @@ class DilateInput(KernelInput):
         argstr="-dil%s",
         position=6,
         mandatory=True,
-        desc="filtering operation to perfoem in dilation",
+        desc="filtering operation to perform in dilation",
     )
 
 

@@ -74,7 +74,7 @@ class BRAINSResampleInputSpec(CommandLineInputSpec):
     defaultValue = traits.Float(desc="Default voxel value", argstr="--defaultValue %f")
     gridSpacing = InputMultiPath(
         traits.Int,
-        desc="Add warped grid to output image to help show the deformation that occured with specified spacing.   A spacing of 0 in a dimension indicates that grid lines should be rendered to fall exactly (i.e. do not allow displacements off that plane).  This is useful for makeing a 2D image of grid lines from the 3D space ",
+        desc="Add warped grid to output image to help show the deformation that occurred with specified spacing.   A spacing of 0 in a dimension indicates that grid lines should be rendered to fall exactly (i.e. do not allow displacements off that plane).  This is useful for making a 2D image of grid lines from the 3D space ",
         sep=",",
         argstr="--gridSpacing %s",
     )

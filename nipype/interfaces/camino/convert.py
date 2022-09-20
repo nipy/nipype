@@ -780,7 +780,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         position=3,
         desc=(
             "Reads header information from file and "
-            "intializes a new header with the values read "
+            "initializes a new header with the values read "
             "from the file. You may replace any "
             "combination of fields in the new header by "
             "specifying subsequent options."

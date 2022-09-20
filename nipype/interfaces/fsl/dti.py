@@ -877,7 +877,7 @@ class ProbTrackX(FSLCommand):
             out_dir = self.inputs.out_dir
 
         outputs["log"] = os.path.abspath(os.path.join(out_dir, "probtrackx.log"))
-        # utputs['way_total'] = os.path.abspath(os.path.join(out_dir,
+        # outputs['way_total'] = os.path.abspath(os.path.join(out_dir,
         #                                                    'waytotal'))
         if isdefined(self.inputs.opd is True):
             if isinstance(self.inputs.seed, list) and isinstance(
@@ -1352,7 +1352,7 @@ class TractSkeletonInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr="-i %s",
-        desc="input image (typcially mean FA volume)",
+        desc="input image (typically mean FA volume)",
     )
     _proj_inputs = ["threshold", "distance_map", "data_file"]
     project_data = traits.Bool(
@@ -1402,7 +1402,7 @@ class TractSkeleton(FSLCommand):
     ``search_mask_file`` and ``use_cingulum_mask`` inputs are also used in data
     projection, but ``use_cingulum_mask`` is set to True by default.  This mask
     controls where the projection algorithm searches within a circular space
-    around a tract, rather than in a single perpindicular direction.
+    around a tract, rather than in a single perpendicular direction.
 
     Example
     -------
@@ -1476,7 +1476,7 @@ class DistanceMapInputSpec(FSLCommandInputSpec):
         desc="image to calculate distance values for",
     )
     mask_file = File(
-        exists=True, argstr="--mask=%s", desc="binary mask to contrain calculations"
+        exists=True, argstr="--mask=%s", desc="binary mask to constrain calculations"
     )
     invert_input = traits.Bool(argstr="--invert", desc="invert input image")
     local_max_file = traits.Either(
