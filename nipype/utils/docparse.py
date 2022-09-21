@@ -191,7 +191,7 @@ def build_doc(doc, opts):
     -------
     newdoc : string
         The docstring with flags replaced with attribute names and
-        formated to match nipy standards (as best we can).
+        formatted to match nipy standards (as best we can).
 
     """
 
@@ -206,7 +206,7 @@ def build_doc(doc, opts):
             # Probably an empty line
             continue
         # For lines we care about, the first item is the flag
-        if "," in linelist[0]:  # sometimes flags are only seperated by comma
+        if "," in linelist[0]:  # sometimes flags are only separated by comma
             flag = linelist[0].split(",")[0]
         else:
             flag = linelist[0]
@@ -223,7 +223,7 @@ def build_doc(doc, opts):
                 # For all the docs I've looked at, the flags all have
                 # indentation (spaces) at the start of the line.
                 # Other parts of the docs, like 'usage' statements
-                # start with alpha-numeric characters.  We only care
+                # start with alphanumeric characters.  We only care
                 # about the flags.
                 flags_doc.append(line)
     return format_params(newdoc, flags_doc)
@@ -246,7 +246,7 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     Returns
     -------
     doc : string
-        The formated docstring
+        The formatted docstring
 
     """
     res = CommandLine(

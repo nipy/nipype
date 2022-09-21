@@ -55,7 +55,7 @@ class NiftiGeneratorBase(BaseInterface):
     embedded meta data."""
 
     def _get_out_path(self, meta, idx=None):
-        """Return the output path for the gernerated Nifti."""
+        """Return the output path for the generated Nifti."""
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
         else:
@@ -262,7 +262,7 @@ class LookupMeta(BaseInterface):
         return outputs
 
     def _run_interface(self, runtime):
-        # If the 'meta_keys' input is a list, covert it to a dict
+        # If the 'meta_keys' input is a list, convert it to a dict
         self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
@@ -342,7 +342,7 @@ class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     merge_dim = traits.Int(
         desc="Dimension to merge along. If not "
         "specified, the last singular or "
-        "non-existant dimension is used."
+        "non-existent dimension is used."
     )
 
 

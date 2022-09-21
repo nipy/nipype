@@ -13,7 +13,7 @@
 #     GITHUB_TOKEN:     Pre-established token for user or bot
 #
 #   One of:
-#     CIRCLE_BRANCH:    Name of release branch (rel/<version>) 
+#     CIRCLE_BRANCH:    Name of release branch (rel/<version>)
 #     CIRCLE_TAG:       Name of release tag (<version>)
 #
 # Depends:

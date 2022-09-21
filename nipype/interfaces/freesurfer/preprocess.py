@@ -2361,8 +2361,8 @@ class RobustRegister(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         cwd = os.getcwd()
-        prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
-        suffices = dict(
+        prefixes = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
+        suffixes = dict(
             out_reg_file=("src", "_robustreg.lta", False),
             registered_file=("src", "_robustreg", True),
             weights_file=("src", "_robustweights", True),
@@ -2372,12 +2372,12 @@ class RobustRegister(FSCommand):
             half_source_xfm=("src", "_robustxfm.lta", False),
             half_targ_xfm=("trg", "_robustxfm.lta", False),
         )
-        for name, sufftup in list(suffices.items()):
+        for name, sufftup in list(suffixes.items()):
             value = getattr(self.inputs, name)
             if value:
                 if value is True:
                     outputs[name] = fname_presuffix(
-                        prefices[sufftup[0]],
+                        prefixes[sufftup[0]],
                         suffix=sufftup[1],
                         newpath=cwd,
                         use_ext=sufftup[2],

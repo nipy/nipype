@@ -28,7 +28,7 @@ class RobustStatisticsSegmenterInputSpec(CommandLineInputSpec):
         argstr="--intensityHomogeneity %f",
     )
     curvatureWeight = traits.Float(
-        desc="Given sphere 1.0 score and extreme rough bounday/surface 0 score, what is the expected smoothness of the object?",
+        desc="Given sphere 1.0 score and extreme rough boundary/surface 0 score, what is the expected smoothness of the object?",
         argstr="--curvatureWeight %f",
     )
     labelValue = traits.Int(
@@ -255,7 +255,7 @@ class BRAINSROIAutoInputSpec(CommandLineInputSpec):
         argstr="--closingSize %f",
     )
     ROIAutoDilateSize = traits.Float(
-        desc="This flag is only relavent when using ROIAUTO mode for initializing masks.  It defines the final dilation size to capture a bit of background outside the tissue region.  At setting of 10mm has been shown to help regularize a BSpline registration type so that there is some background constraints to match the edges of the head better.",
+        desc="This flag is only relevant when using ROIAUTO mode for initializing masks.  It defines the final dilation size to capture a bit of background outside the tissue region.  At setting of 10mm has been shown to help regularize a BSpline registration type so that there is some background constraints to match the edges of the head better.",
         argstr="--ROIAutoDilateSize %f",
     )
     outputVolumePixelType = traits.Enum(
@@ -288,7 +288,7 @@ class BRAINSROIAuto(SEMLikeCommandLine):
 
     category: Segmentation.Specialized
 
-    description: This tool uses a combination of otsu thresholding and a closing operations to identify the most prominant foreground region in an image.
+    description: This tool uses a combination of otsu thresholding and a closing operations to identify the most prominent foreground region in an image.
 
 
     version: 2.4.1

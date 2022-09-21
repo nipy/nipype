@@ -29,14 +29,14 @@ class GenerateAverageLmkFileInputSpec(CommandLineInputSpec):
         traits.Bool,
         File(),
         hash_files=False,
-        desc="Ouput landmark file name that includes average values for landmarks (.fcsv or .wts)",
+        desc="Output landmark file name that includes average values for landmarks (.fcsv or .wts)",
         argstr="--outputLandmarkFile %s",
     )
 
 
 class GenerateAverageLmkFileOutputSpec(TraitedSpec):
     outputLandmarkFile = File(
-        desc="Ouput landmark file name that includes average values for landmarks (.fcsv or .wts)",
+        desc="Output landmark file name that includes average values for landmarks (.fcsv or .wts)",
         exists=True,
     )
 

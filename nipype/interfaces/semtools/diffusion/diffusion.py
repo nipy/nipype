@@ -49,7 +49,7 @@ class dtiaverage(SEMLikeCommandLine):
     category: Diffusion.Diffusion Tensor Images.CommandLineOnly
 
     description: dtiaverage is a program that allows to compute the average of an arbitrary number of tensor fields (listed after the --inputs option) This program is used in our pipeline as the last step of the atlas building processing. When all the tensor fields have been deformed in the same space, to create the average tensor field (--tensor_output) we use dtiaverage.
-     Several average method can be used (specified by the --method option): euclidian, log-euclidian and pga. The default being euclidian.
+     Several average method can be used (specified by the --method option): euclidean, log-euclidean and pga. The default being euclidean.
 
     version: 1.0.0
 
@@ -118,7 +118,7 @@ class dtiestimInputSpec(CommandLineInputSpec):
         "wls",
         "nls",
         "ml",
-        desc="Esitmation method (lls:linear least squares, wls:weighted least squares, nls:non-linear least squares, ml:maximum likelihood)",
+        desc="Estimation method (lls:linear least squares, wls:weighted least squares, nls:non-linear least squares, ml:maximum likelihood)",
         argstr="--method %s",
     )
     correction = traits.Enum(
@@ -214,7 +214,7 @@ class dtiestim(SEMLikeCommandLine):
 
     contributor: Casey Goodlett, Francois Budin
 
-    acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependancies on boost and a fortran compiler.
+    acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependencies on boost and a fortran compiler.
     """
 
     input_spec = dtiestimInputSpec
@@ -553,7 +553,7 @@ class DWIConvertInputSpec(CommandLineInputSpec):
         argstr="--useIdentityMeaseurementFrame ",
     )
     useBMatrixGradientDirections = traits.Bool(
-        desc="Fill the nhdr header with the gradient directions and bvalues computed out of the BMatrix. Only changes behavior for Siemens data.  In some cases the standard public gradients are not properly computed.  The gradients can emperically computed from the private BMatrix fields.  In some cases the private BMatrix is consistent with the public grandients, but not in all cases, when it exists BMatrix is usually most robust.",
+        desc="Fill the nhdr header with the gradient directions and bvalues computed out of the BMatrix. Only changes behavior for Siemens data.  In some cases the standard public gradients are not properly computed.  The gradients can empirically computed from the private BMatrix fields.  In some cases the private BMatrix is consistent with the public grandients, but not in all cases, when it exists BMatrix is usually most robust.",
         argstr="--useBMatrixGradientDirections ",
     )
     outputDirectory = traits.Either(

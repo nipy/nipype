@@ -169,4 +169,3 @@ absolute path is generated and used for the ``cmdline`` when run, but
 
     In [80]: res.interface.inputs.outfile
     Out[80]: 'bar.nii'
-
