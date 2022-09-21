@@ -107,9 +107,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          fetch-depth: 0
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -124,7 +121,7 @@ jobs:
           echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
       - name: Install Debian dependencies
         run: tools/ci/install_deb_dependencies.sh
-        if: ${{ matrix.os == 'ubuntu-18.04' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
       - name: Install dependencies
         run: tools/ci/install_dependencies.sh
       - name: Install Nipype
