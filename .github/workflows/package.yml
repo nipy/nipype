@@ -16,6 +16,10 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   package:
     # Build packages and upload

@@ -5,6 +5,10 @@ on:
     branches:
       - 'rel/*'
 
+concurrency:
+  group: tutorials-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tutorial:
     runs-on: ubuntu-latest

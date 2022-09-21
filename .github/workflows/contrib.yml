@@ -18,6 +18,10 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: contrib-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   stable:
     # Check each OS, all supported Python, minimum versions and latest releases
