@@ -2151,7 +2151,7 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
         usedefault=True,
     )
     expad = traits.Int(
-        desc="Pad the nonlinear warps by the given number of voxels voxels in "
+        desc="Pad the nonlinear warps by the given number of voxels in "
         "all directions. The warp displacements are extended by linear "
         "extrapolation from the faces of the input grid..",
         argstr="-expad %d",

@@ -1285,7 +1285,7 @@ class BeastInputSpec(CommandLineInputSpec):
      -positive:         Specify mask of positive segmentation (inside mask) instead of the default mask.
      -output_selection: Specify file to output selected files.
      -count:            Specify file to output the patch count.
-     -mask:             Specify a segmentation mask instead of the the default mask.
+     -mask:             Specify a segmentation mask instead of the default mask.
      -no_mask:          Do not apply a segmentation mask. Perform the segmentation over the entire image.
      -no_positive:      Do not apply a positive mask.
     Generic options for all commands:

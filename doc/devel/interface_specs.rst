@@ -148,7 +148,7 @@ base class down to subclasses).:
 
 	        ``SlicerCommandLineInputSpec``: Defines inputs common to all Slicer classes (``module``)
 
-Most developers will only need to code at the the interface-level (i.e. implementing custom class inheriting from one of the above classes).
+Most developers will only need to code at the interface-level (i.e. implementing custom class inheriting from one of the above classes).
 
 Output Specs
 ^^^^^^^^^^^^
@@ -519,7 +519,7 @@ SPM
 
 For SPM-mediated interfaces:
 
-* ``_jobtype`` and ``_jobname``: special names used used by the SPM job manager. You can find them by saving your batch job as an .m file and looking up the code.
+* ``_jobtype`` and ``_jobname``: special names used by the SPM job manager. You can find them by saving your batch job as an .m file and looking up the code.
 
 And optionally:
 

@@ -208,7 +208,7 @@ and 0.1 for other methods""",
         desc="set angle threshold. default value is 35 degree", argstr="-at %f"
     )
     angle_threshold_weight = traits.Float(
-        desc="set angle threshold weighting factor. weighting will be be applied "
+        desc="set angle threshold weighting factor. weighting will be applied "
         "on top of the angle_threshold",
         argstr="-atw %f",
     )

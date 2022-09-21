@@ -1253,7 +1253,7 @@ class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
         traits.Bool,
         File(),
         hash_files=False,
-        desc="Tissue classification of of the whole input volume.",
+        desc="Tissue classification of the whole input volume.",
         argstr="--outFANTASM %s",
     )
     outd0 = traits.Either(
@@ -1310,7 +1310,7 @@ class MedicAlgorithmSPECTRE2010OutputSpec(TraitedSpec):
     )
     outPrior = File(desc="Probability prior from the atlas registrations", exists=True)
     outFANTASM = File(
-        desc="Tissue classification of of the whole input volume.", exists=True
+        desc="Tissue classification of the whole input volume.", exists=True
     )
     outd0 = File(desc="Initial Brainmask", exists=True)
     outMidsagittal = File(desc="Plane dividing the brain hemispheres", exists=True)

@@ -5,7 +5,7 @@ W3C PROV support
 Overview
 --------
 
-We're using the the `W3C PROV data model <http://www.w3.org/TR/prov-dm/>`_ to
+We're using the `W3C PROV data model <http://www.w3.org/TR/prov-dm/>`_ to
 capture and represent provenance in Nipype.
 
 For an overview see:

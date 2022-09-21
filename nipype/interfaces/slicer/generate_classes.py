@@ -196,7 +196,7 @@ def generate_class(
             if longFlagNode:
                 # Prefer to use longFlag as name if it is given, rather than the parameter name
                 longFlagName = longFlagNode[0].firstChild.nodeValue
-                # SEM automatically strips prefixed "--" or "-" from from xml before processing
+                # SEM automatically strips prefixed "--" or "-" from xml before processing
                 # we need to replicate that behavior here The following
                 # two nodes in xml have the same behavior in the program
                 # <longflag>--test</longflag>
