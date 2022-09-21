@@ -1,0 +1,67 @@
+name: Test tutorials
+
+on:
+  push:
+    branches:
+      - 'rel/*'
+
+concurrency:
+  group: tutorials-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tutorial:
+    runs-on: ubuntu-latest
+    env:
+      BRANCH_NAME: ${{ github.ref_name }}
+    steps:
+      - name: Start time
+        id: start
+        run: echo "::set-output name=start_time::$(date +'%Y-%m-%dT%H:%M:%S%z')"
+      - name: Trigger Nipype tutorial Github Action
+        run: |
+          set -x
+          curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.TUTORIAL_ACCESS_TOKEN }}" \
+          -H "Accept: application/vnd.github+json" \
+          https://api.github.com/repos/miykael/nipype_tutorial/actions/workflows/testing.yml/dispatches \
+          -d '{"ref": "master", "inputs": {"nipype_branch": "'${BRANCH_NAME}'"}}'
+          sleep 10
+      - name: Check Action was successfully dispatched
+        id: dispatched
+        run: |
+          set -x
+          START=${{ steps.start.outputs.start_time }}
+          RUN_ID=$(curl -H "Accept: application/vnd.github+json" \
+            'https://api.github.com/repos/miykael/nipype_tutorial/actions/runs?created=>'${START}'&per_page=1' \
+            | jq -r '.workflow_runs[0].id')
+
+          # fail if not extracted
+          [[ -n $RUN_ID ]] || exit 1
+          echo "::set-output name=run_id::$RUN_ID"
+      - name: Check if action completed
+        timeout-minutes: 120
+        run: |
+          set -x
+          RUN_ID=${{ steps.dispatched.outputs.run_id }}
+          while :
+          do
+            TIMESTAMP=$(date +'%Y-%m-%dT%H:%M:%S%z')
+            # check status every 5 minutes
+            STATUS=$(curl -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/miykael/nipype_tutorial/actions/runs/${RUN_ID} \
+            | jq -r '.conclusion')
+            case $STATUS in
+            success)
+              echo "[$TIMESTAMP] Tutorial run $RUN_ID completed successfully."
+              exit 0
+              ;;
+            failure)
+              echo "[$TIMESTAMP] Tutorial run $RUN_ID failed."
+              exit 1
+              ;;
+            *)
+              echo "[$TIMESTAMP] Conclusion ($STATUS) is not yet complete"
+              sleep 300
+            esac
+          done

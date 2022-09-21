@@ -4,8 +4,8 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 
 # nipype version information
-# Remove -dev for release
-__version__ = "1.8.1.dev0"
+# Remove .dev0 for release
+__version__ = "1.8.6.dev0"
 
 
 def get_nipype_gitversion():
@@ -104,6 +104,7 @@ NETWORKX_MIN_VERSION = "2.0"
 NUMPY_MIN_VERSION = "1.17"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
+TRAITS_MAX_VERSION = "6.4"
 DATEUTIL_MIN_VERSION = "2.2"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_MIN_VERSION = "1.5.2"
@@ -143,9 +144,10 @@ REQUIRES = [
     "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
+    "traits>=%s,<%s,!=5.0" % (TRAITS_MIN_VERSION, TRAITS_MAX_VERSION),
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
+    "looseversion",
 ]
 
 TESTS_REQUIRES = [
@@ -155,6 +157,8 @@ TESTS_REQUIRES = [
     "pytest-cov",
     "pytest-env",
     "pytest-timeout",
+    "pytest-doctestplus",
+    "sphinx",
 ]
 
 EXTRA_REQUIRES = {
@@ -169,6 +173,7 @@ EXTRA_REQUIRES = {
         "sphinxcontrib-apidoc",
     ],
     "duecredit": ["duecredit"],
+    "maint": ["GitPython", "fuzzywuzzy"],
     "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
     "profiler": ["psutil>=5.0"],
     "pybids": ["pybids>=0.7.0"],

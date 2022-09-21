@@ -164,7 +164,7 @@ def run(ctx, module, interface, list, help):
                 iface_parser.print_help()
             except:
                 print(
-                    "An error ocurred when trying to print the full"
+                    "An error occurred when trying to print the full"
                     "command help, printing usage."
                 )
             finally:

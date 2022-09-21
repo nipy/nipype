@@ -350,7 +350,7 @@ class ToRawOutputSpec(TraitedSpec):
 
 class ToRaw(StdOutCommandLine):
     """Dump a chunk of MINC file data. This program is largely
-    superceded by mincextract (see Extract).
+    superseded by mincextract (see Extract).
 
     Examples
     --------
@@ -518,32 +518,32 @@ class ToEcatInputSpec(CommandLineInputSpec):
     )
 
     ignore_patient_variable = traits.Bool(
-        desc="Ignore informations from the minc patient variable.",
+        desc="Ignore information from the minc patient variable.",
         argstr="-ignore_patient_variable",
     )
 
     ignore_study_variable = traits.Bool(
-        desc="Ignore informations from the minc study variable.",
+        desc="Ignore information from the minc study variable.",
         argstr="-ignore_study_variable",
     )
 
     ignore_acquisition_variable = traits.Bool(
-        desc="Ignore informations from the minc acquisition variable.",
+        desc="Ignore information from the minc acquisition variable.",
         argstr="-ignore_acquisition_variable",
     )
 
     ignore_ecat_acquisition_variable = traits.Bool(
-        desc="Ignore informations from the minc ecat_acquisition variable.",
+        desc="Ignore information from the minc ecat_acquisition variable.",
         argstr="-ignore_ecat_acquisition_variable",
     )
 
     ignore_ecat_main = traits.Bool(
-        desc="Ignore informations from the minc ecat-main variable.",
+        desc="Ignore information from the minc ecat-main variable.",
         argstr="-ignore_ecat_main",
     )
 
     ignore_ecat_subheader_variable = traits.Bool(
-        desc="Ignore informations from the minc ecat-subhdr variable.",
+        desc="Ignore information from the minc ecat-subhdr variable.",
         argstr="-ignore_ecat_subheader_variable",
     )
 
@@ -1285,7 +1285,7 @@ class BeastInputSpec(CommandLineInputSpec):
      -positive:         Specify mask of positive segmentation (inside mask) instead of the default mask.
      -output_selection: Specify file to output selected files.
      -count:            Specify file to output the patch count.
-     -mask:             Specify a segmentation mask instead of the the default mask.
+     -mask:             Specify a segmentation mask instead of the default mask.
      -no_mask:          Do not apply a segmentation mask. Perform the segmentation over the entire image.
      -no_positive:      Do not apply a positive mask.
     Generic options for all commands:
@@ -1553,7 +1553,7 @@ class PikInputSpec(CommandLineInputSpec):
     )
 
     start = traits.Int(
-        desc="Slice number to get. (note this is in voxel co-ordinates).",
+        desc="Slice number to get. (note this is in voxel coordinates).",
         argstr="--slice %s",
     )  # FIXME Int is correct?
 
@@ -1565,7 +1565,7 @@ class PikInputSpec(CommandLineInputSpec):
     slice_y = traits.Bool(desc="Get a coronal (y) slice.", argstr="-y", xor=_xor_slice)
     slice_x = traits.Bool(
         desc="Get a sagittal (x) slice.", argstr="-x", xor=_xor_slice
-    )  # FIXME typo in man page? sagital?
+    )  # FIXME typo in man page? sagittal?
 
     triplanar = traits.Bool(
         desc="Create a triplanar view of the input file.", argstr="--triplanar"
@@ -2759,7 +2759,7 @@ class NormInputSpec(CommandLineInputSpec):
         exists=True,
     )
     clamp = traits.Bool(
-        desc="Force the ouput range between limits [default].",
+        desc="Force the output range between limits [default].",
         argstr="-clamp",
         usedefault=True,
         default_value=True,

@@ -148,8 +148,8 @@ case?
     Out[115]: 'bet foo.nii /Users/cburns/tmp/junk/not_bar.nii'
 
 
-In this case we provide ``outfile`` but not as an absolue path, so the
-absolue path is generated and used for the ``cmdline`` when run, but
+In this case we provide ``outfile`` but not as an absolute path, so the
+absolute path is generated and used for the ``cmdline`` when run, but
 ``mybet.inputs.outfile`` is not updated with the absolute path.
 
 .. sourcecode:: ipython
@@ -169,4 +169,3 @@ absolue path is generated and used for the ``cmdline`` when run, but
 
     In [80]: res.interface.inputs.outfile
     Out[80]: 'bar.nii'
-

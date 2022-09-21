@@ -709,7 +709,7 @@ def test_SSHDataGrabber(tmpdir):
 
 def test_ExportFile(tmp_path):
     testin = tmp_path / "in.txt"
-    testin.write_text("test string")
+    testin.write_text("test string", encoding='utf-8')
     i = nio.ExportFile()
     i.inputs.in_file = str(testin)
     i.inputs.out_file = str(tmp_path / "out.tsv")

@@ -161,7 +161,7 @@ class TVResampleInputSpec(CommandLineInputSpec):
         desc="how to align output volume to input volume",
     )
     interpolation = traits.Enum(
-        "LEI", "EI", argstr="-interp %s", desc="Log Euclidean Euclidean Interpolation"
+        "LEI", "EI", argstr="-interp %s", desc="Log Euclidean Interpolation"
     )
     array_size = traits.Tuple(
         (traits.Int(), traits.Int(), traits.Int()),

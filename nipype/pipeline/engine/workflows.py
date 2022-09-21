@@ -120,7 +120,7 @@ class Workflow(EngineBase):
                                          'targetinput'), ...]),
              ...]
              sourceoutput1 will always be the first argument to func
-             and func will be evaluated and the results sent ot targetinput
+             and func will be evaluated and the results sent to targetinput
 
              currently func needs to define all its needed imports within the
              function as we use the inspect module to get at the source code

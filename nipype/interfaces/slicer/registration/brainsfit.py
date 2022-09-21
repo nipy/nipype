@@ -104,7 +104,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         "NOMASK",
         "ROIAUTO",
         "ROI",
-        desc="What mode to use for using the masks.  If ROIAUTO is choosen, then the mask is implicitly defined using a otsu forground and hole filling algorithm. The Region Of Interest mode (choose ROI) uses the masks to define what parts of the image should be used for computing the transform.",
+        desc="What mode to use for using the masks.  If ROIAUTO is chosen, then the mask is implicitly defined using a otsu foreground and hole filling algorithm. The Region Of Interest mode (choose ROI) uses the masks to define what parts of the image should be used for computing the transform.",
         argstr="--maskProcessingMode %s",
     )
     fixedBinaryVolume = File(
@@ -208,7 +208,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
     )
     transformType = InputMultiPath(
         traits.Str,
-        desc="Specifies a list of registration types to be used.  The valid types are, Rigid, ScaleVersor3D, ScaleSkewVersor3D, Affine, and BSpline.  Specifiying more than one in a comma separated list will initialize the next stage with the previous results. If registrationClass flag is used, it overrides this parameter setting.",
+        desc="Specifies a list of registration types to be used.  The valid types are, Rigid, ScaleVersor3D, ScaleSkewVersor3D, Affine, and BSpline.  Specifying more than one in a comma separated list will initialize the next stage with the previous results. If registrationClass flag is used, it overrides this parameter setting.",
         sep=",",
         argstr="--transformType %s",
     )
@@ -234,7 +234,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--medianFilterSize %s",
     )
     removeIntensityOutliers = traits.Float(
-        desc="The half percentage to decide outliers of image intensities. The default value is zero, which means no outlier removal. If the value of 0.005 is given, the moduel will throw away 0.005 % of both tails, so 0.01% of intensities in total would be ignored in its statistic calculation. ",
+        desc="The half percentage to decide outliers of image intensities. The default value is zero, which means no outlier removal. If the value of 0.005 is given, the module will throw away 0.005 % of both tails, so 0.01% of intensities in total would be ignored in its statistic calculation. ",
         argstr="--removeIntensityOutliers %f",
     )
     useCachingOfBSplineWeightsMode = traits.Enum(
@@ -251,11 +251,11 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--useExplicitPDFDerivativesMode %s",
     )
     ROIAutoDilateSize = traits.Float(
-        desc="This flag is only relavent when using ROIAUTO mode for initializing masks.  It defines the final dilation size to capture a bit of background outside the tissue region.  At setting of 10mm has been shown to help regularize a BSpline registration type so that there is some background constraints to match the edges of the head better.",
+        desc="This flag is only relevant when using ROIAUTO mode for initializing masks.  It defines the final dilation size to capture a bit of background outside the tissue region.  At setting of 10mm has been shown to help regularize a BSpline registration type so that there is some background constraints to match the edges of the head better.",
         argstr="--ROIAutoDilateSize %f",
     )
     ROIAutoClosingSize = traits.Float(
-        desc="This flag is only relavent when using ROIAUTO mode for initializing masks.  It defines the hole closing size in mm.  It is rounded up to the nearest whole pixel size in each direction. The default is to use a closing size of 9mm.  For mouse data this value may need to be reset to 0.9 or smaller.",
+        desc="This flag is only relevant when using ROIAUTO mode for initializing masks.  It defines the hole closing size in mm.  It is rounded up to the nearest whole pixel size in each direction. The default is to use a closing size of 9mm.  For mouse data this value may need to be reset to 0.9 or smaller.",
         argstr="--ROIAutoClosingSize %f",
     )
     relaxationFactor = traits.Float(
@@ -279,7 +279,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--numberOfThreads %d",
     )
     forceMINumberOfThreads = traits.Int(
-        desc="Force the the maximum number of threads to use for non thread safe MI metric.  CAUTION: Inconsistent results my arise!",
+        desc="Force the maximum number of threads to use for non thread safe MI metric.  CAUTION: Inconsistent results my arise!",
         argstr="--forceMINumberOfThreads %d",
     )
     debugLevel = traits.Int(
@@ -295,7 +295,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--projectedGradientTolerance %f",
     )
     gui = traits.Bool(
-        desc="Display intermediate image volumes for debugging.  NOTE:  This is not part of the standard build sytem, and probably does nothing on your installation.",
+        desc="Display intermediate image volumes for debugging.  NOTE:  This is not part of the standard build system, and probably does nothing on your installation.",
         argstr="--gui ",
     )
     promptUser = traits.Bool(

@@ -33,7 +33,7 @@ class ExtractAdditionalSurfaceParametersInputSpec(SPMCommandInputSpec):
         False,
         field="SD",
         usedefault=True,
-        desc="Extract sulcus depth based on euclidian distance between the central "
+        desc="Extract sulcus depth based on euclidean distance between the central "
         "surface anf its convex hull.",
     )
     fractal_dimension = traits.Bool(
@@ -92,7 +92,7 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
     * Sulcus depth
     * Toro's gyrification index
     * Shaer's local gyrification index
-    * Laplacian gyrification indeces
+    * Laplacian gyrification indices
     * Addicional surfaces
     * Measure normalization
     * Lazy processing
@@ -153,7 +153,7 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
                         )
 
                         # Add all hemisphere files into one list, this is important because only the left hemisphere
-                        # files are used as input in the Surface ROI Tools, fpr instance.
+                        # files are used as input in the Surface ROI Tools, for instance.
                         outputs[all_files_hemisphere].append(
                             os.path.join(pth, generated_filename)
                         )

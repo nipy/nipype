@@ -9,7 +9,7 @@ import re
 from collections.abc import Iterator
 from warnings import warn
 
-from nipype.external.version import LooseVersion
+from looseversion import LooseVersion
 
 import numpy as np
 

@@ -32,7 +32,7 @@ class DWIUnbiasedNonLocalMeansFilterInputSpec(CommandLineInputSpec):
         argstr="--rc %s",
     )
     hp = traits.Float(
-        desc="This parameter is related to noise; the larger the parameter, the more agressive the filtering. Should be near 1, and only values between 0.8 and 1.2 are allowed",
+        desc="This parameter is related to noise; the larger the parameter, the more aggressive the filtering. Should be near 1, and only values between 0.8 and 1.2 are allowed",
         argstr="--hp %f",
     )
     ng = traits.Int(

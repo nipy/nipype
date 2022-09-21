@@ -52,7 +52,7 @@ class BRAINSConstellationModelerInputSpec(CommandLineInputSpec):
         argstr="--resultsDir %s",
     )
     mspQualityLevel = traits.Int(
-        desc=",                 Flag cotrols how agressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,             ",
+        desc=",                 Flag controls how aggressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,             ",
         argstr="--mspQualityLevel %d",
     )
     rescaleIntensities = traits.Bool(
@@ -736,7 +736,7 @@ class BRAINSClipInferior(SEMLikeCommandLine):
 class GenerateLabelMapFromProbabilityMapInputSpec(CommandLineInputSpec):
     inputVolumes = InputMultiPath(
         File(exists=True),
-        desc="The Input probaiblity images to be computed for lable maps",
+        desc="The Input probaiblity images to be computed for label maps",
         argstr="--inputVolumes %s...",
     )
     outputLabelVolume = traits.Either(
@@ -805,7 +805,7 @@ class BRAINSAlignMSPInputSpec(CommandLineInputSpec):
         argstr="--writedebuggingImagesLevel %d",
     )
     mspQualityLevel = traits.Int(
-        desc=",           Flag cotrols how agressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,       ",
+        desc=",           Flag controls how aggressive the MSP is estimated.  0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds).,       ",
         argstr="--mspQualityLevel %d",
     )
     rescaleIntensities = traits.Bool(
@@ -857,11 +857,11 @@ class BRAINSAlignMSPOutputSpec(TraitedSpec):
 
 
 class BRAINSAlignMSP(SEMLikeCommandLine):
-    """title: Align Mid Saggital Brain (BRAINS)
+    """title: Align Mid Sagittal Brain (BRAINS)
 
     category: Utilities.BRAINS
 
-    description: Resample an image into ACPC alignement ACPCDetect
+    description: Resample an image into ACPC alignment ACPCDetect
     """
 
     input_spec = BRAINSAlignMSPInputSpec
@@ -886,7 +886,7 @@ class BRAINSLandmarkInitializerInputSpec(CommandLineInputSpec):
         argstr="--inputMovingLandmarkFilename %s",
     )
     inputWeightFilename = File(
-        desc="Input weight file name for landmarks. Higher weighted landmark will be considered more heavily. Weights are propotional, that is the magnitude of weights will be normalized by its minimum and maximum value. ",
+        desc="Input weight file name for landmarks. Higher weighted landmark will be considered more heavily. Weights are proportional, that is the magnitude of weights will be normalized by its minimum and maximum value. ",
         exists=True,
         argstr="--inputWeightFilename %s",
     )
@@ -991,7 +991,7 @@ class BRAINSSnapShotWriterInputSpec(CommandLineInputSpec):
     )
     inputPlaneDirection = InputMultiPath(
         traits.Int,
-        desc="Plane to display. In general, 0=saggital, 1=coronal, and 2=axial plane.",
+        desc="Plane to display. In general, 0=sagittal, 1=coronal, and 2=axial plane.",
         sep=",",
         argstr="--inputPlaneDirection %s",
     )

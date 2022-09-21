@@ -52,7 +52,7 @@ class ResampleDTIVolumeInputSpec(CommandLineInputSpec):
         "nn",
         "ws",
         "bs",
-        desc="Sampling algorithm (linear , nn (nearest neighborhoor), ws (WindowedSinc), bs (BSpline) )",
+        desc="Sampling algorithm (linear , nn (nearest neighbor), ws (WindowedSinc), bs (BSpline) )",
         argstr="--interpolation %s",
     )
     correction = traits.Enum(
@@ -424,7 +424,7 @@ class DiffusionWeightedVolumeMaskingInputSpec(CommandLineInputSpec):
         argstr="%s",
     )
     otsuomegathreshold = traits.Float(
-        desc="Control the sharpness of the threshold in the Otsu computation. 0: lower threshold, 1: higher threhold",
+        desc="Control the sharpness of the threshold in the Otsu computation. 0: lower threshold, 1: higher threshold",
         argstr="--otsuomegathreshold %f",
     )
     removeislands = traits.Bool(
@@ -549,7 +549,7 @@ class DWIToDTIEstimation(SEMLikeCommandLine):
 
     description: Performs a tensor model estimation from diffusion weighted images.
 
-    There are three estimation methods available: least squares, weigthed least squares and non-linear estimation. The first method is the traditional method for tensor estimation and the fastest one. Weighted least squares takes into account the noise characteristics of the MRI images to weight the DWI samples used in the estimation based on its intensity magnitude. The last method is the more complex.
+    There are three estimation methods available: least squares, weighted least squares and non-linear estimation. The first method is the traditional method for tensor estimation and the fastest one. Weighted least squares takes into account the noise characteristics of the MRI images to weight the DWI samples used in the estimation based on its intensity magnitude. The last method is the more complex.
 
     version: 0.1.0.$Revision: 1892 $(alpha)
 

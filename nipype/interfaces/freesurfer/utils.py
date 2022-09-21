@@ -462,7 +462,7 @@ class SurfaceSmoothOutputSpec(TraitedSpec):
 class SurfaceSmooth(FSCommand):
     """Smooth a surface image with mri_surf2surf.
 
-    The surface is smoothed by an interative process of averaging the
+    The surface is smoothed by an iterative process of averaging the
     value at each vertex with those of its adjacent neighbors. You may supply
     either the number of iterations to run or a desired effective FWHM of the
     smoothing process.  If the latter, the underlying program will calculate
@@ -878,7 +878,7 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
     )
     overlay_range_offset = traits.Float(
         argstr="-foffset %.3f",
-        desc="overlay range will be symettric around offset value",
+        desc="overlay range will be symmetric around offset value",
     )
 
     truncate_overlay = traits.Bool(
@@ -1438,13 +1438,13 @@ class MRITessellateInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-3,
         argstr="%s",
-        desc="Input volume to tesselate voxels from.",
+        desc="Input volume to tessellate voxels from.",
     )
     label_value = traits.Int(
         position=-2,
         argstr="%d",
         mandatory=True,
-        desc='Label value which to tesselate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)',
+        desc='Label value which to tessellate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)',
     )
     out_file = File(
         argstr="%s",
@@ -1600,13 +1600,13 @@ class MRIMarchingCubesInputSpec(FSTraitedSpec):
         mandatory=True,
         position=1,
         argstr="%s",
-        desc="Input volume to tesselate voxels from.",
+        desc="Input volume to tessellate voxels from.",
     )
     label_value = traits.Int(
         position=2,
         argstr="%d",
         mandatory=True,
-        desc='Label value which to tesselate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)',
+        desc='Label value which to tessellate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)',
     )
     connectivity_value = traits.Int(
         1,
@@ -1676,7 +1676,7 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
         argstr="%s",
         position=-2,
         copyfile=True,
-        desc="Input volume to tesselate voxels from.",
+        desc="Input volume to tessellate voxels from.",
     )
     curvature_averaging_iterations = traits.Int(
         argstr="-a %d", desc="Number of curvature averaging iterations (default=10)"
@@ -1842,7 +1842,7 @@ class ExtractMainComponentOutputSpec(TraitedSpec):
 
 
 class ExtractMainComponent(CommandLine):
-    """Extract the main component of a tesselated surface
+    """Extract the main component of a tessellated surface
 
     Examples
     --------
@@ -2329,7 +2329,7 @@ class MRIFillOutputSpec(TraitedSpec):
 class MRIFill(FSCommand):
     """
     This program creates hemispheric cutting planes and fills white matter
-    with specific values for subsequent surface tesselation.
+    with specific values for subsequent surface tessellation.
 
     Examples
     ========
@@ -2730,7 +2730,7 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     )
     fix_mtl = traits.Bool(argstr="-fix_mtl", desc="Undocumented flag")
     no_white = traits.Bool(argstr="-nowhite", desc="Undocumented flag")
-    white_only = traits.Bool(argstr="-whiteonly", desc="Undocumented flage")
+    white_only = traits.Bool(argstr="-whiteonly", desc="Undocumented flag")
     in_aseg = File(argstr="-aseg %s", exists=True, desc="Input segmentation file")
     in_T1 = File(argstr="-T1 %s", exists=True, desc="Input brain or T1 file")
     mgz = traits.Bool(
@@ -2850,7 +2850,7 @@ class MakeSurfaces(FSCommand):
             return spec.argstr % suffix
         elif name == "in_orig":
             if value.endswith("lh.orig") or value.endswith("rh.orig"):
-                # {lh,rh}.orig inputs are not sepcified on command line
+                # {lh,rh}.orig inputs are not specified on command line
                 return
             else:
                 # if the input orig file is different than lh.orig or rh.orig

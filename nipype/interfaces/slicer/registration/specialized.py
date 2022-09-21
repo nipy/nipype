@@ -198,7 +198,7 @@ class VBRAINSDemonWarpInputSpec(CommandLineInputSpec):
         argstr="--registrationFilterType %s",
     )
     smoothDisplacementFieldSigma = traits.Float(
-        desc="A gaussian smoothing value to be applied to the deformation feild at each iteration.",
+        desc="A gaussian smoothing value to be applied to the deformation field at each iteration.",
         argstr="--smoothDisplacementFieldSigma %f",
     )
     numberOfPyramidLevels = traits.Int(
@@ -460,7 +460,7 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
         argstr="--registrationFilterType %s",
     )
     smoothDisplacementFieldSigma = traits.Float(
-        desc="A gaussian smoothing value to be applied to the deformation feild at each iteration.",
+        desc="A gaussian smoothing value to be applied to the deformation field at each iteration.",
         argstr="--smoothDisplacementFieldSigma %f",
     )
     numberOfPyramidLevels = traits.Int(
@@ -517,7 +517,7 @@ class BRAINSDemonWarpInputSpec(CommandLineInputSpec):
         "ROIAUTO",
         "ROI",
         "BOBF",
-        desc="What mode to use for using the masks: NOMASK|ROIAUTO|ROI|BOBF.  If ROIAUTO is choosen, then the mask is implicitly defined using a otsu forground and hole filling algorithm. Where the Region Of Interest mode uses the masks to define what parts of the image should be used for computing the deformation field.  Brain Only Background Fill uses the masks to pre-process the input images by clipping and filling in the background with a predefined value.",
+        desc="What mode to use for using the masks: NOMASK|ROIAUTO|ROI|BOBF.  If ROIAUTO is chosen, then the mask is implicitly defined using a otsu foreground and hole filling algorithm. Where the Region Of Interest mode uses the masks to define what parts of the image should be used for computing the deformation field.  Brain Only Background Fill uses the masks to pre-process the input images by clipping and filling in the background with a predefined value.",
         argstr="--maskProcessingMode %s",
     )
     fixedBinaryVolume = File(

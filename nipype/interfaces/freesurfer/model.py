@@ -425,7 +425,7 @@ class GLMFitInputSpec(FSTraitedSpec):
         argstr="--perm-force",
         desc="force perumtation test, even when design matrix is not orthog",
     )
-    diag = traits.Int(argstr="--diag %d", desc="Gdiag_no : set diagnositc level")
+    diag = traits.Int(argstr="--diag %d", desc="Gdiag_no : set diagnostic level")
     diag_cluster = traits.Bool(
         argstr="--diag-cluster", desc="save sig volume and exit from first sim loop"
     )
@@ -773,7 +773,7 @@ class ConcatenateInputSpec(FSTraitedSpec):
     mask_file = File(exists=True, argstr="--mask %s", desc="Mask input with a volume")
     vote = traits.Bool(
         argstr="--vote",
-        desc="Most frequent value at each voxel and fraction of occurances",
+        desc="Most frequent value at each voxel and fraction of occurrences",
     )
     sort = traits.Bool(argstr="--sort", desc="Sort each voxel by ascending frame value")
 
@@ -1118,7 +1118,7 @@ class SegStatsReconAll(SegStats):
     """
     This class inherits SegStats and modifies it for use in a recon-all workflow.
     This implementation mandates implicit inputs that SegStats.
-    To ensure backwards compatability of SegStats, this class was created.
+    To ensure backwards compatibility of SegStats, this class was created.
 
     Examples
     --------

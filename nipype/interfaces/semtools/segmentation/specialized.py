@@ -37,11 +37,11 @@ class BRAINSCutInputSpec(CommandLineInputSpec):
         desc="print out some debugging information", argstr="--verbose %d"
     )
     multiStructureThreshold = traits.Bool(
-        desc="multiStructureThreshold module to deal with overlaping area",
+        desc="multiStructureThreshold module to deal with overlapping area",
         argstr="--multiStructureThreshold ",
     )
     histogramEqualization = traits.Bool(
-        desc="A Histogram Equalization process could be added to the creating/applying process from Subject To Atlas. Default is false, which genreate input vectors without Histogram Equalization. ",
+        desc="A Histogram Equalization process could be added to the creating/applying process from Subject To Atlas. Default is false, which generate input vectors without Histogram Equalization. ",
         argstr="--histogramEqualization ",
     )
     computeSSEOn = traits.Bool(
@@ -144,7 +144,7 @@ class BRAINSROIAutoInputSpec(CommandLineInputSpec):
         argstr="--closingSize %f",
     )
     ROIAutoDilateSize = traits.Float(
-        desc="This flag is only relavent when using ROIAUTO mode for initializing masks.  It defines the final dilation size to capture a bit of background outside the tissue region.  At setting of 10mm has been shown to help regularize a BSpline registration type so that there is some background constraints to match the edges of the head better.",
+        desc="This flag is only relevant when using ROIAUTO mode for initializing masks.  It defines the final dilation size to capture a bit of background outside the tissue region.  At setting of 10mm has been shown to help regularize a BSpline registration type so that there is some background constraints to match the edges of the head better.",
         argstr="--ROIAutoDilateSize %f",
     )
     outputVolumePixelType = traits.Enum(
@@ -178,7 +178,7 @@ class BRAINSROIAuto(SEMLikeCommandLine):
 
     category: Segmentation.Specialized
 
-    description: This program is used to create a mask over the most prominant forground region in an image.  This is accomplished via a combination of otsu thresholding and a closing operation.  More documentation is available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ForegroundMasking.
+    description: This program is used to create a mask over the most prominent foreground region in an image.  This is accomplished via a combination of otsu thresholding and a closing operation.  More documentation is available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ForegroundMasking.
 
     version: 2.4.1
 
@@ -269,7 +269,7 @@ class BRAINSConstellationDetectorInputSpec(CommandLineInputSpec):
         argstr="--outputVerificationScript %s",
     )
     mspQualityLevel = traits.Int(
-        desc=",                 Flag cotrols how agressive the MSP is estimated. 0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds), NOTE: -1= Prealigned so no estimate!.,             ",
+        desc=",                 Flag controls how aggressive the MSP is estimated. 0=quick estimate (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22 seconds), 3=best estimate (58 seconds), NOTE: -1= Prealigned so no estimate!.,             ",
         argstr="--mspQualityLevel %d",
     )
     otsuPercentileThreshold = traits.Float(
@@ -391,7 +391,7 @@ class BRAINSConstellationDetectorInputSpec(CommandLineInputSpec):
         traits.Bool,
         Directory(),
         hash_files=False,
-        desc=",               The directory for the debuging images to be written.,             ",
+        desc=",               The directory for the debugging images to be written.,             ",
         argstr="--resultsDir %s",
     )
     writedebuggingImagesLevel = traits.Int(
@@ -457,7 +457,7 @@ class BRAINSConstellationDetectorOutputSpec(TraitedSpec):
         exists=True,
     )
     resultsDir = Directory(
-        desc=",               The directory for the debuging images to be written.,             ",
+        desc=",               The directory for the debugging images to be written.,             ",
         exists=True,
     )
 
@@ -467,7 +467,7 @@ class BRAINSConstellationDetector(SEMLikeCommandLine):
 
     category: Segmentation.Specialized
 
-    description: This program will find the mid-sagittal plane, a constellation of landmarks in a volume, and create an AC/PC aligned data set with the AC point at the center of the voxel lattice (labeled at the origin of the image physical space.)  Part of this work is an extention of the algorithms originally described by Dr. Babak A. Ardekani, Alvin H. Bachman, Model-based automatic detection of the anterior and posterior commissures on MRI scans, NeuroImage, Volume 46, Issue 3, 1 July 2009, Pages 677-682, ISSN 1053-8119, DOI: 10.1016/j.neuroimage.2009.02.030.  (http://www.sciencedirect.com/science/article/B6WNP-4VRP25C-4/2/8207b962a38aa83c822c6379bc43fe4c)
+    description: This program will find the mid-sagittal plane, a constellation of landmarks in a volume, and create an AC/PC aligned data set with the AC point at the center of the voxel lattice (labeled at the origin of the image physical space.)  Part of this work is an extension of the algorithms originally described by Dr. Babak A. Ardekani, Alvin H. Bachman, Model-based automatic detection of the anterior and posterior commissures on MRI scans, NeuroImage, Volume 46, Issue 3, 1 July 2009, Pages 677-682, ISSN 1053-8119, DOI: 10.1016/j.neuroimage.2009.02.030.  (http://www.sciencedirect.com/science/article/B6WNP-4VRP25C-4/2/8207b962a38aa83c822c6379bc43fe4c)
 
     version: 1.0
 
@@ -626,7 +626,7 @@ class BinaryMaskEditorBasedOnLandmarks(SEMLikeCommandLine):
 
 class BRAINSMultiSTAPLEInputSpec(CommandLineInputSpec):
     inputCompositeT1Volume = File(
-        desc="Composite T1, all label maps transofrmed into the space for this image.",
+        desc="Composite T1, all label maps transformed into the space for this image.",
         exists=True,
         argstr="--inputCompositeT1Volume %s",
     )
@@ -724,7 +724,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
         traits.Bool,
         Directory(),
         hash_files=False,
-        desc="Ouput directory",
+        desc="Output directory",
         argstr="--outputDir %s",
     )
     atlasToSubjectTransformType = traits.Enum(
@@ -832,7 +832,7 @@ class BRAINSABCInputSpec(CommandLineInputSpec):
     )
     numberOfSubSamplesInEachPlugArea = InputMultiPath(
         traits.Int,
-        desc="Number of continous index samples taken at each direction of lattice space for each plug volume.",
+        desc="Number of continuous index samples taken at each direction of lattice space for each plug volume.",
         sep=",",
         argstr="--numberOfSubSamplesInEachPlugArea %s",
     )
@@ -872,7 +872,7 @@ class BRAINSABCOutputSpec(TraitedSpec):
         desc="(optional) Filename to which save the final state of the registration",
         exists=True,
     )
-    outputDir = Directory(desc="Ouput directory", exists=True)
+    outputDir = Directory(desc="Output directory", exists=True)
     atlasToSubjectTransform = File(
         desc="The transform from atlas to the subject", exists=True
     )

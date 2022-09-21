@@ -821,7 +821,7 @@ No Cigar means: Don't try that combination, it makes no sense.""",
 
 
 class AutoTLRC(AFNICommand):
-    """A minmal wrapper for the AutoTLRC script
+    """A minimal wrapper for the AutoTLRC script
     The only option currently supported is no_ss.
     For complete details, see the `3dQwarp Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@auto_tlrc.html>`_
@@ -1327,7 +1327,7 @@ class ECMInputSpec(CentralityInputSpec):
     )
     fecm = traits.Bool(
         desc="Fast centrality method; substantial speed increase but cannot "
-        "accomodate thresholding; automatically selected if -thresh or "
+        "accommodate thresholding; automatically selected if -thresh or "
         "-sparsity are not set",
         argstr="-fecm",
     )
@@ -2933,7 +2933,7 @@ Specifies how censored time points are treated in
 the output dataset:
 
 * mode = ZERO -- put zero values in their place;
-  output datset is same length as input
+  output dataset is same length as input
 * mode = KILL -- remove those time points;
   output dataset is shorter than input
 * mode = NTRP -- censored values are replaced by interpolated
@@ -3073,7 +3073,7 @@ class TProject(AFNICommand):
     as ``-passband``.  In this way, you can bandpass time-censored data, and at
     the same time, remove other time series of no interest
     (e.g., physiological estimates, motion parameters).
-    Shifts voxel time series from input so that seperate slices are aligned to
+    Shifts voxel time series from input so that separate slices are aligned to
     the same temporal origin.
 
     Examples
@@ -3188,7 +3188,7 @@ class TShiftOutputSpec(AFNICommandOutputSpec):
 
 
 class TShift(AFNICommand):
-    """Shifts voxel time series from input so that seperate slices are aligned
+    """Shifts voxel time series from input so that separate slices are aligned
     to the same temporal origin.
 
     For complete details, see the `3dTshift Documentation.
@@ -3658,7 +3658,7 @@ Sets the prefix/suffix for the output datasets.
   with 3dNwarpApply and 3dNwarpCat, for example.
 * To be clear, this is the warp from source dataset
   coordinates to base dataset coordinates, where the
-  values at each base grid point are the xyz displacments
+  values at each base grid point are the xyz displacements
   needed to move that grid point's xyz values to the
   corresponding xyz values in the source dataset:
   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)
@@ -4034,7 +4034,7 @@ for getting a speedy coarse first alignment."
   The goal is greater speed, and it seems to help this"
   positively piggish program to be more expeditious."
 * However, accuracy is somewhat lower with '-duplo',"
-  for reasons that currenly elude Zhark; for this reason,"
+  for reasons that currently elude Zhark; for this reason,"
   the Emperor does not usually use '-duplo'.
 
 """,
@@ -4225,21 +4225,21 @@ Do NOT use zero-padding on the 3D base and source images.
     )
     hel = traits.Bool(
         desc="Hellinger distance: a matching function for the adventurous"
-        "This option has NOT be extensively tested for usefullness"
+        "This option has NOT be extensively tested for usefulness"
         "and should be considered experimental at this infundibulum.",
         argstr="-hel",
         xor=["nmi", "mi", "lpc", "lpa", "pear"],
     )
     mi = traits.Bool(
         desc="Mutual Information: a matching function for the adventurous"
-        "This option has NOT be extensively tested for usefullness"
+        "This option has NOT be extensively tested for usefulness"
         "and should be considered experimental at this infundibulum.",
         argstr="-mi",
         xor=["mi", "hel", "lpc", "lpa", "pear"],
     )
     nmi = traits.Bool(
         desc="Normalized Mutual Information: a matching function for the adventurous"
-        "This option has NOT been extensively tested for usefullness"
+        "This option has NOT been extensively tested for usefulness"
         "and should be considered experimental at this infundibulum.",
         argstr="-nmi",
         xor=["nmi", "hel", "lpc", "lpa", "pear"],

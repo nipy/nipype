@@ -282,7 +282,7 @@ def cmat(
             )
         except IndexError:
             iflogger.error(
-                "AN INDEXERROR EXCEPTION OCCURED FOR FIBER %s. "
+                "AN INDEXERROR EXCEPTION OCCURRED FOR FIBER %s. "
                 "PLEASE CHECK ENDPOINT GENERATION",
                 i,
             )

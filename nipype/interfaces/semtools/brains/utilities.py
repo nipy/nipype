@@ -173,7 +173,7 @@ class GeneratePurePlugMaskInputSpec(CommandLineInputSpec):
     )
     numberOfSubSamples = InputMultiPath(
         traits.Int,
-        desc="Number of continous index samples taken at each direction of lattice space for each plug volume",
+        desc="Number of continuous index samples taken at each direction of lattice space for each plug volume",
         sep=",",
         argstr="--numberOfSubSamples %s",
     )

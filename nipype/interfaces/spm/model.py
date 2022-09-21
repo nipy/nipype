@@ -616,7 +616,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
         desc=(
             "In case no clusters survive the "
             "topological inference step this "
-            "will pick a culster with the highes "
+            "will pick a culster with the highest "
             "sum of t-values. Use with care."
         ),
     )

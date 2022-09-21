@@ -186,7 +186,7 @@ class BaseInterface(Interface):
             from ... import check_latest_version
 
             if BaseInterface._etelemetry_version_data is None:
-                BaseInterface._etelemetry_version_data = check_latest_version()
+                BaseInterface._etelemetry_version_data = check_latest_version() or "n/a"
 
         if not self.input_spec:
             raise Exception("No input_spec in class: %s" % self.__class__.__name__)
@@ -987,7 +987,7 @@ class MpiCommandLine(CommandLine):
 
     @property
     def cmdline(self):
-        """Adds 'mpiexec' to begining of command"""
+        """Adds 'mpiexec' to beginning of command"""
         result = []
         if self.inputs.use_mpi:
             result.append("mpiexec")

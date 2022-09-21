@@ -58,7 +58,7 @@
     },
     {
       "affiliation": "Klinikum rechts der Isar, TUM. ACPySS",
-      "name": "Manh\u00e3es-Savio, Alexandre",
+      "name": "Manhães-Savio, Alexandre",
       "orcid": "0000-0002-6608-6885"
     },
     {
@@ -95,14 +95,14 @@
       "orcid": "0000-0001-9813-3167"
     },
     {
-      "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
-      "name": "Dewey, Blake E",
-      "orcid": "0000-0003-4554-5058"
-    },
-    {
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
+    },
+    {
+      "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
+      "name": "Dewey, Blake E",
+      "orcid": "0000-0003-4554-5058"
     },
     {
       "affiliation": "Molecular Imaging Research Center, CEA, France",
@@ -127,7 +127,7 @@
     },
     {
       "affiliation": "Stanford University",
-      "name": "\u0106iri\u0107 , Rastko",
+      "name": "Ćirić , Rastko",
       "orcid": "0000-0001-6347-7939"
     },
     {
@@ -214,7 +214,7 @@
       "name": "Tungaraza, Rosalia"
     },
     {
-      "affiliation": "Charit\u00e8 Universit\u00e4tsmedizin Berlin, Germany",
+      "affiliation": "Charitè Universitätsmedizin Berlin, Germany",
       "name": "Dell'Orco, Andrea",
       "orcid": "0000-0002-3964-8360"
     },
@@ -277,7 +277,7 @@
     },
     {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
-      "name": "Guillon, Je\u0301re\u0301my",
+      "name": "Guillon, Jérémy",
       "orcid": "0000-0002-2672-7510"
     },
     {
@@ -301,6 +301,11 @@
       "orcid": "0000-0001-6392-6634"
     },
     {
+      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universität Dresden, Dresden, Germany",
+      "name": "Bernardoni, Fabio",
+      "orcid": "0000-0002-5112-405X"
+    },
+    {
       "name": "Forbes, Jessica"
     },
     {
@@ -314,9 +319,9 @@
       "orcid": "0000-0001-9130-1092"
     },
     {
-      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universit\u00e4t Dresden, Dresden, Germany",
-      "name": "Bernardoni, Fabio",
-      "orcid": "0000-0002-5112-405X"
+      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
+      "name": "Ben-Zvi, Gal",
+      "orcid": "0000-0002-5655-9423"
     },
     {
       "affiliation": "State Key Laboratory of Cognitive Neuroscience and Learning & IDG/McGovern Institute for Brain Research, Beijing Normal University, Beijing, China; Max Planck Institute for Psycholinguistics, Nijmegen, the Netherlands",
@@ -324,7 +329,7 @@
       "orcid": "0000-0002-0805-1350"
     },
     {
-      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universit\u00e4t Dresden, Dresden, Germany",
+      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universität Dresden, Dresden, Germany",
       "name": "Geisler, Daniel",
       "orcid": "0000-0003-2076-5329"
     },
@@ -332,7 +337,7 @@
       "name": "Salvatore, John"
     },
     {
-      "affiliation": "CNRS LTCI, Telecom ParisTech, Universit\u00e9 Paris-Saclay",
+      "affiliation": "CNRS LTCI, Telecom ParisTech, Université Paris-Saclay",
       "name": "Gramfort, Alexandre",
       "orcid": "0000-0001-9791-4404"
     },
@@ -393,16 +398,26 @@
       "orcid": "0000-0003-0646-4810"
     },
     {
+      "affiliation": "ARAMIS Lab, Paris Brain Institute",
+      "name": "Vaillant, Ghislain",
+      "orcid": "0000-0003-0267-3033"
+    },
+    {
       "affiliation": "Neurospin/Unicog/Inserm/CEA",
       "name": "Perez-Guevara, Martin Felipe",
       "orcid": "0000-0003-4497-861X"
     },
     {
-      "name": "Heinsfeld, Anibal S\u00f3lon",
+      "name": "Heinsfeld, Anibal Sólon",
       "orcid": "0000-0002-2050-0614"
     },
     {
       "name": "Haselgrove, Christian"
+    },
+    {
+      "affiliation": "CEA",
+      "name": "Papadopoulos Orfanos, Dimitri",
+      "orcid": "0000-0002-1242-8990"
     },
     {
       "affiliation": "Department of Psychology, Stanford University; Parietal, INRIA",
@@ -417,7 +432,7 @@
       "name": "Poldrack, Russell"
     },
     {
-      "affiliation": "1 McGill Centre for Integrative Neuroscience (MCIN), Ludmer Centre for Neuroinformatics and Mental Health, Montreal Neurological Institute (MNI), McGill University, Montr\u00e9al, 3801 University Street, WB-208, H3A 2B4, Qu\u00e9bec, Canada. 2 University of Lyon, CNRS, INSERM, CREATIS., Villeurbanne, 7, avenue Jean Capelle, 69621, France.",
+      "affiliation": "1 McGill Centre for Integrative Neuroscience (MCIN), Ludmer Centre for Neuroinformatics and Mental Health, Montreal Neurological Institute (MNI), McGill University, Montréal, 3801 University Street, WB-208, H3A 2B4, Québec, Canada. 2 University of Lyon, CNRS, INSERM, CREATIS., Villeurbanne, 7, avenue Jean Capelle, 69621, France.",
       "name": "Glatard, Tristan",
       "orcid": "0000-0003-2620-5883"
     },
@@ -436,7 +451,7 @@
     },
     {
       "affiliation": "University College London",
-      "name": "P\u00e9rez-Garc\u00eda, Fernando",
+      "name": "Pérez-García, Fernando",
       "orcid": "0000-0001-9090-3024"
     },
     {
@@ -470,13 +485,8 @@
       "name": "Correa, Carlos"
     },
     {
-      "affiliation": "CEA",
-      "name": "Papadopoulos Orfanos, Dimitri",
-      "orcid": "0000-0002-1242-8990"
-    },
-    {
       "affiliation": "Leibniz Institute for Neurobiology",
-      "name": "Stadler, J\u00f6rg",
+      "name": "Stadler, Jörg",
       "orcid": "0000-0003-4313-129X"
     },
     {
@@ -539,10 +549,6 @@
       "orcid": "0000-0003-3846-7696"
     },
     {
-      "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
-      "name": "Ben-Zvi, Gal"
-    },
-    {
       "affiliation": "University of Newcastle, Australia",
       "name": "Cooper, Gavin",
       "orcid": "0000-0002-7186-5293"
@@ -557,7 +563,7 @@
     },
     {
       "affiliation": "German Institute for International Educational Research",
-      "name": "Linkersd\u00f6rfer, Janosch",
+      "name": "Linkersdörfer, Janosch",
       "orcid": "0000-0002-1577-1233"
     },
     {
@@ -571,7 +577,7 @@
       "name": "Stanley, Olivia"
     },
     {
-      "name": "K\u00fcttner, Ren\u00e9"
+      "name": "Küttner, René"
     },
     {
       "affiliation": "California Institute of Technology",
@@ -700,11 +706,6 @@
       "orcid": "0000-0001-9800-4816"
     },
     {
-      "affiliation": "ARAMIS Lab, Paris Brain Institute",
-      "name": "Vaillant, Ghislain",
-      "orcid": "0000-0003-0267-3033"
-    },
-    {
       "name": "Schwabacher, Isaac"
     },
     {
@@ -729,7 +730,7 @@
       "orcid": "0000-0003-2077-3070"
     },
     {
-      "affiliation": "TIB \u2013 Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
+      "affiliation": "TIB – Leibniz Information Centre for Science and Technology and University Library, Hannover, Germany",
       "name": "Leinweber, Katrin",
       "orcid": "0000-0001-5135-5758"
     },
@@ -763,7 +764,7 @@
     },
     {
       "affiliation": "Universidad de Guadalajara",
-      "name": "Gonz\u00e1lez Orozco, Abel A."
+      "name": "González Orozco, Abel A."
     },
     {
       "affiliation": "ARAMIS Lab",

@@ -96,7 +96,7 @@ class TrainingSetCreator(BaseInterface):
     the ones that have a hand_labels_noise.txt file in them.
 
     This is outsourced as a separate class, so that the pipeline is
-    rerun everytime a handlabeled file has been changed, or a new one
+    rerun every time a handlabeled file has been changed, or a new one
     created.
 
     """

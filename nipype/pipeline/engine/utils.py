@@ -51,14 +51,14 @@ from inspect import signature
 logger = logging.getLogger("nipype.workflow")
 
 
-def _parameterization_dir(param):
+def _parameterization_dir(param, maxlen):
     """
     Returns the directory name for the given parameterization string as follows:
-        - If the parameterization is longer than 32 characters, then
+        - If the parameterization is longer than maxlen characters, then
           return the SHA-1 hex digest.
         - Otherwise, return the parameterization unchanged.
     """
-    if len(param) > 32:
+    if len(param) > maxlen:
         return sha1(param.encode()).hexdigest()
     return param
 
@@ -125,7 +125,7 @@ def write_node_report(node, result=None, is_mapnode=False):
 
     if result is None:
         logger.debug('[Node] Writing pre-exec report to "%s"', report_file)
-        report_file.write_text("\n".join(lines))
+        report_file.write_text("\n".join(lines), encoding='utf-8')
         return
 
     logger.debug('[Node] Writing post-exec report to "%s"', report_file)
@@ -138,7 +138,7 @@ def write_node_report(node, result=None, is_mapnode=False):
     outputs = result.outputs
     if outputs is None:
         lines += ["None"]
-        report_file.write_text("\n".join(lines))
+        report_file.write_text("\n".join(lines), encoding='utf-8')
         return
 
     if isinstance(outputs, Bunch):
@@ -163,7 +163,7 @@ def write_node_report(node, result=None, is_mapnode=False):
             subnode_report_files.append("subnode %d : %s" % (i, subnode_file))
 
         lines.append(write_rst_list(subnode_report_files))
-        report_file.write_text("\n".join(lines))
+        report_file.write_text("\n".join(lines), encoding='utf-8')
         return
 
     lines.append(write_rst_header("Runtime info", level=1))
@@ -205,7 +205,7 @@ def write_node_report(node, result=None, is_mapnode=False):
             write_rst_dict(result.runtime.environ),
         ]
 
-    report_file.write_text("\n".join(lines))
+    report_file.write_text("\n".join(lines), encoding='utf-8')
 
 
 def write_report(node, report_type=None, is_mapnode=False):
@@ -486,9 +486,9 @@ def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
         srcname = get_print_name(edge[0], simple_form=simple_form)
         destname = get_print_name(edge[1], simple_form=simple_form)
         if show_connectinfo:
-            pklgraph.add_edge(srcname, destname, l=str(data["connect"]))
+            pklgraph.add_edge(f'"{srcname}"', f'"{destname}"', l=str(data["connect"]))
         else:
-            pklgraph.add_edge(srcname, destname)
+            pklgraph.add_edge(f'"{srcname}"', f'"{destname}"')
     return pklgraph
 
 
@@ -1030,7 +1030,7 @@ def generate_expanded_graph(graph_in):
             iterables = {}
             # the source node iterables values
             src_values = [getattr(iter_src.inputs, field) for field in src_fields]
-            # if there is one source field, then the key is the the source value,
+            # if there is one source field, then the key is the source value,
             # otherwise the key is the tuple of source values
             if len(src_values) == 1:
                 key = src_values[0]

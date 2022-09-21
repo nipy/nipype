@@ -1,3 +1,72 @@
+1.8.5 (September 21, 2022)
+==========================
+
+Bug-fix release in the 1.8.x series.
+
+  * FIX: Use interpolation/method in numpy.percentile as available (https://github.com/nipy/nipype/pull/3506)
+  * FIX: Deployed Matlab applications must not call addpath() (https://github.com/nipy/nipype/pull/3509)
+  * FIX: Provide more runtime information when node execution fails (https://github.com/nipy/nipype/pull/3505)
+  * FIX: Fixed bug for work dirs longer than 255 characters, fixes #2061  (https://github.com/nipy/nipype/pull/3495)
+  * FIX: Update ApplyVDM to handle 4D inputs  (https://github.com/nipy/nipype/pull/3500)
+  * ENH: Explicitly specify write_text encoding format (https://github.com/nipy/nipype/pull/3508)
+  * DOC: Fix typos found by copdespell (https://github.com/nipy/nipype/pull/3510)
+  * MAINT: Add github action to trigger tutorials for release branches (https://github.com/nipy/nipype/pull/3504)
+  * CI: Set up build-test-deploy workflow on GHA (https://github.com/nipy/nipype/pull/3513)
+
+
+1.8.4 (September 01, 2022)
+==========================
+
+Bug-fix release in the 1.8.x series.
+
+This release sets a maximum traits version to avoid new, breaking changes.
+
+  * MNT: Pin traits < 6.4 (https://github.com/nipy/nipype/pull/3501)
+  * ENH: Add inputs to mrtrix3.DWIPreprocInputSpec and remove mandatory annotation for pe_dir (https://github.com/nipy/nipype/pull/3470)
+
+
+1.8.3 (July 14, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release includes compatibility fixes for nibabel 4.x and resolves a denial-of-service
+bug when the etelemetry server is down that resulted in excessive (blocking) network hits that
+would cause any tools using nipype interfaces to take a very long time.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.3?closed=1>`__)
+
+  * FIX: Argument order to ``numpy.save()`` (https://github.com/nipy/nipype/pull/3485)
+  * FIX: Add tolerance parameter to ComputeDVARS (https://github.com/nipy/nipype/pull/3489)
+  * FIX: Delay access of nibabel.trackvis until actually needed (https://github.com/nipy/nipype/pull/3488)
+  * FIX: Avoid excessive etelemetry pings (https://github.com/nipy/nipype/pull/3484)
+  * ENH: Added outputs' generation to DWIBiascorrect interface (https://github.com/nipy/nipype/pull/3476)
+
+
+1.8.2 (June 06, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release restores compatibility with networkx 2.8.3, which errors when
+graph nodes might conflict with pydot parsing.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.2?closed=1>`__)
+
+  * ENH: Enable compression with Gunzip interface (https://github.com/nipy/nipype/pull/3472)
+  * CI: Schedule weekly tests with cron (https://github.com/nipy/nipype/pull/3480)
+
+
+1.8.1 (May 16, 2022)
+====================
+
+Bug-fix release in the 1.8.x series.
+
+The previous release vendored ``distutils.version.LooseVersion``, and the vendored objects did not
+preserve compatibility with the ``distutils`` objects. This release switches to the
+``looseversion`` package that ensures compatibility.
+
+
 1.8.0 (May 10, 2022)
 ====================
 

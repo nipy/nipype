@@ -126,7 +126,7 @@ class UKFTractographyInputSpec(CommandLineInputSpec):
     )
     Rs = traits.Float(desc="Measurement noise", argstr="--Rs %f")
     maxBranchingAngle = traits.Float(
-        desc="Maximum branching angle, in degrees. When using multiple tensors, a new branch will be created when the tensors' major directions form an angle between (minBranchingAngle, maxBranchingAngle). Branching is supressed when this maxBranchingAngle is set to 0.0",
+        desc="Maximum branching angle, in degrees. When using multiple tensors, a new branch will be created when the tensors' major directions form an angle between (minBranchingAngle, maxBranchingAngle). Branching is suppressed when this maxBranchingAngle is set to 0.0",
         argstr="--maxBranchingAngle %f",
     )
     minBranchingAngle = traits.Float(
@@ -159,7 +159,7 @@ class UKFTractography(SEMLikeCommandLine):
 
     category: Diffusion.Tractography
 
-    description: This module traces fibers in a DWI Volume using the multiple tensor unscented Kalman Filter methology. For more informations check the documentation.
+    description: This module traces fibers in a DWI Volume using the multiple tensor unscented Kalman Filter methology. For more information check the documentation.
 
     version: 1.0
 

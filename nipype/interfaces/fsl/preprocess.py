@@ -780,7 +780,7 @@ class ApplyXFM(FLIRT):
     """Currently just a light wrapper around FLIRT,
     with no modifications
 
-    ApplyXFM is used to apply an existing tranform to an image
+    ApplyXFM is used to apply an existing transform to an image
 
 
     Examples
@@ -836,7 +836,7 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
         argstr="-stages %d",
         desc="stages (if 4, perform final search with sinc interpolation",
     )
-    init = File(exists=True, argstr="-init %s", desc="inital transformation matrix")
+    init = File(exists=True, argstr="-init %s", desc="initial transformation matrix")
     interpolation = traits.Enum(
         "spline",
         "nn",
@@ -1165,7 +1165,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         argstr="--lambda=%s",
         desc=(
             "Weight of regularisation, default depending on --ssqlambda and "
-            "--regmod switches. See user documetation."
+            "--regmod switches. See user documentation."
         ),
         sep=",",
     )

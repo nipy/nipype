@@ -265,7 +265,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
 class DeconvolveOutputSpec(TraitedSpec):
     out_file = File(desc="output statistics file", exists=True)
     reml_script = File(
-        desc="automatical generated script to run 3dREMLfit", exists=True
+        desc="automatically generated script to run 3dREMLfit", exists=True
     )
     x1D = File(desc="save out X matrix", exists=True)
     cbucket = File(desc="output regression coefficients file (if generated)")
@@ -528,7 +528,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         "be included.",
         argstr="-Rglt %s",
     )
-    fitts_file = File(desc="ouput dataset for REML fitted model", argstr="-Rfitts %s")
+    fitts_file = File(desc="output dataset for REML fitted model", argstr="-Rfitts %s")
     errts_file = File(
         desc="output dataset for REML residuals = data - fitted model",
         argstr="-Rerrts %s",
@@ -584,7 +584,7 @@ class RemlfitOutputSpec(AFNICommandOutputSpec):
         "but ONLY for the GLTs added on the REMLfit command "
         "line itself via 'gltsym' (if generated)"
     )
-    fitts_file = File(desc="ouput dataset for REML fitted model (if generated)")
+    fitts_file = File(desc="output dataset for REML fitted model (if generated)")
     errts_file = File(
         desc="output dataset for REML residuals = data - fitted model (if " "generated"
     )

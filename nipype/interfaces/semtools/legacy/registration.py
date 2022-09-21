@@ -20,7 +20,9 @@ from ...base import (
 
 
 class scalartransformInputSpec(CommandLineInputSpec):
-    input_image = File(desc="Image to tranform", exists=True, argstr="--input_image %s")
+    input_image = File(
+        desc="Image to transform", exists=True, argstr="--input_image %s"
+    )
     output_image = traits.Either(
         traits.Bool,
         File(),
@@ -35,7 +37,7 @@ class scalartransformInputSpec(CommandLineInputSpec):
         desc="Output file for transformation parameters",
         argstr="--transformation %s",
     )
-    invert = traits.Bool(desc="Invert tranform before applying.", argstr="--invert ")
+    invert = traits.Bool(desc="Invert transform before applying.", argstr="--invert ")
     deformation = File(
         desc="Deformation field.", exists=True, argstr="--deformation %s"
     )

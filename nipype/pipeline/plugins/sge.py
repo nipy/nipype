@@ -50,7 +50,7 @@ class QJobInfo(object):
         self._job_time = job_time  # The job start time
         self._job_info_creation_time = (
             time.time()
-        )  # When this job was created (for comparing against initalization)
+        )  # When this job was created (for comparing against initialization)
         self._job_queue_name = job_queue_name  # Where the job is running
         self._job_slots = int(job_slots)  # How many slots are being used
         self._qsub_command_line = qsub_command_line
@@ -270,7 +270,7 @@ class QstatSubstitute(object):
                     self._task_dictionary[dictionary_job].set_state("zombie")
                 else:
                     sge_debug_print(
-                        "ERROR:  Job not in still in intializing mode, "
+                        "ERROR:  Job not in still in initialization mode, "
                         "and not in done list {0}: {1}".format(
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
