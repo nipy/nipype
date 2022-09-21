@@ -65,3 +65,13 @@ jobs:
               sleep 300
             esac
           done
+      - name: Cancel ongoing run if cancelled or failed
+        if: ${{ failure() || cancelled() }}
+        run: |
+          set -x
+          RUN_ID=${{ steps.dispatched.outputs.run_id }}
+          echo "Something went wrong, cancelling dispatched run"
+          curl -s -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.TUTORIAL_ACCESS_TOKEN }}" \
+            https://api.github.com/repos/miykael/nipype_tutorial/actions/runs/${RUN_ID}/cancel
