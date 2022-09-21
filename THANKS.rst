@@ -19,4 +19,3 @@ and `UL1 TR000442	University of Iowa Clinical and Translational Science Program 
 
 
 We would also like to thank `JetBrains <http://www.jetbrains.com/>`__ for providing `Pycharm <http://www.jetbrains.com/pycharm/>`__ licenses.
-
