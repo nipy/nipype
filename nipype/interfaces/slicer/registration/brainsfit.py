@@ -279,7 +279,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--numberOfThreads %d",
     )
     forceMINumberOfThreads = traits.Int(
-        desc="Force the the maximum number of threads to use for non thread safe MI metric.  CAUTION: Inconsistent results my arise!",
+        desc="Force the maximum number of threads to use for non thread safe MI metric.  CAUTION: Inconsistent results my arise!",
         argstr="--forceMINumberOfThreads %d",
     )
     debugLevel = traits.Int(

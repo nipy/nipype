@@ -631,7 +631,7 @@ def test_path_strict_resolve(tmpdir):
     """Check the monkeypatch to test strict resolution of Path."""
     tmpdir.chdir()
 
-    # Default strict=False should work out out of the box
+    # Default strict=False should work out of the box
     testfile = Path("somefile.txt")
     resolved = "%s/somefile.txt" % tmpdir
     assert str(path_resolve(testfile)) == resolved

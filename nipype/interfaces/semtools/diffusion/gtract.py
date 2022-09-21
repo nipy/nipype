@@ -1119,7 +1119,7 @@ class gtractCoRegAnatomyInputSpec(CommandLineInputSpec):
         argstr="--inputVolume %s",
     )
     inputAnatomicalVolume = File(
-        desc="Required: input anatomical image file name. It is recommended that that the input anatomical image has been skull stripped and has the same orientation as the DWI scan.",
+        desc="Required: input anatomical image file name. It is recommended that the input anatomical image has been skull stripped and has the same orientation as the DWI scan.",
         exists=True,
         argstr="--inputAnatomicalVolume %s",
     )

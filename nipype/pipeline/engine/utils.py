@@ -1030,7 +1030,7 @@ def generate_expanded_graph(graph_in):
             iterables = {}
             # the source node iterables values
             src_values = [getattr(iter_src.inputs, field) for field in src_fields]
-            # if there is one source field, then the key is the the source value,
+            # if there is one source field, then the key is the source value,
             # otherwise the key is the tuple of source values
             if len(src_values) == 1:
                 key = src_values[0]

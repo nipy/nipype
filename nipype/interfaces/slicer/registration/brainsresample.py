@@ -94,7 +94,7 @@ class BRAINSResample(SEMLikeCommandLine):
     category: Registration
 
     description:
-       This program resamples an image image using a deformation field or a transform (BSpline, Affine, Rigid, etc.).
+       This program resamples an image using a deformation field or a transform (BSpline, Affine, Rigid, etc.).
 
 
     version: 3.0.0
