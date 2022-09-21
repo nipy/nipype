@@ -95,14 +95,14 @@
       "orcid": "0000-0001-9813-3167"
     },
     {
-      "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
-      "name": "Dewey, Blake E",
-      "orcid": "0000-0003-4554-5058"
-    },
-    {
       "affiliation": "University of Iowa",
       "name": "Johnson, Hans",
       "orcid": "0000-0001-9513-2660"
+    },
+    {
+      "affiliation": "Department of Electrical and Computer Engineering, Johns Hopkins University",
+      "name": "Dewey, Blake E",
+      "orcid": "0000-0003-4554-5058"
     },
     {
       "affiliation": "Molecular Imaging Research Center, CEA, France",
@@ -301,6 +301,11 @@
       "orcid": "0000-0001-6392-6634"
     },
     {
+      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universität Dresden, Dresden, Germany",
+      "name": "Bernardoni, Fabio",
+      "orcid": "0000-0002-5112-405X"
+    },
+    {
       "name": "Forbes, Jessica"
     },
     {
@@ -312,11 +317,6 @@
       "affiliation": "Australian eHealth Research Centre, Commonwealth Scientific and Industrial Research Organisation; University of Queensland",
       "name": "Gillman, Ashley",
       "orcid": "0000-0001-9130-1092"
-    },
-    {
-      "affiliation": "Division of Psychological and Social Medicine and Developmental Neuroscience, Faculty of Medicine, Technische Universität Dresden, Dresden, Germany",
-      "name": "Bernardoni, Fabio",
-      "orcid": "0000-0002-5112-405X"
     },
     {
       "affiliation": "Sagol School of Neuroscience, Tel Aviv University",
@@ -415,6 +415,11 @@
       "name": "Haselgrove, Christian"
     },
     {
+      "affiliation": "CEA",
+      "name": "Papadopoulos Orfanos, Dimitri",
+      "orcid": "0000-0002-1242-8990"
+    },
+    {
       "affiliation": "Department of Psychology, Stanford University; Parietal, INRIA",
       "name": "Durnez, Joke",
       "orcid": "0000-0001-9030-2202"
@@ -478,11 +483,6 @@
     },
     {
       "name": "Correa, Carlos"
-    },
-    {
-      "affiliation": "CEA",
-      "name": "Papadopoulos Orfanos, Dimitri",
-      "orcid": "0000-0002-1242-8990"
     },
     {
       "affiliation": "Leibniz Institute for Neurobiology",
