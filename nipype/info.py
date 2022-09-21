@@ -157,6 +157,8 @@ TESTS_REQUIRES = [
     "pytest-cov",
     "pytest-env",
     "pytest-timeout",
+    "pytest-doctestplus",
+    "sphinx",
 ]
 
 EXTRA_REQUIRES = {
