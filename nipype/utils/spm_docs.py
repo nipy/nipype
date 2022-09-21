@@ -38,7 +38,7 @@ def grab_doc(task_name):
 def _strip_header(doc):
     """Strip Matlab header and splash info off doc.
 
-    Searches for the tag 'NIPYPE' in the doc and returns everyting after that.
+    Searches for the tag 'NIPYPE' in the doc and returns everything after that.
 
     """
     hdr = "NIPYPE"

@@ -84,7 +84,7 @@ class C3dInputSpec(CommandLineInputSpec):
         desc=(
             "Write all images on the convert3d stack as multiple files."
             " Supports both list of output files or a pattern for the output"
-            " filenames (using %d substituion)."
+            " filenames (using %d substitution)."
         ),
     )
     pix_type = traits.Enum(

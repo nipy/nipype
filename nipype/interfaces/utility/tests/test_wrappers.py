@@ -95,7 +95,7 @@ def test_function_with_imports(tmpdir):
 
 
 def test_aux_connect_function(tmpdir):
-    """This tests excution nodes with multiple inputs and auxiliary
+    """This tests execution nodes with multiple inputs and auxiliary
     function inside the Workflow connect function.
     """
     tmpdir.chdir()

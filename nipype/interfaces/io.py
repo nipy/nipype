@@ -764,7 +764,7 @@ class DataSink(IOBase):
                     out_files.append(s3dst)
                 # Otherwise, copy locally src -> dst
                 if not s3_flag or isdefined(self.inputs.local_copy):
-                    # Create output directory if it doesnt exist
+                    # Create output directory if it doesn't exist
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
@@ -1318,7 +1318,7 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     sort_filelist = traits.Bool(
         True,
         usedefault=True,
-        desc="When matching mutliple files, return them" " in sorted order.",
+        desc="When matching multiple files, return them" " in sorted order.",
     )
     raise_on_empty = traits.Bool(
         True,
@@ -1346,7 +1346,7 @@ class SelectFiles(IOBase):
 
     This interface uses Python's {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
-    templates and collect files from persistant storage. These templates can
+    templates and collect files from persistent storage. These templates can
     also be combined with glob wildcards (``*``, ``?``) and character ranges (``[...]``).
     The field names in the formatting template (i.e. the terms in braces) will
     become inputs fields on the interface, and the keys in the templates
@@ -1513,7 +1513,7 @@ class DataFinder(IOBase):
     Will recursively search any subdirectories by default. This can be limited
     with the min/max depth options.
     Matched paths are available in the output 'out_paths'. Any named groups of
-    captured text from the regular expression are also available as ouputs of
+    captured text from the regular expression are also available as outputs of
     the same name.
 
     Examples
@@ -1583,7 +1583,7 @@ class DataFinder(IOBase):
             ]
         self.result = None
         for root_path in self.inputs.root_paths:
-            # Handle tilda/env variables and remove extra seperators
+            # Handle tilda/env variables and remove extra separators
             root_path = os.path.normpath(
                 os.path.expandvars(os.path.expanduser(root_path))
             )
@@ -1612,7 +1612,7 @@ class DataFinder(IOBase):
             for key, vals in list(self.result.items()):
                 self.result[key] = vals[0]
         else:
-            # sort all keys acording to out_paths
+            # sort all keys according to out_paths
             for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
@@ -2083,7 +2083,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     assessor_id = Str(
         desc=(
-            "Option to customize ouputs representation in XNAT - "
+            "Option to customize outputs representation in XNAT - "
             "assessor level will be used with specified id"
         ),
         xor=["reconstruction_id"],
@@ -2091,7 +2091,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     reconstruction_id = Str(
         desc=(
-            "Option to customize ouputs representation in XNAT - "
+            "Option to customize outputs representation in XNAT - "
             "reconstruction level will be used with specified id"
         ),
         xor=["assessor_id"],

@@ -291,7 +291,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--outputTransform %s",
     )
     initializeRegistrationByCurrentGenericTransform = traits.Bool(
-        desc="If this flag is ON, the current generic composite transform, resulted from the linear registration stages, is set to initialize the follow nonlinear registration process. However, by the default behaviour, the moving image is first warped based on the existant transform before it is passed to the BSpline registration filter. It is done to speed up the BSpline registration by reducing the computations of composite transform Jacobian.",
+        desc="If this flag is ON, the current generic composite transform, resulted from the linear registration stages, is set to initialize the follow nonlinear registration process. However, by the default behaviour, the moving image is first warped based on the existent transform before it is passed to the BSpline registration filter. It is done to speed up the BSpline registration by reducing the computations of composite transform Jacobian.",
         argstr="--initializeRegistrationByCurrentGenericTransform ",
     )
     failureExitCode = traits.Int(
@@ -327,7 +327,7 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--maximumNumberOfCorrections %d",
     )
     gui = traits.Bool(
-        desc="Display intermediate image volumes for debugging.  NOTE:  This is not part of the standard build sytem, and probably does nothing on your installation.",
+        desc="Display intermediate image volumes for debugging.  NOTE:  This is not part of the standard build system, and probably does nothing on your installation.",
         argstr="--gui ",
     )
     promptUser = traits.Bool(
@@ -392,7 +392,7 @@ class BRAINSFit(SEMLikeCommandLine):
 
     category: Registration
 
-    description: Register a three-dimensional volume to a reference volume (Mattes Mutual Information by default). Full documentation avalable here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/BRAINSFit. Method described in BRAINSFit: Mutual Information Registrations of Whole-Brain 3D Images, Using the Insight Toolkit, Johnson H.J., Harris G., Williams K., The Insight Journal, 2007. http://hdl.handle.net/1926/1291
+    description: Register a three-dimensional volume to a reference volume (Mattes Mutual Information by default). Full documentation available here: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/BRAINSFit. Method described in BRAINSFit: Mutual Information Registrations of Whole-Brain 3D Images, Using the Insight Toolkit, Johnson H.J., Harris G., Williams K., The Insight Journal, 2007. http://hdl.handle.net/1926/1291
 
     version: 3.0.0
 

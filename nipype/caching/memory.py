@@ -287,7 +287,7 @@ class Memory(object):
             os.remove(log_name)
 
     def _clear_all_but(self, runs, warn=True):
-        """Remove all the runs appart from those given to the function
+        """Remove all the runs apart from those given to the function
         input.
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)

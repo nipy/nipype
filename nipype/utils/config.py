@@ -214,7 +214,7 @@ class NipypeConfig(object):
         return None
 
     def save_data(self, key, value):
-        """Store config flie"""
+        """Store config file"""
         datadict = {}
         if os.path.exists(self.data_file):
             with SoftFileLock("%s.lock" % self.data_file):

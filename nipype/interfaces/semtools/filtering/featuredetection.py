@@ -21,10 +21,10 @@ from ...base import (
 
 class GenerateSummedGradientImageInputSpec(CommandLineInputSpec):
     inputVolume1 = File(
-        desc="input volume 1, usally t1 image", exists=True, argstr="--inputVolume1 %s"
+        desc="input volume 1, usually t1 image", exists=True, argstr="--inputVolume1 %s"
     )
     inputVolume2 = File(
-        desc="input volume 2, usally t2 image", exists=True, argstr="--inputVolume2 %s"
+        desc="input volume 2, usually t2 image", exists=True, argstr="--inputVolume2 %s"
     )
     outputFileName = traits.Either(
         traits.Bool,
@@ -309,10 +309,10 @@ class ErodeImage(SEMLikeCommandLine):
 
 class GenerateBrainClippedImageInputSpec(CommandLineInputSpec):
     inputImg = File(
-        desc="input volume 1, usally t1 image", exists=True, argstr="--inputImg %s"
+        desc="input volume 1, usually t1 image", exists=True, argstr="--inputImg %s"
     )
     inputMsk = File(
-        desc="input volume 2, usally t2 image", exists=True, argstr="--inputMsk %s"
+        desc="input volume 2, usually t2 image", exists=True, argstr="--inputMsk %s"
     )
     outputFileName = traits.Either(
         traits.Bool,
@@ -402,7 +402,7 @@ class NeighborhoodMedian(SEMLikeCommandLine):
 
 class GenerateTestImageInputSpec(CommandLineInputSpec):
     inputVolume = File(
-        desc="input volume 1, usally t1 image", exists=True, argstr="--inputVolume %s"
+        desc="input volume 1, usually t1 image", exists=True, argstr="--inputVolume %s"
     )
     outputVolume = traits.Either(
         traits.Bool,
