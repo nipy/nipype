@@ -20,7 +20,9 @@ from ...base import (
 
 
 class scalartransformInputSpec(CommandLineInputSpec):
-    input_image = File(desc="Image to transform", exists=True, argstr="--input_image %s")
+    input_image = File(
+        desc="Image to transform", exists=True, argstr="--input_image %s"
+    )
     output_image = traits.Either(
         traits.Bool,
         File(),
