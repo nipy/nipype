@@ -4,7 +4,8 @@ import glob
 
 from ... import logging
 from ...utils.filemanip import simplify_list
-from ..base import traits, File, Directory, TraitedSpec, OutputMultiPath
+from ..base import (traits, File, Directory, TraitedSpec,
+                    OutputMultiPath, isdefined, CommandLine)
 from ..freesurfer.base import FSCommand, FSTraitedSpec
 
 iflogger = logging.getLogger("nipype.interface")
@@ -144,4 +145,123 @@ class WatershedBEM(FSCommand):
                     if not k.rfind("surface") == -1:
                         mesh_paths.append(out_files)
         outputs["mesh_files"] = mesh_paths
+        return outputs
+
+
+class SetupSourceSpaceInputSpec(FSTraitedSpec):
+    subject = Str(
+        argstr='--subject %s',
+        mandatory=True,
+        desc='Subject name')
+    fname = File(
+        argstr='--src %s',
+        mandatory=False,
+        default=None,
+        desc='Output file name. Use a name <dir>/<name>-src.fif')
+    subject_to = Str(
+        argstr='--morph %s',
+        mandatory=False,
+        default=None,
+        desc='morph the source space to this subject')
+    surface = traits.Str(
+        'white',
+        argstr='--surf %s',
+        mandatory=False,
+        usedefault=True,
+        desc='The surface to use.')
+    ico = traits.Int(
+        argstr='--ico %s',
+        mandatory=False,
+        default=None,
+        desc='use the recursively subdivided icosahedron '
+             'to create the source space.')
+    oct_ = traits.Int(
+        argstr='--oct %s',
+        mandatory=False,
+        default=None,
+        desc='use the recursively subdivided octahedron '
+             'to create the source space.',
+        xor=['ico'])
+    spacing = traits.Int(
+        7,
+        argstr='--spacing %s',
+        mandatory=False,
+        usedefault=True,
+        desc='Specifies the approximate grid spacing of the '
+             'source space in mm.',
+        xor=['oct_', 'ico'])
+    n_jobs = traits.Int(
+        1,
+        argstr='--n-jobs %s',
+        mandatory=False,
+        usedefault=True,
+        desc='The number of jobs to run in parallel '
+             '(default 1). Requires the joblib package. '
+             'Will use at most 2 jobs'
+             ' (one for each hemisphere).')
+    verbose = traits.Bool(
+        False,
+        argstr='--verbose',
+        mandatory=False,
+        usedefault=True,
+        desc='Turn on verbose mode.')
+    overwrite = traits.Bool(
+        False,
+        argstr='--overwrite',
+        mandatory=False,
+        usedefault=True,
+        desc='Overwrites the existing files')
+
+
+class SetupSourceSpaceOutputSpec(TraitedSpec):
+    source = File(exists=True,
+                  desc='File containing the setup_source_space')
+
+
+class SetupSourceSpace(CommandLine):
+    """Uses mne_setup_source_space to create a source space.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.mne import SetupSourceSpace
+    >>> setup_source_space = SetupSourceSpace()
+    >>> setup_source_space.inputs.subject = 'subj1'
+    >>> setup_source_space.inputs.subjects_dir = '.'
+    >>> setup_source_space.cmdline
+    'mne setup_source_space --n-jobs 1 --spacing 7 \
+    --subject subj1 --surf white'
+    >>> setup_source_space.run() 				# doctest: +SKIP
+
+   """
+
+    _cmd = 'mne setup_source_space'
+    input_spec = SetupSourceSpaceInputSpec
+    output_spec = SetupSourceSpaceOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        fname = self.inputs.fname
+        ico = self.inputs.ico
+        oct_ = self.inputs.oct_
+        spacing = self.inputs.spacing
+        subject = self.inputs.subject
+        subject_to = self.inputs.subject_to
+
+        if not isdefined(fname):
+            if isdefined(ico):
+                use_spacing = "ico" + str(ico)
+            elif isdefined(oct_):
+                use_spacing = "oct" + str(oct_)
+            elif isdefined(spacing):
+                use_spacing = spacing
+            if not isdefined(subject_to):
+                fname = subject + '-' + str(use_spacing) + '-src.fif'
+            else:
+                fname = (subject_to + '-' + subject + '-' +
+                         str(use_spacing) + '-src.fif')
+        else:
+            if not (fname.endswith('_src.fif') or fname.endswith('-src.fif')):
+                fname = fname + "-src.fif"
+        outputs['source'] = os.path.join(os.getcwd(), fname)
         return outputs
