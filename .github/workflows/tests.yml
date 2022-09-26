@@ -29,8 +29,12 @@ concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
 jobs:
   build:
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -80,6 +84,9 @@ jobs:
 
   stable:
     # Check each OS, all supported Python, minimum versions and latest releases
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
