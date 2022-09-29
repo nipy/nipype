@@ -259,9 +259,9 @@ class DWIBiasCorrect(MRTrix3Base):
         if self.inputs.out_file:
             outputs = self.output_spec().get()
             outputs["out_file"] = op.abspath(self.inputs.out_file)
-            if self.inputs.bias:
-                outputs["bias"] = op.abspath(self.inputs.bias)
-            return outputs
+        if self.inputs.bias:
+            outputs["bias"] = op.abspath(self.inputs.bias)
+        return outputs
 
 
 class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
