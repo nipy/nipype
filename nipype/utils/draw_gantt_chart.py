@@ -103,8 +103,26 @@ def log_to_dict(logfile):
 
     nodes_list = [json.loads(l) for l in lines]
 
+    def _convert_string_to_datetime(datestring):
+        try:
+            datetime_object: datetime.datetime = datetime.datetime.strptime(
+                datestring, "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            return datetime_object
+        except Exception as _:
+            pass
+        return datestring
+
+    date_object_node_list: list = list()
+    for n in nodes_list:
+        if "start" in n.keys():
+            n["start"] = _convert_string_to_datetime(n["start"])
+        if "finish" in n.keys():
+            n["finish"] = _convert_string_to_datetime(n["finish"])
+        date_object_node_list.append(n)
+
     # Return list of nodes
-    return nodes_list
+    return date_object_node_list
 
 
 def calculate_resource_timeseries(events, resource):
@@ -514,7 +532,11 @@ def generate_gantt_chart(
     # Create the header of the report with useful information
     start_node = nodes_list[0]
     last_node = nodes_list[-1]
-    duration = (last_node["finish"] - start_node["start"]).total_seconds()
+    duration: float = 0.0
+    if isinstance(start_node["start"], datetime.date) and isinstance(
+        last_node["finish"], datetime.date
+    ):
+        duration = (last_node["finish"] - start_node["start"]).total_seconds()
 
     # Get events based dictionary of node run stats
     events = create_event_dict(start_node["start"], nodes_list)
