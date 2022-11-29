@@ -7,8 +7,10 @@
 import os
 
 from ... import logging
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
-from .base import FSCommand, FSTraitedSpec, FSCommandOpenMP, FSTraitedSpecOpenMP
+from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined, InputMultiObject, Directory
+from .base import FSCommand, FSTraitedSpec, FSCommandOpenMP, FSTraitedSpecOpenMP, CommandLine
+from .preprocess import ReconAllInputSpec
+from ..io import FreeSurferSource
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
@@ -251,3 +253,200 @@ class FuseSegmentations(FSCommand):
         outputs = self.output_spec().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class BaseReconAllInputSpec(ReconAllInputSpec):
+    subject_id = traits.Str(argstr="-subjid %s", desc="subject name")
+    base_id = traits.Str(argstr="-base %s", desc="base template name", xor=["subject_id"])
+    timepoints = InputMultiObject(
+        traits.Str(), argstr="-tp %s...", desc="processed time point to use in template"
+    )
+
+class BaseReconAllOutputSpec(FreeSurferSource.output_spec):
+    subjects_dir = Directory(exists=True, desc="FreeSurfer subjects directory")
+    subject_id = traits.Str(desc="Subject template name")
+
+class BaseReconAll(CommandLine):
+    """Uses the longitudinal pipeline of recon-all to create a template for a given number of subject's sessions.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer.longitudinal import BaseReconAll
+    >>> baserecon = BaseReconAll()
+    >>> baserecon.inputs.base_id = 'sub-template'
+    >>> baserecon.inputs.timepoints = ['ses-1','ses-2']
+    >>> baserecon.inputs.directive = 'all'
+    >>> baserecon.inputs.subjects_dir = '.'
+    >>> baserecon.cmdline
+    'recon-all -all -base sub-template -sd . -tp ses-1 -tp ses-2'
+    """
+
+    _cmd = "recon-all"
+    input_spec = BaseReconAllInputSpec
+    output_spec = BaseReconAllOutputSpec
+    _can_resume = True
+    force_run = False
+
+    def _gen_subjects_dir(self):
+        return os.getcwd()
+
+
+    def _gen_filename(self, name):
+        if name == "subjects_dir":
+            return self._gen_subjects_dir()
+        return None
+
+    
+    def _list_outputs(self):
+        if isdefined(self.inputs.subjects_dir):
+            subjects_dir = self.inputs.subjects_dir
+        else:
+            subjects_dir = self._gen_subjects_dir()
+
+        if isdefined(self.inputs.hemi):
+            hemi = self.inputs.hemi
+        else:
+            hemi = "both"
+
+        outputs = self._outputs().get()
+
+        outputs.update(
+            FreeSurferSource(subject_id=self.inputs.base_id,
+                subjects_dir=subjects_dir, hemi=hemi)._list_outputs()
+        )
+        outputs["subject_id"] = self.inputs.base_id
+        outputs["subjects_dir"] = subjects_dir
+        return outputs
+
+
+    def _is_resuming(self):
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        if os.path.isdir(os.path.join(subjects_dir, self.inputs.base_id, "mri")):
+            return True
+        return False
+
+
+    def _format_arg(self, name, trait_spec, value):
+        return super(BaseReconAll, self)._format_arg(name, trait_spec, value)
+
+
+    @property
+    def cmdline(self):
+        cmd = super(BaseReconAll, self).cmdline
+
+        if not self._is_resuming():
+            return cmd
+
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+
+        directive = self.inputs.directive
+        if not isdefined(directive):
+            steps = []
+
+        iflogger.info(f"recon-all: {cmd}")
+        return cmd
+
+
+class LongReconAllInputSpec(ReconAllInputSpec):
+    subject_id = traits.Str(argstr="-subjid %s", desc="subject name")
+    long_id = traits.Tuple(
+        traits.Str(),
+        traits.Str(),
+        argstr="-long %s %s",
+        desc="longitudinal name followed by base template name",
+        xor=["subject_id"]
+    )
+
+
+class LongReconAllOutputSpec(FreeSurferSource.output_spec):
+    subjects_dir = Directory(exists=True, desc="FreeSurfer subjects directory")
+    subject_id = traits.Str(desc="Subject template name")
+
+
+class LongReconAll(CommandLine):
+    """Uses FreeSurfer's longitudinal recon-all to process a subject given
+    the previously processed base template.
+
+    Examples
+    ---------
+
+    >>> from nipype.interfaces.freesurfer.longitudinal import LongReconAll
+    >>> longrecon = LongReconAll()
+    >>> longrecon.inputs.long_id = ("ses-1","sub-template")
+    >>> longrecon.inputs.directive = "all"
+    >>> longrecon.inputs.subjects_dir = "."
+    >>> longrecon.cmdline
+    'recon-all -all -long ses-1 sub-template -sd .'
+    """
+
+    _cmd = "recon-all"
+    input_spec = LongReconAllInputSpec
+    output_spec = LongReconAllOutputSpec
+    _can_resume = True
+    force_run = False
+
+    def _gen_subjects_dir(self):
+        return os.getcwd()
+
+    def _gen_filename(self, name):
+        if name == "subjects_dir":
+            return self._gen_subjects_dir()
+        return None
+
+    def _list_outputs(self):
+        subject_id = f"{self.inputs.long_id[0]}.long.{self.inputs.long_id[1]}"
+
+        if isdefined(self.inputs.subjects_dir):
+            subjects_dir = self.inputs.subjects_dir
+        else:
+            subjects_dir = self._gen_subjects_dir()
+
+        if isdefined(self.inputs.hemi):
+            hemi = self.inputs.hemi
+        else:
+            hemi = "both"
+
+        outputs = self._outputs().get()
+
+        outputs.update(
+            FreeSurferSource(
+                subject_id=subject_id, subjects_dir=subjects_dir, hemi=hemi
+            )._list_outputs()
+        )
+        outputs["subject_id"] = subject_id
+        outputs["subjects_dir"] = subjects_dir
+        return outputs
+
+    def _is_resuming(self):
+        subjects_dir = self.inputs.subjects_dir
+        subject_id = f"{self.inputs.long_id[0]}.long{self.inputs.long_id[1]}"
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        if os.path.isdir(os.path.join(subjects_dir, subject_id, "mri")):
+            return True
+        return False
+
+    def _format_arg(self, name, trait_spec, value):
+        return super(LongReconAll, self)._format_arg(name, trait_spec, value)
+
+    @property
+    def cmdline(self):
+        cmd = super(LongReconAll, self).cmdline
+
+        if not self._is_resuming():
+            return cmd
+
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+
+        directive = self.inputs.directive
+        if not isdefined(directive):
+            steps = []
+
+        iflogger.info(f"recon-all: {cmd}")
+        return cmd
