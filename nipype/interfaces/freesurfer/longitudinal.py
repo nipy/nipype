@@ -296,7 +296,7 @@ class BaseReconAll(CommandLine):
             return self._gen_subjects_dir()
         return None
 
-    
+
     def _list_outputs(self):
         if isdefined(self.inputs.subjects_dir):
             subjects_dir = self.inputs.subjects_dir
