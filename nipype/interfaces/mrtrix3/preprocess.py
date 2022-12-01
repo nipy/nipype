@@ -257,7 +257,8 @@ class DWIBiasCorrect(MRTrix3Base):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        if self.inputs.out_file:
+            outputs["out_file"] = op.abspath(self.inputs.out_file)
         if self.inputs.bias:
             outputs["bias"] = op.abspath(self.inputs.bias)
         return outputs
