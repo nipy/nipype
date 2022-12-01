@@ -22,6 +22,9 @@ concurrency:
   group: contrib-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
 jobs:
   stable:
     # Check each OS, all supported Python, minimum versions and latest releases
