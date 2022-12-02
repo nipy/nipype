@@ -20,6 +20,11 @@ def test_LongReconAll_inputs():
         args=dict(
             argstr="%s",
         ),
+        base_id=dict(
+            argstr="%s",
+            position=2,
+            requires=["long_id"],
+        ),
         big_ventricles=dict(
             argstr="-bigventricles",
         ),
@@ -58,7 +63,9 @@ def test_LongReconAll_inputs():
             min_ver="6.0.0",
         ),
         long_id=dict(
-            argstr="-long %s %s",
+            argstr="-long %s",
+            position=1,
+            requires=["base_id"],
             xor=["subject_id"],
         ),
         mprage=dict(

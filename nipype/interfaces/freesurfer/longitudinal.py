@@ -387,7 +387,7 @@ class LongReconAll(CommandLine):
     >>> longrecon.inputs.directive = "all"
     >>> longrecon.inputs.subjects_dir = "."
     >>> longrecon.cmdline
-    'recon-all -all -long ses-1 -base sub-template -sd .'
+    'recon-all -all -long ses-1 sub-template -sd .'
     """
 
     _cmd = "recon-all"
