@@ -353,12 +353,18 @@ class BaseReconAll(CommandLine):
 
 class LongReconAllInputSpec(ReconAllInputSpec):
     subject_id = traits.Str(argstr="-subjid %s", desc="subject name")
-    long_id = traits.Tuple(
-        traits.Str(),
-        traits.Str(),
-        argstr="-long %s %s",
-        desc="longitudinal name followed by base template name",
-        xor=["subject_id"]
+    long_id = traits.Str(
+        argstr="-long %s",
+        desc="longitudinal session/timepoint id",
+        xor=["subject_id"],
+        requires=["base_id"],
+        position=1
+    )
+    base_id = traits.Str(
+        argstr="%s",
+        desc="longitudinal base template id",
+        requires=["long_id"],
+        position=2
     )
 
 
@@ -376,11 +382,12 @@ class LongReconAll(CommandLine):
 
     >>> from nipype.interfaces.freesurfer.longitudinal import LongReconAll
     >>> longrecon = LongReconAll()
-    >>> longrecon.inputs.long_id = ("ses-1","sub-template")
+    >>> longrecon.inputs.long_id = "ses-1"
+    >>> longrecon.inputs.base_id = "sub-template"
     >>> longrecon.inputs.directive = "all"
     >>> longrecon.inputs.subjects_dir = "."
     >>> longrecon.cmdline
-    'recon-all -all -long ses-1 sub-template -sd .'
+    'recon-all -all -long ses-1 -base sub-template -sd .'
     """
 
     _cmd = "recon-all"
