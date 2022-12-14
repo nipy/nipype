@@ -375,6 +375,11 @@
       "name": "Schwartz, Yannick"
     },
     {
+      "affiliation": "Medical College of Wisconsin",
+      "name": "Espana, Lezlie",
+      "orcid": "0000-0002-6466-4653"
+    },
+    {
       "affiliation": "The University of Iowa",
       "name": "Ghayoor, Ali",
       "orcid": "0000-0002-8858-1254"
@@ -890,11 +895,6 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
-    },
-    {
-      "affiliation": "Department of Neurosurgery, Medical College of Wisconsin",
-      "name": "Espana, Lezlie",
-      "orcid": "0000-0002-6466-4653"
     }
   ],
   "keywords": [
