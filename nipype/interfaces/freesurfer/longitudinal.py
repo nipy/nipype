@@ -405,7 +405,7 @@ class LongReconAll(CommandLine):
         return None
 
     def _list_outputs(self):
-        subject_id = f"{self.inputs.long_id[0]}.long.{self.inputs.long_id[1]}"
+        subject_id = f"{self.inputs.long_id}.long.{self.inputs.base_id}"
 
         if isdefined(self.inputs.subjects_dir):
             subjects_dir = self.inputs.subjects_dir
@@ -430,7 +430,7 @@ class LongReconAll(CommandLine):
 
     def _is_resuming(self):
         subjects_dir = self.inputs.subjects_dir
-        subject_id = f"{self.inputs.long_id[0]}.long{self.inputs.long_id[1]}"
+        subject_id = f"{self.inputs.long_id}.long{self.inputs.base_id}"
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
         if os.path.isdir(os.path.join(subjects_dir, subject_id, "mri")):
