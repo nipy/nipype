@@ -358,17 +358,16 @@ class BaseReconAll(CommandLine):
 
 
 class LongReconAllInputSpec(ReconAllInputSpec):
-    long_id = traits.Str(
+    longitudinal_timepoint_id = traits.Str(
         argstr="-long %s",
         desc="longitudinal session/timepoint id",
-        xor=["subject_id"],
-        requires=["base_id"],
+        mandatory=True
         position=1
     )
-    base_id = traits.Str(
+    longitudinal_template_id = traits.Str(
         argstr="%s",
         desc="longitudinal base template id",
-        requires=["long_id"],
+        mandatory=True,
         position=2
     )
 
