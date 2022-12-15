@@ -256,9 +256,16 @@ class FuseSegmentations(FSCommand):
 
 
 class BaseReconAllInputSpec(ReconAllInputSpec):
-    base_id = traits.Str(argstr="-base %s", desc="base template name", xor=["subject_id"])
-    timepoints = InputMultiObject(
-        traits.Str(), argstr="-tp %s...", desc="processed time point to use in template"
+    base_template_id = traits.Str(
+        argstr="-base %s",
+        desc="base template name",
+        mandatory=True,
+    )
+    base_timepoint_ids = InputMultiObject(
+        traits.Str(),
+        argstr="-base-tp %s...",
+        desc="processed time point to use in template",
+        mandatory=True,
     )
 
 class BaseReconAllOutputSpec(FreeSurferSource.output_spec):
