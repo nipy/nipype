@@ -256,7 +256,6 @@ class FuseSegmentations(FSCommand):
 
 
 class BaseReconAllInputSpec(ReconAllInputSpec):
-    subject_id = traits.Str(argstr="-subjid %s", desc="subject name")
     base_id = traits.Str(argstr="-base %s", desc="base template name", xor=["subject_id"])
     timepoints = InputMultiObject(
         traits.Str(), argstr="-tp %s...", desc="processed time point to use in template"
@@ -352,7 +351,6 @@ class BaseReconAll(CommandLine):
 
 
 class LongReconAllInputSpec(ReconAllInputSpec):
-    subject_id = traits.Str(argstr="-subjid %s", desc="subject name")
     long_id = traits.Str(
         argstr="-long %s",
         desc="longitudinal session/timepoint id",
