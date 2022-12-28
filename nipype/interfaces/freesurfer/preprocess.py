@@ -817,7 +817,9 @@ class Resample(FSCommand):
 
 class ReconAllInputSpec(CommandLineInputSpec):
     subject_id = traits.Str(
-        "recon_all", argstr="-subjid %s", desc="subject name",
+        "recon_all",
+        argstr="-subjid %s",
+        desc="subject name",
     )
     directive = traits.Enum(
         "all",
@@ -932,7 +934,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
     base_template_id = traits.Str(
         argstr="-base %s",
         desc="base template id",
-        xor=["subject_id","longitudinal_timepoint_id"],
+        xor=["subject_id", "longitudinal_timepoint_id"],
         requires=["base_timepoint_ids"],
     )
     base_timepoint_ids = InputMultiObject(
@@ -943,14 +945,12 @@ class ReconAllInputSpec(CommandLineInputSpec):
     longitudinal_timepoint_id = traits.Str(
         argstr="-long %s",
         desc="longitudinal session/timepoint id",
-        xor=["subject_id","base_template_id"],
+        xor=["subject_id", "base_template_id"],
         requires=["longitudinal_template_id"],
-        position=1
+        position=1,
     )
     longitudinal_template_id = traits.Str(
-        argstr="%s",
-        desc="longitudinal base tempalte id",
-        position=2
+        argstr="%s", desc="longitudinal base tempalte id", position=2
     )
 
     # Expert options
@@ -1572,13 +1572,14 @@ class ReconAll(CommandLine):
         if isdefined(self.inputs.base_template_id):
             outputs.update(
                 FreeSurferSource(
-                    subject_id=self.inputs.base_template_id, subjects_dir=subjects_dir,
-                    hemi=hemi
+                    subject_id=self.inputs.base_template_id,
+                    subjects_dir=subjects_dir,
+                    hemi=hemi,
                 )._list_outputs()
             )
             outputs["subject_id"] = self.inputs.base_template_id
         elif isdefined(self.inputs.longitudinal_timepoint_id):
-            subject_id=f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}"
+            subject_id = f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}"
             outputs.update(
                 FreeSurferSource(
                     subject_id=subject_id, subjects_id=subjects_dir, hemi=hemi
@@ -1588,7 +1589,9 @@ class ReconAll(CommandLine):
         else:
             outputs.update(
                 FreeSurferSource(
-                    subject_id=self.inputs.subject_id, subjects_dir=subjects_dir, hemi=hemi
+                    subject_id=self.inputs.subject_id,
+                    subjects_dir=subjects_dir,
+                    hemi=hemi,
                 )._list_outputs()
             )
             outputs["subject_id"] = self.inputs.subject_id
@@ -1604,12 +1607,18 @@ class ReconAll(CommandLine):
         # Check for longitudinal pipeline
         if not isdefined(self.inputs.subject_id):
             if isdefined(self.inputs.base_template_id):
-                if os.path.isdir(os.path.join(subjects_dir, self.inputs.base_template_id, "mri")):
+                if os.path.isdir(
+                    os.path.join(subjects_dir, self.inputs.base_template_id, "mri")
+                ):
                     return True
             elif isdefined(self.inputs.longitudinal_template_id):
-                if os.path.isdir(os.path.join(subjects_dir,
-                    f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}",
-                    "mri")):
+                if os.path.isdir(
+                    os.path.join(
+                        subjects_dir,
+                        f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}",
+                        "mri",
+                    )
+                ):
                     return True
         else:
             if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id, "mri")):
