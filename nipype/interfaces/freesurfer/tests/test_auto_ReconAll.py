@@ -20,6 +20,14 @@ def test_ReconAll_inputs():
         args=dict(
             argstr="%s",
         ),
+        base_template_id=dict(
+            argstr="-base %s",
+            requires=["base_timepoint_ids"],
+            xor=["subject_id", "longitudinal_timepoint_id"],
+        ),
+        base_timepoint_ids=dict(
+            argstr="-base-tp %s...",
+        ),
         big_ventricles=dict(
             argstr="-bigventricles",
         ),
@@ -56,6 +64,16 @@ def test_ReconAll_inputs():
         hires=dict(
             argstr="-hires",
             min_ver="6.0.0",
+        ),
+        longitudinal_template_id=dict(
+            argstr="%s",
+            position=2,
+        ),
+        longitudinal_timepoint_id=dict(
+            argstr="-long %s",
+            position=1,
+            requires=["longitudinal_template_id"],
+            xor=["subject_id", "base_template_id"],
         ),
         mprage=dict(
             argstr="-mprage",
@@ -143,7 +161,6 @@ def test_ReconAll_inputs():
         ),
         subject_id=dict(
             argstr="-subjid %s",
-            usedefault=True,
         ),
         subjects_dir=dict(
             argstr="-sd %s",
