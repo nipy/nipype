@@ -1582,7 +1582,7 @@ class ReconAll(CommandLine):
             subject_id = f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}"
             outputs.update(
                 FreeSurferSource(
-                    subject_id=subject_id, subjects_id=subjects_dir, hemi=hemi
+                    subject_id=subject_id, subjects_dir=subjects_dir, hemi=hemi
                 )._list_outputs()
             )
             outputs["subject_id"] = subject_id
