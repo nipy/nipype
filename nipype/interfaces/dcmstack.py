@@ -24,7 +24,7 @@ from .base import (
 
 have_dcmstack = True
 try:
-    import dicom
+    import pydicom
     import dcmstack
     from dcmstack.dcmmeta import NiftiWrapper
 except ImportError:
@@ -34,7 +34,7 @@ except ImportError:
 def sanitize_path_comp(path_comp):
     result = []
     for char in path_comp:
-        if char not in string.letters + string.digits + "-_.":
+        if char not in string.ascii_letters + string.digits + "-_.":
             result.append("_")
         else:
             result.append(char)
@@ -154,7 +154,7 @@ class DcmStack(NiftiGeneratorBase):
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
             if not imghdr.what(src_path) == "gif":
-                src_dcm = dicom.read_file(src_path, force=self.inputs.force_read)
+                src_dcm = pydicom.dcmread(src_path, force=self.inputs.force_read)
                 stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
