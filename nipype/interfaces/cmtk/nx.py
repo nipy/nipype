@@ -200,7 +200,8 @@ def average_networks(in_files, ntwk_res_file, group_id):
 
     # Writes the networks and returns the name
     network_name = group_id + "_average.pck"
-    nx.write_gpickle(avg_ntwk, op.abspath(network_name))
+    with open(op.abspath(network_name), 'wb') as f:
+        pickle.dump(avg_ntwk, f, pickle.HIGHEST_PROTOCOL)
     iflogger.info("Saving average network as %s", op.abspath(network_name))
     avg_ntwk = fix_keys_for_gexf(avg_ntwk)
     network_name = group_id + "_average.gexf"
@@ -483,7 +484,8 @@ class NetworkXMetrics(BaseInterface):
         for key in list(node_measures.keys()):
             newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            nx.write_gpickle(newntwk, out_file)
+            with open(out_file, 'wb') as f:
+                pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             nodentwks.append(out_file)
         if isdefined(self.inputs.out_node_metrics_matlab):
             node_out_file = op.abspath(self.inputs.out_node_metrics_matlab)
@@ -497,7 +499,8 @@ class NetworkXMetrics(BaseInterface):
         for key in list(edge_measures.keys()):
             newntwk = add_edge_data(edge_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            nx.write_gpickle(newntwk, out_file)
+            with open(out_file, 'wb') as f:
+                pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             edgentwks.append(out_file)
         if isdefined(self.inputs.out_edge_metrics_matlab):
             edge_out_file = op.abspath(self.inputs.out_edge_metrics_matlab)
@@ -521,7 +524,8 @@ class NetworkXMetrics(BaseInterface):
                 out_file = op.abspath(
                     self._gen_outfilename(self.inputs.out_k_crust, "pck")
                 )
-            nx.write_gpickle(ntwk_measures[key], out_file)
+            with open(out_file, 'wb') as f:
+                pickle.dump(ntwk_measures[key], f, pickle.HIGHEST_PROTOCOL)
             kntwks.append(out_file)
         gpickled.extend(kntwks)
 

@@ -226,7 +226,8 @@ def cmat(
     # Add node information from specified parcellation scheme
     path, name, ext = split_filename(resolution_network_file)
     if ext == ".pck":
-        gp = nx.read_gpickle(resolution_network_file)
+        with open(resolution_network_file, 'rb') as f:
+            gp = pickle.load(f)
     elif ext == ".graphml":
         gp = nx.read_graphml(resolution_network_file)
     else:
@@ -379,7 +380,8 @@ def cmat(
                 fibdev.add_edge(u, v, weight=di["fiber_length_std"])
 
     iflogger.info("Writing network as %s", matrix_name)
-    nx.write_gpickle(G, op.abspath(matrix_name))
+    with open(op.abspath(matrix_name), 'wb') as f:
+        pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
 
     numfib_mlab = nx.to_numpy_matrix(numfib, dtype=int)
     numfib_dict = {"number_of_fibers": numfib_mlab}
@@ -394,7 +396,8 @@ def cmat(
         path, name, ext = split_filename(matrix_name)
         intersection_matrix_name = op.abspath(name + "_intersections") + ext
         iflogger.info("Writing intersection network as %s", intersection_matrix_name)
-        nx.write_gpickle(I, intersection_matrix_name)
+        with open(intersection_matrix_name, 'wb') as f:
+            pickle.dump(I, f, pickle.HIGHEST_PROTOCOL)
 
     path, name, ext = split_filename(matrix_mat_name)
     if not ext == ".mat":
@@ -1070,7 +1073,8 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
             )
         )
         G.nodes[int(u)]["dn_position"] = tuple([xyz[0], xyz[2], -xyz[1]])
-    nx.write_gpickle(G, out_filename)
+    with open(out_filename, 'wb') as f:
+        pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
     return out_filename
 
 
