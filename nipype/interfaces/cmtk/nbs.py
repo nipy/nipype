@@ -150,8 +150,8 @@ class NetworkBasedStatistic(LibraryBaseInterface):
             pADJ[x, y] = PVAL[idx]
 
         # Create networkx graphs from the adjacency matrix
-        nbsgraph = nx.from_numpy_matrix(ADJ)
-        nbs_pval_graph = nx.from_numpy_matrix(pADJ)
+        nbsgraph = nx.from_numpy_array(ADJ)
+        nbs_pval_graph = nx.from_numpy_array(pADJ)
 
         # Relabel nodes because they should not start at zero for our convention
         nbsgraph = nx.relabel_nodes(nbsgraph, lambda x: x + 1)
