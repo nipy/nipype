@@ -434,7 +434,7 @@ class DistributedPluginBase(PluginBase):
         import networkx as nx
 
         self.procs, _ = topological_sort(graph)
-        self.depidx = nx.to_scipy_sparse_matrix(
+        self.depidx = nx.to_scipy_sparse_array(
             graph, nodelist=self.procs, format="lil"
         )
         self.refidx = self.depidx.astype(int)
