@@ -263,7 +263,7 @@ def cmat(
         )
         intersection_matrix = np.matrix(intersection_matrix)
         I = G.copy()
-        H = nx.from_numpy_matrix(np.matrix(intersection_matrix))
+        H = nx.from_numpy_array(np.matrix(intersection_matrix))
         H = nx.relabel_nodes(H, lambda x: x + 1)  # relabel nodes so they start at 1
         I.add_weighted_edges_from(
             ((u, v, d["weight"]) for u, v, d in H.edges(data=True))
