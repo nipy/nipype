@@ -6,6 +6,7 @@ import os.path as op
 
 import numpy as np
 import networkx as nx
+import pickle
 
 from ... import logging
 from ..base import (
@@ -172,12 +173,14 @@ class NetworkBasedStatistic(LibraryBaseInterface):
 
         path = op.abspath("NBS_Result_" + details)
         iflogger.info(path)
-        nx.write_gpickle(nbsgraph, path)
+        with open(path, 'wb') as f:
+            pickle.dump(nbsgraph, f, pickle.HIGHEST_PROTOCOL)
         iflogger.info("Saving output NBS edge network as %s", path)
 
         pval_path = op.abspath("NBS_P_vals_" + details)
         iflogger.info(pval_path)
-        nx.write_gpickle(nbs_pval_graph, pval_path)
+        with open(pval_path, 'wb') as f:
+            pickle.dump(nbs_pval_graph, f, pickle.HIGHEST_PROTOCOL)
         iflogger.info("Saving output p-value network as %s", pval_path)
         return runtime
 

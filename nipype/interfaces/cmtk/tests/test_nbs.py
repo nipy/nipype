@@ -2,6 +2,7 @@ from ..nbs import NetworkBasedStatistic
 from ....utils.misc import package_check
 import numpy as np
 import networkx as nx
+import pickle
 import pytest
 
 have_cv = True
@@ -20,7 +21,8 @@ def creating_graphs(tmpdir):
         G = nx.from_numpy_matrix(graph)
         out_file = tmpdir.strpath + graphnames[idx] + ".pck"
         # Save as pck file
-        nx.write_gpickle(G, out_file)
+        with open(out_file, 'wb') as f:
+            pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
         graphlist.append(out_file)
     return graphlist
 
