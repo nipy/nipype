@@ -2,8 +2,7 @@
 click>=6.6.0
 networkx>=2.0
 nibabel>=2.1.0
-numpy>=1.13 ; python_version < "3.7"
-numpy>=1.15.3 ; python_version >= "3.7"
+numpy>=1.17
 packaging
 prov>=1.5.2
 pydot>=1.2.3
@@ -11,6 +10,7 @@ python-dateutil>=2.2
 rdflib>=5.0.0
 scipy>=0.14
 simplejson>=3.8.0
-traits>=4.6,!=5.0
+traits>=4.6,<6.4,!=5.0
 filelock>=3.0.0
 etelemetry>=0.2.0
+looseversion
