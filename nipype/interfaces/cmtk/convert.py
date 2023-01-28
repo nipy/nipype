@@ -18,6 +18,13 @@ from ..base import (
 from .base import CFFBaseInterface, have_cfflib
 
 
+def _read_pickle(fname):
+    import pickle
+
+    with open(fname, 'rb') as f:
+        return pickle.load(f)
+
+
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
     graphml_networks = InputMultiPath(
         File(exists=True), desc="list of graphML networks"
@@ -135,7 +142,7 @@ class CFFConverter(CFFBaseInterface):
             unpickled = []
             for ntwk in self.inputs.gpickled_networks:
                 _, ntwk_name, _ = split_filename(ntwk)
-                unpickled = nx.read_gpickle(ntwk)
+                unpickled = _read_pickle(ntwk)
                 cnet = cf.CNetwork(name=ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
                 a.add_connectome_network(cnet)

@@ -24,11 +24,16 @@ from .base import have_cmp
 iflogger = logging.getLogger("nipype.interface")
 
 
+def _read_pickle(fname):
+    with open(fname, 'rb') as f:
+        return pickle.load(f)
+
+
 def read_unknown_ntwk(ntwk):
     if not isinstance(ntwk, nx.classes.graph.Graph):
         _, _, ext = split_filename(ntwk)
         if ext == ".pck":
-            ntwk = nx.read_gpickle(ntwk)
+            ntwk = _read_pickle(ntwk)
         elif ext == ".graphml":
             ntwk = nx.read_graphml(ntwk)
     return ntwk
@@ -121,7 +126,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         counting_ntwk = ntwk.copy()
         # Sums all the relevant variables
         for index, subject in enumerate(in_files):
-            tmp = nx.read_gpickle(subject)
+            tmp = _read_pickle(subject)
             iflogger.info("File %s has %i edges", subject, tmp.number_of_edges())
             edges = list(tmp.edges())
             for edge in edges:
@@ -461,7 +466,7 @@ class NetworkXMetrics(BaseInterface):
         edgentwks = list()
         kntwks = list()
         matlab = list()
-        ntwk = nx.read_gpickle(self.inputs.in_file)
+        ntwk = _read_pickle(self.inputs.in_file)
 
         # Each block computes, writes, and saves a measure
         # The names are then added to the output .pck file list
