@@ -383,13 +383,13 @@ def cmat(
     with open(op.abspath(matrix_name), 'wb') as f:
         pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
 
-    numfib_mlab = nx.to_numpy_matrix(numfib, dtype=int)
+    numfib_mlab = nx.to_numpy_array(numfib, dtype=int)
     numfib_dict = {"number_of_fibers": numfib_mlab}
-    fibmean_mlab = nx.to_numpy_matrix(fibmean, dtype=np.float64)
+    fibmean_mlab = nx.to_numpy_array(fibmean, dtype=np.float64)
     fibmean_dict = {"mean_fiber_length": fibmean_mlab}
-    fibmedian_mlab = nx.to_numpy_matrix(fibmedian, dtype=np.float64)
+    fibmedian_mlab = nx.to_numpy_array(fibmedian, dtype=np.float64)
     fibmedian_dict = {"median_fiber_length": fibmedian_mlab}
-    fibdev_mlab = nx.to_numpy_matrix(fibdev, dtype=np.float64)
+    fibdev_mlab = nx.to_numpy_array(fibdev, dtype=np.float64)
     fibdev_dict = {"fiber_length_std": fibdev_mlab}
 
     if intersections:

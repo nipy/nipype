@@ -40,7 +40,7 @@ def ntwks_to_matrices(in_files, edge_key):
                 raise KeyError(
                     "the graph edges do not have {} attribute".format(edge_key)
                 )
-        matrix[:, :, idx] = nx.to_numpy_matrix(graph)  # Retrieve the matrix
+        matrix[:, :, idx] = nx.to_numpy_array(graph)  # Retrieve the matrix
     return matrix
 
 
