@@ -21,6 +21,18 @@ from .tools import report_crash, report_nodes_not_run, create_pyscript
 logger = logging.getLogger("nipype.workflow")
 
 
+def _graph_to_lil_matrix(graph, nodelist):
+    """Provide a sparse linked list matrix across various NetworkX versions"""
+    import scipy.sparse as ssp
+
+    try:
+        from networkx import to_scipy_sparse_array
+    except ImportError:  # NetworkX < 2.7
+        from networkx import to_scipy_sparse_matrix as to_scipy_sparse_array
+
+    return ssp.lil_matrix(to_scipy_sparse_array(graph, nodelist=nodelist, format="lil"))
+
+
 class PluginBase(object):
     """Base class for plugins."""
 
@@ -431,12 +443,8 @@ class DistributedPluginBase(PluginBase):
 
     def _generate_dependency_list(self, graph):
         """Generates a dependency list for a list of graphs."""
-        import networkx as nx
-
         self.procs, _ = topological_sort(graph)
-        self.depidx = nx.to_scipy_sparse_matrix(
-            graph, nodelist=self.procs, format="lil"
-        )
+        self.depidx = _graph_to_lil_matrix(graph, nodelist=self.procs)
         self.refidx = self.depidx.astype(int)
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
