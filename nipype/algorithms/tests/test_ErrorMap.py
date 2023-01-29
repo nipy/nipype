@@ -17,7 +17,7 @@ def test_errormap(tmpdir):
     volume1 = np.array([[[2.0, 8.0], [1.0, 2.0]], [[1.0, 9.0], [0.0, 3.0]]])
     # Alan Turing's birthday
     volume2 = np.array([[[0.0, 7.0], [2.0, 3.0]], [[1.0, 9.0], [1.0, 2.0]]])
-    mask = np.array([[[1, 0], [0, 1]], [[1, 0], [0, 1]]])
+    mask = np.array([[[1, 0], [0, 1]], [[1, 0], [0, 1]]], dtype=np.uint8)
 
     img1 = nb.Nifti1Image(volume1, np.eye(4))
     img2 = nb.Nifti1Image(volume2, np.eye(4))

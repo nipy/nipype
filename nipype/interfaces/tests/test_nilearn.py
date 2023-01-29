@@ -184,10 +184,11 @@ class TestSignalExtraction:
                 [[2, -2, -1, -2, -5], [3, 0, 3, -5, -2]],
                 [[-4, -2, -2, 1, -2], [3, 1, 4, -3, -2]],
             ],
-        ]
+        ],
+        np.int16,
     )
 
-    fake_label_data = np.array([[[1, 0], [3, 1]], [[2, 0], [1, 3]]])
+    fake_label_data = np.array([[[1, 0], [3, 1]], [[2, 0], [1, 3]]], np.uint8)
 
     fake_equiv_4d_label_data = np.array(
         [

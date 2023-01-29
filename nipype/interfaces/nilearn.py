@@ -155,7 +155,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         if self.inputs.include_global:
             global_label_data = label_data.dataobj.sum(axis=3)  # sum across all regions
             global_label_data = (
-                np.rint(global_label_data).astype(int).clip(0, 1)
+                np.rint(global_label_data).clip(0, 1).astype('u1')
             )  # binarize
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = nl.NiftiLabelsMasker(

@@ -110,7 +110,7 @@ def convert_to_traits_type(dipy_type, is_file=False):
     """Convert DIPY type to Traits type."""
     dipy_type = dipy_type.lower()
     is_mandatory = bool("optional" not in dipy_type)
-    if "variable" in dipy_type and "string" in dipy_type:
+    if "variable" in dipy_type and "str" in dipy_type:
         return traits.ListStr, is_mandatory
     elif "variable" in dipy_type and "int" in dipy_type:
         return traits.ListInt, is_mandatory
@@ -120,9 +120,9 @@ def convert_to_traits_type(dipy_type, is_file=False):
         return traits.ListBool, is_mandatory
     elif "variable" in dipy_type and "complex" in dipy_type:
         return traits.ListComplex, is_mandatory
-    elif "string" in dipy_type and not is_file:
+    elif "str" in dipy_type and not is_file:
         return traits.Str, is_mandatory
-    elif "string" in dipy_type and is_file:
+    elif "str" in dipy_type and is_file:
         return File, is_mandatory
     elif "int" in dipy_type:
         return traits.Int, is_mandatory
