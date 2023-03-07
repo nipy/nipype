@@ -327,8 +327,10 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         usedefault=True,
         desc="Gzip compress images - [y=pigz, i=internal, n=no, 3=no,3D]",
     )
-    merge_imgs = traits.Bool(
-        False, argstr="-m", usedefault=True, desc="merge 2D slices from same series"
+    merge_imgs = traits.Enum(
+        0, 1, 2,
+        argstr="-m %d",
+        desc="merge 2D slices from same series regardless of echo, exposure, etc. - [0=no, 1=yes, 2=auto]",
     )
     single_file = traits.Bool(
         False, argstr="-s", usedefault=True, desc="Single file mode"
