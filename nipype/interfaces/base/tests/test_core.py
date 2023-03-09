@@ -288,28 +288,28 @@ def test_unavailable_input():
         _version = "0.6"
 
     has = WithInput()
-    hasnt = WithoutInput()
+    hasnot = WithoutInput()
     trying_anyway = WithoutInput(foo=3)
     assert has.inputs.foo == 3
-    assert not nib.isdefined(hasnt.inputs.foo)
+    assert not nib.isdefined(hasnot.inputs.foo)
     assert trying_anyway.inputs.foo == 3
 
     has.run()
-    hasnt.run()
+    hasnot.run()
     with pytest.raises(Exception):
         trying_anyway.run()
 
     # Still settable
     has.inputs.foo = 4
-    hasnt.inputs.foo = 4
+    hasnot.inputs.foo = 4
     trying_anyway.inputs.foo = 4
     assert has.inputs.foo == 4
-    assert hasnt.inputs.foo == 4
+    assert hasnot.inputs.foo == 4
     assert trying_anyway.inputs.foo == 4
 
     has.run()
     with pytest.raises(Exception):
-        hasnt.run()
+        hasnot.run()
     with pytest.raises(Exception):
         trying_anyway.run()
 
