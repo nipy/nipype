@@ -1,6 +1,11 @@
 [codespell]
 skip = .git,*.pdf,*.svg,external
-# nd - import module short
+# nd,nam - import module short
 # fith - oddness coming from AFNI
 # whos - smth used in matlab things
-ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs
+# SMAL - Stanford CNI MRS Library
+# Such - name
+# noo,crasher - field/var name used
+# Reson - short journal name
+# ALS, FWE - neuroimaging specific abbrevs
+ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,such,noo,reson,als,fwe,crasher
