@@ -388,14 +388,14 @@ class StreamlineTrack(CommandLine):
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
-    >>> strack = mrt.StreamlineTrack()
-    >>> strack.inputs.inputmodel = 'SD_PROB'
-    >>> strack.inputs.in_file = 'data.Bfloat'
-    >>> strack.inputs.seed_file = 'seed_mask.nii'
-    >>> strack.inputs.mask_file = 'mask.nii'
-    >>> strack.cmdline
+    >>> streamtrack = mrt.StreamlineTrack()
+    >>> streamtrack.inputs.inputmodel = 'SD_PROB'
+    >>> streamtrack.inputs.in_file = 'data.Bfloat'
+    >>> streamtrack.inputs.seed_file = 'seed_mask.nii'
+    >>> streamtrack.inputs.mask_file = 'mask.nii'
+    >>> streamtrack.cmdline
     'streamtrack -mask mask.nii -seed seed_mask.nii SD_PROB data.Bfloat data_tracked.tck'
-    >>> strack.run()                                    # doctest: +SKIP
+    >>> streamtrack.run()                                    # doctest: +SKIP
     """
 
     _cmd = "streamtrack"
@@ -423,10 +423,10 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
-    >>> dtstrack = mrt.DiffusionTensorStreamlineTrack()
-    >>> dtstrack.inputs.in_file = 'data.Bfloat'
-    >>> dtstrack.inputs.seed_file = 'seed_mask.nii'
-    >>> dtstrack.run()                                  # doctest: +SKIP
+    >>> dtstreamtrack = mrt.DiffusionTensorStreamlineTrack()
+    >>> dtstreamtrack.inputs.in_file = 'data.Bfloat'
+    >>> dtstreamtrack.inputs.seed_file = 'seed_mask.nii'
+    >>> dtstreamtrack.run()                                  # doctest: +SKIP
     """
 
     input_spec = DiffusionTensorStreamlineTrackInputSpec
