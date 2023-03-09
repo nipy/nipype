@@ -2026,7 +2026,7 @@ class ClusterInputSpec(FSLCommandInputSpec):
         argstr="--stdvol=%s", desc="filename for standard-space volume"
     )
     num_maxima = traits.Int(argstr="--num=%d", desc="no of local maxima to report")
-    warpfield_file = File(argstr="--warpvol=%s", desc="file contining warpfield")
+    warpfield_file = File(argstr="--warpvol=%s", desc="file containing warpfield")
 
 
 class ClusterOutputSpec(TraitedSpec):

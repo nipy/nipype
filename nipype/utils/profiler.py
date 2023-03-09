@@ -44,7 +44,7 @@ class ResourceMonitorMock:
 
 class ResourceMonitor(threading.Thread):
     """
-    A ``Thread`` to monitor a specific PID with a certain frequence
+    A ``Thread`` to monitor a specific PID with a certain frequency
     to a file
     """
 
