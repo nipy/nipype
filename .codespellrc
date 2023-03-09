@@ -1,3 +1,6 @@
 [codespell]
-skip = .git,*.pdf,*.svg
-# ignore-words-list = 
+skip = .git,*.pdf,*.svg,external
+# nd - import module short
+# fith - oddness coming from AFNI
+# whos - smth used in matlab things
+ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs
