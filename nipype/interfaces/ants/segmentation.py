@@ -1009,10 +1009,10 @@ class BrainExtraction(ANTSCommand):
         runtime = super(BrainExtraction, self)._run_interface(runtime)
 
         # Still, double-check if it didn't found N4
-        if "we cant find" in runtime.stdout:
+        if "we can't find" in runtime.stdout:
             for line in runtime.stdout.split("\n"):
-                if line.strip().startswith("we cant find"):
-                    tool = line.strip().replace("we cant find the", "").split(" ")[0]
+                if line.strip().startswith("we can't find"):
+                    tool = line.strip().replace("we can't find the", "").split(" ")[0]
                     break
 
             errmsg = (
