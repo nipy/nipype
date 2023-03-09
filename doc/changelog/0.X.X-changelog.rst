@@ -316,7 +316,7 @@ Release 0.10.0 (October 10, 2014)
 * ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still
        available with the version suffix: BEDPOSTX4 and XFibres4. Added gpu
        versions of BEDPOSTX: BEDPOSTXGPU, BEDPOSTX5GPU, and BEDPOSTX4GPU
-* ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins
+* ENH: Added experimental support for MIPAV algorithms through JIST plugins
 * ENH: New dipy interfaces: Denoise, Resample
 * ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format), MRIPretess
 * ENH: New FSL interfaces: WarpPoints, WarpPointsToStd, EpiReg, ProbTrackX2, WarpUtils, ConvertWarp
