@@ -18,7 +18,6 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update && sudo apt install -y shellcheck
-
-    - name: shellcheck
-      run: |
-        git grep -l '^#!\(/bin/\|/usr/bin/env \)\(sh\|bash\|dash\|ksh\)' | xargs shellcheck 
+      - name: shellcheck
+        run: |
+          git grep -l '^#\( *shellcheck \|!\(/bin/\|/usr/bin/env \)\(sh\|bash\|dash\|ksh\)\)' | xargs shellcheck 
