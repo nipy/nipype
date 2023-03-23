@@ -119,7 +119,8 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline  # doctest: +ELLIPSIS
-    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'"""
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
+    """
 
     input_spec = Dcm2niiInputSpec
     output_spec = Dcm2niiOutputSpec
@@ -374,6 +375,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
 class Dcm2niixOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
     bvecs = OutputMultiPath(File(exists=True))
+    mvecs = OutputMultiPath(File(exists=True))
     bvals = OutputMultiPath(File(exists=True))
     bids = OutputMultiPath(File(exists=True))
 
@@ -456,8 +458,8 @@ class Dcm2niix(CommandLine):
         return filenames
 
     def _parse_files(self, filenames):
-        outfiles, bvals, bvecs, bids = [], [], [], []
-        outtypes = [".bval", ".bvec", ".json", ".txt"]
+        outfiles, bvals, bvecs, mvecs, bids = [], [], [], [], []
+        outtypes = [".bval", ".bvec", ".mvec", ".json", ".txt"]
         if self.inputs.to_nrrd:
             outtypes += [".nrrd", ".nhdr", ".raw.gz"]
         else:
@@ -477,10 +479,13 @@ class Dcm2niix(CommandLine):
                     bvals.append(fl)
                 elif fl.endswith(".bvec"):
                     bvecs.append(fl)
+                elif fl.endswith(".mvec"):
+                    mvecs.append(fl)
                 elif fl.endswith(".json") or fl.endswith(".txt"):
                     bids.append(fl)
         self.output_files = outfiles
         self.bvecs = bvecs
+        self.mvecs = mvecs
         self.bvals = bvals
         self.bids = bids
 
@@ -489,6 +494,7 @@ class Dcm2niix(CommandLine):
         outputs["converted_files"] = self.output_files
         outputs["bvecs"] = self.bvecs
         outputs["bvals"] = self.bvals
+        outputs["mvecs"] = self.mvecs
         outputs["bids"] = self.bids
         return outputs
 

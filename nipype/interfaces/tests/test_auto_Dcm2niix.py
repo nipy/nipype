@@ -95,6 +95,7 @@ def test_Dcm2niix_outputs():
         bvals=dict(),
         bvecs=dict(),
         converted_files=dict(),
+        mvecs=dict(),
     )
     outputs = Dcm2niix.output_spec()
 
