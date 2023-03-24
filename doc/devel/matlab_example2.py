@@ -4,8 +4,7 @@ from nipype.interfaces.matlab import MatlabCommand, MatlabInputSpec
 
 
 class HelloWorldInputSpec(MatlabInputSpec):
-    name = traits.Str(mandatory=True,
-                      desc='Name of person to say hello to')
+    name = traits.Str(mandatory=True, desc='Name of person to say hello to')
 
 
 class HelloWorldOutputSpec(TraitedSpec):
@@ -29,6 +28,7 @@ class HelloWorld(MatlabCommand):
     >>> out = hello.run()
     >>> print out.outputs.matlab_output
     """
+
     input_spec = HelloWorldInputSpec
     output_spec = HelloWorldOutputSpec
 
@@ -37,7 +37,9 @@ class HelloWorld(MatlabCommand):
         script = """
         disp('Hello %s Python')
         two = 1 + 1
-        """ % (self.inputs.name)
+        """ % (
+            self.inputs.name
+        )
         return script
 
     def run(self, **inputs):

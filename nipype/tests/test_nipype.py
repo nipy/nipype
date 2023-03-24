@@ -51,7 +51,6 @@ def test_no_et_bare(tmp_path):
 
     # Pytest doesn't trigger this, so let's pretend it's there
     with patch.object(BaseInterface, "_etelemetry_version_data", {}):
-
         # Direct function call - environment not set
         f = niu.Function(function=_check_no_et)
         res = f.run()
@@ -87,7 +86,6 @@ def test_no_et_multiproc(tmp_path, plugin, run_without_submitting):
 
     # Pytest doesn't trigger this, so let's pretend it's there
     with patch.object(BaseInterface, "_etelemetry_version_data", {}):
-
         wf = pe.Workflow(name="wf2", base_dir=str(tmp_path))
         n = pe.Node(
             niu.Function(function=_check_no_et),

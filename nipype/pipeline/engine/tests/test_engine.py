@@ -196,7 +196,6 @@ def test_synchronize_tuples_expansion():
 
 
 def test_itersource_expansion():
-
     wf1 = pe.Workflow(name="test")
     node1 = pe.Node(EngineTestInterface(), name="node1")
     node1.iterables = ("input1", [1, 2])

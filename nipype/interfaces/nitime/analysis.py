@@ -32,7 +32,6 @@ except ImportError:
 
 
 class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
-
     # Input either csv file, or time-series object and use _xor_inputs to
     # discriminate
     _xor_inputs = ("in_file", "in_TS")

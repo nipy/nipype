@@ -22,7 +22,6 @@ except ImportError:
 
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 class TestSignalExtraction:
-
     filenames = {
         "in_file": "fmri.nii",
         "label_files": "labels.nii",

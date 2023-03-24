@@ -41,7 +41,6 @@ def test_dtifit2(create_files_in_directory):
 
 @pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
 def test_randomise2():
-
     rand = fsl.Randomise()
 
     # make sure command gets called
@@ -233,7 +232,6 @@ def test_Proj_thresh():
 # test vec_reg
 @pytest.mark.xfail(reason="These tests are skipped until we clean up some of this code")
 def test_Vec_reg():
-
     vrg = fsl.VecReg()
 
     # make sure command gets called

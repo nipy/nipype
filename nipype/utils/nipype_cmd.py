@@ -61,7 +61,6 @@ def run_instance(interface, options):
 
 
 def main(argv):
-
     if len(argv) == 2 and not argv[1].startswith("-"):
         listClasses(argv[1])
         sys.exit(0)
