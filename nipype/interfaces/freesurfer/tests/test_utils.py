@@ -17,7 +17,6 @@ from nipype.interfaces.io import FreeSurferSource
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_sample2surf(create_files_in_directory_plus_dummy_file):
-
     s2s = fs.SampleToSurface()
     # Test underlying command
     assert s2s.cmd == "mri_vol2surf"
@@ -65,7 +64,6 @@ def test_sample2surf(create_files_in_directory_plus_dummy_file):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_surfsmooth(create_surf_file_in_directory):
-
     smooth = fs.SurfaceSmooth()
 
     # Test underlying command
@@ -104,7 +102,6 @@ def test_surfsmooth(create_surf_file_in_directory):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_surfxfm(create_surf_file_in_directory):
-
     xfm = fs.SurfaceTransform()
 
     # Test underlying command
@@ -141,7 +138,6 @@ def test_surfxfm(create_surf_file_in_directory):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_surfshots(create_files_in_directory_plus_dummy_file):
-
     fotos = fs.SurfaceSnapshots()
 
     # Test underlying command

@@ -1833,7 +1833,6 @@ class BBRegister(FSCommand):
     output_spec = BBRegisterOutputSpec
 
     def _list_outputs(self):
-
         outputs = self.output_spec().get()
         _in = self.inputs
 
@@ -1893,7 +1892,6 @@ class BBRegister(FSCommand):
         return super(BBRegister, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
-
         if name == "out_reg_file":
             return self._list_outputs()[name]
         return None
@@ -2180,7 +2178,6 @@ class Smooth(FSCommand):
 
 
 class RobustRegisterInputSpec(FSTraitedSpec):
-
     source_file = File(
         exists=True, mandatory=True, argstr="--mov %s", desc="volume to be registered"
     )
@@ -2302,7 +2299,6 @@ class RobustRegisterInputSpec(FSTraitedSpec):
 
 
 class RobustRegisterOutputSpec(TraitedSpec):
-
     out_reg_file = File(exists=True, desc="output registration file")
     registered_file = File(exists=True, desc="output image with registration applied")
     weights_file = File(exists=True, desc="image of weights used")
@@ -2388,7 +2384,6 @@ class RobustRegister(FSCommand):
 
 
 class FitMSParamsInputSpec(FSTraitedSpec):
-
     in_files = traits.List(
         File(exists=True),
         argstr="%s",
@@ -2408,7 +2403,6 @@ class FitMSParamsInputSpec(FSTraitedSpec):
 
 
 class FitMSParamsOutputSpec(TraitedSpec):
-
     t1_image = File(exists=True, desc="image of estimated T1 relaxation values")
     pd_image = File(exists=True, desc="image of estimated proton density values")
     t2star_image = File(exists=True, desc="image of estimated T2* values")
@@ -2466,7 +2460,6 @@ class FitMSParams(FSCommand):
 
 
 class SynthesizeFLASHInputSpec(FSTraitedSpec):
-
     fixed_weighting = traits.Bool(
         position=1,
         argstr="-w",
@@ -2495,7 +2488,6 @@ class SynthesizeFLASHInputSpec(FSTraitedSpec):
 
 
 class SynthesizeFLASHOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="synthesized FLASH acquisition")
 
 

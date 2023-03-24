@@ -151,7 +151,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 )
         try:
             BaseRotatingHandler.__init__(self, filename, mode, encoding)
-        except TypeError:  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
+        except (
+            TypeError
+        ):  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
             BaseRotatingHandler.__init__(self, filename, mode)
             self.encoding = encoding
 

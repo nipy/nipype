@@ -11,7 +11,6 @@ from .. import EM
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_EM"), reason="niftyseg is not installed")
 def test_seg_em():
-
     # Create a node object
     seg_em = EM()
 

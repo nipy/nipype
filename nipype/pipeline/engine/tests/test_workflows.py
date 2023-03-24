@@ -100,7 +100,6 @@ def test_nested_workflow_doubleconnect():
 
 
 def test_duplicate_node_check():
-
     wf = pe.Workflow(name="testidentity")
 
     original_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

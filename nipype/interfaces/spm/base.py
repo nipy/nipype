@@ -201,7 +201,6 @@ class Info(PackageInfo):
             and klass._command == matlab_cmd
             and klass._paths == paths
         ):
-
             return {"name": klass._name, "path": klass._path, "release": klass._version}
         logger.debug("matlab command or path has changed. recomputing version.")
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)

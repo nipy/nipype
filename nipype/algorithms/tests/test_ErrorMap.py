@@ -10,7 +10,6 @@ import os
 
 
 def test_errormap(tmpdir):
-
     # Single-Spectual
     # Make two fake 2*2*2 voxel volumes
     # John von Neumann's birthday

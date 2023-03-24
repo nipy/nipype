@@ -24,7 +24,6 @@ class Analyze2niiOutputSpec(SPMCommandInputSpec):
 
 
 class Analyze2nii(SPMCommand):
-
     input_spec = Analyze2niiInputSpec
     output_spec = Analyze2niiOutputSpec
 
