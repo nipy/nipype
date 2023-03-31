@@ -674,8 +674,8 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
     c_thresh = traits.Float(
         argstr="--cthr=%.3f", desc="curvature threshold - default=0.2"
     )
-    sample_random_points = traits.Bool(
-        argstr="--sampvox", desc=("sample random points within " "seed voxels")
+    sample_random_points = traits.Float(
+        argstr="--sampvox=%.3f", desc=("sample random points within " "seed voxels")
     )
     step_length = traits.Float(
         argstr="--steplength=%.3f", desc="step_length in mm - default=0.5"
@@ -714,7 +714,7 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
         ),
     )
     mod_euler = traits.Bool(argstr="--modeuler", desc="use modified euler streamlining")
-    random_seed = traits.Bool(argstr="--rseed", desc="random seed")
+    random_seed = traits.Int(argstr="--rseed=%d", desc="random seed")
     s2tastext = traits.Bool(
         argstr="--s2tastext",
         desc=(
