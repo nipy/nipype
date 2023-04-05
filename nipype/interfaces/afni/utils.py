@@ -302,7 +302,6 @@ class BrickStat(AFNICommandBase):
     output_spec = BrickStatOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
 
         outfile = os.path.join(os.getcwd(), "stat_result.json")
@@ -2595,7 +2594,6 @@ class ReHo(AFNICommandBase):
 
 
 class ResampleInputSpec(AFNICommandInputSpec):
-
     in_file = File(
         desc="input file to 3dresample",
         argstr="-inset %s",

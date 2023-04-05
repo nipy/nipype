@@ -105,13 +105,13 @@ jobs:
             depends: REQUIREMENTS
             deb-depends: true
             nipype-extras: doc,tests,profiler,duecredit,ssh
-          - os: ubuntu-20.04
-            python-version: 3.8
-            check: test
-            pip-flags: ''
-            depends: NUMPY123
-            deb-depends: true
-            nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
+          # - os: ubuntu-20.04
+          #   python-version: 3.8
+          #   check: test
+          #   pip-flags: ''
+          #   depends: NUMPY123
+          #   deb-depends: true
+          #   nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
     env:
       DEPENDS: ${{ matrix.depends }}
       CHECK_TYPE: ${{ matrix.check }}

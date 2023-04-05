@@ -405,7 +405,6 @@ class MultiObject(traits.List):
     """Abstract class - shared functionality of input and output MultiObject"""
 
     def validate(self, objekt, name, value):
-
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(value, Sequence):
             value = list(value)

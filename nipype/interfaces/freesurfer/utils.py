@@ -116,7 +116,6 @@ def createoutputdirs(outputs):
 
 
 class SampleToSurfaceInputSpec(FSTraitedSpec):
-
     source_file = File(
         exists=True,
         mandatory=True,
@@ -289,7 +288,6 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
 
 
 class SampleToSurfaceOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="surface file")
     hits_file = File(exists=True, desc="image with number of hits at each voxel")
     vox_file = File(
@@ -426,7 +424,6 @@ class SampleToSurface(FSCommand):
 
 
 class SurfaceSmoothInputSpec(FSTraitedSpec):
-
     in_file = File(mandatory=True, argstr="--sval %s", desc="source surface file")
     subject_id = traits.String(
         mandatory=True, argstr="--s %s", desc="subject id of surface file"
@@ -455,7 +452,6 @@ class SurfaceSmoothInputSpec(FSTraitedSpec):
 
 
 class SurfaceSmoothOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="smoothed surface file")
 
 
@@ -753,7 +749,6 @@ class Surface2VolTransform(FSCommand):
 
 
 class ApplyMaskInputSpec(FSTraitedSpec):
-
     in_file = File(
         exists=True,
         mandatory=True,
@@ -803,7 +798,6 @@ class ApplyMaskInputSpec(FSTraitedSpec):
 
 
 class ApplyMaskOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="masked image")
 
 
@@ -822,7 +816,6 @@ class ApplyMask(FSCommand):
 
 
 class SurfaceSnapshotsInputSpec(FSTraitedSpec):
-
     subject_id = traits.String(
         position=1, argstr="%s", mandatory=True, desc="subject to visualize"
     )
@@ -956,7 +949,6 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
 
 class SurfaceSnapshotsOutputSpec(TraitedSpec):
-
     snapshots = OutputMultiPath(
         File(exists=True), desc="tiff images of the surface from different perspectives"
     )
@@ -1118,12 +1110,10 @@ class SurfaceSnapshots(FSCommand):
 
 
 class ImageInfoInputSpec(FSTraitedSpec):
-
     in_file = File(exists=True, position=1, argstr="%s", desc="image to query")
 
 
 class ImageInfoOutputSpec(TraitedSpec):
-
     info = traits.Any(desc="output of mri_info")
     out_file = File(exists=True, desc="text file with image information")
     data_type = traits.String(desc="image data type")
@@ -1138,7 +1128,6 @@ class ImageInfoOutputSpec(TraitedSpec):
 
 
 class ImageInfo(FSCommand):
-
     _cmd = "mri_info"
     input_spec = ImageInfoInputSpec
     output_spec = ImageInfoOutputSpec
@@ -2015,7 +2004,6 @@ class Tkregister2(FSCommand):
 
 
 class AddXFormToHeaderInputSpec(FSTraitedSpec):
-
     # required
     in_file = File(
         exists=True, mandatory=True, position=-2, argstr="%s", desc="input volume"
@@ -2035,7 +2023,6 @@ class AddXFormToHeaderInputSpec(FSTraitedSpec):
 
 
 class AddXFormToHeaderOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="output volume")
 
 

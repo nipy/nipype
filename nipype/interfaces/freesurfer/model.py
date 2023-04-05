@@ -449,7 +449,6 @@ class GLMFitInputSpec(FSTraitedSpec):
 
 
 class GLMFitOutputSpec(TraitedSpec):
-
     glm_dir = Directory(exists=True, desc="output directory")
     beta_file = File(exists=True, desc="map of regression coefficients")
     error_file = File(desc="map of residual error")

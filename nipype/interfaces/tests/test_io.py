@@ -571,7 +571,6 @@ def test_freesurfersource_incorrectdir():
 
 
 def test_jsonsink_input():
-
     ds = nio.JSONFileSink()
     assert ds.inputs._outputs == {}
 

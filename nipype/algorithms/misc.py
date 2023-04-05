@@ -968,7 +968,6 @@ class CalculateNormalizedMoments(BaseInterface):
     output_spec = CalculateNormalizedMomentsOutputSpec
 
     def _run_interface(self, runtime):
-
         self._moments = calc_moments(self.inputs.timeseries_file, self.inputs.moment)
         return runtime
 

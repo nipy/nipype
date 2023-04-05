@@ -9,6 +9,10 @@ PYTHON ?= python
 zipdoc: html
 	zip documentation.zip doc/_build/html
 
+.git-blame-ignore-revs: .git/HEAD
+	git log --grep "\[ignore-rev\]\|STY: black\|run black" -i --pretty=format:"# %ad - %ae - %s%n%H" > .git-blame-ignore-revs
+	echo >> .git-blame-ignore-revs
+
 sdist: zipdoc
 	@echo "Building source distribution..."
 	$(PYTHON) setup.py sdist

@@ -39,7 +39,6 @@ __docformat__ = "restructuredtext"
 
 
 class FieldMapInputSpec(SPMCommandInputSpec):
-
     jobtype = traits.Enum(
         "calculatevdm",
         usedefault=True,
@@ -235,7 +234,6 @@ class FieldMap(SPMCommand):
         """Convert input to appropriate format for spm"""
 
         if opt in ["phase_file", "magnitude_file", "anat_file", "epi_file"]:
-
             return scans_for_fname(ensure_list(val))
 
         return super(FieldMap, self)._format_arg(opt, spec, val)
@@ -256,7 +254,6 @@ class FieldMap(SPMCommand):
 
 
 class ApplyVDMInputSpec(SPMCommandInputSpec):
-
     in_files = InputMultiObject(
         ImageFileSPM(exists=True),
         field="data.scans",
@@ -674,7 +671,6 @@ class Realign(SPMCommand):
 
 
 class RealignUnwarpInputSpec(SPMCommandInputSpec):
-
     in_files = InputMultiObject(
         traits.Either(
             ImageFileSPM(exists=True), traits.List(ImageFileSPM(exists=True))
@@ -879,7 +875,6 @@ class RealignUnwarp(SPMCommand):
         return super(RealignUnwarp, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self, skip=()):
-
         spmdict = super(RealignUnwarp, self)._parse_inputs(skip=())[0]
 
         if isdefined(self.inputs.phase_map):
@@ -2681,7 +2676,6 @@ class ApplyDeformations(SPMCommand):
 
 
 class VBMSegmentInputSpec(SPMCommandInputSpec):
-
     in_files = InputMultiPath(
         ImageFileSPM(exists=True),
         desc="A list of files to be segmented",
@@ -2851,7 +2845,6 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
 
 
 class VBMSegmentOuputSpec(TraitedSpec):
-
     native_class_images = traits.List(
         traits.List(File(exists=True)), desc="native space probability maps"
     )

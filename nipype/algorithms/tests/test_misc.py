@@ -13,7 +13,6 @@ from nipype.testing import example_data
 
 
 def test_CreateNifti(create_analyze_pair_file_in_directory):
-
     filelist, outdir = create_analyze_pair_file_in_directory
 
     create_nifti = misc.CreateNifti()
@@ -35,7 +34,6 @@ def test_CreateNifti(create_analyze_pair_file_in_directory):
 
 
 def test_CalculateMedian(create_analyze_pair_file_in_directory):
-
     mean = misc.CalculateMedian()
 
     with pytest.raises(TypeError):

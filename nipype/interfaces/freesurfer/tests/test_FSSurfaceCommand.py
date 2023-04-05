@@ -35,7 +35,6 @@ def test_associated_file(tmpdir):
         ("./lh.white", "./lh.pial"),
         (fsavginfo["white"], fsavginfo["pial"]),
     ]:
-
         # Unspecified paths, possibly with missing hemisphere information,
         # are equivalent to using the same directory and hemisphere
         for name in ("pial", "lh.pial", pial):
