@@ -19,7 +19,6 @@ from ..base import (
 
 
 class BseInputSpec(CommandLineInputSpec):
-
     inputMRIFile = File(mandatory=True, argstr="-i %s", desc="input MRI volume")
     outputMRIVolume = File(
         desc="output brain-masked MRI volume. If unspecified, output file name will be auto generated.",

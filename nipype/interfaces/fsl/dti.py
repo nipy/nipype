@@ -462,7 +462,6 @@ class BEDPOSTX5(FSLXCommand):
             self._cmd = self._default_cmd
 
     def _run_interface(self, runtime):
-
         subjectdir = os.path.abspath(self.inputs.out_dir)
         if not os.path.exists(subjectdir):
             os.makedirs(subjectdir)
@@ -1347,7 +1346,6 @@ class FindTheBiggest(FSLCommand):
 
 
 class TractSkeletonInputSpec(FSLCommandInputSpec):
-
     in_file = File(
         exists=True,
         mandatory=True,
@@ -1385,7 +1383,6 @@ class TractSkeletonInputSpec(FSLCommandInputSpec):
 
 
 class TractSkeletonOutputSpec(TraitedSpec):
-
     projected_data = File(desc="input data projected onto skeleton")
     skeleton_file = File(desc="tract skeleton image")
 
@@ -1468,7 +1465,6 @@ class TractSkeleton(FSLCommand):
 
 
 class DistanceMapInputSpec(FSLCommandInputSpec):
-
     in_file = File(
         exists=True,
         mandatory=True,
@@ -1492,7 +1488,6 @@ class DistanceMapInputSpec(FSLCommandInputSpec):
 
 
 class DistanceMapOutputSpec(TraitedSpec):
-
     distance_map = File(exists=True, desc="value is distance to nearest nonzero voxels")
     local_max_file = File(desc="image of local maxima")
 

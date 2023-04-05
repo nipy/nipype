@@ -3031,7 +3031,6 @@ class Volpad(CommandLine):
 
 
 class VolisoInputSpec(CommandLineInputSpec):
-
     input_file = File(
         desc="input file to convert to isotropic sampling",
         exists=True,

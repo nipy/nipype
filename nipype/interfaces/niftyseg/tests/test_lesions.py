@@ -13,7 +13,6 @@ from .. import FillLesions
     no_nifty_tool(cmd="seg_FillLesions"), reason="niftyseg is not installed"
 )
 def test_seg_filllesions():
-
     # Create a node object
     seg_fill = FillLesions()
 

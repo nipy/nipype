@@ -11,7 +11,6 @@ from .. import UnaryMaths, BinaryMaths, BinaryMathsInteger, TupleMaths, Merge
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_maths"), reason="niftyseg is not installed")
 def test_unary_maths():
-
     # Create a node object
     unarym = UnaryMaths()
 
@@ -38,7 +37,6 @@ def test_unary_maths():
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_maths"), reason="niftyseg is not installed")
 def test_binary_maths():
-
     # Create a node object
     binarym = BinaryMaths()
 
@@ -65,7 +63,6 @@ def test_binary_maths():
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_maths"), reason="niftyseg is not installed")
 def test_int_binary_maths():
-
     # Create a node object
     ibinarym = BinaryMathsInteger()
 
@@ -93,7 +90,6 @@ def test_int_binary_maths():
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_maths"), reason="niftyseg is not installed")
 def test_tuple_maths():
-
     # Create a node object
     tuplem = TupleMaths()
 
@@ -124,7 +120,6 @@ def test_tuple_maths():
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_maths"), reason="niftyseg is not installed")
 def test_merge():
-
     # Create a node object
     merge = Merge()
 

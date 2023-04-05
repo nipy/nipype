@@ -612,7 +612,6 @@ def test_versioned_pklization(tmpdir):
         with mock.patch(
             "nipype.utils.tests.test_filemanip.Pickled", PickledBreaker
         ), mock.patch("nipype.__version__", "0.0.0"):
-
             loadpkl("./pickled.pkz")
 
 

@@ -1133,7 +1133,6 @@ class ClipLevel(AFNICommandBase):
     output_spec = ClipLevelOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
 
         outfile = os.path.join(os.getcwd(), "stat_result.json")
@@ -2295,7 +2294,6 @@ class Seg(AFNICommandBase):
     output_spec = AFNICommandOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         import glob
 
         outputs = self._outputs()

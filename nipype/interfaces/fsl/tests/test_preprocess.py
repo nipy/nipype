@@ -402,7 +402,6 @@ def test_mcflirt_noinput():
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fnirt(setup_flirt):
-
     tmpdir, infile, reffile = setup_flirt
     tmpdir.chdir()
     fnirt = fsl.FNIRT()
@@ -497,7 +496,7 @@ def test_fnirt(setup_flirt):
         ("log_file", "--logout=%s" % infile, infile),
     ]
 
-    for (name, settings, arg) in opt_map:
+    for name, settings, arg in opt_map:
         fnirt = fsl.FNIRT(in_file=infile, ref_file=reffile, **{name: arg})
 
         if name in ("config_file", "affine_file", "field_file", "fieldcoeff_file"):

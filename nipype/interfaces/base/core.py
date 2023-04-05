@@ -389,7 +389,6 @@ class BaseInterface(Interface):
         self._check_version_requirements(self.inputs)
 
         with rtc(self, cwd=cwd, redirect_x=self._redirect_x) as runtime:
-
             # Grab inputs now, as they should not change during execution
             inputs = self.inputs.get_traitsfree()
             outputs = None

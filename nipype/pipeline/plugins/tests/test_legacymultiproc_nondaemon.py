@@ -50,7 +50,6 @@ def mytestFunction(insum=0):
             f.write(str(j))
 
     for n in range(numberOfThreads):
-
         # mark thread as alive
         a[n] = True
 
@@ -64,11 +63,9 @@ def mytestFunction(insum=0):
     # block until all processes are done
     allDone = False
     while not allDone:
-
         time.sleep(1)
 
         for n in range(numberOfThreads):
-
             a[n] = t[n].is_alive()
 
         if not any(a):

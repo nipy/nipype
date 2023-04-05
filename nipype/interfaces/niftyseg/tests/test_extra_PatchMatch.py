@@ -13,7 +13,6 @@ from .. import PatchMatch
     no_nifty_tool(cmd="seg_PatchMatch"), reason="niftyseg is not installed"
 )
 def test_seg_patchmatch():
-
     # Create a node object
     seg_patchmatch = PatchMatch()
 

@@ -537,7 +537,6 @@ class CAT12Segment(SPMCommand):
         ]
 
         for tidx, tissue in enumerate(["gm", "wm", "csf"]):
-
             for image, prefix in [("modulated", "mw"), ("dartel", "r"), ("native", "")]:
                 outtype = f"{tissue}_output_{image}"
                 if isdefined(getattr(self.inputs, outtype)) and getattr(
@@ -594,7 +593,6 @@ class CAT12Segment(SPMCommand):
 
 
 class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
-
     in_files = InputMultiPath(
         ImageFileSPM(exists=True),
         field="data",
@@ -679,7 +677,6 @@ class CAT12SANLMDenoisingInputSpec(SPMCommandInputSpec):
 
 
 class CAT12SANLMDenoisingOutputSpec(TraitedSpec):
-
     out_file = File(desc="out file")
 
 

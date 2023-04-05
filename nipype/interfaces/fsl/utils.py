@@ -482,7 +482,6 @@ class ExtractROI(FSLCommand):
     output_spec = ExtractROIOutputSpec
 
     def _format_arg(self, name, spec, value):
-
         if name == "crop_list":
             return " ".join(map(str, sum(list(map(list, value)), [])))
         return super(ExtractROI, self)._format_arg(name, spec, value)
@@ -1251,7 +1250,6 @@ class Slicer(FSLCommand):
 
 
 class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
-
     in_file = traits.Either(
         File(exists=True),
         traits.List(File(exists=True)),
@@ -1308,7 +1306,6 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
 
 
 class PlotTimeSeriesOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="image to write")
 
 
@@ -1374,7 +1371,6 @@ class PlotTimeSeries(FSLCommand):
 
 
 class PlotMotionParamsInputSpec(FSLCommandInputSpec):
-
     in_file = traits.Either(
         File(exists=True),
         traits.List(File(exists=True)),
@@ -1406,7 +1402,6 @@ class PlotMotionParamsInputSpec(FSLCommandInputSpec):
 
 
 class PlotMotionParamsOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="image to write")
 
 
@@ -1443,7 +1438,6 @@ class PlotMotionParams(FSLCommand):
     output_spec = PlotMotionParamsOutputSpec
 
     def _format_arg(self, name, spec, value):
-
         if name == "plot_type":
             source = self.inputs.in_source
 
@@ -1602,7 +1596,6 @@ class ConvertXFM(FSLCommand):
 
 
 class SwapDimensionsInputSpec(FSLCommandInputSpec):
-
     in_file = File(
         exists=True, mandatory=True, argstr="%s", position="1", desc="input image"
     )
@@ -1619,7 +1612,6 @@ class SwapDimensionsInputSpec(FSLCommandInputSpec):
 
 
 class SwapDimensionsOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="image with new dimensions")
 
 

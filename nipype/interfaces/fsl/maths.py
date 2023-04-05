@@ -13,7 +13,6 @@ from .base import FSLCommand, FSLCommandInputSpec
 
 
 class MathsInput(FSLCommandInputSpec):
-
     in_file = File(
         position=2, argstr="%s", exists=True, mandatory=True, desc="image to operate on"
     )
@@ -40,12 +39,10 @@ class MathsInput(FSLCommandInputSpec):
 
 
 class MathsOutput(TraitedSpec):
-
     out_file = File(desc="image written after calculations")
 
 
 class MathsCommand(FSLCommand):
-
     _cmd = "fslmaths"
     input_spec = MathsInput
     output_spec = MathsOutput
@@ -68,7 +65,6 @@ class MathsCommand(FSLCommand):
 
 
 class ChangeDataTypeInput(MathsInput):
-
     _dtypes = ["float", "char", "int", "short", "double", "input"]
     output_datatype = traits.Enum(
         *_dtypes, position=-1, argstr="-odt %s", mandatory=True, desc="output data type"
@@ -83,7 +79,6 @@ class ChangeDataType(MathsCommand):
 
 
 class ThresholdInputSpec(MathsInput):
-
     thresh = traits.Float(
         mandatory=True, position=4, argstr="%s", desc="threshold value"
     )
@@ -126,7 +121,6 @@ class Threshold(MathsCommand):
 
 
 class StdImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -149,7 +143,6 @@ class StdImage(MathsCommand):
 
 
 class MeanImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -170,7 +163,6 @@ class MeanImage(MathsCommand):
 
 
 class MaxImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -202,7 +194,6 @@ class MaxImage(MathsCommand):
 
 
 class PercentileImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -242,7 +233,6 @@ class PercentileImage(MathsCommand):
 
 
 class MaxnImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -266,7 +256,6 @@ class MaxnImage(MathsCommand):
 
 
 class MinImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -287,7 +276,6 @@ class MinImage(MathsCommand):
 
 
 class MedianImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -308,7 +296,6 @@ class MedianImage(MathsCommand):
 
 
 class AR1ImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -332,7 +319,6 @@ class AR1Image(MathsCommand):
 
 
 class IsotropicSmoothInput(MathsInput):
-
     fwhm = traits.Float(
         mandatory=True,
         xor=["sigma"],
@@ -363,7 +349,6 @@ class IsotropicSmooth(MathsCommand):
 
 
 class ApplyMaskInput(MathsInput):
-
     mask_file = File(
         exists=True,
         mandatory=True,
@@ -381,7 +366,6 @@ class ApplyMask(MathsCommand):
 
 
 class KernelInput(MathsInput):
-
     kernel_shape = traits.Enum(
         "3D",
         "2D",
@@ -412,7 +396,6 @@ class KernelInput(MathsInput):
 
 
 class DilateInput(KernelInput):
-
     operation = traits.Enum(
         "mean",
         "modal",
@@ -437,7 +420,6 @@ class DilateImage(MathsCommand):
 
 
 class ErodeInput(KernelInput):
-
     minimum_filter = traits.Bool(
         argstr="%s",
         position=6,
@@ -462,7 +444,6 @@ class ErodeImage(MathsCommand):
 
 
 class SpatialFilterInput(KernelInput):
-
     operation = traits.Enum(
         "mean",
         "median",
@@ -482,7 +463,6 @@ class SpatialFilter(MathsCommand):
 
 
 class UnaryMathsInput(MathsInput):
-
     operation = traits.Enum(
         "exp",
         "log",
@@ -525,7 +505,6 @@ class UnaryMaths(MathsCommand):
 
 
 class BinaryMathsInput(MathsInput):
-
     operation = traits.Enum(
         "add",
         "sub",
@@ -566,7 +545,6 @@ class BinaryMaths(MathsCommand):
 
 
 class MultiImageMathsInput(MathsInput):
-
     op_string = traits.String(
         position=4,
         argstr="%s",
@@ -605,7 +583,6 @@ class MultiImageMaths(MathsCommand):
 
 
 class TemporalFilterInput(MathsInput):
-
     lowpass_sigma = traits.Float(
         -1,
         argstr="%.6f",

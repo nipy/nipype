@@ -272,7 +272,6 @@ def cmat(
 
     dis = 0
     for i in range(endpoints.shape[0]):
-
         # ROI start => ROI end
         try:
             startROI = int(

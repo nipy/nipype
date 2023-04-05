@@ -80,7 +80,7 @@ class Info(object):
         versions = {"minc": None, "libminc": None, "netcdf": None, "hdf5": None}
 
         for l in out.split("\n"):
-            for (name, f) in [
+            for name, f in [
                 ("minc", read_program_version),
                 ("libminc", read_libminc_version),
                 ("netcdf", read_netcdf_version),

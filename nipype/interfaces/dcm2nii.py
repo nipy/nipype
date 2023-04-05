@@ -119,7 +119,8 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline  # doctest: +ELLIPSIS
-    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'"""
+    'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
+    """
 
     input_spec = Dcm2niiInputSpec
     output_spec = Dcm2niiOutputSpec
