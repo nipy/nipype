@@ -12,7 +12,7 @@ from ...utils.misc import package_check
 have_nipy = True
 try:
     package_check("nipy")
-except ImportError:
+except:
     have_nipy = False
 
 
