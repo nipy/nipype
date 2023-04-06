@@ -2,7 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
 
-from ... import logging, LooseVersion
+from looseversion import LooseVersion
+
+from ... import logging
 from ...utils.filemanip import which
 from ..base import (
     CommandLineInputSpec,

@@ -16,7 +16,8 @@ See the docstrings for the individual classes for 'working' examples.
 """
 import os
 
-from ... import LooseVersion
+from looseversion import LooseVersion
+
 from ...utils.filemanip import fname_presuffix
 from ..base import (
     CommandLine,

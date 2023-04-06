@@ -16,7 +16,9 @@ import shlex
 import simplejson as json
 from traits.trait_errors import TraitError
 
-from ... import config, logging, LooseVersion
+from looseversion import LooseVersion
+
+from ... import config, logging
 from ...utils.provenance import write_provenance
 from ...utils.misc import str2bool
 from ...utils.filemanip import (
