@@ -820,6 +820,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         "recon_all",
         argstr="-subjid %s",
         desc="subject name",
+        xor=["base_template_id","longitudinal_timepoint_id"],
     )
     directive = traits.Enum(
         "all",
@@ -845,21 +846,28 @@ class ReconAllInputSpec(CommandLineInputSpec):
         usedefault=True,
         position=0,
     )
-    hemi = traits.Enum("lh", "rh", desc="hemisphere to process", argstr="-hemi %s")
+    hemi = traits.Enum("lh", "rh",
+        desc="hemisphere to process",
+        argstr="-hemi %s",
+        requires=["subject_id"],
+    )
     T1_files = InputMultiPath(
-        File(exists=True), argstr="-i %s...", desc="name of T1 file to process"
+        File(exists=True), argstr="-i %s...", desc="name of T1 file to process",
+        requires=["subject_id"],
     )
     T2_file = File(
         exists=True,
         argstr="-T2 %s",
         min_ver="5.3.0",
         desc="Convert T2 image to orig directory",
+        requires=["subject_id"],
     )
     FLAIR_file = File(
         exists=True,
         argstr="-FLAIR %s",
         min_ver="5.3.0",
         desc="Convert FLAIR image to orig directory",
+        requires=["subject_id"]
     )
     use_T2 = traits.Bool(
         argstr="-T2pial",
@@ -888,18 +896,21 @@ class ReconAllInputSpec(CommandLineInputSpec):
             "Assume scan parameters are MGH MP-RAGE "
             "protocol, which produces darker gray matter"
         ),
+        requires=["subject_id"],
     )
     big_ventricles = traits.Bool(
         argstr="-bigventricles",
         desc=("For use in subjects with enlarged " "ventricles"),
     )
     brainstem = traits.Bool(
-        argstr="-brainstem-structures", desc="Segment brainstem structures"
+        argstr="-brainstem-structures", desc="Segment brainstem structures",
+        requires=["subject_id"],
     )
     hippocampal_subfields_T1 = traits.Bool(
         argstr="-hippocampal-subfields-T1",
         min_ver="6.0.0",
         desc="segment hippocampal subfields using input T1 scan",
+        requires=["subject_id"],
     )
     hippocampal_subfields_T2 = traits.Tuple(
         File(exists=True),
@@ -910,6 +921,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
             "segment hippocampal subfields using T2 scan, identified by "
             "ID (may be combined with hippocampal_subfields_T1)"
         ),
+        requires=["subject_id"],
     )
     expert = File(
         exists=True, argstr="-expert %s", desc="Set parameters using expert file"
