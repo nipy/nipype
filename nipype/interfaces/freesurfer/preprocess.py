@@ -867,7 +867,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         argstr="-FLAIR %s",
         min_ver="5.3.0",
         desc="Convert FLAIR image to orig directory",
-        requires=["subject_id"]
+        requires=["subject_id"],
     )
     use_T2 = traits.Bool(
         argstr="-T2pial",
@@ -903,7 +903,8 @@ class ReconAllInputSpec(CommandLineInputSpec):
         desc=("For use in subjects with enlarged " "ventricles"),
     )
     brainstem = traits.Bool(
-        argstr="-brainstem-structures", desc="Segment brainstem structures",
+        argstr="-brainstem-structures",
+        desc="Segment brainstem structures",
         requires=["subject_id"],
     )
     hippocampal_subfields_T1 = traits.Bool(
