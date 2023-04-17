@@ -13,7 +13,7 @@ Top-level module API
 """
 import os
 
-# XXX Deprecated import. Not used internally but could be used externally.
+# No longer used internally but could be used externally.
 from looseversion import LooseVersion
 
 from .info import URL as __url__, STATUS as __status__, __version__
