@@ -4,10 +4,10 @@ import numpy as np
 import nibabel as nb
 import pytest
 
+from looseversion import LooseVersion
 from nibabel.orientations import axcodes2ornt, ornt_transform
 
 from ..image import _as_reoriented_backport, _orientations
-from ... import LooseVersion
 
 nibabel24 = LooseVersion(nb.__version__) >= LooseVersion("2.4.0")
 

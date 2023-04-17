@@ -6,7 +6,9 @@ import os
 from sys import platform
 import shutil
 
-from ... import logging, LooseVersion
+from looseversion import LooseVersion
+
+from ... import logging
 from ...utils.filemanip import split_filename, fname_presuffix
 from ..base import (
     CommandLine,

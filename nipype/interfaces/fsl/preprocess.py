@@ -11,8 +11,8 @@ from warnings import warn
 
 import numpy as np
 from nibabel import load
+from looseversion import LooseVersion
 
-from ... import LooseVersion
 from ...utils.filemanip import split_filename
 from ..base import (
     TraitedSpec,

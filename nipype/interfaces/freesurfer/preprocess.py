@@ -9,10 +9,11 @@ from glob import glob
 import shutil
 import sys
 
+from looseversion import LooseVersion
 import numpy as np
 from nibabel import load
 
-from ... import logging, LooseVersion
+from ... import logging
 from ...utils.filemanip import fname_presuffix, check_depends
 from ..io import FreeSurferSource
 from ..base import (
