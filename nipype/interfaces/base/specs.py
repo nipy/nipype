@@ -177,7 +177,7 @@ class BaseTraitedSpec(traits.HasTraits):
         return out
 
     def _clean_container(self, objekt, undefinedval=None, skipundefined=False):
-        """Convert a traited obejct into a pure python representation."""
+        """Convert a traited object into a pure python representation."""
         if isinstance(objekt, TraitDictObject) or isinstance(objekt, dict):
             out = {}
             for key, val in list(objekt.items()):

@@ -865,7 +865,7 @@ class Registration(ANTSCommand):
 --write-composite-transform 0'
 
     One can use multiple similarity metrics in a single registration stage.The Node below first
-    performs a linear registation using only the Mutual Information ('Mattes')-metric.
+    performs a linear registration using only the Mutual Information ('Mattes')-metric.
     In a second stage, it performs a non-linear registration ('Syn') using both a
     Mutual Information and a local cross-correlation ('CC')-metric. Both metrics are weighted
     equally ('metric_weight' is .5 for both). The Mutual Information- metric uses 32 bins.

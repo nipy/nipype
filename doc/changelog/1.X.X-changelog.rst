@@ -443,7 +443,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 
   * FIX: ANTS LaplacianThickness cmdline opts fixed up (https://github.com/nipy/nipype/pull/2846)
   * FIX: Resolve LinAlgError during SVD (https://github.com/nipy/nipype/pull/2838)
-  * ENH: Add interfaces wrapping DIPY worflows (https://github.com/nipy/nipype/pull/2830)
+  * ENH: Add interfaces wrapping DIPY workflows (https://github.com/nipy/nipype/pull/2830)
   * ENH: Update BIDSDataGrabber for pybids 0.7 (https://github.com/nipy/nipype/pull/2737)
   * ENH: Add FSL `eddy_quad` interface (https://github.com/nipy/nipype/pull/2825)
   * ENH: Support tckgen -select in MRtrix3 v3+ (https://github.com/nipy/nipype/pull/2823)

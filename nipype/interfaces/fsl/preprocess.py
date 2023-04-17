@@ -376,12 +376,12 @@ class FAST(FSLCommand):
     Examples
     --------
     >>> from nipype.interfaces import fsl
-    >>> fastr = fsl.FAST()
-    >>> fastr.inputs.in_files = 'structural.nii'
-    >>> fastr.inputs.out_basename = 'fast_'
-    >>> fastr.cmdline
+    >>> fast = fsl.FAST()
+    >>> fast.inputs.in_files = 'structural.nii'
+    >>> fast.inputs.out_basename = 'fast_'
+    >>> fast.cmdline
     'fast -o fast_ -S 1 structural.nii'
-    >>> out = fastr.run()  # doctest: +SKIP
+    >>> out = fast.run()  # doctest: +SKIP
 
     """
 
