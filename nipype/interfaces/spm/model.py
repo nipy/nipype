@@ -574,23 +574,26 @@ class ThresholdInputSpec(SPMCommandInputSpec):
     )
     stat_image = File(exists=True, desc="stat image", copyfile=False, mandatory=True)
     contrast_index = traits.Int(
-        mandatory=True, desc="which contrast in the SPM.mat to use"
-    )
-    use_fwe_correction = traits.Bool(
-        True,
+        mandatory=True, desc='which contrast in the SPM.mat to use')
+    multitest_correction = traits.Enum(
+        'none',
+        'FWE',
+        'FDR',
         usedefault=True,
-        desc=(
-            "whether to use FWE (Bonferroni) "
-            "correction for initial threshold "
-            "(height_threshold_type has to be "
-            "set to p-value)"
-        ),
-    )
+        desc=('Whether to use a correction '
+              'for multiple test. '
+              'Possible choices are FWE, FDR '
+              'or none'))
     use_topo_fdr = traits.Bool(
-        True,
-        usedefault=True,
-        desc=("whether to use FDR over cluster extent probabilities"),
-    )
+        False,
+        usedefault=False,
+        desc=('whether to use FDR over cluster extent '
+              'probabilities'))
+    use_topo_fwe = traits.Bool(
+        False,
+        usedefault=False,
+        desc=('whether to use FWE over cluster extent '
+              'probabilities'))
     height_threshold = traits.Float(
         0.05,
         usedefault=True,
@@ -629,6 +632,8 @@ class ThresholdOutputSpec(TraitedSpec):
     pre_topo_n_clusters = traits.Int()
     activation_forced = traits.Bool()
     cluster_forming_thr = traits.Float()
+    FWEc = traits.Float()
+    FDRc = traits.Float()
 
 
 class Threshold(SPMCommand):
@@ -638,7 +643,6 @@ class Threshold(SPMCommand):
 
     Examples
     --------
-
     >>> thresh = Threshold()
     >>> thresh.inputs.spm_mat_file = 'SPM.mat'
     >>> thresh.inputs.stat_image = 'spmT_0001.img'
@@ -661,15 +665,19 @@ class Threshold(SPMCommand):
     def _make_matlab_command(self, _):
         script = "con_index = %d;\n" % self.inputs.contrast_index
         script += "cluster_forming_thr = %f;\n" % self.inputs.height_threshold
-        if self.inputs.use_fwe_correction:
-            script += "thresDesc  = 'FWE';\n"
-        else:
-            script += "thresDesc  = 'none';\n"
-
+        script += "thresDesc = '%s';\n" % self.inputs.multitest_correction
+#        if self.inputs.use_fwe_correction:
+#            script += "thresDesc  = 'FWE';\n"
+#        else:
+#            script += "thresDesc  = 'none';\n"
         if self.inputs.use_topo_fdr:
             script += "use_topo_fdr  = 1;\n"
         else:
             script += "use_topo_fdr  = 0;\n"
+        if self.inputs.use_topo_fwe:
+            script += "use_topo_fwe  = 1;\n"
+        else:
+            script += "use_topo_fwe  = 0;\n"
 
         if self.inputs.force_activation:
             script += "force_activation  = 1;\n"
@@ -690,10 +698,14 @@ STAT = SPM.xCon(con_index).STAT;
 R = SPM.xVol.R;
 S = SPM.xVol.S;
 n = 1;
+VspmSv = cat(1,SPM.xCon(con_index).Vspm);
 
 switch thresDesc
     case 'FWE'
         cluster_forming_thr = spm_uc(cluster_forming_thr,df,STAT,R,n,S);
+
+    case 'FDR'
+        cluster_forming_thr = spm_uc_FDR(cluster_forming_thr,df,STAT,n,VspmSv,0);
 
     case 'none'
         if strcmp(height_threshold_type, 'p-value')
@@ -721,14 +733,15 @@ max_size = 0;
 max_size_index = 0;
 th_nclusters = 0;
 nclusters = 0;
+uc = 0;
+ue = 0;
 if isempty(XYZth)
     thresholded_XYZ = [];
     thresholded_Z = [];
 else
-    if use_topo_fdr
-        V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
-        [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
-    end
+
+    V2R        = 1/prod(FWHM(stat_map_vol.dim > 1));
+    [uc,Pc,ue] = spm_uc_clusterFDR(cluster_extent_p_fdr_thr,df,STAT,R,n,Z,XYZ,V2R,cluster_forming_thr);
 
     voxel_labels = spm_clusters(XYZth);
     nclusters = max(voxel_labels);
@@ -738,7 +751,7 @@ else
 
     for i = 1:nclusters
         cluster_size = sum(voxel_labels==i);
-         if cluster_size > extent_threshold && (~use_topo_fdr || (cluster_size - uc) > -1)
+         if cluster_size > extent_threshold && (~use_topo_fdr || (cluster_size - uc) > -1) && (~use_topo_fwe || (cluster_size - ue) > -1)
             thresholded_XYZ = cat(2, thresholded_XYZ, XYZth(:,voxel_labels == i));
             thresholded_Z = cat(2, thresholded_Z, Zth(voxel_labels == i));
             th_nclusters = th_nclusters + 1;
@@ -771,6 +784,8 @@ fprintf('activation_forced = %d\\n',activation_forced);
 fprintf('pre_topo_n_clusters = %d\\n',nclusters);
 fprintf('n_clusters = %d\\n',th_nclusters);
 fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
+fprintf('FWEc = %d\\n',ue);
+fprintf('FDRc = %d\\n',uc);
 
 """
         script += (
@@ -803,11 +818,15 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
                     int(line[len("pre_topo_n_clusters = ") :].strip()),
                 )
             elif line.startswith("cluster_forming_thr = "):
-                setattr(
-                    outputs,
-                    "cluster_forming_thr",
-                    float(line[len("cluster_forming_thr = ") :].strip()),
-                )
+                setattr(outputs, 'cluster_forming_thr',
+                        float(line[len("cluster_forming_thr = "):].strip()))
+            elif line.startswith("FWEc = "):
+                setattr(outputs, 'FWEc',
+                        float(line[len("FWEc = "):].strip()))
+            elif line.startswith("FDRc = "):
+                setattr(outputs, 'FDRc',
+                        float(line[len("FDRc = "):].strip()))
+
         return outputs
 
     def _list_outputs(self):
