@@ -1110,7 +1110,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
         copyfile=True,
     )
     jobtype = traits.Enum(
-        "estwrite", "est", "write", usedefault=True, desc="Estimate, Write or do both"
+        "estwrite", "estimate", "write", usedefault=True, desc="Estimate, Write or do both"
     )
     apply_to_files = InputMultiPath(
         traits.Either(File(exists=True), traits.List(File(exists=True))),
@@ -1318,7 +1318,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
         ),
     )
     jobtype = traits.Enum(
-        "estwrite", "est", "write", usedefault=True, desc="Estimate, Write or do Both"
+        "estwrite", "estimate", "write", usedefault=True, desc="Estimate, Write or do Both"
     )
     bias_regularization = traits.Enum(
         0,
