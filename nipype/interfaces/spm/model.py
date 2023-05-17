@@ -586,6 +586,16 @@ class ThresholdInputSpec(SPMCommandInputSpec):
             "set to p-value)"
         ),
     )
+    use_vox_fdr_correction = traits.Bool(
+        False,
+        usedefault=True,
+        desc=(
+            "whether to use voxel-based FDR "
+            "correction for initial threshold "
+            "(height_threshold_type has to be "
+            "set to q-value)"
+        ),
+    )
     use_topo_fdr = traits.Bool(
         True,
         usedefault=True,
@@ -661,8 +671,16 @@ class Threshold(SPMCommand):
     def _make_matlab_command(self, _):
         script = "con_index = %d;\n" % self.inputs.contrast_index
         script += "cluster_forming_thr = %f;\n" % self.inputs.height_threshold
-        if self.inputs.use_fwe_correction:
+
+        if self.inputs.use_fwe_correction and self.inputs.use_vox_fdr_correction:
+            raise ValueError(
+                "'use_fwe_correction' and 'use_vox_fdr_correction' can't both be True"
+            )
+
+        if self.inputs.use_fwe_correction and not self.inputs.use_vox_fdr_correction:
             script += "thresDesc  = 'FWE';\n"
+        elif self.inputs.use_vox_fdr_correction and not self.inputs.use_fwe_correction:
+            script += "thresDesc  = 'FDR';\n"
         else:
             script += "thresDesc  = 'none';\n"
 
@@ -687,6 +705,8 @@ class Threshold(SPMCommand):
 FWHM  = SPM.xVol.FWHM;
 df = [SPM.xCon(con_index).eidf SPM.xX.erdf];
 STAT = SPM.xCon(con_index).STAT;
+VspmSv   = cat(1,SPM.xCon(con_index).Vspm);
+
 R = SPM.xVol.R;
 S = SPM.xVol.S;
 n = 1;
@@ -694,6 +714,9 @@ n = 1;
 switch thresDesc
     case 'FWE'
         cluster_forming_thr = spm_uc(cluster_forming_thr,df,STAT,R,n,S);
+
+    case 'FDR'
+        cluster_forming_thr = spm_uc_FDR(cluster_forming_thr,df,STAT,n,VspmSv,0);
 
     case 'none'
         if strcmp(height_threshold_type, 'p-value')
