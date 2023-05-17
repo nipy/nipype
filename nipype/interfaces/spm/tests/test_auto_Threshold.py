@@ -48,6 +48,9 @@ def test_Threshold_inputs():
             min_ver="8",
             usedefault=True,
         ),
+        use_vox_fdr_correction=dict(
+            usedefault=True,
+        ),
     )
     inputs = Threshold.input_spec()
 
