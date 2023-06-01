@@ -6,15 +6,15 @@ import os.path as op
 
 from ...utils.filemanip import split_filename
 from ..base import (
-    CommandLineInputSpec,
     CommandLine,
-    traits,
-    TraitedSpec,
+    CommandLineInputSpec,
     File,
     InputMultiPath,
+    TraitedSpec,
     isdefined,
+    traits,
 )
-from .base import MRTrix3BaseInputSpec, MRTrix3Base
+from .base import MRTrix3Base, MRTrix3BaseInputSpec
 
 
 class BrainMaskInputSpec(MRTrix3BaseInputSpec):
@@ -162,7 +162,11 @@ class MRCat(CommandLine):
 
 class Mesh2PVEInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-3, desc="input mesh"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input mesh",
     )
     reference = File(
         exists=True,
@@ -230,7 +234,11 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
         desc="tissue segmentation algorithm",
     )
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input image",
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
@@ -356,10 +364,18 @@ class TensorMetrics(CommandLine):
 
 class ComputeTDIInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input tractography"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input tractography",
     )
     out_file = File(
-        "tdi.mif", argstr="%s", usedefault=True, position=-1, desc="output TDI file"
+        "tdi.mif",
+        argstr="%s",
+        usedefault=True,
+        position=-1,
+        desc="output TDI file",
     )
     reference = File(
         exists=True,
@@ -463,7 +479,8 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         "(these lengths are then taken into account during TWI calculation)",
     )
     ends_only = traits.Bool(
-        argstr="-ends_only", desc="only map the streamline" " endpoints to the image"
+        argstr="-ends_only",
+        desc="only map the streamline" " endpoints to the image",
     )
 
     tck_weights = File(
@@ -548,10 +565,18 @@ class ComputeTDI(MRTrix3Base):
 
 class TCK2VTKInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input tractography"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input tractography",
     )
     out_file = File(
-        "tracks.vtk", argstr="%s", usedefault=True, position=-1, desc="output VTK file"
+        "tracks.vtk",
+        argstr="%s",
+        usedefault=True,
+        position=-1,
+        desc="output VTK file",
     )
     reference = File(
         exists=True,
@@ -608,7 +633,11 @@ class TCK2VTK(MRTrix3Base):
 
 class DWIExtractInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input image",
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
     bzero = traits.Bool(argstr="-bzero", desc="extract b=0 volumes")
@@ -659,7 +688,11 @@ class DWIExtract(MRTrix3Base):
 
 class MRConvertInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input image",
     )
     out_file = File(
         "dwi.mif",
@@ -676,7 +709,10 @@ class MRConvertInputSpec(MRTrix3BaseInputSpec):
         desc="extract data at the specified coordinates",
     )
     vox = traits.List(
-        traits.Float, sep=",", argstr="-vox %s", desc="change the voxel dimensions"
+        traits.Float,
+        sep=",",
+        argstr="-vox %s",
+        desc="change the voxel dimensions",
     )
     axes = traits.List(
         traits.Int,
@@ -702,6 +738,72 @@ class MRConvertInputSpec(MRTrix3BaseInputSpec):
         mandatory=False,
         desc="export data from an image header key-value pairs into a JSON file",
     )
+    clear_property = traits.List(
+        traits.Str,
+        sep=",",
+        argstr="-clear_property %s",
+        desc="remove the specified key(s) from the image header altogether",
+    )
+    copy_properties = File(
+        exists=True,
+        argstr="-copy_properties %s",
+        mandatory=False,
+        desc="clear all generic properties and replace with the properties from the image / file specified.",
+    )
+    datatype = traits.Enum(
+        "float32",
+        "float32le",
+        "float32be",
+        "float64",
+        "float64le",
+        "float64be",
+        "int64",
+        "uint64",
+        "int64le",
+        "uint64le",
+        "int64be",
+        "uint64be",
+        "int32",
+        "uint32",
+        "int32le",
+        "uint32le",
+        "int32be",
+        "uint32be",
+        "int16",
+        "uint16",
+        "int16le",
+        "uint16le",
+        "int16be",
+        "uint16be",
+        "cfloat32",
+        "cfloat32le",
+        "cfloat32be",
+        "cfloat64",
+        "cfloat64le",
+        "cfloat64be",
+        "int8",
+        "uint8",
+        "bit",
+        argstr="-datatype %s",
+        desc="""specify output image data type.
+        Valid choices are: float32, float32le, float32be, float64,
+        float64le, float64be, int64, uint64, int64le, uint64le,
+        int64be, uint64be, int32, uint32, int32le, uint32le,
+        int32be, uint32be, int16, uint16, int16le, uint16le,
+        int16be, uint16be, cfloat32, cfloat32le, cfloat32be,
+        cfloat64, cfloat64le, cfloat64be, int8, uint8, bit.""",
+    )
+    out_grad_mrtrix = File(
+        "grad.b",
+        argstr="-export_grad_mrtrix %s",
+        desc="export gradient files in mrtrix format",
+    )
+    out_grad_fsl = traits.Tuple(
+        File("grad.bvecs", desc="bvecs"),
+        File("grad.bvals", desc="bvals"),
+        argstr="-export_grad_fsl %s, %s",
+        desc="export gradient files in FSL format",
+    )
 
 
 class MRConvertOutputSpec(TraitedSpec):
@@ -709,6 +811,12 @@ class MRConvertOutputSpec(TraitedSpec):
     json_export = File(
         exists=True,
         desc="exported data from an image header key-value pairs in a JSON file",
+    )
+    out_grad_mrtrix = File(
+        "grad.b",
+        argstr="%s",
+        usedefault=True,
+        desc="exported gradient files in mrtrix format",
     )
     out_bvec = File(exists=True, desc="export bvec file in FSL format")
     out_bval = File(exists=True, desc="export bvec file in FSL format")
@@ -744,6 +852,11 @@ class MRConvert(MRTrix3Base):
             outputs["out_bvec"] = op.abspath(self.inputs.out_bvec)
         if self.inputs.out_bval:
             outputs["out_bval"] = op.abspath(self.inputs.out_bval)
+        if self.inputs.out_grad_mrtrix:
+            outputs["out_grad_mrtrix"] = op.abspath(self.inputs.out_grad_mrtrix)
+        if self.inputs.out_grad_fsl:
+            outputs["out_bvec"] = op.abspath(self.inputs.out_grad_fsl[0])
+            outputs["out_bval"] = op.abspath(self.inputs.out_grad_fsl[1])
         return outputs
 
 
@@ -916,7 +1029,11 @@ class MRTransform(MRTrix3Base):
 
 class MRMathInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-3, desc="input image"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input image",
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
     operation = traits.Enum(
@@ -978,7 +1095,11 @@ class MRMath(MRTrix3Base):
 
 class MRResizeInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
-        exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
+        exists=True,
+        argstr="%s",
+        position=-2,
+        mandatory=True,
+        desc="input DWI image",
     )
     image_size = traits.Tuple(
         (traits.Int, traits.Int, traits.Int),
