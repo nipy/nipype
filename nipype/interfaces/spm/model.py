@@ -245,6 +245,34 @@ class EstimateModelOutputSpec(TraitedSpec):
         ImageFileSPM(exists=True),
         desc="Images of the standard deviation of parameter posteriors",
     )
+    con_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "contrast images from a t-contrast "
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
+    spmT_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "stat images from a t-contrast"
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
+    ess_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "contrast images from an F-contrast"
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
+    spmF_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "stat images from an F-contrast"
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
 
 
 class EstimateModel(SPMCommand):
@@ -310,6 +338,29 @@ class EstimateModel(SPMCommand):
                 outputs["residual_images"] = glob(os.path.join(pth, "Res_*"))
             if betas:
                 outputs["beta_images"] = [os.path.join(pth, beta) for beta in betas]
+            # When 'factor_info' is used in Level1Design
+            # spm automatically creates contrast
+            try:
+                contrast = [c.Vcon[0][0].fname[0] for c in spm["SPM"][0, 0].xCon[0]]
+                contrast_spm = [c.Vspm[0][0].fname[0] for c in spm["SPM"][0, 0].xCon[0]]
+            except Exception:
+                contrast = []
+                contrast_spm = []
+
+            if contrast:
+                outputs["con_images"] = [
+                    (os.path.join(pth, cont) for cont in contrast if 'con' in cont)
+                ]
+                outputs["ess_images"] = [
+                    (os.path.join(pth, cont) for cont in contrast if 'ess' in cont)
+                ]
+            if contrast_spm:
+                outputs["spmT_images"] = [
+                    (os.path.join(pth, cont) for cont in contrast_spm if 'spmT' in cont)
+                ]
+                outputs["spmF_images"] = [
+                    (os.path.join(pth, cont) for cont in contrast_spm if 'spmF' in cont)
+                ]
 
         outputs["mask_image"] = os.path.join(pth, f"mask.{outtype}")
         outputs["spm_mat_file"] = os.path.join(pth, "SPM.mat")

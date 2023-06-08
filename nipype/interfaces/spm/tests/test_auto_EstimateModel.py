@@ -46,6 +46,8 @@ def test_EstimateModel_outputs():
         SDbetas=dict(),
         SDerror=dict(),
         beta_images=dict(),
+        con_images=dict(),
+        ess_images=dict(),
         labels=dict(
             extensions=[".hdr", ".img", ".img.gz", ".nii"],
         ),
@@ -56,6 +58,8 @@ def test_EstimateModel_outputs():
             extensions=[".hdr", ".img", ".img.gz", ".nii"],
         ),
         residual_images=dict(),
+        spmF_images=dict(),
+        spmT_images=dict(),
         spm_mat_file=dict(
             extensions=None,
         ),
