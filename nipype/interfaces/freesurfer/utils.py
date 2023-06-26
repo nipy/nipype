@@ -1967,14 +1967,8 @@ class Tkregister2(FSCommand):
         if name == "lta_in" and self.inputs.invert_lta_in:
             spec = "--lta-inv %s"
         if name in ("fsl_out", "lta_out") and value is True:
-            if name == 'fsl_out':
-                name_actual = 'fsl_file'
-            if name == 'lta_out':
-                name_actual = 'lta_file'
-            value = self._list_outputs()[name_actual]
-            return super(Tkregister2, self)._format_arg(name_actual, spec, value)
-        else:
-            return super(Tkregister2, self)._format_arg(name, spec, value)
+            value = self._list_outputs()[f'{name[:3]}_file']
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
