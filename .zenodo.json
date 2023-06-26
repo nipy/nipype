@@ -895,7 +895,12 @@
       "affiliation": "University of Tübingen and MPI for Biological Cybernertics",
       "name": "Bannert, Michael M.",
       "orcid": "0000-0003-1010-7517"
-    }
+    },
+    {
+      "affiliation": "Research Centre Juelich",
+      "name": "Jianxiao Wu",
+      "orcid": "0000-0002-4866-272X",
+    },
   ],
   "keywords": [
     "neuroimaging",
