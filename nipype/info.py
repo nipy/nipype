@@ -152,7 +152,7 @@ REQUIRES = [
 
 TESTS_REQUIRES = [
     "codecov",
-    "coverage<5",
+    "coverage",
     "pytest",
     "pytest-cov",
     "pytest-env",
