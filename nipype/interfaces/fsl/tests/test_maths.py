@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -28,10 +27,10 @@ def test_maths_base(create_files_in_directory_plus_output_type):
 
     # Set an in file
     maths.inputs.in_file = "a.nii"
-    out_file = "a_maths{}".format(out_ext)
+    out_file = f"a_maths{out_ext}"
 
     # Now test the most basic command line
-    assert maths.cmdline == "fslmaths a.nii {}".format(os.path.join(testdir, out_file))
+    assert maths.cmdline == f"fslmaths a.nii {os.path.join(testdir, out_file)}"
 
     # Now test that we can set the various data types
     dtypes = ["float", "char", "int", "short", "double", "input"]
@@ -103,9 +102,9 @@ def test_threshold(create_files_in_directory_plus_output_type):
     cmdline = "fslmaths a.nii {} b.nii"
     for val in [0, 0.0, -1, -1.5, -0.5, 0.5, 3, 400, 400.5]:
         thresh.inputs.thresh = val
-        assert thresh.cmdline == cmdline.format("-thr {:.10f}".format(val))
+        assert thresh.cmdline == cmdline.format(f"-thr {val:.10f}")
 
-    val = "{:.10f}".format(42)
+    val = f"{42:.10f}"
     thresh = fsl.Threshold(
         in_file="a.nii", out_file="b.nii", thresh=42, use_robust_range=True
     )
@@ -144,7 +143,7 @@ def test_meanimage(create_files_in_directory_plus_output_type):
     # Test the auto naming
     meaner = fsl.MeanImage(in_file="a.nii")
     assert meaner.cmdline == "fslmaths a.nii -Tmean {}".format(
-        os.path.join(testdir, "a_mean{}".format(out_ext))
+        os.path.join(testdir, f"a_mean{out_ext}")
     )
 
 
@@ -196,7 +195,7 @@ def test_maximage(create_files_in_directory_plus_output_type):
     # Test the auto naming
     maxer = fsl.MaxImage(in_file="a.nii")
     assert maxer.cmdline == "fslmaths a.nii -Tmax {}".format(
-        os.path.join(testdir, "a_max{}".format(out_ext))
+        os.path.join(testdir, f"a_max{out_ext}")
     )
 
 
@@ -226,7 +225,7 @@ def test_smooth(create_files_in_directory_plus_output_type):
     # Test automatic naming
     smoother = fsl.IsotropicSmooth(in_file="a.nii", sigma=5)
     assert smoother.cmdline == "fslmaths a.nii -s {:.5f} {}".format(
-        5, os.path.join(testdir, "a_smooth{}".format(out_ext))
+        5, os.path.join(testdir, f"a_smooth{out_ext}")
     )
 
 
@@ -251,7 +250,7 @@ def test_mask(create_files_in_directory_plus_output_type):
     # Test auto name generation
     masker = fsl.ApplyMask(in_file="a.nii", mask_file="b.nii")
     assert masker.cmdline == "fslmaths a.nii -mas b.nii " + os.path.join(
-        testdir, "a_masked{}".format(out_ext)
+        testdir, f"a_masked{out_ext}"
     )
 
 
@@ -273,7 +272,7 @@ def test_dilation(create_files_in_directory_plus_output_type):
     for op in ["mean", "modal", "max"]:
         cv = dict(mean="M", modal="D", max="F")
         diller.inputs.operation = op
-        assert diller.cmdline == "fslmaths a.nii -dil{} b.nii".format(cv[op])
+        assert diller.cmdline == f"fslmaths a.nii -dil{cv[op]} b.nii"
 
     # Now test the different kernel options
     for k in ["3D", "2D", "box", "boxv", "gauss", "sphere"]:
@@ -281,8 +280,7 @@ def test_dilation(create_files_in_directory_plus_output_type):
             diller.inputs.kernel_shape = k
             diller.inputs.kernel_size = size
             assert (
-                diller.cmdline
-                == "fslmaths a.nii -kernel {} {:.4f} -dilF b.nii".format(k, size)
+                diller.cmdline == f"fslmaths a.nii -kernel {k} {size:.4f} -dilF b.nii"
             )
 
     # Test that we can use a file kernel
@@ -296,7 +294,7 @@ def test_dilation(create_files_in_directory_plus_output_type):
     # Test that we don't need to request an out name
     dil = fsl.DilateImage(in_file="a.nii", operation="max")
     assert dil.cmdline == "fslmaths a.nii -dilF {}".format(
-        os.path.join(testdir, "a_dil{}".format(out_ext))
+        os.path.join(testdir, f"a_dil{out_ext}")
     )
 
 
@@ -320,7 +318,7 @@ def test_erosion(create_files_in_directory_plus_output_type):
     # Test that we don't need to request an out name
     erode = fsl.ErodeImage(in_file="a.nii")
     assert erode.cmdline == "fslmaths a.nii -ero {}".format(
-        os.path.join(testdir, "a_ero{}".format(out_ext))
+        os.path.join(testdir, f"a_ero{out_ext}")
     )
 
 
@@ -341,12 +339,12 @@ def test_spatial_filter(create_files_in_directory_plus_output_type):
     # Test the different operations
     for op in ["mean", "meanu", "median"]:
         filter.inputs.operation = op
-        assert filter.cmdline == "fslmaths a.nii -f{} b.nii".format(op)
+        assert filter.cmdline == f"fslmaths a.nii -f{op} b.nii"
 
     # Test that we don't need to ask for an out name
     filter = fsl.SpatialFilter(in_file="a.nii", operation="mean")
     assert filter.cmdline == "fslmaths a.nii -fmean {}".format(
-        os.path.join(testdir, "a_filt{}".format(out_ext))
+        os.path.join(testdir, f"a_filt{out_ext}")
     )
 
 
@@ -368,13 +366,13 @@ def test_unarymaths(create_files_in_directory_plus_output_type):
     ops = ["exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index"]
     for op in ops:
         maths.inputs.operation = op
-        assert maths.cmdline == "fslmaths a.nii -{} b.nii".format(op)
+        assert maths.cmdline == f"fslmaths a.nii -{op} b.nii"
 
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.UnaryMaths(in_file="a.nii", operation=op)
         assert maths.cmdline == "fslmaths a.nii -{} {}".format(
-            op, os.path.join(testdir, "a_{}{}".format(op, out_ext))
+            op, os.path.join(testdir, f"a_{op}{out_ext}")
         )
 
 
@@ -400,7 +398,7 @@ def test_binarymaths(create_files_in_directory_plus_output_type):
             maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii", operation=op)
             if ent == "b.nii":
                 maths.inputs.operand_file = ent
-                assert maths.cmdline == "fslmaths a.nii -{} b.nii c.nii".format(op)
+                assert maths.cmdline == f"fslmaths a.nii -{op} b.nii c.nii"
             else:
                 maths.inputs.operand_value = ent
                 assert maths.cmdline == "fslmaths a.nii -{} {:.8f} c.nii".format(
@@ -411,7 +409,7 @@ def test_binarymaths(create_files_in_directory_plus_output_type):
     for op in ops:
         maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")
         assert maths.cmdline == "fslmaths a.nii -{} b.nii {}".format(
-            op, os.path.join(testdir, "a_maths{}".format(out_ext))
+            op, os.path.join(testdir, f"a_maths{out_ext}")
         )
 
 
@@ -470,5 +468,5 @@ def test_tempfilt(create_files_in_directory_plus_output_type):
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma=64)
     assert filt.cmdline == "fslmaths a.nii -bptf 64.000000 -1.000000 {}".format(
-        os.path.join(testdir, "a_filt{}".format(out_ext))
+        os.path.join(testdir, f"a_filt{out_ext}")
     )

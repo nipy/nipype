@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -72,7 +71,7 @@ def test_merge(tmpdir, args, kwargs, in_lists, expected):
     numinputs = args[0] if args else 0
     if numinputs >= 1:
         for i in range(1, numinputs + 1):
-            setattr(node.inputs, "in{:d}".format(i), in_lists[i - 1])
+            setattr(node.inputs, f"in{i:d}", in_lists[i - 1])
 
     res = node.run()
     if numinputs < 1:

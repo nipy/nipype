@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
@@ -29,30 +28,8 @@ fmlogger = logging.getLogger("nipype.utils")
 related_filetype_sets = [(".hdr", ".img", ".mat"), (".nii", ".mat"), (".BRIK", ".HEAD")]
 
 
-def _resolve_with_filenotfound(path, **kwargs):
-    """Raise FileNotFoundError instead of OSError"""
-    try:
-        return path.resolve(**kwargs)
-    except OSError as e:
-        if isinstance(e, FileNotFoundError):
-            raise
-        raise FileNotFoundError(str(path))
-
-
-def path_resolve(path, strict=False):
-    try:
-        return _resolve_with_filenotfound(path, strict=strict)
-    except TypeError:  # PY35
-        pass
-
-    path = path.absolute()
-    if strict or path.exists():
-        return _resolve_with_filenotfound(path)
-
-    # This is a hacky shortcut, using path.absolute() unmodified
-    # In cases where the existing part of the path contains a
-    # symlink, different results will be produced
-    return path
+# Previously a patch, not worth deprecating
+path_resolve = Path.resolve
 
 
 def split_filename(fname):
@@ -583,7 +560,7 @@ def load_json(filename):
 
     """
 
-    with open(filename, "r") as fp:
+    with open(filename) as fp:
         data = json.load(fp)
     return data
 
@@ -608,15 +585,15 @@ def loadpkl(infile):
         if infile.exists():
             timed_out = False
             break
-        fmlogger.debug("'{}' missing; waiting 2s".format(infile))
+        fmlogger.debug(f"'{infile}' missing; waiting 2s")
         sleep(2)
     if timed_out:
         error_message = (
-            "Result file {0} expected, but "
-            "does not exist after ({1}) "
+            "Result file {} expected, but "
+            "does not exist after ({}) "
             "seconds.".format(infile, timeout)
         )
-        raise IOError(error_message)
+        raise OSError(error_message)
 
     with pklopen(str(infile), "rb") as pkl_file:
         pkl_contents = pkl_file.read()
@@ -676,10 +653,10 @@ def crash2txt(filename, record):
     with open(filename, "w") as fp:
         if "node" in record:
             node = record["node"]
-            fp.write("Node: {}\n".format(node.fullname))
-            fp.write("Working directory: {}\n".format(node.output_dir()))
+            fp.write(f"Node: {node.fullname}\n")
+            fp.write(f"Working directory: {node.output_dir()}\n")
             fp.write("\n")
-            fp.write("Node inputs:\n{}\n".format(node.inputs))
+            fp.write(f"Node inputs:\n{node.inputs}\n")
         fp.write("".join(record["traceback"]))
 
 
@@ -710,7 +687,7 @@ def savepkl(filename, record, versioning=False):
         if versioning:
             metadata = json.dumps({"version": version})
             f.write(metadata.encode("utf-8"))
-            f.write("\n".encode("utf-8"))
+            f.write(b"\n")
         pickle.dump(record, f)
         content = f.getvalue()
 
@@ -739,14 +716,14 @@ def write_rst_header(header, level=0):
 def write_rst_list(items, prefix=""):
     out = []
     for item in ensure_list(items):
-        out.append("{} {}".format(prefix, str(item)))
+        out.append(f"{prefix} {str(item)}")
     return "\n".join(out) + "\n\n"
 
 
 def write_rst_dict(info, prefix=""):
     out = []
     for key, value in sorted(info.items()):
-        out.append("{}* {} : {}".format(prefix, key, str(value)))
+        out.append(f"{prefix}* {key} : {str(value)}")
     return "\n".join(out) + "\n\n"
 
 
@@ -929,12 +906,10 @@ def relpath(path, start=None):
         unc_path, rest = op.splitunc(path)
         unc_start, rest = op.splitunc(start)
         if bool(unc_path) ^ bool(unc_start):
-            raise ValueError(
-                ("Cannot mix UNC and non-UNC paths " "(%s and %s)") % (path, start)
-            )
+            raise ValueError(f"Cannot mix UNC and non-UNC paths ({path} and {start})")
         else:
             raise ValueError(
-                "path is on drive %s, start on drive %s" % (path_list[0], start_list[0])
+                f"path is on drive {path_list[0]}, start on drive {start_list[0]}"
             )
     # Work out how much of the filepath is shared by start and path.
     for i in range(min(len(start_list), len(path_list))):

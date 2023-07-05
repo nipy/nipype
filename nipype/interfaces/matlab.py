@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to run MATLAB scripts."""
@@ -97,7 +96,7 @@ class MatlabCommand(CommandLine):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash')
         """
-        super(MatlabCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         if matlab_cmd and isdefined(matlab_cmd):
             self._cmd = matlab_cmd
         elif self._default_matlab_cmd:
@@ -153,7 +152,7 @@ class MatlabCommand(CommandLine):
 
     def _run_interface(self, runtime):
         self.terminal_output = "allatonce"
-        runtime = super(MatlabCommand, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         try:
             # Matlab can leave the terminal in a barbbled state
             os.system("stty sane")
@@ -170,7 +169,7 @@ class MatlabCommand(CommandLine):
             if self.inputs.uses_mcr:
                 argstr = "%s"
             return self._gen_matlab_command(argstr, value)
-        return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
         """Generates commands and, if mfile specified, writes it to disk."""
@@ -208,12 +207,12 @@ class MatlabCommand(CommandLine):
 
         script_lines = "\n".join(prescript) + script_lines + "\n".join(postscript)
         if mfile:
-            with open(os.path.join(cwd, self.inputs.script_file), "wt") as mfile:
+            with open(os.path.join(cwd, self.inputs.script_file), "w") as mfile:
                 mfile.write(script_lines)
             if self.inputs.uses_mcr:
                 script = "%s" % (os.path.join(cwd, self.inputs.script_file))
             else:
-                script = "addpath('%s');%s" % (
+                script = "addpath('{}');{}".format(
                     cwd,
                     self.inputs.script_file.split(".")[0],
                 )

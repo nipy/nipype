@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The dtitk module provides classes for interfacing with the `DTITK
@@ -36,7 +35,7 @@ import warnings
 LOGGER = logging.getLogger("nipype.interface")
 
 
-class DTITKRenameMixin(object):
+class DTITKRenameMixin:
     def __init__(self, *args, **kwargs):
         classes = [cls.__name__ for cls in self.__class__.mro()]
         dep_name = classes[0]
@@ -50,7 +49,7 @@ class DTITKRenameMixin(object):
             "".format(dep_name, new_name),
             DeprecationWarning,
         )
-        super(DTITKRenameMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class CommandLineDtitk(CommandLine):

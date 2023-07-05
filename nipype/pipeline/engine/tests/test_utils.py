@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine utils module
@@ -179,7 +178,7 @@ def test_mapnode_crash(tmpdir):
         iterfield=["WRONG"],
         name="myfunc",
     )
-    node.inputs.WRONG = ["string{}".format(i) for i in range(3)]
+    node.inputs.WRONG = [f"string{i}" for i in range(3)]
     node.config = deepcopy(config._sections)
     node.config["execution"]["stop_on_first_crash"] = True
     node.base_dir = tmpdir.strpath
@@ -198,7 +197,7 @@ def test_mapnode_crash2(tmpdir):
         iterfield=["WRONG"],
         name="myfunc",
     )
-    node.inputs.WRONG = ["string{}".format(i) for i in range(3)]
+    node.inputs.WRONG = [f"string{i}" for i in range(3)]
     node.base_dir = tmpdir.strpath
 
     with pytest.raises(Exception):
@@ -216,7 +215,7 @@ def test_mapnode_crash3(tmpdir):
         iterfield=["WRONG"],
         name="myfunc",
     )
-    node.inputs.WRONG = ["string{}".format(i) for i in range(3)]
+    node.inputs.WRONG = [f"string{i}" for i in range(3)]
     wf = pe.Workflow("testmapnodecrash")
     wf.add_nodes([node])
     wf.base_dir = tmpdir.strpath

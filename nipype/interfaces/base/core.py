@@ -61,7 +61,7 @@ VALID_TERMINAL_OUTPUT = [
 __docformat__ = "restructuredtext"
 
 
-class Interface(object):
+class Interface:
     """This is an abstract definition for Interface objects.
 
     It provides no functionality.  It defines the necessary attributes
@@ -562,7 +562,7 @@ class SimpleInterface(BaseInterface):
     """
 
     def __init__(self, from_file=None, resource_monitor=None, **inputs):
-        super(SimpleInterface, self).__init__(
+        super().__init__(
             from_file=from_file, resource_monitor=resource_monitor, **inputs
         )
         self._results = {}
@@ -628,7 +628,7 @@ class CommandLine(BaseInterface):
     def __init__(
         self, command=None, terminal_output=None, write_cmdline=False, **inputs
     ):
-        super(CommandLine, self).__init__(**inputs)
+        super().__init__(**inputs)
         self._environ = None
         # Set command. Input argument takes precedence
         self._cmd = command or getattr(self, "_cmd", None)
@@ -751,7 +751,7 @@ class CommandLine(BaseInterface):
         cmd_path = which(executable_name, env=runtime.environ)
 
         if cmd_path is None:
-            raise IOError(
+            raise OSError(
                 'No command "%s" found on host %s. Please check that the '
                 "corresponding package is installed."
                 % (executable_name, runtime.hostname)
@@ -994,7 +994,7 @@ class MpiCommandLine(CommandLine):
             result.append("mpiexec")
             if self.inputs.n_procs:
                 result.append("-n %d" % self.inputs.n_procs)
-        result.append(super(MpiCommandLine, self).cmdline)
+        result.append(super().cmdline)
         return " ".join(result)
 
 
@@ -1033,7 +1033,7 @@ class SEMLikeCommandLine(CommandLine):
                     value = os.path.abspath(self._outputs_filenames[name])
                 else:
                     return ""
-        return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class LibraryBaseInterface(BaseInterface):
@@ -1041,7 +1041,7 @@ class LibraryBaseInterface(BaseInterface):
     imports = ()
 
     def __init__(self, check_import=True, *args, **kwargs):
-        super(LibraryBaseInterface, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if check_import:
             import pkgutil
 
@@ -1051,7 +1051,7 @@ class LibraryBaseInterface(BaseInterface):
                     failed_imports.append(pkg)
             if failed_imports:
                 iflogger.warning(
-                    "Unable to import %s; %s interface may fail to " "run",
+                    "Unable to import %s; %s interface may fail to run",
                     failed_imports,
                     self.__class__.__name__,
                 )
@@ -1065,10 +1065,10 @@ class LibraryBaseInterface(BaseInterface):
                 self._version = importlib.import_module(self._pkg).__version__
             except (ImportError, AttributeError):
                 pass
-        return super(LibraryBaseInterface, self).version
+        return super().version
 
 
-class PackageInfo(object):
+class PackageInfo:
     _version = None
     version_cmd = None
     version_file = None
@@ -1083,13 +1083,13 @@ class PackageInfo(object):
                         resource_monitor=False,
                         terminal_output="allatonce",
                     ).run()
-                except IOError:
+                except OSError:
                     return None
 
                 raw_info = clout.runtime.stdout
             elif klass.version_file is not None:
                 try:
-                    with open(klass.version_file, "rt") as fobj:
+                    with open(klass.version_file) as fobj:
                         raw_info = fobj.read()
                 except OSError:
                     return None

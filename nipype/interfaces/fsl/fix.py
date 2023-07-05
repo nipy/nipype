@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fix module provides classes for interfacing with the `FSL FIX
@@ -375,7 +374,7 @@ class Cleaner(CommandLine):
 
     def _get_cleaned_functional_filename(self, artifacts_list_filename):
         """extract the proper filename from the first line of the artifacts file"""
-        artifacts_list_file = open(artifacts_list_filename, "r")
+        artifacts_list_file = open(artifacts_list_filename)
         functional_filename, extension = artifacts_list_file.readline().split(".")
         artifacts_list_file_path, artifacts_list_filename = os.path.split(
             artifacts_list_filename

@@ -525,7 +525,7 @@ class CAT12Segment(SPMCommand):
         elif opt in ["tpm", "shooting_tpm"]:
             return Cell2Str(val)
 
-        return super(CAT12Segment, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -726,7 +726,7 @@ class CAT12SANLMDenoising(SPMCommand):
         if opt == "spm_type":
             type_map = {"same": 0, "uint8": 2, "uint16": 512, "float32": 16}
             val = type_map[val]
-        return super(CAT12SANLMDenoising, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

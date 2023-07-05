@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -136,7 +135,7 @@ def test_Randomise_parallel():
     rand.inputs.t_contrast = "infile.con"
 
     actualCmdline = sorted(rand.cmdline.split())
-    cmd = "randomise_parallel -i infile.nii -o outfile -d design.mat -t " "infile.con"
+    cmd = "randomise_parallel -i infile.nii -o outfile -d design.mat -t infile.con"
     desiredCmdline = sorted(cmd.split())
     assert actualCmdline == desiredCmdline
 
@@ -371,7 +370,7 @@ def test_tbss_skeleton(create_files_in_directory):
     bones.inputs.data_file = "b.nii"  # Even though that's silly
 
     # Now we get a command line
-    assert bones.cmdline == "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" % (
+    assert bones.cmdline == "tbss_skeleton -i a.nii -p 0.200 b.nii {} b.nii {}".format(
         Info.standard_image("LowerCingulum_1mm.nii.gz"),
         os.path.join(newdir, "b_skeletonised.nii"),
     )
@@ -409,7 +408,7 @@ def test_distancemap(create_files_in_directory):
 
     # And we should be able to write out a maxima map
     mapper.inputs.local_max_file = True
-    assert mapper.cmdline == "distancemap --out=%s --in=a.nii --localmax=%s" % (
+    assert mapper.cmdline == "distancemap --out={} --in=a.nii --localmax={}".format(
         os.path.join(newdir, "a_dstmap.nii"),
         os.path.join(newdir, "a_lclmax.nii"),
     )

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Utilities for the CLI functions.
 """
@@ -25,7 +24,7 @@ UnexistingFilePath = click.Path(dir_okay=False, resolve_path=True)
 # validators
 def check_not_none(ctx, param, value):
     if value is None:
-        raise click.BadParameter("got {}.".format(value))
+        raise click.BadParameter(f"got {value}.")
     return value
 
 
@@ -102,12 +101,10 @@ def add_args_options(arg_parser, interface):
 
             if has_multiple_inner_traits:
                 raise NotImplementedError(
-                    (
-                        "This interface cannot be used. via the"
-                        " command line as multiple inner traits"
-                        " are currently not supported for mandatory"
-                        " argument: {}.".format(name)
-                    )
+                    "This interface cannot be used. via the"
+                    " command line as multiple inner traits"
+                    " are currently not supported for mandatory"
+                    " argument: {}.".format(name)
                 )
             arg_parser.add_argument(name, help=desc, **args)
         else:

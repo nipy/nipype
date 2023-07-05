@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -24,13 +23,13 @@ class MathsInput(FSLCommandInputSpec):
         *_dtypes,
         position=1,
         argstr="-dt %s",
-        desc=("datatype to use for calculations " "(default is float)")
+        desc=("datatype to use for calculations (default is float)")
     )
     output_datatype = traits.Enum(
         *_dtypes,
         position=-1,
         argstr="-odt %s",
-        desc=("datatype to use for output (default " "uses input type)")
+        desc=("datatype to use for output (default uses input type)")
     )
 
     nan2zeros = traits.Bool(
@@ -117,7 +116,7 @@ class Threshold(MathsCommand):
                     arg += "p"
             arg += " %.10f" % value
             return arg
-        return super(Threshold, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class StdImageInput(MathsInput):
@@ -209,7 +208,7 @@ class PercentileImageInput(MathsInput):
         high=100,
         argstr="%f",
         position=5,
-        desc=("nth percentile (0-100) of FULL RANGE " "across dimension"),
+        desc=("nth percentile (0-100) of FULL RANGE across dimension"),
     )
 
 
@@ -304,7 +303,7 @@ class AR1ImageInput(MathsInput):
         usedefault=True,
         argstr="-%sar1",
         position=4,
-        desc=("dimension to find AR(1) coefficient" "across"),
+        desc=("dimension to find AR(1) coefficient across"),
     )
 
 
@@ -345,7 +344,7 @@ class IsotropicSmooth(MathsCommand):
         if name == "fwhm":
             sigma = float(value) / np.sqrt(8 * np.log(2))
             return spec.argstr % sigma
-        return super(IsotropicSmooth, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ApplyMaskInput(MathsInput):
@@ -382,9 +381,7 @@ class KernelInput(MathsInput):
         argstr="%.4f",
         position=5,
         xor=["kernel_file"],
-        desc=(
-            "kernel size - voxels for box/boxv, mm " "for sphere, mm sigma for gauss"
-        ),
+        desc=("kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss"),
     )
     kernel_file = File(
         exists=True,
@@ -416,7 +413,7 @@ class DilateImage(MathsCommand):
     def _format_arg(self, name, spec, value):
         if name == "operation":
             return spec.argstr % dict(mean="M", modal="D", max="F")[value]
-        return super(DilateImage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ErodeInput(KernelInput):
@@ -425,7 +422,7 @@ class ErodeInput(KernelInput):
         position=6,
         usedefault=True,
         default_value=False,
-        desc=("if true, minimum filter rather than " "erosion by zeroing-out"),
+        desc=("if true, minimum filter rather than erosion by zeroing-out"),
     )
 
 
@@ -440,7 +437,7 @@ class ErodeImage(MathsCommand):
             if value:
                 return "-eroF"
             return "-ero"
-        return super(ErodeImage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class SpatialFilterInput(KernelInput):
@@ -501,7 +498,7 @@ class UnaryMaths(MathsCommand):
 
     def _list_outputs(self):
         self._suffix = "_" + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
+        return super()._list_outputs()
 
 
 class BinaryMathsInput(MathsInput):
@@ -549,12 +546,12 @@ class MultiImageMathsInput(MathsInput):
         position=4,
         argstr="%s",
         mandatory=True,
-        desc=("python formatted string of operations " "to perform"),
+        desc=("python formatted string of operations to perform"),
     )
     operand_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("list of file names to plug into op " "string"),
+        desc=("list of file names to plug into op string"),
     )
 
 
@@ -579,7 +576,7 @@ class MultiImageMaths(MathsCommand):
     def _format_arg(self, name, spec, value):
         if name == "op_string":
             return value % tuple(self.inputs.operand_files)
-        return super(MultiImageMaths, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class TemporalFilterInput(MathsInput):

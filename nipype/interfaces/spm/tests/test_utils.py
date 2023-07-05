@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -21,7 +20,7 @@ def test_coreg():
     assert not isdefined(coreg.inputs.mat)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
-    mat = os.path.join(pth, "%s_to_%s.mat" % (mov, tgt))
+    mat = os.path.join(pth, f"{mov}_to_{tgt}.mat")
     invmat = fname_presuffix(mat, prefix="inverse_")
     script = coreg._make_matlab_command(None)
     assert coreg.inputs.mat == mat

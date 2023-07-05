@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import warnings
 import numpy as np
 import nibabel as nb
@@ -63,7 +61,7 @@ class Similarity(NipyBaseInterface):
             ),
             DeprecationWarning,
         )
-        super(Similarity, self).__init__(**inputs)
+        super().__init__(**inputs)
 
     def _run_interface(self, runtime):
         from nipy.algorithms.registration.histogram_registration import (

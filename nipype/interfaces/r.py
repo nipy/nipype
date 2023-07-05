@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to run R scripts."""
@@ -57,7 +56,7 @@ class RCommand(CommandLine):
         """initializes interface to r
         (default 'R')
         """
-        super(RCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         if r_cmd and isdefined(r_cmd):
             self._cmd = r_cmd
 
@@ -83,7 +82,7 @@ class RCommand(CommandLine):
 
     def _run_interface(self, runtime):
         self.terminal_output = "allatonce"
-        runtime = super(RCommand, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if "R code threw an exception" in runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -92,7 +91,7 @@ class RCommand(CommandLine):
         if name in ["script"]:
             argstr = trait_spec.argstr
             return self._gen_r_command(argstr, value)
-        return super(RCommand, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _gen_r_command(self, argstr, script_lines):
         """Generates commands and, if rfile specified, writes it to disk."""
@@ -110,7 +109,7 @@ class RCommand(CommandLine):
             script = script.replace("$", "\\$")
         else:
             script_path = os.path.join(os.getcwd(), self.inputs.script_file)
-            with open(script_path, "wt") as rfile:
+            with open(script_path, "w") as rfile:
                 rfile.write(script_lines)
             script = "source('%s')" % script_path
 

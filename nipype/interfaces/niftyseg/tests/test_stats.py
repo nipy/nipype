@@ -28,7 +28,7 @@ def test_unary_stats():
     unarys.inputs.in_file = in_file
     unarys.inputs.operation = "a"
 
-    expected_cmd = "{cmd} {in_file} -a".format(cmd=cmd, in_file=in_file)
+    expected_cmd = f"{cmd} {in_file} -a"
 
     assert unarys.cmdline == expected_cmd
 
@@ -53,6 +53,6 @@ def test_binary_stats():
     binarys.inputs.operand_value = 2
     binarys.inputs.operation = "sa"
 
-    expected_cmd = "{cmd} {in_file} -sa 2.00000000".format(cmd=cmd, in_file=in_file)
+    expected_cmd = f"{cmd} {in_file} -sa 2.00000000"
 
     assert binarys.cmdline == expected_cmd

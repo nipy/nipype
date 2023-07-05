@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Provides interfaces to various commands provided by Camino-Trackvis."""
 
 import os

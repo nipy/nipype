@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -225,7 +224,7 @@ class DWI2TensorInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(
         argstr="-quiet",
         position=1,
-        desc=("Do not display information messages or progress " "status."),
+        desc=("Do not display information messages or progress status."),
     )
     debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 

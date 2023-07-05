@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
@@ -18,7 +17,7 @@ import numpy as np
 import nibabel as nb
 
 
-class TempFATFS(object):
+class TempFATFS:
     def __init__(self, size_in_mbytes=8, delay=0.5):
         """Temporary filesystem for testing non-POSIX filesystems on a POSIX
         system.
@@ -55,19 +54,19 @@ class TempFATFS(object):
                 args=mkfs_args, stdout=self.dev_null, stderr=self.dev_null
             )
         except CalledProcessError as e:
-            raise IOError("mkfs.vfat failed") from e
+            raise OSError("mkfs.vfat failed") from e
 
         try:
             self.fusefat = subprocess.Popen(
                 args=mount_args, stdout=self.dev_null, stderr=self.dev_null
             )
         except OSError as e:
-            raise IOError("fusefat is not installed") from e
+            raise OSError("fusefat is not installed") from e
 
         time.sleep(self.delay)
 
         if self.fusefat.poll() is not None:
-            raise IOError("fusefat terminated too soon")
+            raise OSError("fusefat terminated too soon")
 
         open(self.canary, "wb").close()
 

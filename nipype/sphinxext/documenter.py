@@ -46,9 +46,7 @@ class NipypeClassDocumenter(_ClassDocumenter):  # type: ignore
             for line in lines.splitlines():
                 self.add_line(line, sourcename)
         else:
-            self.add_line(
-                ".. %s:%s:: %s%s" % (domain, directive, name, sig), sourcename
-            )
+            self.add_line(f".. {domain}:{directive}:: {name}{sig}", sourcename)
             if self.options.noindex:
                 self.add_line("   :noindex:", sourcename)
             if self.objpath:
@@ -73,9 +71,9 @@ class NipypeClassDocumenter(_ClassDocumenter):  # type: ignore
                 if b.__module__ in ("__builtin__", "builtins"):
                     bases_links.append(":class:`%s`" % b.__name__)
                 elif based_interface:
-                    bases_links.append(":ref:`%s.%s`" % (b.__module__, b.__name__))
+                    bases_links.append(f":ref:`{b.__module__}.{b.__name__}`")
                 else:
-                    bases_links.append(":class:`%s.%s`" % (b.__module__, b.__name__))
+                    bases_links.append(f":class:`{b.__module__}.{b.__name__}`")
 
             self.add_line("   " + _("Bases: %s") % ", ".join(bases_links), sourcename)
 

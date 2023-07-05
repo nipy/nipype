@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Using nipype with persistence and lazy recomputation but without explicit
 name-steps pipeline: getting back scope in command-line based programming.
@@ -18,7 +17,7 @@ from ..pipeline.engine.utils import modify_paths
 # PipeFunc object: callable interface to nipype.interface objects
 
 
-class PipeFunc(object):
+class PipeFunc:
     """Callable interface to nipype.interface objects
 
     Use this to wrap nipype.interface object and call them
@@ -53,7 +52,7 @@ class PipeFunc(object):
         if not os.path.exists(base_dir) and os.path.isdir(base_dir):
             raise ValueError("base_dir should be an existing directory")
         self.base_dir = base_dir
-        doc = "%s\n%s" % (self.interface.__doc__, self.interface.help(returnhelp=True))
+        doc = f"{self.interface.__doc__}\n{self.interface.help(returnhelp=True)}"
         self.__doc__ = doc
         self.callback = callback
 
@@ -66,7 +65,7 @@ class PipeFunc(object):
         inputs = interface.inputs.get_hashval()
         hasher = hashlib.new("md5")
         hasher.update(pickle.dumps(inputs))
-        dir_name = "%s-%s" % (
+        dir_name = "{}-{}".format(
             interface.__class__.__module__.replace(".", "-"),
             interface.__class__.__name__,
         )
@@ -103,7 +102,7 @@ def read_log(filename, run_dict=None):
     if run_dict is None:
         run_dict = dict()
 
-    with open(filename, "r") as logfile:
+    with open(filename) as logfile:
         for line in logfile:
             dir_name, job_name = line[:-1].split("/")
             jobs = run_dict.get(dir_name, set())
@@ -137,7 +136,7 @@ def rm_all_but(base_dir, dirs_to_keep, warn=False):
             shutil.rmtree(dir_name)
 
 
-class _MemoryCallback(object):
+class _MemoryCallback:
     "An object to avoid closures and have everything pickle"
 
     def __init__(self, memory):
@@ -147,7 +146,7 @@ class _MemoryCallback(object):
         self.memory._log_name(dir_name, job_name)
 
 
-class Memory(object):
+class Memory:
     """Memory context to provide caching for interfaces
 
     Parameters
@@ -224,7 +223,7 @@ class Memory(object):
         # immediately to avoid race conditions in parallel computing:
         # file appends are atomic
         with open(os.path.join(base_dir, "log.current"), "a") as currentlog:
-            currentlog.write("%s/%s\n" % (dir_name, job_name))
+            currentlog.write(f"{dir_name}/{job_name}\n")
 
         t = time.localtime()
         year_dir = os.path.join(base_dir, "log.%i" % t.tm_year)
@@ -239,7 +238,7 @@ class Memory(object):
             "Dir exists"
 
         with open(os.path.join(month_dir, "%02i.log" % t.tm_mday), "a") as rotatefile:
-            rotatefile.write("%s/%s\n" % (dir_name, job_name))
+            rotatefile.write(f"{dir_name}/{job_name}\n")
 
     def clear_previous_runs(self, warn=True):
         """Remove all the cache that where not used in the latest run of
@@ -295,4 +294,4 @@ class Memory(object):
             rm_all_but(os.path.join(self.base_dir, dir_name), job_names, warn=warn)
 
     def __repr__(self):
-        return "{}(base_dir={})".format(self.__class__.__name__, self.base_dir)
+        return f"{self.__class__.__name__}(base_dir={self.base_dir})"

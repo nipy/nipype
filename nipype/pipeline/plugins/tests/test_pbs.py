@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from shutil import which
 
 import nipype.interfaces.base as nib

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -153,12 +152,12 @@ class RegAladin(NiftyRegCommand):
     output_spec = RegAladinOutputSpec
 
     def _list_outputs(self):
-        outputs = super(RegAladin, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         # Make a list of the linear transformation file and the input image
         aff = os.path.abspath(outputs["aff_file"])
         flo = os.path.abspath(self.inputs.flo_file)
-        outputs["avg_output"] = "%s %s" % (aff, flo)
+        outputs["avg_output"] = f"{aff} {flo}"
         return outputs
 
 
@@ -386,7 +385,7 @@ class RegF3D(NiftyRegCommand):
         return os.path.join(dn, bn)
 
     def _list_outputs(self):
-        outputs = super(RegF3D, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if self.inputs.vel_flag is True:
             res_name = self._remove_extension(outputs["res_file"])
@@ -398,7 +397,7 @@ class RegF3D(NiftyRegCommand):
         if self.inputs.vel_flag is True and isdefined(self.inputs.aff_file):
             cpp_file = os.path.abspath(outputs["cpp_file"])
             flo_file = os.path.abspath(self.inputs.flo_file)
-            outputs["avg_output"] = "%s %s %s" % (
+            outputs["avg_output"] = "{} {} {}".format(
                 self.inputs.aff_file,
                 cpp_file,
                 flo_file,
@@ -406,6 +405,6 @@ class RegF3D(NiftyRegCommand):
         else:
             cpp_file = os.path.abspath(outputs["cpp_file"])
             flo_file = os.path.abspath(self.inputs.flo_file)
-            outputs["avg_output"] = "%s %s" % (cpp_file, flo_file)
+            outputs["avg_output"] = f"{cpp_file} {flo_file}"
 
         return outputs
