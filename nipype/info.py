@@ -54,13 +54,12 @@ CLASSIFIERS = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering",
 ]
-PYTHON_REQUIRES = ">= 3.7"
+PYTHON_REQUIRES = ">= 3.8"
 
 description = "Neuroimaging in Python: Pipelines and Interfaces"
 
