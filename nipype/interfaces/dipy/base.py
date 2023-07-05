@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Base interfaces for dipy """
 
 import os.path as op
@@ -134,10 +133,9 @@ def convert_to_traits_type(dipy_type, is_file=False):
         return traits.Complex, is_mandatory
     else:
         msg = (
-            "Error during convert_to_traits_type({0}).".format(dipy_type)
-            + "Unknown DIPY type."
+            f"Error during convert_to_traits_type({dipy_type})." + "Unknown DIPY type."
         )
-        raise IOError(msg)
+        raise OSError(msg)
 
 
 def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
@@ -218,13 +216,13 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     input_parameters = parser.positional_parameters + optional_params
 
     input_spec = create_interface_specs(
-        "{}InputSpec".format(cls_name),
+        f"{cls_name}InputSpec",
         input_parameters,
         BaseClass=BaseInterfaceInputSpec,
     )
 
     output_spec = create_interface_specs(
-        "{}OutputSpec".format(cls_name), output_parameters, BaseClass=TraitedSpec
+        f"{cls_name}OutputSpec", output_parameters, BaseClass=TraitedSpec
     )
 
     def _run_interface(self, runtime):

@@ -367,7 +367,7 @@ class Tractography(MRTrix3Base):
             value = ["%f" % v for v in value]
             return trait_spec.argstr % ",".join(value)
 
-        return super(Tractography, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

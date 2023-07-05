@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import nibabel as nb
 
@@ -77,7 +75,7 @@ class DTI(DipyDiffusionInterface):
         outputs["out_file"] = self._gen_filename("dti")
 
         for metric in ["fa", "md", "rd", "ad", "color_fa"]:
-            outputs["{}_file".format(metric)] = self._gen_filename(metric)
+            outputs[f"{metric}_file"] = self._gen_filename(metric)
 
         return outputs
 

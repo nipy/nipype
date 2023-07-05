@@ -156,7 +156,7 @@ class TestSignalExtraction:
         self.assert_expected_output(wanted_labels, wanted)
 
     def assert_expected_output(self, labels, wanted):
-        with open(self.filenames["out_file"], "r") as output:
+        with open(self.filenames["out_file"]) as output:
             got = [line.split() for line in output]
             labels_got = got.pop(0)  # remove header
             assert labels_got == labels

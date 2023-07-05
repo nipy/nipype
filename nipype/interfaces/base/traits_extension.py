@@ -50,7 +50,7 @@ IMG_FORMATS = {
     "nifti2": (".nii", ".nii.gz"),
     "nrrd": (".nrrd", ".nhdr"),
 }
-IMG_ZIP_FMT = set([".nii.gz", "tar.gz", ".gii.gz", ".mgz", ".mgh.gz", "img.gz"])
+IMG_ZIP_FMT = {".nii.gz", "tar.gz", ".gii.gz", ".mgz", ".mgh.gz", "img.gz"}
 
 """
 The functions that pop-up the Traits GUIs, edit_traits and
@@ -121,7 +121,7 @@ class BasePath(TraitType):
         """Create a BasePath trait."""
         self.exists = exists
         self.resolve = resolve
-        super(BasePath, self).__init__(value, **metadata)
+        super().__init__(value, **metadata)
 
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
@@ -309,15 +309,10 @@ class File(BasePath):
                 extensions = list(set(extensions) - IMG_ZIP_FMT)
 
             self._exts = sorted(
-                set(
-                    [
-                        ".%s" % ext if not ext.startswith(".") else ext
-                        for ext in extensions
-                    ]
-                )
+                {".%s" % ext if not ext.startswith(".") else ext for ext in extensions}
             )
 
-        super(File, self).__init__(
+        super().__init__(
             value=value,
             exists=exists,
             resolve=resolve,
@@ -327,10 +322,10 @@ class File(BasePath):
 
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
-        value = super(File, self).validate(objekt, name, value, return_pathlike=True)
+        value = super().validate(objekt, name, value, return_pathlike=True)
         if self._exts:
             fname = value.name
-            if not any((fname.endswith(e) for e in self._exts)):
+            if not any(fname.endswith(e) for e in self._exts):
                 self.error(objekt, name, str(value))
 
         if not return_pathlike:
@@ -366,7 +361,7 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
                 )
             extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
-        super(ImageFile, self).__init__(
+        super().__init__(
             value=value,
             exists=exists,
             extensions=extensions,
@@ -421,7 +416,7 @@ class MultiObject(traits.List):
             and not isinstance(value[0], list)
         ):
             newvalue = [value]
-        value = super(MultiObject, self).validate(objekt, name, newvalue)
+        value = super().validate(objekt, name, newvalue)
 
         if value:
             return value

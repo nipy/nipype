@@ -170,4 +170,4 @@ class EM(NiftySegCommand):
             _nb_priors = len(self.inputs.priors)
             return "-priors %d %s" % (_nb_priors, " ".join(self.inputs.priors))
         else:
-            return super(EM, self)._format_arg(opt, spec, val)
+            return super()._format_arg(opt, spec, val)

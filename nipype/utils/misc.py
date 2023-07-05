@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
@@ -159,11 +158,11 @@ def package_check(
     """
 
     if app:
-        msg = "%s requires %s" % (app, pkg_name)
+        msg = f"{app} requires {pkg_name}"
     else:
         msg = "Nipype requires %s" % pkg_name
     if version:
-        msg += " with version >= %s" % (version,)
+        msg += f" with version >= {version}"
     try:
         mod = __import__(pkg_name)
     except ImportError as e:
@@ -340,7 +339,7 @@ Diff between nipype inputs failed:
         old = _uniformize(dold[k])
 
         if new != old:
-            diff += ["  * %s: %r != %r" % (k, _shorten(new), _shorten(old))]
+            diff += [f"  * {k}: {_shorten(new)!r} != {_shorten(old)!r}"]
 
     if len(diff) > diffkeys:
         diff.insert(diffkeys, "Some dictionary entries had differing values:")

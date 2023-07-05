@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
@@ -76,7 +75,7 @@ def run_node(node, updatehash, taskid):
 # Pythons 2.7, 3.4-3.7.0, and 3.7.1 have three different implementations of
 # pool.Pool().Process(), and the type of the result varies based on the default
 # multiprocessing context, so we need to dynamically patch the daemon property
-class NonDaemonMixin(object):
+class NonDaemonMixin:
     @property
     def daemon(self):
         return False
@@ -135,7 +134,7 @@ try:
             if context is None:
                 context = mp.get_context()
             context = _nondaemon_context_mapper[context._name]
-            super(NonDaemonPool, self).__init__(
+            super().__init__(
                 processes=processes,
                 initializer=initializer,
                 initargs=initargs,
@@ -194,7 +193,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
-        super(LegacyMultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0

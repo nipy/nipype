@@ -169,9 +169,7 @@ def _parse_spec(inputs, name, spec):
 
         desc_lines += ["(Nipype **default** value: ``%s``)" % str(default)]
 
-    out_rst = [
-        "{name} : {type}".format(name=name, type=spec.full_info(inputs, name, None))
-    ]
+    out_rst = [f"{name} : {spec.full_info(inputs, name, None)}"]
     out_rst += _indent(desc_lines, 4)
 
     return out_rst

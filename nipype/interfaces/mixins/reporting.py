@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ class mixin and utilities for enabling reports for nipype interfaces """
@@ -31,11 +30,11 @@ class ReportCapableInterface(BaseInterface):
     _out_report = None
 
     def __init__(self, generate_report=False, **kwargs):
-        super(ReportCapableInterface, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.generate_report = generate_report
 
     def _post_run_hook(self, runtime):
-        runtime = super(ReportCapableInterface, self)._post_run_hook(runtime)
+        runtime = super()._post_run_hook(runtime)
 
         # leave early if there's nothing to do
         if not self.generate_report:
@@ -53,7 +52,7 @@ class ReportCapableInterface(BaseInterface):
 
     def _list_outputs(self):
         try:
-            outputs = super(ReportCapableInterface, self)._list_outputs()
+            outputs = super()._list_outputs()
         except NotImplementedError:
             outputs = {}
         if self._out_report is not None:

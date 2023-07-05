@@ -27,7 +27,7 @@ class PBSGraphPlugin(SGEGraphPlugin):
     def _submit_graph(self, pyfiles, dependencies, nodes):
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, "submit_jobs.sh")
-        with open(submitjobsfile, "wt") as fp:
+        with open(submitjobsfile, "w") as fp:
             fp.writelines("#!/usr/bin/env sh\n")
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
@@ -35,11 +35,9 @@ class PBSGraphPlugin(SGEGraphPlugin):
 
                 batch_dir, name = os.path.split(pyscript)
                 name = ".".join(name.split(".")[:-1])
-                batchscript = "\n".join(
-                    (template, "%s %s" % (sys.executable, pyscript))
-                )
+                batchscript = "\n".join((template, f"{sys.executable} {pyscript}"))
                 batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
-                with open(batchscriptfile, "wt") as batchfp:
+                with open(batchscriptfile, "w") as batchfp:
                     batchfp.writelines(batchscript)
                     batchfp.close()
                 deps = ""

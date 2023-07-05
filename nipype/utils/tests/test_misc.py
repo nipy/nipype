@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -127,7 +126,7 @@ def test_dict_diff():
 
     diff = dict_diff({"a": complicated_val1}, {"a": complicated_val2})
     assert "Some dictionary entries had differing values:" in diff
-    assert "a: {!r} != {!r}".format(uniformized_val2, uniformized_val1) in diff
+    assert f"a: {uniformized_val2!r} != {uniformized_val1!r}" in diff
 
     # Trigger shortening
     diff = dict_diff({"a": "b" * 60}, {"a": "c" * 70})

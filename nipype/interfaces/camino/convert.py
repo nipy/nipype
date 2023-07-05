@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import glob
 
@@ -446,10 +444,10 @@ class ProcStreamlines(StdOutCommandLine):
     def _format_arg(self, name, spec, value):
         if name == "outputroot":
             return spec.argstr % self._get_actual_outputroot(value)
-        return super(ProcStreamlines, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def __init__(self, *args, **kwargs):
-        super(ProcStreamlines, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.outputroot_files = []
 
     def _run_interface(self, runtime):
@@ -459,13 +457,13 @@ class ProcStreamlines(StdOutCommandLine):
             base, filename, ext = split_filename(actual_outputroot)
             if not os.path.exists(base):
                 os.makedirs(base)
-            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            new_runtime = super()._run_interface(runtime)
             self.outputroot_files = glob.glob(
                 os.path.join(os.getcwd(), actual_outputroot + "*")
             )
             return new_runtime
         else:
-            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            new_runtime = super()._run_interface(runtime)
             return new_runtime
 
     def _get_actual_outputroot(self, outputroot):

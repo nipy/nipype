@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -167,7 +166,7 @@ def bids_gen_info(
             condition_column = "_trial_type"
             for i in events:
                 i.update({condition_column: "ev0"})
-        conditions = sorted(set([i[condition_column] for i in events]))
+        conditions = sorted({i[condition_column] for i in events})
         runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
         for condition in conditions:
             selected_events = [i for i in events if i[condition_column] == condition]
@@ -488,7 +487,7 @@ None])
             for filename in self.inputs.outlier_files:
                 try:
                     outindices = np.loadtxt(filename, dtype=int)
-                except IOError:
+                except OSError:
                     outliers.append([])
                 else:
                     if outindices.size == 1:
@@ -616,8 +615,8 @@ class SpecifySPMModel(SpecifyModel):
                     else:
                         raise ValueError(
                             "Mismatch in number of onsets and \
-                                          durations for run {0}, condition \
-                                          {1}".format(
+                                          durations for run {}, condition \
+                                          {}".format(
                                 i + 2, j + 1
                             )
                         )
@@ -651,7 +650,7 @@ class SpecifySPMModel(SpecifyModel):
             not isdefined(self.inputs.concatenate_runs)
             or not self.inputs.concatenate_runs
         ):
-            super(SpecifySPMModel, self)._generate_design(infolist=infolist)
+            super()._generate_design(infolist=infolist)
             return
 
         if isdefined(self.inputs.subject_info):
@@ -682,7 +681,7 @@ class SpecifySPMModel(SpecifyModel):
             for i, filename in enumerate(self.inputs.outlier_files):
                 try:
                     out = np.loadtxt(filename)
-                except IOError:
+                except OSError:
                     iflogger.warning("Error reading outliers file %s", filename)
                     out = np.array([])
 
@@ -789,7 +788,7 @@ class SpecifySparseModel(SpecifyModel):
         dt = TA / 10.0
         durations = np.round(np.array(i_durations) * 1000)
         if len(durations) == 1:
-            durations = durations * np.ones((len(i_onsets)))
+            durations = durations * np.ones(len(i_onsets))
         onsets = np.round(np.array(i_onsets) * 1000)
         dttemp = math.gcd(TA, math.gcd(SILENCE, TR))
         if dt < dttemp:
@@ -801,8 +800,8 @@ class SpecifySparseModel(SpecifyModel):
         iflogger.info("Setting dt = %d ms\n", dt)
         npts = int(np.ceil(total_time / dt))
         times = np.arange(0, total_time, dt) * 1e-3
-        timeline = np.zeros((npts))
-        timeline2 = np.zeros((npts))
+        timeline = np.zeros(npts)
+        timeline2 = np.zeros(npts)
         if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
             hrf = spm_hrf(dt * 1e-3)
         reg_scale = 1.0
@@ -839,7 +838,7 @@ class SpecifySparseModel(SpecifyModel):
             if not self.inputs.stimuli_as_impulses:
                 if durations[i] == 0:
                     durations[i] = TA * nvol
-                stimdur = np.ones((int(durations[i] / dt)))
+                stimdur = np.ones(int(durations[i] / dt))
                 timeline2 = np.convolve(timeline2, stimdur)[0 : len(timeline2)]
             timeline += timeline2
             timeline2[:] = 0
@@ -866,7 +865,7 @@ class SpecifySparseModel(SpecifyModel):
             ):
                 plt.plot(times, timederiv)
         # sample timeline
-        timeline2 = np.zeros((npts))
+        timeline2 = np.zeros(npts)
         reg = []
         regderiv = []
         for i, trial in enumerate(np.arange(nscans) / nvol):
@@ -977,7 +976,7 @@ class SpecifySparseModel(SpecifyModel):
         else:
             infolist = gen_info(self.inputs.event_files)
         sparselist = self._generate_clustered_design(infolist)
-        super(SpecifySparseModel, self)._generate_design(infolist=sparselist)
+        super()._generate_design(infolist=sparselist)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

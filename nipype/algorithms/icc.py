@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from functools import lru_cache
 import numpy as np

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import configparser
 
 import os
@@ -41,7 +40,7 @@ def pkg_commit_hash(pkg_path):
     # Try and get commit from written commit text file
     pth = os.path.join(pkg_path, COMMIT_INFO_FNAME)
     if not os.path.isfile(pth):
-        raise IOError("Missing commit info file %s" % pth)
+        raise OSError("Missing commit info file %s" % pth)
     cfg_parser = configparser.RawConfigParser()
     with open(pth, encoding="utf-8") as fp:
         cfg_parser.read_file(fp)

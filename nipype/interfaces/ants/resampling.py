@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ANTS Apply Transforms interface
 """
 import os
@@ -130,9 +129,7 @@ ants_Affine.txt'
                     )
 
             return " ".join(series)
-        return super(WarpTimeSeriesImageMultiTransform, self)._format_arg(
-            opt, spec, val
-        )
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -143,9 +140,7 @@ ants_Affine.txt'
         return outputs
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
-        runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(
-            runtime, correct_return_codes=[0, 1]
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes=[0, 1])
         if "100 % complete" not in runtime.stdout:
             self.raise_exception(runtime)
         return runtime
@@ -290,7 +285,7 @@ ants_Affine.txt'
 
             return " ".join(series)
 
-        return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -509,7 +504,7 @@ class ApplyTransforms(ANTSCommand):
                 "MultiLabel",
                 "Gaussian",
             ] and isdefined(self.inputs.interpolation_parameters):
-                return "--interpolation %s[ %s ]" % (
+                return "--interpolation {}[ {} ]".format(
                     self.inputs.interpolation,
                     ", ".join(
                         [str(param) for param in self.inputs.interpolation_parameters]
@@ -517,7 +512,7 @@ class ApplyTransforms(ANTSCommand):
                 )
             else:
                 return "--interpolation %s" % self.inputs.interpolation
-        return super(ApplyTransforms, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -614,10 +609,8 @@ class ApplyTransformsToPoints(ANTSCommand):
                     )
                 else:
                     raise Exception(
-                        (
-                            "ERROR: The useInverse list must have the same number "
-                            "of entries as the transformsFileName list."
-                        )
+                        "ERROR: The useInverse list must have the same number "
+                        "of entries as the transformsFileName list."
                     )
             else:
                 retval.append("--transform %s" % self.inputs.transforms[ii])
@@ -626,4 +619,4 @@ class ApplyTransformsToPoints(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == "transforms":
             return self._get_transform_filenames()
-        return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)

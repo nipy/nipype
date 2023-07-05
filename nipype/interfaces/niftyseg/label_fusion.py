@@ -186,7 +186,7 @@ class LabelFusion(NiftySegCommand):
         if opt == "classifier_type" and val == "STEPS":
             return self.get_steps_args()
 
-        return super(LabelFusion, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def get_steps_args(self):
         if not isdefined(self.inputs.template_file):
@@ -283,7 +283,7 @@ when 'classifier_type' is set to '%s' and 'sm_ranking' is set to '%s'."
         path, base, _ = split_filename(value)
         _, _, ext = split_filename(self.inputs.in_file)
         suffix = self.inputs.classifier_type.lower()
-        return os.path.join(path, "{0}_{1}{2}".format(base, suffix, ext))
+        return os.path.join(path, f"{base}_{suffix}{ext}")
 
 
 class CalcTopNCCInputSpec(CommandLineInputSpec):
@@ -344,7 +344,7 @@ class CalcTopNCC(NiftySegCommand):
         if runtime is None or not runtime.stdout:
             try:
                 out_files = load_json(outfile)["files"]
-            except IOError:
+            except OSError:
                 return self.run().outputs
         else:
             out_files = []

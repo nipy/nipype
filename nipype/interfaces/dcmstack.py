@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """dcmstack allows series of DICOM images to be stacked into multi-dimensional arrays."""
 
 import os
@@ -250,7 +249,7 @@ class LookupMeta(BaseInterface):
 
     def _outputs(self):
         self._make_name_map()
-        outputs = super(LookupMeta, self)._outputs()
+        outputs = super()._outputs()
         undefined_traits = {}
         for out_name in list(self._meta_keys.values()):
             outputs.add_trait(out_name, traits.Any)

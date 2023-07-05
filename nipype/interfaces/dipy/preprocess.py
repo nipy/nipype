@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os.path as op
 import nibabel as nb
 import numpy as np
@@ -103,7 +101,7 @@ class Resample(DipyBaseInterface):
         if fext == ".gz":
             fname, fext2 = op.splitext(fname)
             fext = fext2 + fext
-        return op.abspath("%s_reslice%s" % (fname, fext))
+        return op.abspath(f"{fname}_reslice{fext}")
 
 
 class DenoiseInputSpec(TraitedSpec):
@@ -204,7 +202,7 @@ class Denoise(DipyBaseInterface):
         if fext == ".gz":
             fname, fext2 = op.splitext(fname)
             fext = fext2 + fext
-        return op.abspath("%s_denoise%s" % (fname, fext))
+        return op.abspath(f"{fname}_denoise{fext}")
 
 
 def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
@@ -218,7 +216,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
         if fext == ".gz":
             fname, fext2 = op.splitext(fname)
             fext = fext2 + fext
-        out_file = op.abspath("./%s_reslice%s" % (fname, fext))
+        out_file = op.abspath(f"./{fname}_reslice{fext}")
 
     img = nb.load(in_file)
     hdr = img.header.copy()
@@ -258,7 +256,7 @@ def nlmeans_proxy(in_file, settings, snr=None, smask=None, nmask=None, out_file=
         if fext == ".gz":
             fname, fext2 = op.splitext(fname)
             fext = fext2 + fext
-        out_file = op.abspath("./%s_denoise%s" % (fname, fext))
+        out_file = op.abspath(f"./{fname}_denoise{fext}")
 
     img = nb.load(in_file)
     hdr = img.header

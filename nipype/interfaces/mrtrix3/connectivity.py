@@ -221,7 +221,7 @@ class LabelConfig(MRTrix3Base):
                 "src/dwi/tractography/connectomics/" "example_configs/fs_default.txt",
             )
 
-        return super(LabelConfig, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -313,7 +313,7 @@ class LabelConvert(MRTrix3Base):
                 "src/dwi/tractography/connectomics/" "example_configs/fs_default.txt",
             )
 
-        return super(LabelConvert, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

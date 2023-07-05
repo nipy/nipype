@@ -18,7 +18,7 @@ def clone_repo(url, branch):
     cwd = os.getcwd()
     tmpdir = tempfile.mkdtemp()
     try:
-        cmd = "git clone %s %s" % (url, tmpdir)
+        cmd = f"git clone {url} {tmpdir}"
         call(cmd, shell=True)
         os.chdir(tmpdir)
         cmd = "git checkout %s" % branch
@@ -51,16 +51,16 @@ def cp_files(in_path, globs, out_path):
 
 def filename_search_replace(sr_pairs, filename, backup=False):
     """Search and replace for expressions in files"""
-    in_txt = open(filename, "rt").read(-1)
+    in_txt = open(filename).read(-1)
     out_txt = in_txt[:]
     for in_exp, out_exp in sr_pairs:
         in_exp = re.compile(in_exp)
         out_txt = in_exp.sub(out_exp, out_txt)
     if in_txt == out_txt:
         return False
-    open(filename, "wt").write(out_txt)
+    open(filename, "w").write(out_txt)
     if backup:
-        open(filename + ".bak", "wt").write(in_txt)
+        open(filename + ".bak", "w").write(in_txt)
     return True
 
 
@@ -110,7 +110,7 @@ def make_link_targets(
     .. _`proj_name`: url
     .. _`proj_name` mailing list: url
     """
-    link_contents = open(known_link_fname, "rt").readlines()
+    link_contents = open(known_link_fname).readlines()
     have_url = url is not None
     have_ml_url = ml_url is not None
     have_gh_url = None
@@ -133,18 +133,18 @@ def make_link_targets(
         )
     lines = []
     if url is not None:
-        lines.append(".. _%s: %s\n" % (proj_name, url))
+        lines.append(f".. _{proj_name}: {url}\n")
     if not have_gh_url:
-        gh_url = "http://github.com/%s/%s\n" % (user_name, repo_name)
-        lines.append(".. _`%s github`: %s\n" % (proj_name, gh_url))
+        gh_url = f"http://github.com/{user_name}/{repo_name}\n"
+        lines.append(f".. _`{proj_name} github`: {gh_url}\n")
     if ml_url is not None:
-        lines.append(".. _`%s mailing list`: %s\n" % (proj_name, ml_url))
+        lines.append(f".. _`{proj_name} mailing list`: {ml_url}\n")
     if len(lines) == 0:
         # Nothing to do
         return
     # A neat little header line
     lines = [".. %s\n" % proj_name] + lines
-    out_links = open(out_link_fname, "wt")
+    out_links = open(out_link_fname, "w")
     out_links.writelines(lines)
     out_links.close()
 
@@ -232,7 +232,7 @@ def main():
             out_path,
             cp_globs=(pjoin("gitwash", "*"),),
             rep_globs=("*.rst",),
-            renames=(("\.rst$", options.source_suffix),),
+            renames=((r"\.rst$", options.source_suffix),),
         )
         make_link_targets(
             project_name,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from ..nipype2boutiques import generate_boutiques_descriptor
@@ -20,7 +19,7 @@ def test_generate():
         author=("Oxford Centre for Functional" " MRI of the Brain (FMRIB)"),
     )
 
-    with open(example_data("nipype2boutiques_example.json"), "r") as desc_file:
+    with open(example_data("nipype2boutiques_example.json")) as desc_file:
         # Make sure that output descriptor matches the expected descriptor.
         output_desc = json.loads(desc)
         expected_desc = json.load(desc_file)

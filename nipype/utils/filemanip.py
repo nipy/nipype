@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
@@ -583,7 +582,7 @@ def load_json(filename):
 
     """
 
-    with open(filename, "r") as fp:
+    with open(filename) as fp:
         data = json.load(fp)
     return data
 
@@ -608,15 +607,15 @@ def loadpkl(infile):
         if infile.exists():
             timed_out = False
             break
-        fmlogger.debug("'{}' missing; waiting 2s".format(infile))
+        fmlogger.debug(f"'{infile}' missing; waiting 2s")
         sleep(2)
     if timed_out:
         error_message = (
-            "Result file {0} expected, but "
-            "does not exist after ({1}) "
+            "Result file {} expected, but "
+            "does not exist after ({}) "
             "seconds.".format(infile, timeout)
         )
-        raise IOError(error_message)
+        raise OSError(error_message)
 
     with pklopen(str(infile), "rb") as pkl_file:
         pkl_contents = pkl_file.read()
@@ -676,10 +675,10 @@ def crash2txt(filename, record):
     with open(filename, "w") as fp:
         if "node" in record:
             node = record["node"]
-            fp.write("Node: {}\n".format(node.fullname))
-            fp.write("Working directory: {}\n".format(node.output_dir()))
+            fp.write(f"Node: {node.fullname}\n")
+            fp.write(f"Working directory: {node.output_dir()}\n")
             fp.write("\n")
-            fp.write("Node inputs:\n{}\n".format(node.inputs))
+            fp.write(f"Node inputs:\n{node.inputs}\n")
         fp.write("".join(record["traceback"]))
 
 
@@ -710,7 +709,7 @@ def savepkl(filename, record, versioning=False):
         if versioning:
             metadata = json.dumps({"version": version})
             f.write(metadata.encode("utf-8"))
-            f.write("\n".encode("utf-8"))
+            f.write(b"\n")
         pickle.dump(record, f)
         content = f.getvalue()
 
@@ -739,14 +738,14 @@ def write_rst_header(header, level=0):
 def write_rst_list(items, prefix=""):
     out = []
     for item in ensure_list(items):
-        out.append("{} {}".format(prefix, str(item)))
+        out.append(f"{prefix} {str(item)}")
     return "\n".join(out) + "\n\n"
 
 
 def write_rst_dict(info, prefix=""):
     out = []
     for key, value in sorted(info.items()):
-        out.append("{}* {} : {}".format(prefix, key, str(value)))
+        out.append(f"{prefix}* {key} : {str(value)}")
     return "\n".join(out) + "\n\n"
 
 
@@ -934,7 +933,7 @@ def relpath(path, start=None):
             )
         else:
             raise ValueError(
-                "path is on drive %s, start on drive %s" % (path_list[0], start_list[0])
+                f"path is on drive {path_list[0]}, start on drive {start_list[0]}"
             )
     # Work out how much of the filepath is shared by start and path.
     for i in range(min(len(start_list), len(path_list))):

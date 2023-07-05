@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft = python sts = 4 ts = 4 sw = 4 et:
 """
@@ -305,7 +304,7 @@ class Deconvolve(AFNICommand):
                 if val.startswith("SYM: "):
                     value[n] = val.lstrip("SYM: ")
 
-        return super(Deconvolve, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         if skip is None:
@@ -317,7 +316,7 @@ class Deconvolve(AFNICommand):
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = "Decon.nii"
 
-        return super(Deconvolve, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -637,7 +636,7 @@ class Remlfit(AFNICommand):
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-        return super(Remlfit, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

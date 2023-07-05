@@ -338,7 +338,7 @@ class FitDwi(NiftyFitCommand):
             return ""
         if name == "tenmap2_file" and self.inputs.ten_type != "lower-tri":
             return ""
-        return super(FitDwi, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class DwiToolInputSpec(CommandLineInputSpec):
@@ -600,4 +600,4 @@ class DwiTool(NiftyFitCommand):
                 self.inputs.dti_flag2
             ):
                 return ""
-        return super(DwiTool, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)

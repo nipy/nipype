@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -30,7 +29,7 @@ class TVTKBaseInterface(BaseInterface):
     def __init__(self, **inputs):
         if VTKInfo.no_tvtk():
             raise ImportError("This interface requires tvtk to run.")
-        super(TVTKBaseInterface, self).__init__(**inputs)
+        super().__init__(**inputs)
 
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
@@ -92,7 +91,7 @@ class WarpPoints(TVTKBaseInterface):
 
         if ext[0] == ".":
             ext = ext[1:]
-        return op.abspath("%s_%s.%s" % (fname, suffix, ext))
+        return op.abspath(f"{fname}_{suffix}.{ext}")
 
     def _run_interface(self, runtime):
         import nibabel as nb
@@ -423,7 +422,7 @@ class P2PDistance(ComputeMeshWarp):
     """
 
     def __init__(self, **inputs):
-        super(P2PDistance, self).__init__(**inputs)
+        super().__init__(**inputs)
         IFLOGGER.warning(
             "This interface has been deprecated since 1.0, please "
             "use ComputeMeshWarp"

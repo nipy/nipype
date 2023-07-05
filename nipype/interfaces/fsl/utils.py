@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -261,8 +260,8 @@ class Smooth(FSLCommand):
     def _format_arg(self, name, trait_spec, value):
         if name == "fwhm":
             sigma = float(value) / np.sqrt(8 * np.log(2))
-            return super(Smooth, self)._format_arg(name, trait_spec, sigma)
-        return super(Smooth, self)._format_arg(name, trait_spec, value)
+            return super()._format_arg(name, trait_spec, sigma)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class SliceInputSpec(FSLCommandInputSpec):
@@ -410,7 +409,7 @@ class Merge(FSLCommand):
             if isdefined(self.inputs.tr):
                 return "-tr"
             return spec.argstr % value
-        return super(Merge, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ExtractROIInputSpec(FSLCommandInputSpec):
@@ -484,7 +483,7 @@ class ExtractROI(FSLCommand):
     def _format_arg(self, name, spec, value):
         if name == "crop_list":
             return " ".join(map(str, sum(list(map(list, value)), [])))
-        return super(ExtractROI, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         """Create a Bunch which contains all possible files generated
@@ -630,7 +629,7 @@ class ImageMaths(FSLCommand):
         return None
 
     def _parse_inputs(self, skip=None):
-        return super(ImageMaths, self)._parse_inputs(skip=["suffix"])
+        return super()._parse_inputs(skip=["suffix"])
 
     def _list_outputs(self):
         suffix = "_maths"  # ohinds: build suffix
@@ -716,7 +715,7 @@ class FilterRegressor(FSLCommand):
             except IndexError:
                 n_cols = 1
             return trait_spec.argstr % ",".join(map(str, list(range(1, n_cols + 1))))
-        return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -805,7 +804,7 @@ class ImageStats(FSLCommand):
                     return self.inputs.op_string % self.inputs.mask_file
                 else:
                     raise ValueError("-k %s option in op_string requires mask_file")
-        return super(ImageStats, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
@@ -814,7 +813,7 @@ class ImageStats(FSLCommand):
         if runtime is None:
             try:
                 out_stat = load_json(outfile)["stat"]
-            except IOError:
+            except OSError:
                 return self.run().outputs
         else:
             out_stat = []
@@ -883,7 +882,7 @@ class AvScale(CommandLine):
     _cmd = "avscale"
 
     def _run_interface(self, runtime):
-        runtime = super(AvScale, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
 
         expr = re.compile(
             r"Rotation & Translation Matrix:\n(?P<rot_tran_mat>[0-9\. \n-]+)[\s\n]*"
@@ -1070,12 +1069,12 @@ class Overlay(FSLCommand):
             else:
                 return "1"
         if name == "show_negative_stats":
-            return "%s %.2f %.2f" % (
+            return "{} {:.2f} {:.2f}".format(
                 self.inputs.stat_image,
                 self.inputs.stat_thresh[0] * -1,
                 self.inputs.stat_thresh[1] * -1,
             )
-        return super(Overlay, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1085,7 +1084,7 @@ class Overlay(FSLCommand):
                 not isdefined(self.inputs.show_negative_stats)
                 or not self.inputs.show_negative_stats
             ):
-                stem = "%s_and_%s" % (
+                stem = "{}_and_{}".format(
                     split_filename(self.inputs.stat_image)[1],
                     split_filename(self.inputs.stat_image2)[1],
                 )
@@ -1233,7 +1232,7 @@ class Slicer(FSLCommand):
                 return "-L"
             else:
                 return ""
-        return super(Slicer, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1350,7 +1349,7 @@ class PlotTimeSeries(FSLCommand):
             return "--ymin=%d --ymax=%d" % value
         elif name == "plot_size":
             return "-h %d -w %d" % value
-        return super(PlotTimeSeries, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1444,7 +1443,7 @@ class PlotMotionParams(FSLCommand):
             if self.inputs.plot_type == "displacement":
                 title = "-t 'MCFLIRT estimated mean displacement (mm)'"
                 labels = "-a abs,rel"
-                return "%s %s" % (title, labels)
+                return f"{title} {labels}"
 
             # Get the right starting and ending position depending on source
             # package
@@ -1453,17 +1452,17 @@ class PlotMotionParams(FSLCommand):
             )
 
             # Format the title properly
-            sfstr = "--start=%d --finish=%d" % sfdict["%s_%s" % (source, value[:3])]
+            sfstr = "--start=%d --finish=%d" % sfdict[f"{source}_{value[:3]}"]
             titledict = dict(fsl="MCFLIRT", spm="Realign")
             unitdict = dict(rot="radians", tra="mm")
 
-            title = "'%s estimated %s (%s)'" % (
+            title = "'{} estimated {} ({})'".format(
                 titledict[source],
                 value,
                 unitdict[value[:3]],
             )
 
-            return "-t %s %s -a x,y,z" % (title, sfstr)
+            return f"-t {title} {sfstr} -a x,y,z"
         elif name == "plot_size":
             return "-h %d -w %d" % value
         elif name == "in_file":
@@ -1473,7 +1472,7 @@ class PlotMotionParams(FSLCommand):
             else:
                 return "-i %s" % value
 
-        return super(PlotMotionParams, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1577,7 +1576,7 @@ class ConvertXFM(FSLCommand):
                 if self.inputs.concat_xfm:
                     _, infile2, _ = split_filename(self.inputs.in_file2)
                     outfile = fname_presuffix(
-                        "%s_%s" % (infile1, infile2),
+                        f"{infile1}_{infile2}",
                         suffix=".mat",
                         newpath=os.getcwd(),
                         use_ext=False,
@@ -2026,7 +2025,7 @@ class Complex(FSLCommand):
             skip += self.inputs._ofs[:1] + self.inputs._ofs[3:]
         else:
             skip += self.inputs._ofs[1:]
-        return super(Complex, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _gen_filename(self, name):
         if name == "complex_out_file":
@@ -2241,7 +2240,7 @@ class WarpUtils(FSLCommand):
             skip += ["out_jacobian"]
 
         skip += ["write_jacobian"]
-        return super(WarpUtils, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
 
 class ConvertWarpInputSpec(FSLCommandInputSpec):
@@ -2505,21 +2504,19 @@ class WarpPoints(CommandLine):
         self._in_file = None
         self._outformat = None
 
-        super(WarpPoints, self).__init__(command=command, **inputs)
+        super().__init__(command=command, **inputs)
 
     def _format_arg(self, name, trait_spec, value):
         if name == "out_file":
             return ""
 
-        return super(WarpPoints, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         fname, ext = op.splitext(self.inputs.in_coords)
         setattr(self, "_in_file", fname)
         setattr(self, "_outformat", ext[1:])
-        first_args = super(WarpPoints, self)._parse_inputs(
-            skip=["in_coords", "out_file"]
-        )
+        first_args = super()._parse_inputs(skip=["in_coords", "out_file"])
 
         second_args = fname + ".txt"
 
@@ -2584,7 +2581,7 @@ class WarpPoints(CommandLine):
 
     def _overload_extension(self, value, name):
         if name == "out_file":
-            return "%s.%s" % (value, getattr(self, "_outformat"))
+            return "{}.{}".format(value, getattr(self, "_outformat"))
 
     def _run_interface(self, runtime):
         fname = getattr(self, "_in_file")
@@ -2598,7 +2595,7 @@ class WarpPoints(CommandLine):
             tmpfile = self._tmpfile
             self._trk_to_coords(fname, out_file=tmpfile)
 
-        runtime = super(WarpPoints, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         newpoints = np.fromstring("\n".join(runtime.stdout.split("\n")[1:]), sep=" ")
 
         if tmpfile is not None:

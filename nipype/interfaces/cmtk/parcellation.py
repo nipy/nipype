@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -264,7 +263,7 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     log = cmp_config.get_logger()
 
     for out in comp:
-        mris_cmd = 'mris_ca_label %s %s "%s/surf/%s.sphere.reg" "%s" "%s" ' % (
+        mris_cmd = 'mris_ca_label {} {} "{}/surf/{}.sphere.reg" "{}" "{}" '.format(
             subject_id,
             out[0],
             op.join(subjects_dir, subject_id),
@@ -277,11 +276,13 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
 
         annot = '--annotation "%s"' % out[4]
 
-        mri_an_cmd = 'mri_annotation2label --subject %s --hemi %s --outdir "%s" %s' % (
-            subject_id,
-            out[0],
-            op.join(output_dir, out[3]),
-            annot,
+        mri_an_cmd = (
+            'mri_annotation2label --subject {} --hemi {} --outdir "{}" {}'.format(
+                subject_id,
+                out[0],
+                op.join(output_dir, out[3]),
+                annot,
+            )
         )
         iflogger.info(mri_an_cmd)
         runCmd(mri_an_cmd, log)
@@ -316,12 +317,12 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     )
     runCmd(mri_cmd, log)
     runCmd("mris_volmask %s" % subject_id, log)
-    mri_cmd = 'mri_convert -i "%s/mri/ribbon.mgz" -o "%s/mri/ribbon.nii.gz"' % (
+    mri_cmd = 'mri_convert -i "{}/mri/ribbon.mgz" -o "{}/mri/ribbon.nii.gz"'.format(
         op.join(subjects_dir, subject_id),
         op.join(subjects_dir, subject_id),
     )
     runCmd(mri_cmd, log)
-    mri_cmd = 'mri_convert -i "%s/mri/aseg.mgz" -o "%s/mri/aseg.nii.gz"' % (
+    mri_cmd = 'mri_convert -i "{}/mri/aseg.mgz" -o "{}/mri/aseg.nii.gz"'.format(
         op.join(subjects_dir, subject_id),
         op.join(subjects_dir, subject_id),
     )
@@ -407,15 +408,17 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
             labelpath = op.join(output_dir, parval["fs_label_subdir_name"] % hemi)
             # construct .label file name
 
-            fname = "%s.%s.label" % (hemi, brv["dn_fsname"])
+            fname = "{}.{}.label".format(hemi, brv["dn_fsname"])
 
             # execute fs mri_label2vol to generate volume roi from the label file
             # store it in temporary file to be overwritten for each region
 
-            mri_cmd = 'mri_label2vol --label "%s" --temp "%s" --o "%s" --identity' % (
-                op.join(labelpath, fname),
-                op.join(fs_dir, "mri", "orig.mgz"),
-                op.join(output_dir, "tmp.nii.gz"),
+            mri_cmd = (
+                'mri_label2vol --label "{}" --temp "{}" --o "{}" --identity'.format(
+                    op.join(labelpath, fname),
+                    op.join(fs_dir, "mri", "orig.mgz"),
+                    op.join(output_dir, "tmp.nii.gz"),
+                )
             )
             runCmd(mri_cmd, log)
 
@@ -656,7 +659,7 @@ def crop_and_move_datasets(
             raise Exception("File %s does not exist." % d[0])
         # reslice to original volume because the roi creation with freesurfer
         # changed to 256x256x256 resolution
-        mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, d[0], d[1])
+        mri_cmd = f'mri_convert -rl "{orig}" -rt nearest "{d[0]}" -nc "{d[1]}"'
         runCmd(mri_cmd, log)
 
 

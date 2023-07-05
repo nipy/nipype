@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various longitudinal commands provided by freesurfer
@@ -71,7 +70,7 @@ class MPRtoMNI305(FSScriptCommand):
     output_spec = MPRtoMNI305OutputSpec
 
     def __init__(self, **inputs):
-        super(MPRtoMNI305, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._environ_update, "target")
         self.inputs.on_trait_change(self._environ_update, "reference_dir")
 
@@ -85,7 +84,7 @@ class MPRtoMNI305(FSScriptCommand):
                 val, os.path.abspath(retval + ext), copy=True, hashmethod="content"
             )
             return retval
-        return super(MPRtoMNI305, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _environ_update(self):
         # refdir = os.path.join(Info.home(), val)
@@ -98,7 +97,7 @@ class MPRtoMNI305(FSScriptCommand):
         return split_filename(fname)[1]
 
     def _list_outputs(self):
-        outputs = super(MPRtoMNI305, self)._list_outputs()
+        outputs = super()._list_outputs()
         fullname = "_".join(
             [
                 self._get_fname(self.inputs.in_file),
@@ -308,7 +307,7 @@ class Register(FSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == "curv":
             return spec.argstr
-        return super(Register, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _gen_filename(self, name):
         if name == "out_file":
@@ -388,7 +387,7 @@ class Paint(FSCommand):
         if opt == "template":
             if isdefined(self.inputs.template_param):
                 return spec.argstr % (val + "#" + str(self.inputs.template_param))
-        return super(Paint, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -587,7 +586,7 @@ class MRICoreg(FSCommand):
             val = self._list_outputs()[opt]
         elif opt == "reference_mask" and val is False:
             return "--no-ref-mask"
-        return super(MRICoreg, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

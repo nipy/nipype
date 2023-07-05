@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -75,7 +74,7 @@ def test_fslmerge(create_files_in_directory_plus_output_type):
 
     # verify that providing a tr value updates the dimension to tr
     merger.inputs.tr = 2.25
-    assert merger.cmdline == "fslmerge -tr foo_merged.nii %s %.2f" % (
+    assert merger.cmdline == "fslmerge -tr foo_merged.nii {} {:.2f}".format(
         " ".join(filelist),
         2.25,
     )
@@ -89,7 +88,7 @@ def test_fslmerge(create_files_in_directory_plus_output_type):
         tr=2.25,
     )
 
-    assert merger2.cmdline == "fslmerge -tr foo_merged.nii %s %.2f" % (
+    assert merger2.cmdline == "fslmerge -tr foo_merged.nii {} {:.2f}".format(
         " ".join(filelist),
         2.25,
     )
@@ -168,9 +167,12 @@ def test_overlay(create_files_in_directory_plus_output_type):
         auto_thresh_bg=True,
         out_file="foo2_overlay.nii",
     )
-    assert overlay2.cmdline == "overlay 1 0 %s -a %s 2.50 10.00 foo2_overlay.nii" % (
-        filelist[1],
-        filelist[0],
+    assert (
+        overlay2.cmdline
+        == "overlay 1 0 {} -a {} 2.50 10.00 foo2_overlay.nii".format(
+            filelist[1],
+            filelist[0],
+        )
     )
 
 
@@ -196,9 +198,12 @@ def test_slicer(create_files_in_directory_plus_output_type):
     slicer.inputs.all_axial = True
     slicer.inputs.image_width = 750
     slicer.inputs.out_file = "foo_bar.png"
-    assert slicer.cmdline == "slicer %s %s -L -i 10.000 20.000  -A 750 foo_bar.png" % (
-        filelist[0],
-        filelist[1],
+    assert (
+        slicer.cmdline
+        == "slicer {} {} -L -i 10.000 20.000  -A 750 foo_bar.png".format(
+            filelist[0],
+            filelist[1],
+        )
     )
 
     # .run based parameter setting
@@ -313,7 +318,7 @@ def test_convertxfm(create_files_in_directory_plus_output_type):
     cvt2 = fsl.ConvertXFM(
         in_file=filelist[0], in_file2=filelist[1], concat_xfm=True, out_file="bar.mat"
     )
-    assert cvt2.cmdline == "convert_xfm -omat bar.mat -concat %s %s" % (
+    assert cvt2.cmdline == "convert_xfm -omat bar.mat -concat {} {}".format(
         filelist[1],
         filelist[0],
     )

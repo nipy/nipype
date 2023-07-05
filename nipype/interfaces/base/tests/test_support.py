@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -50,7 +49,7 @@ def test_bunch_hash():
     assert bhash == "d1f46750044c3de102efc847720fc35f"
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = md5()
-    with open(json_pth, "r") as fp:
+    with open(json_pth) as fp:
         jshash.update(fp.read().encode("utf-8"))
     assert newbdict["infile"][0][1] == jshash.hexdigest()
     assert newbdict["yat"] is True

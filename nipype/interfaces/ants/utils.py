@@ -196,7 +196,7 @@ class ImageMath(ANTSCommand, CopyHeaderInterface):
     )
 
     def __init__(self, **inputs):
-        super(ImageMath, self).__init__(**inputs)
+        super().__init__(**inputs)
         if self.inputs.operation in self._no_copy_header_operation:
             self.inputs.copy_header = False
 
@@ -304,7 +304,7 @@ class ResampleImageBySpacing(ANTSCommand):
 
             value = " ".join(["%g" % d for d in value])
 
-        return super(ResampleImageBySpacing, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class ThresholdImageInputSpec(ANTSCommandInputSpec):
@@ -508,7 +508,7 @@ class AI(ANTSCommand):
     output_spec = AIOuputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(AI, self)._run_interface(runtime, correct_return_codes)
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         self._output = {
             "output_transform": os.path.join(
@@ -527,14 +527,14 @@ class AI(ANTSCommand):
             return spec.argstr % val
 
         if opt == "search_grid":
-            fmtval = "[%s,%s]" % (val[0], "x".join("%g" % v for v in val[1]))
+            fmtval = "[{},{}]".format(val[0], "x".join("%g" % v for v in val[1]))
             return spec.argstr % fmtval
 
         if opt == "fixed_image_mask":
             if isdefined(self.inputs.moving_image_mask):
-                return spec.argstr % ("[%s,%s]" % (val, self.inputs.moving_image_mask))
+                return spec.argstr % (f"[{val},{self.inputs.moving_image_mask}]")
 
-        return super(AI, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         return getattr(self, "_output")
@@ -582,7 +582,7 @@ class AverageAffineTransform(ANTSCommand):
     output_spec = AverageAffineTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        return super(AverageAffineTransform, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -643,7 +643,7 @@ class AverageImages(ANTSCommand):
     output_spec = AverageImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        return super(AverageImages, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -699,7 +699,7 @@ class MultiplyImages(ANTSCommand):
     output_spec = MultiplyImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        return super(MultiplyImages, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -751,7 +751,7 @@ class CreateJacobianDeterminantImage(ANTSCommand):
     output_spec = CreateJacobianDeterminantImageOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        return super(CreateJacobianDeterminantImage, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
@@ -174,11 +173,11 @@ class Node(EngineBase):
         """
         # Make sure an interface is set, and that it is an Interface
         if interface is None:
-            raise IOError("Interface must be provided")
+            raise OSError("Interface must be provided")
         if not isinstance(interface, Interface):
-            raise IOError("interface must be an instance of an Interface")
+            raise OSError("interface must be an instance of an Interface")
 
-        super(Node, self).__init__(name, kwargs.get("base_dir"))
+        super().__init__(name, kwargs.get("base_dir"))
 
         self._interface = interface
         self._hierarchy = None
@@ -872,7 +871,7 @@ class JoinNode(Node):
 
         See Node docstring for additional keyword arguments.
         """
-        super(JoinNode, self).__init__(interface, name, **kwargs)
+        super().__init__(interface, name, **kwargs)
 
         self._joinsource = None  # The member should be defined
         self.joinsource = joinsource  # Let the setter do the job
@@ -938,9 +937,9 @@ class JoinNode(Node):
         """
         # create the new join item fields
         idx = self._next_slot_index
-        newfields = dict(
-            [(field, self._add_join_item_field(field, idx)) for field in self.joinfield]
-        )
+        newfields = {
+            field: self._add_join_item_field(field, idx) for field in self.joinfield
+        }
         # increment the join slot index
         logger.debug("Added the %s join item fields %s.", self, newfields)
         self._next_slot_index += 1
@@ -1001,7 +1000,7 @@ class JoinNode(Node):
     def _run_command(self, execute, copyfiles=True):
         """Collates the join inputs prior to delegating to the superclass."""
         self._collate_join_field_inputs()
-        return super(JoinNode, self)._run_command(execute, copyfiles)
+        return super()._run_command(execute, copyfiles)
 
     def _collate_join_field_inputs(self):
         """
@@ -1113,7 +1112,7 @@ class MapNode(Node):
         See Node docstring for additional keyword arguments.
         """
 
-        super(MapNode, self).__init__(interface, name, **kwargs)
+        super().__init__(interface, name, **kwargs)
         if isinstance(iterfield, (str, bytes)):
             iterfield = [iterfield]
         self.iterfield = iterfield
@@ -1291,7 +1290,7 @@ class MapNode(Node):
                     msg += ["Subnode %d failed" % i]
                     msg += ["Error: %s" % str(code)]
             raise NodeExecutionError(
-                "Subnodes of node: %s failed:\n%s" % (self.name, "\n".join(msg))
+                "Subnodes of node: {} failed:\n{}".format(self.name, "\n".join(msg))
             )
 
         return finalresult
@@ -1319,7 +1318,7 @@ class MapNode(Node):
             self._interface.inputs, fields=self.iterfield
         )
         self._inputs.trait_set(**old_inputs)
-        super(MapNode, self)._get_inputs()
+        super()._get_inputs()
 
     def _check_iterfield(self):
         """Checks iterfield

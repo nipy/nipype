@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Interfaces to the reconstruction algorithms in dipy
 

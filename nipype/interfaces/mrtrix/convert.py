@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os.path as op
@@ -119,7 +118,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             if len(pts_str) < (n_pts * bytesize):
                 if not n_streams == stream_count:
                     raise nb.trackvis.HeaderError(
-                        "Expecting %s points, found only %s" % (stream_count, n_streams)
+                        f"Expecting {stream_count} points, found only {n_streams}"
                     )
                     iflogger.error(
                         "Expecting %s points, found only %s", stream_count, n_streams

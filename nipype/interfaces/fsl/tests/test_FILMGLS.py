@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from nipype.interfaces.fsl.model import FILMGLS, FILMGLSInputSpec
 
 

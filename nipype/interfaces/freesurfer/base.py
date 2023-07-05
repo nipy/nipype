@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The freesurfer module provides basic functions for interfacing with
@@ -127,7 +126,7 @@ class FSCommand(CommandLine):
     _subjects_dir = None
 
     def __init__(self, **inputs):
-        super(FSCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._subjects_dir_update, "subjects_dir")
         if not self._subjects_dir:
             self._subjects_dir = Info.subjectsdir()
@@ -147,7 +146,7 @@ class FSCommand(CommandLine):
         if "subjects_dir" in inputs:
             self.inputs.subjects_dir = inputs["subjects_dir"]
         self._subjects_dir_update()
-        return super(FSCommand, self).run(**inputs)
+        return super().run(**inputs)
 
     def _gen_fname(self, basename, fname=None, cwd=None, suffix="_fs", use_ext=True):
         """Define a generic mapping for a single outfile
@@ -242,7 +241,7 @@ class FSCommandOpenMP(FSCommand):
     _num_threads = None
 
     def __init__(self, **inputs):
-        super(FSCommandOpenMP, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, "num_threads")
         if not self._num_threads:
             self._num_threads = os.environ.get("OMP_NUM_THREADS", None)
@@ -262,7 +261,7 @@ class FSCommandOpenMP(FSCommand):
         if "num_threads" in inputs:
             self.inputs.num_threads = inputs["num_threads"]
         self._num_threads_update()
-        return super(FSCommandOpenMP, self).run(**inputs)
+        return super().run(**inputs)
 
 
 def no_freesurfer():

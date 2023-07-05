@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -16,7 +15,7 @@ except ImportError:
     from logging.handlers import RotatingFileHandler as RFHandler
 
 
-class Logging(object):
+class Logging:
     """Nipype logging class"""
 
     fmt = "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"

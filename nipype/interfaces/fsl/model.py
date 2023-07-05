@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -144,10 +143,10 @@ class Level1Design(BaseInterface):
     output_spec = Level1DesignOutputSpec
 
     def _create_ev_file(self, evfname, evinfo):
-        f = open(evfname, "wt")
+        f = open(evfname, "w")
         for i in evinfo:
             if len(i) == 3:
-                f.write("%f %f %f\n" % (i[0], i[1], i[2]))
+                f.write(f"{i[0]:f} {i[1]:f} {i[2]:f}\n")
             else:
                 f.write("%f\n" % i[0])
         f.close()
@@ -466,7 +465,7 @@ class FEAT(FSLCommand):
         outputs = self._outputs().get()
         is_ica = False
         outputs["feat_dir"] = None
-        with open(self.inputs.fsf_file, "rt") as fp:
+        with open(self.inputs.fsf_file) as fp:
             text = fp.read()
             if "set fmri(inmelodic) 1" in text:
                 is_ica = True
@@ -523,13 +522,11 @@ class FEATModel(FSLCommand):
 
     def _format_arg(self, name, trait_spec, value):
         if name == "fsf_file":
-            return super(FEATModel, self)._format_arg(
-                name, trait_spec, self._get_design_root(value)
-            )
+            return super()._format_arg(name, trait_spec, self._get_design_root(value))
         elif name == "ev_files":
             return ""
         else:
-            return super(FEATModel, self)._format_arg(name, trait_spec, value)
+            return super()._format_arg(name, trait_spec, value)
 
     def _get_design_root(self, infile):
         _, fname = os.path.split(infile)
@@ -827,7 +824,7 @@ threshold=10, results_dir='stats')
     def _get_pe_files(self, cwd):
         files = None
         if isdefined(self.inputs.design_file):
-            fp = open(self.inputs.design_file, "rt")
+            fp = open(self.inputs.design_file)
             for line in fp.readlines():
                 if line.startswith("/NumWaves"):
                     numpes = int(line.split()[-1])
@@ -842,14 +839,14 @@ threshold=10, results_dir='stats')
         numtcons = 0
         numfcons = 0
         if isdefined(self.inputs.tcon_file):
-            fp = open(self.inputs.tcon_file, "rt")
+            fp = open(self.inputs.tcon_file)
             for line in fp.readlines():
                 if line.startswith("/NumContrasts"):
                     numtcons = int(line.split()[-1])
                     break
             fp.close()
         if isdefined(self.inputs.fcon_file):
-            fp = open(self.inputs.fcon_file, "rt")
+            fp = open(self.inputs.fcon_file)
             for line in fp.readlines():
                 if line.startswith("/NumContrasts"):
                     numfcons = int(line.split()[-1])
@@ -952,7 +949,7 @@ class FEATRegister(BaseInterface):
         for i, rundir in enumerate(ensure_list(self.inputs.feat_dirs)):
             fsf_txt += fsf_dirs.substitute(runno=i + 1, rundir=os.path.abspath(rundir))
         fsf_txt += fsf_footer.substitute()
-        f = open(os.path.join(os.getcwd(), "register.fsf"), "wt")
+        f = open(os.path.join(os.getcwd(), "register.fsf"), "w")
         f.write(fsf_txt)
         f.close()
 
@@ -1136,7 +1133,7 @@ class FLAMEO(FSLCommand):
         if os.access(os.path.join(cwd, log_dir), os.F_OK):
             rmtree(os.path.join(cwd, log_dir))
 
-        return super(FLAMEO, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     # ohinds: 2010-04-06
     # made these compatible with flameo
@@ -1280,7 +1277,7 @@ class ContrastMgr(FSLCommand):
         # The returncode is meaningless in ContrastMgr.  So check the output
         # in stderr and if it's set, then update the returncode
         # accordingly.
-        runtime = super(ContrastMgr, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -1292,7 +1289,7 @@ class ContrastMgr(FSLCommand):
             path, _ = os.path.split(value)
             return path
         else:
-            return super(ContrastMgr, self)._format_arg(name, trait_spec, value)
+            return super()._format_arg(name, trait_spec, value)
 
     def _get_design_root(self, infile):
         _, fname = os.path.split(infile)
@@ -1302,14 +1299,14 @@ class ContrastMgr(FSLCommand):
         numtcons = 0
         numfcons = 0
         if isdefined(self.inputs.tcon_file):
-            fp = open(self.inputs.tcon_file, "rt")
+            fp = open(self.inputs.tcon_file)
             for line in fp.readlines():
                 if line.startswith("/NumContrasts"):
                     numtcons = int(line.split()[-1])
                     break
             fp.close()
         if isdefined(self.inputs.fcon_file):
-            fp = open(self.inputs.fcon_file, "rt")
+            fp = open(self.inputs.fcon_file)
             for line in fp.readlines():
                 if line.startswith("/NumContrasts"):
                     numfcons = int(line.split()[-1])
@@ -1386,7 +1383,7 @@ class L2Model(BaseInterface):
         cwd = os.getcwd()
         mat_txt = [
             "/NumWaves   1",
-            "/NumPoints  {:d}".format(self.inputs.num_copes),
+            f"/NumPoints  {self.inputs.num_copes:d}",
             "/PPheights  1",
             "",
             "/Matrix",
@@ -1410,7 +1407,7 @@ class L2Model(BaseInterface):
 
         grp_txt = [
             "/NumWaves   1",
-            "/NumPoints  {:d}".format(self.inputs.num_copes),
+            f"/NumPoints  {self.inputs.num_copes:d}",
             "",
             "/Matrix",
         ]
@@ -1422,7 +1419,7 @@ class L2Model(BaseInterface):
 
         # write design files
         for i, name in enumerate(["design.mat", "design.con", "design.grp"]):
-            f = open(os.path.join(cwd, name), "wt")
+            f = open(os.path.join(cwd, name), "w")
             f.write(txt[name])
             f.close()
 
@@ -1591,7 +1588,7 @@ class MultipleRegressDesign(BaseInterface):
             if ("fts" in key) and (nfcons == 0):
                 continue
             filename = key.replace("_", ".")
-            f = open(os.path.join(cwd, filename), "wt")
+            f = open(os.path.join(cwd, filename), "w")
             f.write(val)
             f.close()
 
@@ -2098,7 +2095,7 @@ class Cluster(FSLCommand):
             else:
                 fname = value
             return spec.argstr % fname
-        return super(Cluster, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class DualRegressionInputSpec(FSLCommandInputSpec):
@@ -2338,21 +2335,17 @@ class Randomise(FSLCommand):
             prefix = "clusterm"
         if prefix:
             outputs["t_p_files"] = glob(
-                self._gen_fname("%s_%s_p_tstat*" % (self.inputs.base_name, prefix))
+                self._gen_fname(f"{self.inputs.base_name}_{prefix}_p_tstat*")
             )
             outputs["t_corrected_p_files"] = glob(
-                self._gen_fname(
-                    "%s_%s_corrp_tstat*.nii" % (self.inputs.base_name, prefix)
-                )
+                self._gen_fname(f"{self.inputs.base_name}_{prefix}_corrp_tstat*.nii")
             )
 
             outputs["f_p_files"] = glob(
-                self._gen_fname("%s_%s_p_fstat*.nii" % (self.inputs.base_name, prefix))
+                self._gen_fname(f"{self.inputs.base_name}_{prefix}_p_fstat*.nii")
             )
             outputs["f_corrected_p_files"] = glob(
-                self._gen_fname(
-                    "%s_%s_corrp_fstat*.nii" % (self.inputs.base_name, prefix)
-                )
+                self._gen_fname(f"{self.inputs.base_name}_{prefix}_corrp_fstat*.nii")
             )
         return outputs
 
@@ -2509,7 +2502,7 @@ class GLM(FSLCommand):
     output_spec = GLMOutputSpec
 
     def _list_outputs(self):
-        outputs = super(GLM, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if isdefined(self.inputs.out_cope):
             outputs["out_cope"] = os.path.abspath(self.inputs.out_cope)

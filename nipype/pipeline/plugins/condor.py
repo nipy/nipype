@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor
 """
 
@@ -44,7 +43,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
                 self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
             if "max_tries" in kwargs["plugin_args"]:
                 self._max_tries = kwargs["plugin_args"]["max_tries"]
-        super(CondorPlugin, self).__init__(template, **kwargs)
+        super().__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         cmd = CommandLine(
@@ -79,9 +78,9 @@ class CondorPlugin(SGELikeBatchManagerBase):
         if self._qsub_args:
             qsubargs = self._qsub_args
         if "-o" not in qsubargs:
-            qsubargs = "%s -o %s" % (qsubargs, path)
+            qsubargs = f"{qsubargs} -o {path}"
         if "-e" not in qsubargs:
-            qsubargs = "%s -e %s" % (qsubargs, path)
+            qsubargs = f"{qsubargs} -e {path}"
         if node._hierarchy:
             jobname = ".".join((dict(os.environ)["LOGNAME"], node._hierarchy, node._id))
         else:
@@ -89,7 +88,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split(".")
         jobnameitems.reverse()
         jobname = ".".join(jobnameitems)
-        cmd.inputs.args = "%s -N %s %s" % (qsubargs, jobname, scriptfile)
+        cmd.inputs.args = f"{qsubargs} -N {jobname} {scriptfile}"
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName("CRITICAL"))
         tries = 0

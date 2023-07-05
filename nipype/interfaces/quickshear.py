@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Quickshear is a simple geometric defacing algorithm."""
 
 from .base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File

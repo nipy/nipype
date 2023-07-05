@@ -110,7 +110,7 @@ class MRTrix3Base(CommandLine):
         if name == "out_bvec":
             return trait_spec.argstr % (value, self.inputs.out_bval)
 
-        return super(MRTrix3Base, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         if skip is None:
@@ -131,7 +131,7 @@ class MRTrix3Base(CommandLine):
         except AttributeError:
             pass
 
-        return super(MRTrix3Base, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     @property
     def version(self):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from collections import OrderedDict
 
 from copy import deepcopy
@@ -121,7 +120,7 @@ def _get_sorteddict(object, dictwithhash=False):
             else:
                 out = hash
         elif isinstance(object, float):
-            out = "%.10f".format(object)
+            out = f"%.10f"
         else:
             out = object
     return out
@@ -144,7 +143,7 @@ def safe_encode(x, as_literal=True):
         if os.path.exists(x):
             if x[0] != os.pathsep:
                 x = os.path.abspath(x)
-            value = "file://{}{}".format(platform.node().lower(), x)
+            value = f"file://{platform.node().lower()}{x}"
             if not as_literal:
                 return value
             try:
@@ -181,7 +180,7 @@ def safe_encode(x, as_literal=True):
         try:
             jsonstr = json.dumps(outdict)
         except UnicodeDecodeError as excp:
-            jsonstr = "Could not encode dictionary. {}".format(excp)
+            jsonstr = f"Could not encode dictionary. {excp}"
             logger.warning("Prov: %s", jsonstr)
 
         if not as_literal:
@@ -211,7 +210,7 @@ def safe_encode(x, as_literal=True):
         try:
             jsonstr = json.dumps(x)
         except UnicodeDecodeError as excp:
-            jsonstr = "Could not encode list/tuple. {}".format(excp)
+            jsonstr = f"Could not encode list/tuple. {excp}"
             logger.warning("Prov: %s", jsonstr)
 
         if not as_literal:
@@ -237,7 +236,7 @@ def safe_encode(x, as_literal=True):
             jsonstr = dumps(x)
             ltype = nipype_ns["pickle"]
         except TypeError as excp:
-            jsonstr = "Could not encode object. {}".format(excp)
+            jsonstr = f"Could not encode object. {excp}"
 
     if not as_literal:
         return jsonstr
@@ -310,7 +309,7 @@ def write_provenance(results, filename="provenance", format="all"):
     return prov
 
 
-class ProvStore(object):
+class ProvStore:
     def __init__(self):
         self.g = pm.ProvDocument()
         self.g.add_namespace(foaf)
@@ -327,7 +326,7 @@ class ProvStore(object):
         inputs = results.inputs
         outputs = results.outputs
         classname = interface.__name__
-        modulepath = "{0}.{1}".format(interface.__module__, interface.__name__)
+        modulepath = f"{interface.__module__}.{interface.__name__}"
         activitytype = "".join([i.capitalize() for i in modulepath.split(".")])
 
         a0_attrs = {
@@ -443,7 +442,7 @@ class ProvStore(object):
 
     def write_provenance(self, filename="provenance", format="all"):
         if format in ["provn", "all"]:
-            with open(filename + ".provn", "wt") as fp:
+            with open(filename + ".provn", "w") as fp:
                 fp.writelines(self.g.get_provn())
         try:
             if format in ["rdf", "all"]:

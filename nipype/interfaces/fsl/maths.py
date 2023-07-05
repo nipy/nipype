@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -117,7 +116,7 @@ class Threshold(MathsCommand):
                     arg += "p"
             arg += " %.10f" % value
             return arg
-        return super(Threshold, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class StdImageInput(MathsInput):
@@ -345,7 +344,7 @@ class IsotropicSmooth(MathsCommand):
         if name == "fwhm":
             sigma = float(value) / np.sqrt(8 * np.log(2))
             return spec.argstr % sigma
-        return super(IsotropicSmooth, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ApplyMaskInput(MathsInput):
@@ -416,7 +415,7 @@ class DilateImage(MathsCommand):
     def _format_arg(self, name, spec, value):
         if name == "operation":
             return spec.argstr % dict(mean="M", modal="D", max="F")[value]
-        return super(DilateImage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ErodeInput(KernelInput):
@@ -440,7 +439,7 @@ class ErodeImage(MathsCommand):
             if value:
                 return "-eroF"
             return "-ero"
-        return super(ErodeImage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class SpatialFilterInput(KernelInput):
@@ -501,7 +500,7 @@ class UnaryMaths(MathsCommand):
 
     def _list_outputs(self):
         self._suffix = "_" + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
+        return super()._list_outputs()
 
 
 class BinaryMathsInput(MathsInput):
@@ -579,7 +578,7 @@ class MultiImageMaths(MathsCommand):
     def _format_arg(self, name, spec, value):
         if name == "op_string":
             return value % tuple(self.inputs.operand_files)
-        return super(MultiImageMaths, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class TemporalFilterInput(MathsInput):

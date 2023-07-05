@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -43,12 +42,12 @@ def test_bet(setup_infile):
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, "foo_brain")
-    realcmd = "bet %s %s" % (tmp_infile, outfile)
+    realcmd = f"bet {tmp_infile} {outfile}"
     assert better.cmdline == realcmd
     # Test specified outfile name
     outfile = fsl_name(better, "/newdata/bar")
     better.inputs.out_file = outfile
-    realcmd = "bet %s %s" % (tmp_infile, outfile)
+    realcmd = f"bet {tmp_infile} {outfile}"
     assert better.cmdline == realcmd
 
     # infile foo.nii doesn't exist
@@ -104,13 +103,13 @@ def test_fast(setup_infile):
     assert faster.inputs.manual_seg == Undefined
     assert faster.inputs != fasted.inputs
     assert fasted.cmdline == "fast -v -S 1 %s" % (tmp_infile)
-    assert fasted2.cmdline == "fast -v -S 2 %s %s" % (tmp_infile, tmp_infile)
+    assert fasted2.cmdline == f"fast -v -S 2 {tmp_infile} {tmp_infile}"
 
     faster = fsl.FAST()
     faster.inputs.in_files = tmp_infile
     assert faster.cmdline == "fast -S 1 %s" % (tmp_infile)
     faster.inputs.in_files = [tmp_infile, tmp_infile]
-    assert faster.cmdline == "fast -S 2 %s %s" % (tmp_infile, tmp_infile)
+    assert faster.cmdline == f"fast -S 2 {tmp_infile} {tmp_infile}"
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -123,7 +122,7 @@ def test_fast(setup_infile):
         "segments": ("-g", True),
         "init_transform": ("-a %s" % (tmp_infile), "%s" % (tmp_infile)),
         "other_priors": (
-            "-A %s %s %s" % (tmp_infile, tmp_infile, tmp_infile),
+            f"-A {tmp_infile} {tmp_infile} {tmp_infile}",
             (["%s" % (tmp_infile), "%s" % (tmp_infile), "%s" % (tmp_infile)]),
         ),
         "no_pve": ("--nopve", True),
@@ -242,7 +241,7 @@ def test_flirt(setup_flirt):
     pth, fname, ext = split_filename(infile)
     outfile = fsl_name(flirter, "%s_flirt" % fname)
     outmat = "%s_flirt.mat" % fname
-    realcmd = "flirt -in %s -ref %s -out %s -omat %s" % (
+    realcmd = "flirt -in {} -ref {} -out {} -omat {}".format(
         infile,
         reffile,
         outfile,
@@ -303,7 +302,7 @@ def test_flirt(setup_flirt):
         else:
             value = trait_spec.default
             param = trait_spec.argstr % value
-        cmdline = "flirt -in %s -ref %s" % (infile, reffile)
+        cmdline = f"flirt -in {infile} -ref {reffile}"
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
         outfile = fsl_name(fsl.FLIRT(), "%s_flirt" % fname)

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 """ANTS Legacy Interfaces
 
 These interfaces are for programs that have been deprecated by ANTs, but
 are preserved for backwards compatibility.
 """
 
-from builtins import range
 
 import os
 from glob import glob
@@ -335,7 +333,7 @@ class buildtemplateparallel(ANTSCommand):
             else:
                 start = ""
             return start + " ".join(name for name in val)
-        return super(buildtemplateparallel, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -366,7 +364,7 @@ class buildtemplateparallel(ANTSCommand):
         outputs["subject_outfiles"] = []
         for filename in self.inputs.in_files:
             _, base, _ = split_filename(filename)
-            temp = glob(os.path.realpath("%s%s*" % (self.inputs.out_prefix, base)))
+            temp = glob(os.path.realpath(f"{self.inputs.out_prefix}{base}*"))
             for file_ in temp:
                 outputs["subject_outfiles"].append(file_)
         return outputs

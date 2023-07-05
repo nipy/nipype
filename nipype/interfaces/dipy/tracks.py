@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os.path as op
 import numpy as np
 import nibabel as nb
@@ -226,7 +224,7 @@ class StreamlineTractography(DipyBaseInterface):
 
         if not (isdefined(self.inputs.in_model) or isdefined(self.inputs.in_peaks)):
             raise RuntimeError(
-                ("At least one of in_model or in_peaks should " "be supplied")
+                "At least one of in_model or in_peaks should " "be supplied"
             )
 
         img = nb.load(self.inputs.in_file)

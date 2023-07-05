@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 import nibabel as nb
@@ -61,7 +60,7 @@ class ComputeMask(NipyBaseInterface):
 
         brain_mask = compute_mask(**args)
         _, name, ext = split_filename(self.inputs.mean_volume)
-        self._brain_mask_path = os.path.abspath("%s_mask.%s" % (name, ext))
+        self._brain_mask_path = os.path.abspath(f"{name}_mask.{ext}")
         nb.save(
             nb.Nifti1Image(brain_mask.astype(np.uint8), nii.affine),
             self._brain_mask_path,

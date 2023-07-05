@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -290,7 +289,7 @@ class FSLXCommand(FSLCommand):
 
     def _run_interface(self, runtime):
         self._out_dir = os.getcwd()
-        runtime = super(FSLXCommand, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -452,7 +451,7 @@ class BEDPOSTX5(FSLXCommand):
     _can_resume = True
 
     def __init__(self, **inputs):
-        super(BEDPOSTX5, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._cuda_update, "use_gpu")
 
     def _cuda_update(self):
@@ -475,7 +474,7 @@ class BEDPOSTX5(FSLXCommand):
             _, _, ext = split_filename(self.inputs.grad_dev)
             copyfile(self.inputs.grad_dev, os.path.join(subjectdir, "grad_dev" + ext))
 
-        retval = super(BEDPOSTX5, self)._run_interface(runtime)
+        retval = super()._run_interface(runtime)
 
         self._out_dir = subjectdir + ".bedpostX"
         return retval
@@ -816,7 +815,7 @@ class ProbTrackX(FSLCommand):
             ("Deprecated: Please use create_bedpostx_pipeline " "instead"),
             DeprecationWarning,
         )
-        return super(ProbTrackX, self).__init__(**inputs)
+        return super().__init__(**inputs)
 
     def _run_interface(self, runtime):
         for i in range(1, len(self.inputs.thsamples) + 1):
@@ -853,7 +852,7 @@ class ProbTrackX(FSLCommand):
                     f.write("%s\n" % seed)
             f.close()
 
-        runtime = super(ProbTrackX, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -861,12 +860,12 @@ class ProbTrackX(FSLCommand):
     def _format_arg(self, name, spec, value):
         if name == "target_masks" and isdefined(value):
             fname = "targets.txt"
-            return super(ProbTrackX, self)._format_arg(name, spec, [fname])
+            return super()._format_arg(name, spec, [fname])
         elif name == "seed" and isinstance(value, list):
             fname = "seeds.txt"
-            return super(ProbTrackX, self)._format_arg(name, spec, fname)
+            return super()._format_arg(name, spec, fname)
         else:
-            return super(ProbTrackX, self)._format_arg(name, spec, value)
+            return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1068,7 +1067,7 @@ class ProbTrackX2(ProbTrackX):
     output_spec = ProbTrackX2OutputSpec
 
     def _list_outputs(self):
-        outputs = super(ProbTrackX2, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if not isdefined(self.inputs.out_dir):
             out_dir = os.getcwd()
@@ -1200,7 +1199,7 @@ class VecReg(FSLCommand):
             self.inputs.out_file = self._gen_fname(
                 base_name, cwd=os.path.abspath(pth), suffix="_vreg"
             )
-        return super(VecReg, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1274,7 +1273,7 @@ class ProjThresh(FSLCommand):
                 self._gen_fname(
                     base_name,
                     cwd=cwd,
-                    suffix="_proj_seg_thr_{}".format(self.inputs.threshold),
+                    suffix=f"_proj_seg_thr_{self.inputs.threshold}",
                 )
             )
         return outputs
@@ -1328,7 +1327,7 @@ class FindTheBiggest(FSLCommand):
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = self._gen_fname("biggestSegmentation", suffix="")
-        return super(FindTheBiggest, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1440,7 +1439,7 @@ class TractSkeleton(FSLCommand):
                 return spec.argstr % self._list_outputs()["skeleton_file"]
             else:
                 return spec.argstr % value
-        return super(TractSkeleton, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1514,7 +1513,7 @@ class DistanceMap(FSLCommand):
         if name == "local_max_file":
             if isinstance(value, bool):
                 return spec.argstr % self._list_outputs()["local_max_file"]
-        return super(DistanceMap, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

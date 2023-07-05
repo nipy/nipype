@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """DTITK registration interfaces
@@ -118,7 +117,7 @@ class Rigid(CommandLineDtitk):
         return super(Rigid, self)._format_arg(name, spec, value)"""
 
     def _run_interface(self, runtime):
-        runtime = super(Rigid, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if """.aff doesn't exist or can't be opened""" in runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -445,7 +444,7 @@ class AffScalarVol(CommandLineDtitk):
     def _format_arg(self, name, spec, value):
         if name == "interpolation":
             value = {"trilinear": 0, "NN": 1}[value]
-        return super(AffScalarVol, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class DiffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
@@ -530,7 +529,7 @@ class DiffeoSymTensor3DVol(CommandLineDtitk):
     def _format_arg(self, name, spec, value):
         if name == "resampling_type":
             value = {"forward": 0, "backward": 1}[value]
-        return super(DiffeoSymTensor3DVol, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class DiffeoScalarVolInputSpec(CommandLineInputSpec):
@@ -607,7 +606,7 @@ class DiffeoScalarVol(CommandLineDtitk):
             value = {"forward": 0, "backward": 1}[value]
         elif name == "interpolation":
             value = {"trilinear": 0, "NN": 1}[value]
-        return super(DiffeoScalarVol, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class RigidTask(DTITKRenameMixin, Rigid):

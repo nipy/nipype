@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 
 from ...utils.filemanip import split_filename
@@ -938,7 +936,7 @@ class TrackDT(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "dt"
-        return super(TrackDT, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackPICoInputSpec(TrackInputSpec):
@@ -975,7 +973,7 @@ class TrackPICo(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "pico"
-        return super(TrackPICo, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBedpostxDeterInputSpec(TrackInputSpec):
@@ -1025,7 +1023,7 @@ class TrackBedpostxDeter(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bedpostx_dyad"
-        return super(TrackBedpostxDeter, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBedpostxProbaInputSpec(TrackInputSpec):
@@ -1086,7 +1084,7 @@ class TrackBedpostxProba(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bedpostx"
-        return super(TrackBedpostxProba, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBayesDiracInputSpec(TrackInputSpec):
@@ -1187,7 +1185,7 @@ class TrackBayesDirac(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bayesdirac"
-        return super(TrackBayesDirac, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBallStick(Track):
@@ -1206,7 +1204,7 @@ class TrackBallStick(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "ballstick"
-        return super(TrackBallStick, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBootstrapInputSpec(TrackInputSpec):
@@ -1268,7 +1266,7 @@ class TrackBootstrap(Track):
     input_spec = TrackBootstrapInputSpec
 
     def __init__(self, command=None, **inputs):
-        return super(TrackBootstrap, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
