@@ -8,14 +8,17 @@ def test_ReconAll_inputs():
             argstr="-FLAIR %s",
             extensions=None,
             min_ver="5.3.0",
+            requires=["subject_id"],
         ),
         T1_files=dict(
             argstr="-i %s...",
+            requires=["subject_id"],
         ),
         T2_file=dict(
             argstr="-T2 %s",
             extensions=None,
             min_ver="5.3.0",
+            requires=["subject_id"],
         ),
         args=dict(
             argstr="%s",
@@ -33,6 +36,7 @@ def test_ReconAll_inputs():
         ),
         brainstem=dict(
             argstr="-brainstem-structures",
+            requires=["subject_id"],
         ),
         directive=dict(
             argstr="-%s",
@@ -52,14 +56,17 @@ def test_ReconAll_inputs():
         ),
         hemi=dict(
             argstr="-hemi %s",
+            requires=["subject_id"],
         ),
         hippocampal_subfields_T1=dict(
             argstr="-hippocampal-subfields-T1",
             min_ver="6.0.0",
+            requires=["subject_id"],
         ),
         hippocampal_subfields_T2=dict(
             argstr="-hippocampal-subfields-T2 %s %s",
             min_ver="6.0.0",
+            requires=["subject_id"],
         ),
         hires=dict(
             argstr="-hires",
@@ -77,6 +84,7 @@ def test_ReconAll_inputs():
         ),
         mprage=dict(
             argstr="-mprage",
+            requires=["subject_id"],
         ),
         mri_aparc2aseg=dict(
             xor=["expert"],
@@ -161,6 +169,7 @@ def test_ReconAll_inputs():
         ),
         subject_id=dict(
             argstr="-subjid %s",
+            xor=["base_template_id", "longitudinal_timepoint_id"],
         ),
         subjects_dir=dict(
             argstr="-sd %s",
