@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -219,7 +218,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg %s %s %s -omp 1" % (
+    expected_argv = "{} {} -avg {} {} {} -omp 1".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.nii.gz"),
         one_file,
@@ -230,7 +229,7 @@ def test_reg_average():
     assert argv.decode("utf-8") == expected_argv
 
     # Test command line with text file
-    expected_cmd = "%s --cmd_file %s" % (
+    expected_cmd = "{} --cmd_file {}".format(
         get_custom_path("reg_average"),
         reg_average_cmd,
     )
@@ -252,7 +251,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg %s %s %s -omp 1" % (
+    expected_argv = "{} {} -avg {} {} {} -omp 1".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.txt"),
         one_file,
@@ -277,7 +276,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg_lts %s %s %s -omp 1" % (
+    expected_argv = "{} {} -avg_lts {} {} {} -omp 1".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.txt"),
         one_file,
@@ -314,7 +313,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s" % (
+    expected_argv = "{} {} -avg_tran {} -omp 1 {} {} {} {} {} {}".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.nii.gz"),
         ref_file,
@@ -361,7 +360,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s" % (
+    expected_argv = "{} {} -demean3 {} -omp 1 {} {} {} {} {} {} {} {} {}".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.nii.gz"),
         ref_file,

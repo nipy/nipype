@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utilities to pull in documentation from command-line tools.
@@ -40,8 +39,8 @@ def grab_doc(cmd, trap_error=True):
     stdout, stderr = proc.communicate()
 
     if trap_error and proc.returncode:
-        msg = "Attempting to run %s. Returned Error: %s" % (cmd, stderr)
-        raise IOError(msg)
+        msg = f"Attempting to run {cmd}. Returned Error: {stderr}"
+        raise OSError(msg)
 
     if stderr:
         # A few programs, like fast and fnirt, send their help to

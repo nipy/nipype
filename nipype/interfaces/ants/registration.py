@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The ants module provides basic functions for interfacing with ants
    functions.
 """
@@ -16,7 +15,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     fixed_image = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("image to which the moving image is " "warped"),
+        desc=("image to which the moving image is warped"),
     )
     moving_image = InputMultiPath(
         File(exists=True),
@@ -203,7 +202,7 @@ class ANTS(ANTSCommand):
         return "".join(retval)
 
     def _regularization_constructor(self):
-        return "--regularization {0}[{1},{2}]".format(
+        return "--regularization {}[{},{}]".format(
             self.inputs.regularization,
             self.inputs.regularization_gradient_field_sigma,
             self.inputs.regularization_deformation_field_sigma,
@@ -237,7 +236,7 @@ class ANTS(ANTSCommand):
                 return "--use-Histogram-Matching 1"
             else:
                 return "--use-Histogram-Matching 0"
-        return super(ANTS, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1012,12 +1011,12 @@ class Registration(ANTSCommand):
     ]
 
     def __init__(self, **inputs):
-        super(Registration, self).__init__(**inputs)
+        super().__init__(**inputs)
         self._elapsed_time = None
         self._metric_value = None
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(Registration, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
 
         # Parse some profiling info
         output = runtime.stdout or runtime.merged
@@ -1078,7 +1077,7 @@ class Registration(ANTSCommand):
             indexes = list(range(0, len(name_input)))
             specs = list()
             for i in indexes:
-                temp = dict([(k, v[i]) for k, v in items])
+                temp = {k: v[i] for k, v in items}
                 if len(self.inputs.fixed_image) == 1:
                     temp["fixed_image"] = self.inputs.fixed_image[0]
                 else:
@@ -1195,7 +1194,7 @@ class Registration(ANTSCommand):
                     moving_mask = moving_masks[ii if len(moving_masks) > 1 else 0]
                 else:
                     moving_mask = "NULL"
-                retval.append("--masks [ %s, %s ]" % (fixed_mask, moving_mask))
+                retval.append(f"--masks [ {fixed_mask}, {moving_mask} ]")
         return " ".join(retval)
 
     def _get_outputfilenames(self, inverse=False):
@@ -1248,7 +1247,7 @@ class Registration(ANTSCommand):
                 )
             )
         self._quantilesDone = True
-        return "--winsorize-image-intensities [ %s, %s ]" % (
+        return "--winsorize-image-intensities [ {}, {} ]".format(
             self.inputs.winsorize_lower_quantile,
             self.inputs.winsorize_upper_quantile,
         )
@@ -1275,7 +1274,7 @@ class Registration(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == "fixed_image_mask":
             if isdefined(self.inputs.moving_image_mask):
-                return "--masks [ %s, %s ]" % (
+                return "--masks [ {}, {} ]".format(
                     self.inputs.fixed_image_mask,
                     self.inputs.moving_image_mask,
                 )
@@ -1303,7 +1302,7 @@ class Registration(ANTSCommand):
                 "Gaussian",
                 "GenericLabel",
             ] and isdefined(self.inputs.interpolation_parameters):
-                return "--interpolation %s[ %s ]" % (
+                return "--interpolation {}[ {} ]".format(
                     self.inputs.interpolation,
                     ", ".join(
                         [str(param) for param in self.inputs.interpolation_parameters]
@@ -1315,13 +1314,13 @@ class Registration(ANTSCommand):
             out_filename = self._get_outputfilenames(inverse=False)
             inv_out_filename = self._get_outputfilenames(inverse=True)
             if out_filename and inv_out_filename:
-                return "--output [ %s, %s, %s ]" % (
+                return "--output [ {}, {}, {} ]".format(
                     self.inputs.output_transform_prefix,
                     out_filename,
                     inv_out_filename,
                 )
             elif out_filename:
-                return "--output [ %s, %s ]" % (
+                return "--output [ {}, {} ]".format(
                     self.inputs.output_transform_prefix,
                     out_filename,
                 )
@@ -1336,7 +1335,7 @@ class Registration(ANTSCommand):
         # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
         # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
         #    return self._formatCollapseLinearTransformsToFixedImageHeader()
-        return super(Registration, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _output_filenames(self, prefix, count, transform, inverse=False):
         self.low_dimensional_transform_map = {
@@ -1626,7 +1625,7 @@ class MeasureImageSimilarity(ANTSCommand):
             return self._metric_constructor()
         elif opt == "fixed_image_mask":
             return self._mask_constructor()
-        return super(MeasureImageSimilarity, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
@@ -1772,7 +1771,7 @@ class RegistrationSynQuick(ANTSCommand):
     def _format_arg(self, name, spec, value):
         if name == "precision_type":
             return spec.argstr % value[0]
-        return super(RegistrationSynQuick, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1868,13 +1867,13 @@ class CompositeTransformUtil(ANTSCommand):
             return ""
         if name == "out_file" and self.inputs.process == "disassemble":
             return ""
-        return super(CompositeTransformUtil, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if self.inputs.process == "disassemble":
             outputs["affine_transform"] = os.path.abspath(
-                "00_{}_AffineTransform.mat".format(self.inputs.output_prefix)
+                f"00_{self.inputs.output_prefix}_AffineTransform.mat"
             )
             outputs["displacement_field"] = os.path.abspath(
                 "01_{}_DisplacementFieldTransform.nii.gz".format(

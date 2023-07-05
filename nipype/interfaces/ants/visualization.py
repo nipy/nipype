@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """The ants visualisation module provides basic functions based on ITK.
 """
 
@@ -98,7 +97,7 @@ class ConvertScalarImageToRGB(ANTSCommand):
     output_spec = ConvertScalarImageToRGBOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        return super(ConvertScalarImageToRGB, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

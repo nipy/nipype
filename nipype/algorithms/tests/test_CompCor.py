@@ -261,7 +261,7 @@ class TestCompCor:
         assert os.path.exists(expected_file)
         assert os.path.getsize(expected_file) > 0
 
-        with open(ccresult.outputs.components_file, "r") as components_file:
+        with open(ccresult.outputs.components_file) as components_file:
             header = components_file.readline().rstrip().split("\t")
             components_data = np.loadtxt(components_file, delimiter="\t")
 
@@ -283,7 +283,7 @@ class TestCompCor:
             assert os.path.exists(expected_metadata_file)
             assert os.path.getsize(expected_metadata_file) > 0
 
-            with open(ccresult.outputs.metadata_file, "r") as metadata_file:
+            with open(ccresult.outputs.metadata_file) as metadata_file:
                 components_metadata = [
                     line.rstrip().split("\t") for line in metadata_file
                 ]

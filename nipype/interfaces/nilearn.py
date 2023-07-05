@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Nilearn is a Python library for fast and easy statistical learning on NeuroImaging data."""
@@ -45,7 +44,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
         "signals.tsv",
         usedefault=True,
         exists=False,
-        desc="The name of the file to output to. " "signals.tsv by default",
+        desc="The name of the file to output to. signals.tsv by default",
     )
     incl_shared_variance = traits.Bool(
         True,

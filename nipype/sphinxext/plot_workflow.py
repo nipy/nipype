@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -273,7 +272,7 @@ class WorkflowDirective(Directive):
             else:
                 function_name = None
 
-            with open(source_file_name, "r", encoding="utf-8") as fd:
+            with open(source_file_name, encoding="utf-8") as fd:
                 code = fd.read()
             output_base = os.path.basename(source_file_name)
         else:
@@ -388,7 +387,7 @@ class WorkflowDirective(Directive):
                 images = []
 
             opts = [
-                ":%s: %s" % (key, val)
+                f":{key}: {val}"
                 for key, val in list(self.options.items())
                 if key in ("alt", "height", "width", "scale", "align", "class")
             ]
@@ -585,14 +584,14 @@ Exception occurred rendering plot.
 wf_context = dict()
 
 
-class ImageFile(object):
+class ImageFile:
     def __init__(self, basename, dirname):
         self.basename = basename
         self.dirname = dirname
         self.formats = []
 
     def filename(self, fmt):
-        return os.path.join(self.dirname, "%s.%s" % (self.basename, fmt))
+        return os.path.join(self.dirname, f"{self.basename}.{fmt}")
 
     def filenames(self):
         return [self.filename(fmt) for fmt in self.formats]

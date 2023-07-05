@@ -298,16 +298,14 @@ class TensorMetricsInputSpec(CommandLineInputSpec):
     in_mask = File(
         exists=True,
         argstr="-mask %s",
-        desc=(
-            "only perform computation within the specified binary" " brain mask image"
-        ),
+        desc=("only perform computation within the specified binary brain mask image"),
     )
     modulate = traits.Enum(
         "FA",
         "none",
         "eval",
         argstr="-modulate %s",
-        desc=("how to modulate the magnitude of the" " eigenvectors"),
+        desc=("how to modulate the magnitude of the eigenvectors"),
     )
 
 
@@ -364,7 +362,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
     reference = File(
         exists=True,
         argstr="-template %s",
-        desc="a reference" "image to be used as template",
+        desc="a reference image to be used as template",
     )
     vox_size = traits.List(
         traits.Int, argstr="-vox %s", sep=",", desc="voxel dimensions"
@@ -384,7 +382,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
     )
     max_tod = traits.Int(
         argstr="-tod %d",
-        desc="generate a Track Orientation " "Distribution (TOD) in each voxel.",
+        desc="generate a Track Orientation Distribution (TOD) in each voxel.",
     )
 
     contrast = traits.Enum(
@@ -396,7 +394,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         "fod_amp",
         "curvature",
         argstr="-constrast %s",
-        desc="define the desired " "form of contrast for the output image",
+        desc="define the desired form of contrast for the output image",
     )
     in_map = File(
         exists=True,
@@ -463,17 +461,17 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         "(these lengths are then taken into account during TWI calculation)",
     )
     ends_only = traits.Bool(
-        argstr="-ends_only", desc="only map the streamline" " endpoints to the image"
+        argstr="-ends_only", desc="only map the streamline endpoints to the image"
     )
 
     tck_weights = File(
         exists=True,
         argstr="-tck_weights_in %s",
-        desc="specify" " a text scalar file containing the streamline weights",
+        desc="specify a text scalar file containing the streamline weights",
     )
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 
@@ -570,7 +568,7 @@ class TCK2VTKInputSpec(CommandLineInputSpec):
 
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 

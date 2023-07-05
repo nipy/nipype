@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via SLURM
 """
 import os
@@ -59,7 +58,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                 ]
             else:
                 self._dont_resubmit_completed_jobs = False
-        super(SLURMGraphPlugin, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         def make_job_name(jobnumber, nodeslist):
@@ -68,7 +67,7 @@ class SLURMGraphPlugin(GraphPluginBase):
             - nodeslist: The name of the node being processed
             - return: A string representing this job to be displayed by SLURM
             """
-            job_name = "j{0}_{1}".format(jobnumber, nodeslist[jobnumber]._id)
+            job_name = f"j{jobnumber}_{nodeslist[jobnumber]._id}"
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
             job_name = job_name.replace("-", "_").replace(".", "_").replace(":", "_")
             return job_name
@@ -96,7 +95,7 @@ class SLURMGraphPlugin(GraphPluginBase):
 
                 cache_doneness_per_node[idx] = node_status_done
 
-        with open(submitjobsfile, "wt") as fp:
+        with open(submitjobsfile, "w") as fp:
             fp.writelines("#!/usr/bin/env bash\n")
             fp.writelines("# Condense format attempted\n")
             for idx, pyscript in enumerate(pyfiles):
@@ -110,9 +109,7 @@ class SLURMGraphPlugin(GraphPluginBase):
 
                     batch_dir, name = os.path.split(pyscript)
                     name = ".".join(name.split(".")[:-1])
-                    batchscript = "\n".join(
-                        (template, "%s %s" % (sys.executable, pyscript))
-                    )
+                    batchscript = "\n".join((template, f"{sys.executable} {pyscript}"))
                     batchscriptfile = os.path.join(
                         batch_dir, "batchscript_%s.sh" % name
                     )
@@ -120,7 +117,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                     batchscriptoutfile = batchscriptfile + ".o"
                     batchscripterrfile = batchscriptfile + ".e"
 
-                    with open(batchscriptfile, "wt") as batchfp:
+                    with open(batchscriptfile, "w") as batchfp:
                         batchfp.writelines(batchscript)
                         batchfp.close()
                     deps = ""
@@ -144,10 +141,10 @@ class SLURMGraphPlugin(GraphPluginBase):
                     # Do not use default output locations if they are set in self._sbatch_args
                     stderrFile = ""
                     if self._sbatch_args.count("-e ") == 0:
-                        stderrFile = "-e {errFile}".format(errFile=batchscripterrfile)
+                        stderrFile = f"-e {batchscripterrfile}"
                     stdoutFile = ""
                     if self._sbatch_args.count("-o ") == 0:
-                        stdoutFile = "-o {outFile}".format(outFile=batchscriptoutfile)
+                        stdoutFile = f"-o {batchscriptoutfile}"
                     full_line = "{jobNm}=$(sbatch {outFileOption} {errFileOption} {extraSBatchArgs} {dependantIndex} -J {jobNm} {batchscript} | awk '/^Submitted/ {{print $4}}')\n".format(
                         jobNm=jobname,
                         outFileOption=stdoutFile,

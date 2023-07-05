@@ -89,7 +89,7 @@ class MathsCommand(NiftySegCommand):
         if suffix != "_merged" and isdefined(self.inputs.operation):
             suffix = "_" + self.inputs.operation
 
-        return os.path.join(path, "{0}{1}{2}".format(base, suffix, ext))
+        return os.path.join(path, f"{base}{suffix}{ext}")
 
 
 class UnaryMathsInput(MathsInput):
@@ -356,12 +356,12 @@ class BinaryMaths(MathsCommand):
             # Only float
             if val in ["pow", "thr", "uthr", "smo", "edge", "sobel3", "sobel5", "smol"]:
                 if not isdefined(self.inputs.operand_value):
-                    err = "operand_value not set for {0}.".format(val)
+                    err = f"operand_value not set for {val}."
                     raise NipypeInterfaceError(err)
             # only files
             elif val in ["min", "llsnorm", "masknan", "hdr_copy"]:
                 if not isdefined(self.inputs.operand_file):
-                    err = "operand_file not set for {0}.".format(val)
+                    err = f"operand_file not set for {val}."
                     raise NipypeInterfaceError(err)
             # splitinter:
             elif val == "splitinter":
@@ -372,16 +372,16 @@ class BinaryMaths(MathsCommand):
         if opt == "operand_value" and float(val) == 0.0:
             return "0"
 
-        return super(BinaryMaths, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _overload_extension(self, value, name=None):
         if self.inputs.operation == "hdr_copy":
             path, base, _ = split_filename(value)
             _, base, ext = split_filename(self.inputs.operand_file)
             suffix = self.inputs.operation
-            return os.path.join(path, "{0}{1}{2}".format(base, suffix, ext))
+            return os.path.join(path, f"{base}{suffix}{ext}")
         else:
-            return super(BinaryMaths, self)._overload_extension(value, name)
+            return super()._overload_extension(value, name)
 
 
 class BinaryMathsInputInteger(MathsInput):
@@ -600,4 +600,4 @@ class Merge(MathsCommand):
         if opt == "merge_files":
             return "-merge %d %d %s" % (len(val), self.inputs.dimension, " ".join(val))
 
-        return super(Merge, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)

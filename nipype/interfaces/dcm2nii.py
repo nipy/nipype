@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """dcm2nii converts images from the proprietary scanner DICOM format to NIfTI."""
 import os
 import re
@@ -150,11 +149,11 @@ class Dcm2nii(CommandLine):
                 val = True
         if opt == "source_names":
             return spec.argstr % val[0]
-        return super(Dcm2nii, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         self._config_created = False
-        new_runtime = super(Dcm2nii, self)._run_interface(runtime)
+        new_runtime = super()._run_interface(runtime)
         (
             self.output_files,
             self.reoriented_files,
@@ -202,7 +201,7 @@ class Dcm2nii(CommandLine):
                     # just above
                     for l in (bvecs, bvals):
                         l[-1] = os.path.join(
-                            os.path.dirname(l[-1]), "x%s" % (os.path.basename(l[-1]),)
+                            os.path.dirname(l[-1]), f"x{os.path.basename(l[-1])}"
                         )
                 elif re.search(".*->(.*)", line):
                     val = re.search(".*->(.*)", line)
@@ -443,13 +442,11 @@ class Dcm2niix(CommandLine):
                 val = True
         if opt == "source_names":
             return spec.argstr % (os.path.dirname(val[0]) or ".")
-        return super(Dcm2niix, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         # may use return code 1 despite conversion
-        runtime = super(Dcm2niix, self)._run_interface(
-            runtime, correct_return_codes=(0, 1)
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes=(0, 1))
         self._parse_files(self._parse_stdout(runtime.stdout))
         return runtime
 

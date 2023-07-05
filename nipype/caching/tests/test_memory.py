@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Test the nipype interface caching mechanism
 """
 
@@ -16,7 +15,7 @@ class SideEffectInterface(EngineTestInterface):
     def _run_interface(self, runtime):
         global nb_runs
         nb_runs += 1
-        return super(SideEffectInterface, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
 
 def test_caching(tmpdir):

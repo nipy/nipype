@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The ants module provides basic functions for interfacing with ANTS tools."""
@@ -74,7 +73,7 @@ class ANTSCommand(CommandLine):
     _num_threads = LOCAL_DEFAULT_NUMBER_OF_THREADS
 
     def __init__(self, **inputs):
-        super(ANTSCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, "num_threads")
 
         if not isdefined(self.inputs.num_threads):

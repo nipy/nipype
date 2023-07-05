@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The dtk module provides basic functions for interfacing with
@@ -19,7 +18,7 @@ from ..base import CommandLine
 __docformat__ = "restructuredtext"
 
 
-class Info(object):
+class Info:
     """Handle dtk output type and version information.
 
     Examples

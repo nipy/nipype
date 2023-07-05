@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Experimental Slicer wrapper - Work in progress."""
@@ -39,7 +38,7 @@ class SlicerCommandLine(CommandLine):
             raise Exception(cmd.cmdline + " failed:\n%s" % ret.runtime.stderr)
 
     def _outputs(self):
-        base = super(SlicerCommandLine, self)._outputs()
+        base = super()._outputs()
         undefined_output_traits = {}
         for key in [
             node.getElementsByTagName("name")[0].firstChild.nodeValue
@@ -53,9 +52,7 @@ class SlicerCommandLine(CommandLine):
 
     def __init__(self, module, **inputs):
         warnings.warn("slicer is Not fully implemented", RuntimeWarning)
-        super(SlicerCommandLine, self).__init__(
-            command="Slicer3 --launch %s " % module, name=module, **inputs
-        )
+        super().__init__(command="Slicer3 --launch %s " % module, name=module, **inputs)
         dom = self._grab_xml(module)
         self._outputs_filenames = {}
 
@@ -193,7 +190,7 @@ class SlicerCommandLine(CommandLine):
             else:
                 fname = value
             return spec.argstr % fname
-        return super(SlicerCommandLine, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 #    test = SlicerCommandLine(module="BRAINSFit")

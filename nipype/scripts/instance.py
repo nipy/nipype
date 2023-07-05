@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Import lib and class meta programming utilities.
 """
@@ -29,7 +28,7 @@ def import_module(module_path):
     try:
         mod = importlib.import_module(module_path)
     except:
-        raise ImportError("Error when importing object {}.".format(module_path))
+        raise ImportError(f"Error when importing object {module_path}.")
     else:
         return mod
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Interfaces to the reconstruction algorithms in dipy
 
@@ -45,13 +44,11 @@ class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
 
 
 class RESTOREOutputSpec(TraitedSpec):
-    fa = File(
-        desc="output fractional anisotropy (FA) map computed from " "the fitted DTI"
-    )
-    md = File(desc="output mean diffusivity (MD) map computed from the " "fitted DTI")
-    rd = File(desc="output radial diffusivity (RD) map computed from " "the fitted DTI")
+    fa = File(desc="output fractional anisotropy (FA) map computed from the fitted DTI")
+    md = File(desc="output mean diffusivity (MD) map computed from the fitted DTI")
+    rd = File(desc="output radial diffusivity (RD) map computed from the fitted DTI")
     mode = File(desc=("output mode (MO) map computed from the fitted DTI"))
-    trace = File(desc=("output the tensor trace map computed from the " "fitted DTI"))
+    trace = File(desc=("output the tensor trace map computed from the fitted DTI"))
     evals = File(desc=("output the eigenvalues of the fitted DTI"))
     evecs = File(desc=("output the eigenvectors of the fitted DTI"))
 
@@ -285,7 +282,7 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
         if ratio > 0.25:
             IFLOGGER.warning(
-                "Estimated response is not prolate enough. " "Ratio=%0.3f.", ratio
+                "Estimated response is not prolate enough. Ratio=%0.3f.", ratio
             )
         elif ratio < 1.0e-5 or np.any(np.isnan(response)):
             response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
@@ -375,7 +372,7 @@ class CSD(DipyDiffusionInterface):
 
         if abs(ratio - 0.2) > 0.1:
             IFLOGGER.warning(
-                "Estimated response is not prolate enough. " "Ratio=%0.3f.", ratio
+                "Estimated response is not prolate enough. Ratio=%0.3f.", ratio
             )
 
         csd_model = ConstrainedSphericalDeconvModel(

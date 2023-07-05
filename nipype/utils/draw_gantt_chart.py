@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -98,7 +97,7 @@ def log_to_dict(logfile):
     """
 
     # Init variables
-    with open(logfile, "r") as content:
+    with open(logfile) as content:
         # read file separating each line
         lines = content.readlines()
 
@@ -527,7 +526,7 @@ def generate_gantt_chart(
     html_string += (
         "<p>Finish: " + last_node["finish"].strftime("%Y-%m-%d %H:%M:%S") + "</p>"
     )
-    html_string += "<p>Duration: " + "{0:.2f}".format(duration / 60) + " minutes</p>"
+    html_string += "<p>Duration: " + f"{duration / 60:.2f}" + " minutes</p>"
     html_string += "<p>Nodes: " + str(len(nodes_list)) + "</p>"
     html_string += "<p>Cores: " + str(cores) + "</p>"
     html_string += close_header

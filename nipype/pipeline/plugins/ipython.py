@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
@@ -49,7 +48,7 @@ class IPythonPlugin(DistributedPluginBase):
     def __init__(self, plugin_args=None):
         if IPython_not_loaded:
             raise ImportError("Please install ipyparallel to use this plugin.")
-        super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         valid_args = (
             "url_file",
             "profile",
@@ -83,7 +82,7 @@ class IPythonPlugin(DistributedPluginBase):
             self.iparallel = sys.modules[name]
         except ImportError as e:
             raise ImportError(
-                "ipyparallel not found. Parallel execution " "will be unavailable"
+                "ipyparallel not found. Parallel execution will be unavailable"
             ) from e
         try:
             self.taskclient = self.iparallel.Client(**self.client_args)
@@ -96,7 +95,7 @@ class IPythonPlugin(DistributedPluginBase):
                 raise Exception("Ipython kernel not installed") from e
             else:
                 raise e
-        return super(IPythonPlugin, self).run(graph, config, updatehash=updatehash)
+        return super().run(graph, config, updatehash=updatehash)
 
     def _get_result(self, taskid):
         if taskid not in self.taskmap:

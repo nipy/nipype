@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for workflow callbacks
@@ -17,7 +16,7 @@ def bad_func():
     raise Exception
 
 
-class Status(object):
+class Status:
     def __init__(self):
         self.statuses = []
 

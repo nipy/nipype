@@ -72,7 +72,7 @@ class FitDwiInputSpec(CommandLineInputSpec):
     mcmap_file = File(
         name_source=["source_file"],
         name_template="%s_mcmap.nii.gz",
-        desc="Filename of multi-compartment model parameter map " "(-ivim,-ball,-nod)",
+        desc="Filename of multi-compartment model parameter map (-ivim,-ball,-nod)",
         argstr="-mcmap %s",
         requires=["nodv_flag"],
     )
@@ -295,7 +295,7 @@ class FitDwiOutputSpec(TraitedSpec):
     tenmap2_file = File(desc="Filename of tensor map [lower tri]")
 
     mcmap_file = File(
-        desc="Filename of multi-compartment model " "parameter map (-ivim,-ball,-nod)."
+        desc="Filename of multi-compartment model parameter map (-ivim,-ball,-nod)."
     )
     mcout = File(desc="Filename of mc samples (ascii text file)")
 
@@ -338,7 +338,7 @@ class FitDwi(NiftyFitCommand):
             return ""
         if name == "tenmap2_file" and self.inputs.ten_type != "lower-tri":
             return ""
-        return super(FitDwi, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class DwiToolInputSpec(CommandLineInputSpec):
@@ -600,4 +600,4 @@ class DwiTool(NiftyFitCommand):
                 self.inputs.dti_flag2
             ):
                 return ""
-        return super(DwiTool, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)

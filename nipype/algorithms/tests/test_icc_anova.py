@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import numpy as np
 from nipype.algorithms.icc import ICC_rep_anova
 

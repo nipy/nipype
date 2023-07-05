@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs"""
@@ -67,13 +66,13 @@ def save_hashfile(hashfile, hashed_inputs):
     """Store a hashfile"""
     try:
         save_json(hashfile, hashed_inputs)
-    except (IOError, TypeError):
+    except (OSError, TypeError):
         err_type = sys.exc_info()[0]
         if err_type is TypeError:
             # XXX - SG current workaround is to just
             # create the hashed file and not put anything
             # in it
-            with open(hashfile, "wt") as fd:
+            with open(hashfile, "w") as fd:
                 fd.writelines(str(hashed_inputs))
 
             logger.debug("Unable to write a particular type to the json file")
@@ -333,7 +332,7 @@ def _write_inputs(node):
                 try:
                     func = create_function_from_source(val)
                 except RuntimeError:
-                    lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
+                    lines.append(f"{nodename}.inputs.{key} = '{val}'")
                 else:
                     funcname = [
                         name for name in func.__globals__ if name != "__builtins__"
@@ -345,11 +344,9 @@ def _write_inputs(node):
                         )
                         funcname = "%s_1" % funcname
                     lines.append("from nipype.utils.functions import getsource")
-                    lines.append(
-                        "%s.inputs.%s = getsource(%s)" % (nodename, key, funcname)
-                    )
+                    lines.append(f"{nodename}.inputs.{key} = getsource({funcname})")
             else:
-                lines.append("%s.inputs.%s = %s" % (nodename, key, val))
+                lines.append(f"{nodename}.inputs.{key} = {val}")
     return lines
 
 
@@ -361,7 +358,7 @@ def format_node(node, format="python", include_config=False):
     name = node.fullname.replace(".", "_")
     if format == "python":
         klass = node.interface
-        importline = "from %s import %s" % (klass.__module__, klass.__class__.__name__)
+        importline = f"from {klass.__module__} import {klass.__class__.__name__}"
         comment = "# Node: %s" % node.fullname
         spec = signature(node.interface.__init__)
         filled_args = []
@@ -372,7 +369,7 @@ def format_node(node, format="python", include_config=False):
         args = ", ".join(filled_args)
         klass_name = klass.__class__.__name__
         if isinstance(node, MapNode):
-            nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' % (
+            nodedef = '{} = MapNode({}({}), iterfield={}, name="{}")'.format(
                 name,
                 klass_name,
                 args,
@@ -380,7 +377,7 @@ def format_node(node, format="python", include_config=False):
                 name,
             )
         else:
-            nodedef = '%s = Node(%s(%s), name="%s")' % (name, klass_name, args, name)
+            nodedef = f'{name} = Node({klass_name}({args}), name="{name}")'
         lines = [importline, comment, nodedef]
 
         if include_config:
@@ -390,10 +387,10 @@ def format_node(node, format="python", include_config=False):
                 comment,
                 nodedef,
             ]
-            lines.append("%s.config = %s" % (name, node.config))
+            lines.append(f"{name}.config = {node.config}")
 
         if node.iterables is not None:
-            lines.append("%s.iterables = %s" % (name, node.iterables))
+            lines.append(f"{name}.iterables = {node.iterables}")
         lines.extend(_write_inputs(node))
 
     return lines
@@ -437,11 +434,11 @@ def modify_paths(object, relative=True, basedir=None):
                 else:
                     out = os.path.abspath(os.path.join(basedir, object))
                 if not os.path.exists(out):
-                    raise IOError("File %s not found" % out)
+                    raise OSError("File %s not found" % out)
             else:
                 out = object
         else:
-            raise TypeError("Object {} is undefined".format(object))
+            raise TypeError(f"Object {object} is undefined")
     return out
 
 
@@ -536,7 +533,7 @@ def _write_detailed_dot(graph, dotfilename):
                     inports.append(inport)
         inputstr = (
             ["{IN"]
-            + ["|<in%s> %s" % (_replacefunk(ip), ip) for ip in sorted(inports)]
+            + [f"|<in{_replacefunk(ip)}> {ip}" for ip in sorted(inports)]
             + ["}"]
         )
         outports = []
@@ -550,10 +547,7 @@ def _write_detailed_dot(graph, dotfilename):
                     outports.append(outport)
         outputstr = (
             ["{OUT"]
-            + [
-                "|<out%s> %s" % (_replacefunk(oport), oport)
-                for oport in sorted(outports)
-            ]
+            + [f"|<out{_replacefunk(oport)}> {oport}" for oport in sorted(outports)]
             + ["}"]
         )
         srcpackage = ""
@@ -562,7 +556,7 @@ def _write_detailed_dot(graph, dotfilename):
             if len(pkglist) > 2:
                 srcpackage = pkglist[2]
         srchierarchy = ".".join(nodename.split(".")[1:-1])
-        nodenamestr = "{ %s | %s | %s }" % (
+        nodenamestr = "{{ {} | {} | {} }}".format(
             nodename.split(".")[-1],
             srcpackage,
             srchierarchy,
@@ -580,7 +574,7 @@ def _write_detailed_dot(graph, dotfilename):
     for edge in sorted(edges):
         text.append(edge)
     text.append("}")
-    with open(dotfilename, "wt") as filep:
+    with open(dotfilename, "w") as filep:
         filep.write("\n".join(text))
     return text
 
@@ -651,8 +645,7 @@ def walk(children, level=0, path=None, usename=True):
         else:
             path[level] = child
         # Recurse into the next level
-        for child_paths in walk(tail, level + 1, path, usename):
-            yield child_paths
+        yield from walk(tail, level + 1, path, usename)
 
 
 def synchronize_iterables(iterables):
@@ -758,10 +751,8 @@ def _merge_graphs(
         # used at the same level. The use of the template below for naming
         # updates to nodes is the general solution.
         raise Exception(
-            (
-                "Execution graph does not have a unique set of node "
-                "names. Please rerun the workflow"
-            )
+            "Execution graph does not have a unique set of node "
+            "names. Please rerun the workflow"
         )
     edgeinfo = {}
     for n in list(subgraph.nodes()):
@@ -1013,11 +1004,9 @@ def generate_expanded_graph(graph_in):
             # find the unique iterable source node in the graph
             try:
                 iter_src = next(
-                    (
-                        node
-                        for node in graph_in.nodes()
-                        if node.name == src_name and nx.has_path(graph_in, node, inode)
-                    )
+                    node
+                    for node in graph_in.nodes()
+                    if node.name == src_name and nx.has_path(graph_in, node, inode)
                 )
             except StopIteration:
                 raise ValueError(
@@ -1039,13 +1028,9 @@ def generate_expanded_graph(graph_in):
             # The itersource iterables is a {field: lookup} dictionary, where the
             # lookup is a {source key: iteration list} dictionary. Look up the
             # current iterable value using the predecessor itersource input values.
-            iter_dict = dict(
-                [
-                    (field, lookup[key])
-                    for field, lookup in inode.iterables
-                    if key in lookup
-                ]
-            )
+            iter_dict = {
+                field: lookup[key] for field, lookup in inode.iterables if key in lookup
+            }
 
             # convert the iterables to the standard {field: function} format
 
@@ -1114,7 +1099,7 @@ def generate_expanded_graph(graph_in):
                             expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug(
-                    "The join node %s input %s was expanded" " to %d nodes.",
+                    "The join node %s input %s was expanded to %d nodes.",
                     jnode,
                     in_id,
                     len(in_nodes),
@@ -1235,9 +1220,7 @@ def _standardize_iterables(node):
     if node.synchronize:
         if len(iterables) == 2:
             first, last = iterables
-            if all(
-                (isinstance(item, (str, bytes)) and item in fields for item in first)
-            ):
+            if all(isinstance(item, (str, bytes)) and item in fields for item in first):
                 iterables = _transpose_iterables(first, last)
 
     # Convert a tuple to a list
@@ -1279,16 +1262,14 @@ def _validate_iterables(node, iterables, fields):
         try:
             if len(item) != 2:
                 raise ValueError(
-                    "The %s iterables is not a [(field, values)]" " list" % node.name
+                    "The %s iterables is not a [(field, values)] list" % node.name
                 )
         except TypeError as e:
-            raise TypeError(
-                "A %s iterables member is not iterable: %s" % (node.name, e)
-            )
+            raise TypeError(f"A {node.name} iterables member is not iterable: {e}")
         field, _ = item
         if field not in fields:
             raise ValueError(
-                "The %s iterables field is unrecognized: %s" % (node.name, field)
+                f"The {node.name} iterables field is unrecognized: {field}"
             )
 
 
@@ -1303,7 +1284,7 @@ def _transpose_iterables(fields, values):
     Otherwise, the result is a list of (field: value list) pairs.
     """
     if isinstance(values, dict):
-        transposed = dict([(field, defaultdict(list)) for field in fields])
+        transposed = {field: defaultdict(list) for field in fields}
         for key, tuples in list(values.items()):
             for kvals in tuples:
                 for idx, val in enumerate(kvals):
@@ -1398,9 +1379,9 @@ def format_dot(dotfilename, format="png"):
     """Dump a directed graph (Linux only; install via `brew` on OSX)"""
     try:
         formatted_dot, _ = _run_dot(dotfilename, format_ext=format)
-    except IOError as ioe:
+    except OSError as ioe:
         if "could not be found" in str(ioe):
-            raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
+            raise OSError("Cannot draw directed graph; executable 'dot' is unavailable")
         else:
             raise ioe
     return formatted_dot
@@ -1411,8 +1392,8 @@ def _run_dot(dotfilename, format_ext):
         return dotfilename, None
 
     dot_base = os.path.splitext(dotfilename)[0]
-    formatted_dot = "{}.{}".format(dot_base, format_ext)
-    cmd = 'dot -T{} -o"{}" "{}"'.format(format_ext, formatted_dot, dotfilename)
+    formatted_dot = f"{dot_base}.{format_ext}"
+    cmd = f'dot -T{format_ext} -o"{formatted_dot}" "{dotfilename}"'
     res = CommandLine(cmd, terminal_output="allatonce", resource_monitor=False).run()
     return formatted_dot, res
 
@@ -1668,7 +1649,7 @@ def write_workflow_resources(graph, filename=None, append=None):
     # If we append different runs, then we will see different
     # "bursts" of timestamps corresponding to those executions.
     if append and os.path.isfile(filename):
-        with open(filename, "r") as rsf:
+        with open(filename) as rsf:
             big_dict = json.load(rsf)
 
     for _, node in enumerate(graph.nodes()):
@@ -1677,13 +1658,13 @@ def write_workflow_resources(graph, filename=None, append=None):
 
         params = ""
         if node.parameterization:
-            params = "_".join(["{}".format(p) for p in node.parameterization])
+            params = "_".join([f"{p}" for p in node.parameterization])
 
         try:
             rt_list = node.result.runtime
         except Exception:
             logger.warning(
-                "Could not access runtime info for node %s" " (%s interface)",
+                "Could not access runtime info for node %s (%s interface)",
                 nodename,
                 classname,
             )

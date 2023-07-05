@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """dcmstack allows series of DICOM images to be stacked into multi-dimensional arrays."""
 
 import os
@@ -101,10 +100,10 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     )
     embed_meta = traits.Bool(desc="Embed DICOM meta data into result")
     exclude_regexes = traits.List(
-        desc="Meta data to exclude, suplementing " "any default exclude filters"
+        desc="Meta data to exclude, suplementing any default exclude filters"
     )
     include_regexes = traits.List(
-        desc="Meta data to include, overriding any " "exclude filters"
+        desc="Meta data to include, overriding any exclude filters"
     )
     force_read = traits.Bool(
         True, usedefault=True, desc=("Force reading files without DICM marker")
@@ -250,7 +249,7 @@ class LookupMeta(BaseInterface):
 
     def _outputs(self):
         self._make_name_map()
-        outputs = super(LookupMeta, self)._outputs()
+        outputs = super()._outputs()
         undefined_traits = {}
         for out_name in list(self._meta_keys.values()):
             outputs.add_trait(out_name, traits.Any)
@@ -285,9 +284,7 @@ class CopyMetaInputSpec(TraitedSpec):
         "classifications to include. If not "
         "specified include everything."
     )
-    exclude_classes = traits.List(
-        desc="List of meta data " "classifications to exclude"
-    )
+    exclude_classes = traits.List(desc="List of meta data classifications to exclude")
 
 
 class CopyMetaOutputSpec(TraitedSpec):
@@ -337,7 +334,7 @@ class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     sort_order = traits.Either(
         traits.Str(),
         traits.List(),
-        desc="One or more meta data keys to " "sort files by.",
+        desc="One or more meta data keys to sort files by.",
     )
     merge_dim = traits.Int(
         desc="Dimension to merge along. If not "

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via OAR http://oar.imag.fr
 """
 import os
@@ -47,7 +46,7 @@ class OARPlugin(SGELikeBatchManagerBase):
                 self._max_tries = kwargs["plugin_args"]["max_tries"]
             if "max_jobname_len" in kwargs["plugin_args"]:
                 self._max_jobname_len = kwargs["plugin_args"]["max_jobname_len"]
-        super(OARPlugin, self).__init__(template, **kwargs)
+        super().__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         #  subprocess.Popen requires taskid to be a string
@@ -90,12 +89,12 @@ class OARPlugin(SGELikeBatchManagerBase):
         jobname = jobname[0 : self._max_jobname_len]
 
         if "-O" not in oarsubargs:
-            oarsubargs = "%s -O %s" % (
+            oarsubargs = "{} -O {}".format(
                 oarsubargs,
                 os.path.join(path, jobname + ".stdout"),
             )
         if "-E" not in oarsubargs:
-            oarsubargs = "%s -E %s" % (
+            oarsubargs = "{} -E {}".format(
                 oarsubargs,
                 os.path.join(path, jobname + ".stderr"),
             )
@@ -103,7 +102,7 @@ class OARPlugin(SGELikeBatchManagerBase):
             oarsubargs = "%s -J" % (oarsubargs)
 
         os.chmod(scriptfile, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
-        cmd.inputs.args = "%s -n %s -S %s" % (oarsubargs, jobname, scriptfile)
+        cmd.inputs.args = f"{oarsubargs} -n {jobname} -S {scriptfile}"
 
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName("CRITICAL"))
@@ -121,7 +120,7 @@ class OARPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit OAR task" " for node %s") % node._id,
+                                "Could not submit OAR task for node %s" % node._id,
                                 str(e),
                             )
                         )
@@ -142,5 +141,5 @@ class OARPlugin(SGELikeBatchManagerBase):
                 break
         taskid = json.loads(o)["job_id"]
         self._pending[taskid] = node.output_dir()
-        logger.debug("submitted OAR task: %s for node %s" % (taskid, node._id))
+        logger.debug(f"submitted OAR task: {taskid} for node {node._id}")
         return taskid
