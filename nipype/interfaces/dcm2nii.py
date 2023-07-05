@@ -329,7 +329,11 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         desc="Gzip compress images - [y=pigz, i=internal, n=no, 3=no,3D]",
     )
     merge_imgs = traits.Enum(
-        0, 1, 2,
+        0,
+        1,
+        2,
+        default=0,
+        usedefault=True,
         argstr="-m %d",
         desc="merge 2D slices from same series regardless of echo, exposure, etc. - [0=no, 1=yes, 2=auto]",
     )
@@ -393,7 +397,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compression = 5
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
-    'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
+    'dcm2niix -b y -z y -5 -x n -t n -m 0 -o ds005 -s n -v n dicomdir'
     >>> converter.run() # doctest: +SKIP
 
     In the example below, we note that the current version of dcm2niix
@@ -406,7 +410,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compression = 5
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
-    'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n .'
+    'dcm2niix -b y -z y -5 -x n -t n -m 0 -o ds005 -s n -v n .'
     >>> converter.run() # doctest: +SKIP
     """
 
@@ -421,7 +425,6 @@ class Dcm2niix(CommandLine):
     def _format_arg(self, opt, spec, val):
         bools = [
             "bids_format",
-            "merge_imgs",
             "single_file",
             "verbose",
             "crop",

@@ -147,12 +147,12 @@ REQUIRES = [
     "traits>=%s,<%s,!=5.0" % (TRAITS_MIN_VERSION, TRAITS_MAX_VERSION),
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
-    "looseversion",
+    "looseversion!=1.2",
 ]
 
 TESTS_REQUIRES = [
     "codecov",
-    "coverage<5",
+    "coverage",
     "pytest",
     "pytest-cov",
     "pytest-env",
