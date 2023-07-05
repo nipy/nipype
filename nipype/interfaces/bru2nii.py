@@ -23,7 +23,7 @@ class Bru2InputSpec(CommandLineInputSpec):
     )
     force_conversion = traits.Bool(
         argstr="-f",
-        desc="Force conversion of localizers images (multiple slice " "orientations).",
+        desc="Force conversion of localizers images (multiple slice orientations).",
     )
     compress = traits.Bool(argstr="-z", desc='gz compress images (".nii.gz").')
     append_protocol_name = traits.Bool(

@@ -107,7 +107,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit lsf task" " for node %s") % node._id,
+                                "Could not submit lsf task for node %s" % node._id,
                                 str(e),
                             )
                         )

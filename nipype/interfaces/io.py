@@ -244,7 +244,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         "AWS_SECRET_ACCESS_KEY environment variables"
     )
     encrypt_bucket_keys = traits.Bool(
-        desc="Flag indicating whether to use S3 " "server-side AES-256 encryption"
+        desc="Flag indicating whether to use S3 server-side AES-256 encryption"
     )
     # Set this if user wishes to override the bucket with their own
     bucket = traits.Any(desc="Boto3 S3 bucket for manual override of bucket")
@@ -530,7 +530,7 @@ class DataSink(IOBase):
             import boto3
             import botocore
         except ImportError as exc:
-            err_msg = "Boto3 package is not installed - install boto3 and " "try again."
+            err_msg = "Boto3 package is not installed - install boto3 and try again."
             raise Exception(err_msg)
 
         # Init variables
@@ -1313,12 +1313,12 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     sort_filelist = traits.Bool(
         True,
         usedefault=True,
-        desc="When matching multiple files, return them" " in sorted order.",
+        desc="When matching multiple files, return them in sorted order.",
     )
     raise_on_empty = traits.Bool(
         True,
         usedefault=True,
-        desc="Raise an exception if a template pattern " "matches no files.",
+        desc="Raise an exception if a template pattern matches no files.",
     )
     force_lists = traits.Either(
         traits.Bool(),
@@ -1433,7 +1433,7 @@ class SelectFiles(IOBase):
             plural = "s" if len(bad_fields) > 1 else ""
             verb = "were" if len(bad_fields) > 1 else "was"
             msg = (
-                "The field%s '%s' %s set in 'force_lists' and not in " "'templates'."
+                "The field%s '%s' %s set in 'force_lists' and not in 'templates'."
             ) % (plural, bad_fields, verb)
             raise ValueError(msg)
 
@@ -1490,8 +1490,8 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             "ignored."
         )
     )
-    max_depth = traits.Int(desc="The maximum depth to search beneath " "the root_paths")
-    min_depth = traits.Int(desc="The minimum depth to search beneath " "the root paths")
+    max_depth = traits.Int(desc="The maximum depth to search beneath the root_paths")
+    min_depth = traits.Int(desc="The minimum depth to search beneath the root paths")
     unpack_single = traits.Bool(
         False, usedefault=True, desc="Unpack single results from list"
     )
@@ -1845,7 +1845,7 @@ class FreeSurferSource(IOBase):
 class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     query_template = Str(
         mandatory=True,
-        desc=("Layout used to get files. Relative to base " "directory if defined"),
+        desc="Layout used to get files. Relative to base directory if defined",
     )
 
     query_template_args = traits.Dict(
@@ -2003,7 +2003,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
                             raise ValueError(
-                                "incompatible number " "of arguments for %s" % key
+                                "incompatible number of arguments for %s" % key
                             )
                         if len(arg) > maxlen:
                             maxlen = len(arg)
@@ -2022,7 +2022,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         file_objects = xnat.select(target).get("obj")
 
                         if file_objects == []:
-                            raise OSError("Template %s " "returned no files" % target)
+                            raise OSError("Template %s returned no files" % target)
 
                         outfiles = simplify_list(
                             [
@@ -2035,7 +2035,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         file_objects = xnat.select(template).get("obj")
 
                         if file_objects == []:
-                            raise OSError("Template %s " "returned no files" % template)
+                            raise OSError("Template %s returned no files" % template)
 
                         outfiles = simplify_list(
                             [
@@ -2148,7 +2148,7 @@ class XNATSink(LibraryBaseInterface, IOBase):
                         share_project.insert()
 
                     subject = xnat.select(
-                        "/project/%(project)s" "/subject/%(subject_id)s" % result
+                        "/project/%(project)s/subject/%(subject_id)s" % result
                     )
 
                     subject.share(str(self.inputs.project_id))
@@ -2507,7 +2507,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
         super().__init__(**kwargs)
         if None in (self.inputs.username, self.inputs.password):
             raise ValueError(
-                "either both username and password " "are provided or none of them"
+                "either both username and password are provided or none of them"
             )
 
         if (

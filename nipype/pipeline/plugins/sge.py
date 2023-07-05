@@ -462,7 +462,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit sge task" " for node %s") % node._id,
+                                "Could not submit sge task for node %s" % node._id,
                                 str(e),
                             )
                         )

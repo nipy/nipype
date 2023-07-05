@@ -132,7 +132,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug(
-            "[MultiProc] Starting (n_procs=%d, " "mem_gb=%0.2f, cwd=%s)",
+            "[MultiProc] Starting (n_procs=%d, mem_gb=%0.2f, cwd=%s)",
             self.processors,
             self.memory_gb,
             self._cwd,
@@ -190,7 +190,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         if np.any(np.array(tasks_mem_gb) > self.memory_gb):
             logger.warning(
-                "Some nodes exceed the total amount of memory available " "(%0.2fGB).",
+                "Some nodes exceed the total amount of memory available (%0.2fGB).",
                 self.memory_gb,
             )
             if self.raise_insufficient:

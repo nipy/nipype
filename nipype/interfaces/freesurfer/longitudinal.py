@@ -19,7 +19,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         File(exists=True),
         mandatory=True,
         argstr="--mov %s",
-        desc="input movable volumes to be aligned to common mean/median " "template",
+        desc="input movable volumes to be aligned to common mean/median template",
     )
     out_file = File(
         "mri_robust_template_out.mgz",

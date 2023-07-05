@@ -23,13 +23,13 @@ class MathsInput(FSLCommandInputSpec):
         *_dtypes,
         position=1,
         argstr="-dt %s",
-        desc=("datatype to use for calculations " "(default is float)")
+        desc=("datatype to use for calculations (default is float)")
     )
     output_datatype = traits.Enum(
         *_dtypes,
         position=-1,
         argstr="-odt %s",
-        desc=("datatype to use for output (default " "uses input type)")
+        desc=("datatype to use for output (default uses input type)")
     )
 
     nan2zeros = traits.Bool(
@@ -208,7 +208,7 @@ class PercentileImageInput(MathsInput):
         high=100,
         argstr="%f",
         position=5,
-        desc=("nth percentile (0-100) of FULL RANGE " "across dimension"),
+        desc=("nth percentile (0-100) of FULL RANGE across dimension"),
     )
 
 
@@ -303,7 +303,7 @@ class AR1ImageInput(MathsInput):
         usedefault=True,
         argstr="-%sar1",
         position=4,
-        desc=("dimension to find AR(1) coefficient" "across"),
+        desc=("dimension to find AR(1) coefficient across"),
     )
 
 
@@ -381,9 +381,7 @@ class KernelInput(MathsInput):
         argstr="%.4f",
         position=5,
         xor=["kernel_file"],
-        desc=(
-            "kernel size - voxels for box/boxv, mm " "for sphere, mm sigma for gauss"
-        ),
+        desc=("kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss"),
     )
     kernel_file = File(
         exists=True,
@@ -424,7 +422,7 @@ class ErodeInput(KernelInput):
         position=6,
         usedefault=True,
         default_value=False,
-        desc=("if true, minimum filter rather than " "erosion by zeroing-out"),
+        desc=("if true, minimum filter rather than erosion by zeroing-out"),
     )
 
 
@@ -548,12 +546,12 @@ class MultiImageMathsInput(MathsInput):
         position=4,
         argstr="%s",
         mandatory=True,
-        desc=("python formatted string of operations " "to perform"),
+        desc=("python formatted string of operations to perform"),
     )
     operand_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("list of file names to plug into op " "string"),
+        desc=("list of file names to plug into op string"),
     )
 
 

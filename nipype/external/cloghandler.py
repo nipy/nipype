@@ -267,7 +267,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             except OSError:
                 exc_value = sys.exc_info()[1]
                 self._degrade(
-                    True, "rename failed.  File in use?  " "exception=%s", exc_value
+                    True, "rename failed.  File in use?  exception=%s", exc_value
                 )
                 return
 

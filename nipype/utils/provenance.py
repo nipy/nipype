@@ -21,7 +21,7 @@ nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
 niiri = pm.Namespace("niiri", "http://iri.nidash.org/")
 crypto = pm.Namespace(
     "crypto",
-    ("http://id.loc.gov/vocabulary/preservation/" "cryptographicHashFunctions/"),
+    ("http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/"),
 )
 get_id = lambda: niiri[uuid1().hex]
 

@@ -172,7 +172,7 @@ class ExtractROIBasedSurfaceMeasuresInputSpec(SPMCommandInputSpec):
 
     surface_files = InputMultiPath(
         File(exists=True),
-        desc="Surface data files. This variable should be a list " "with all",
+        desc="Surface data files. This variable should be a list with all",
         mandatory=False,
         copyfile=False,
     )

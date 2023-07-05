@@ -24,9 +24,7 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
         argstr="%s",
         position=2,
         mandatory=True,
-        desc=(
-            "Phase difference map, in SIEMENS format range from " "0-4096 or 0-8192)"
-        ),
+        desc=("Phase difference map, in SIEMENS format range from 0-4096 or 0-8192)"),
     )
     in_magnitude = File(
         exists=True,
@@ -52,7 +50,7 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
         position=-1,
         argstr="--nocheck",
         usedefault=True,
-        desc=("do not perform sanity checks for image " "size/range/dimensions"),
+        desc=("do not perform sanity checks for image size/range/dimensions"),
     )
     out_fieldmap = File(
         argstr="%s", position=4, desc="output name for prepared fieldmap"
@@ -144,14 +142,14 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         xor=["encoding_file"],
         requires=["readout_times"],
         argstr="--datain=%s",
-        desc=("encoding direction for automatic " "generation of encoding_file"),
+        desc=("encoding direction for automatic generation of encoding_file"),
     )
     readout_times = InputMultiPath(
         traits.Float,
         requires=["encoding_direction"],
         xor=["encoding_file"],
         mandatory=True,
-        desc=("readout times (dwell times by # " "phase-encode steps minus 1)"),
+        desc=("readout times (dwell times by # phase-encode steps minus 1)"),
     )
     out_base = File(
         desc=(
@@ -224,7 +222,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         "b02b0.cnf",
         argstr="--config=%s",
         usedefault=True,
-        desc=("Name of config file specifying command line " "arguments"),
+        desc=("Name of config file specifying command line arguments"),
     )
     max_iter = traits.Int(argstr="--miter=%d", desc="max # of non-linear iterations")
     reg_lambda = traits.Float(
@@ -270,19 +268,17 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         0,
         1,
         argstr="--minmet=%d",
-        desc=(
-            "Minimisation method 0=Levenberg-Marquardt, " "1=Scaled Conjugate Gradient"
-        ),
+        desc=("Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate Gradient"),
     )
     splineorder = traits.Int(
         argstr="--splineorder=%d",
-        desc=("order of spline, 2->Qadratic spline, " "3->Cubic spline"),
+        desc=("order of spline, 2->Qadratic spline, 3->Cubic spline"),
     )
     numprec = traits.Enum(
         "double",
         "float",
         argstr="--numprec=%s",
-        desc=("Precision for representing Hessian, double " "or float."),
+        desc=("Precision for representing Hessian, double or float."),
     )
     interp = traits.Enum(
         "spline",
@@ -294,13 +290,13 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         0,
         1,
         argstr="--scale=%d",
-        desc=("If set (=1), the images are individually scaled" " to a common mean"),
+        desc=("If set (=1), the images are individually scaled to a common mean"),
     )
     regrid = traits.Enum(
         1,
         0,
         argstr="--regrid=%d",
-        desc=("If set (=1), the calculations are done in a " "different grid"),
+        desc=("If set (=1), the calculations are done in a different grid"),
     )
 
 
@@ -455,7 +451,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
         argstr="--topup=%s",
         copyfile=False,
         requires=["in_topup_movpar"],
-        desc=("topup file containing the field " "coefficients"),
+        desc=("topup file containing the field coefficients"),
     )
     in_topup_movpar = File(
         exists=True,
@@ -473,7 +469,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
         "jac",
         "lsr",
         argstr="--method=%s",
-        desc=("use jacobian modulation (jac) or least-squares" " resampling (lsr)"),
+        desc=("use jacobian modulation (jac) or least-squares resampling (lsr)"),
     )
     interp = traits.Enum(
         "trilinear", "spline", argstr="--interp=%s", desc="interpolation method"
@@ -491,7 +487,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
 
 class ApplyTOPUPOutputSpec(TraitedSpec):
     out_corrected = File(
-        exists=True, desc=("name of 4D image file with " "unwarped images")
+        exists=True, desc=("name of 4D image file with unwarped images")
     )
 
 
@@ -1508,7 +1504,7 @@ class EddyCorrect(FSLCommand):
 
     def __init__(self, **inputs):
         warnings.warn(
-            ("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy " "instead"),
+            ("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy instead"),
             DeprecationWarning,
         )
         return super().__init__(**inputs)
@@ -1535,7 +1531,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr="--eddyIdx %s",
-        desc=("File containing indices for all volumes into acquisition " "parameters"),
+        desc=("File containing indices for all volumes into acquisition parameters"),
     )
     param_file = File(
         exists=True,
@@ -1575,7 +1571,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
 class EddyQuadOutputSpec(TraitedSpec):
     qc_json = File(
         exists=True,
-        desc=("Single subject database containing quality metrics and data " "info."),
+        desc=("Single subject database containing quality metrics and data info."),
     )
     qc_pdf = File(exists=True, desc="Single subject QC report.")
     avg_b_png = traits.List(

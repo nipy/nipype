@@ -120,7 +120,7 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
         argstr="-denote",
     )
     oldid = traits.Bool(
-        desc="Give the new dataset the input dataset" "s AFNI ID code.",
+        desc="Give the new dataset the input datasets AFNI ID code.",
         argstr="-oldid",
         xor=["newid"],
     )
@@ -1686,7 +1686,7 @@ voxels.""",
         traits.Tuple(traits.Float, traits.Float, traits.Float),
         argstr="-reduce_restore_grid %s",
         xor=["reduce_max_vox", "reduce_grid"],
-        desc="Like reduce_grid, but also resample output back to input" "grid.",
+        desc="Like reduce_grid, but also resample output back to input grid.",
     )
     reduce_max_vox = traits.Float(
         argstr="-reduce_max_vox %s",
@@ -2036,7 +2036,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         traits.List(File(exists=True)),
         mandatory=True,
         argstr="-source %s",
-        desc="the name of the dataset to be warped " "can be multiple datasets",
+        desc="the name of the dataset to be warped can be multiple datasets",
     )
     warp = traits.String(
         desc="the name of the warp dataset. "
@@ -2135,7 +2135,7 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
         position=-1,
     )
     space = traits.String(
-        desc="string to attach to the output dataset as its atlas space " "marker.",
+        desc="string to attach to the output dataset as its atlas space marker.",
         argstr="-space %s",
     )
     inv_warp = traits.Bool(desc="invert the final warp before output", argstr="-iwarp")

@@ -117,15 +117,11 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
     )
     max_length = traits.Float(
         argstr="-maxlength %f",
-        desc=(
-            "set the maximum length of any track in mm (default is " "100 x voxelsize)"
-        ),
+        desc=("set the maximum length of any track in mm (default is 100 x voxelsize)"),
     )
     min_length = traits.Float(
         argstr="-minlength %f",
-        desc=(
-            "set the minimum length of any track in mm (default is " "5 x voxelsize)"
-        ),
+        desc=("set the minimum length of any track in mm (default is 5 x voxelsize)"),
     )
     cutoff = traits.Float(
         argstr="-cutoff %f",
@@ -195,7 +191,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
     stop = traits.Bool(
         argstr="-stop",
         desc=(
-            "stop propagating a streamline once it has traversed all " "include regions"
+            "stop propagating a streamline once it has traversed all include regions"
         ),
     )
     downsample = traits.Float(
@@ -299,14 +295,14 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
         "out_seeds.nii.gz",
         usedefault=True,
         argstr="-output_seeds %s",
-        desc=("output the seed location of all successful streamlines to" " a file"),
+        desc=("output the seed location of all successful streamlines to a file"),
     )
 
 
 class TractographyOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="the output filtered tracks")
     out_seeds = File(
-        desc=("output the seed location of all successful" " streamlines to a file")
+        desc=("output the seed location of all successful streamlines to a file")
     )
 
 

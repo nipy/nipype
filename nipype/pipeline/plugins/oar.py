@@ -120,7 +120,7 @@ class OARPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit OAR task" " for node %s") % node._id,
+                                "Could not submit OAR task for node %s" % node._id,
                                 str(e),
                             )
                         )

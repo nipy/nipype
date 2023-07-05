@@ -888,7 +888,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
     )
     big_ventricles = traits.Bool(
         argstr="-bigventricles",
-        desc=("For use in subjects with enlarged " "ventricles"),
+        desc=("For use in subjects with enlarged ventricles"),
     )
     brainstem = traits.Bool(
         argstr="-brainstem-structures", desc="Segment brainstem structures"
@@ -1560,7 +1560,7 @@ class ReconAll(CommandLine):
         if name == "directive" and value == "autorecon-hemi":
             if not isdefined(self.inputs.hemi):
                 raise ValueError(
-                    "Directive 'autorecon-hemi' requires hemi " "input to be set"
+                    "Directive 'autorecon-hemi' requires hemi input to be set"
                 )
             value += " " + self.inputs.hemi
         if all(

@@ -72,7 +72,7 @@ class FitDwiInputSpec(CommandLineInputSpec):
     mcmap_file = File(
         name_source=["source_file"],
         name_template="%s_mcmap.nii.gz",
-        desc="Filename of multi-compartment model parameter map " "(-ivim,-ball,-nod)",
+        desc="Filename of multi-compartment model parameter map (-ivim,-ball,-nod)",
         argstr="-mcmap %s",
         requires=["nodv_flag"],
     )
@@ -295,7 +295,7 @@ class FitDwiOutputSpec(TraitedSpec):
     tenmap2_file = File(desc="Filename of tensor map [lower tri]")
 
     mcmap_file = File(
-        desc="Filename of multi-compartment model " "parameter map (-ivim,-ball,-nod)."
+        desc="Filename of multi-compartment model parameter map (-ivim,-ball,-nod)."
     )
     mcout = File(desc="Filename of mc samples (ascii text file)")
 

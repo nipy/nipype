@@ -593,7 +593,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     # check if we should subtract the cortical rois from this parcellation
     iflogger.info(
-        "Loading ROI_%s.nii.gz to subtract cortical ROIs from white " "matter mask",
+        "Loading ROI_%s.nii.gz to subtract cortical ROIs from white matter mask",
         parcellation_name,
     )
     roi = nb.load(op.join(op.curdir, "ROI_%s.nii.gz" % parcellation_name))

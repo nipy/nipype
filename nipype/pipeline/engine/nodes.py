@@ -652,7 +652,7 @@ Error populating the inputs of node "%s": the results file of the source node \
             logger.debug("Error populating inputs/outputs, (re)aggregating results...")
         except (AttributeError, ImportError) as err:
             logger.debug(
-                "attribute error: %s probably using " "different trait pickled file",
+                "attribute error: %s probably using different trait pickled file",
                 str(err),
             )
             old_inputs = loadpkl(op.join(cwd, "_inputs.pklz"))
@@ -696,7 +696,7 @@ Error populating the inputs of node "%s": the results file of the source node \
             except (FileNotFoundError, AttributeError):
                 # if aggregation does not work, rerun the node
                 logger.info(
-                    "[Node] Some of the outputs were not found: " "rerunning node."
+                    "[Node] Some of the outputs were not found: rerunning node."
                 )
                 copyfiles = False  # OE: this was like this before,
                 execute = True  # I'll keep them for safety
@@ -1329,18 +1329,14 @@ class MapNode(Node):
         for iterfield in self.iterfield:
             if not isdefined(getattr(self.inputs, iterfield)):
                 raise ValueError(
-                    ("Input %s was not set but it is listed " "in iterfields.")
-                    % iterfield
+                    "Input %s was not set but it is listed in iterfields." % iterfield
                 )
         if len(self.iterfield) > 1:
             first_len = len(ensure_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
                 if first_len != len(ensure_list(getattr(self.inputs, iterfield))):
                     raise ValueError(
-                        (
-                            "All iterfields of a MapNode have to "
-                            "have the same length. %s"
-                        )
+                        "All iterfields of a MapNode have to have the same length. %s"
                         % str(self.inputs)
                     )
 

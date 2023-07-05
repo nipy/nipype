@@ -26,7 +26,7 @@ class EditTransformInputSpec(BaseInterfaceInputSpec):
     )
     reference_image = File(
         exists=True,
-        desc=("set a new reference image to change the " "target coordinate system."),
+        desc=("set a new reference image to change the target coordinate system."),
     )
     interpolation = traits.Enum(
         "cubic",

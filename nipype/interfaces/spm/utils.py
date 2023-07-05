@@ -50,7 +50,7 @@ class CalcCoregAffineInputSpec(SPMCommandInputSpec):
         exists=True,
         mandatory=True,
         copyfile=False,
-        desc=("volume transform can be applied to register with " "target"),
+        desc=("volume transform can be applied to register with target"),
     )
     mat = File(desc="Filename used to store affine matrix")
     invmat = File(desc="Filename used to store inverse affine matrix")

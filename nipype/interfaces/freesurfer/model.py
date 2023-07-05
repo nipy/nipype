@@ -1332,7 +1332,7 @@ class MS_LDAInputSpec(FSTraitedSpec):
         exists=False,
         argstr="-synth %s",
         mandatory=True,
-        desc=("filename for the synthesized output " "volume"),
+        desc=("filename for the synthesized output volume"),
     )
     label_file = File(
         exists=True, argstr="-label %s", desc="filename of the label volume"
@@ -1345,10 +1345,10 @@ class MS_LDAInputSpec(FSTraitedSpec):
     )
     conform = traits.Bool(
         argstr="-conform",
-        desc=("Conform the input volumes (brain mask " "typically already conformed)"),
+        desc=("Conform the input volumes (brain mask typically already conformed)"),
     )
     use_weights = traits.Bool(
-        argstr="-W", desc=("Use the weights from a previously " "generated weight file")
+        argstr="-W", desc=("Use the weights from a previously generated weight file")
     )
     images = InputMultiPath(
         File(exists=True),

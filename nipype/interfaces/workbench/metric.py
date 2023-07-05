@@ -159,7 +159,7 @@ class MetricResample(WBCommand):
                 and not self.inputs.area_metrics
             ):
                 raise ValueError(
-                    "Exactly one of area_surfs or area_metrics" " must be specified"
+                    "Exactly one of area_surfs or area_metrics must be specified"
                 )
         if opt == "valid_roi_out" and val:
             # generate a filename and add it to argstr

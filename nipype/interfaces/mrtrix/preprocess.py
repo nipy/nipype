@@ -224,7 +224,7 @@ class DWI2TensorInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(
         argstr="-quiet",
         position=1,
-        desc=("Do not display information messages or progress " "status."),
+        desc=("Do not display information messages or progress status."),
     )
     debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
 

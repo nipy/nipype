@@ -268,7 +268,7 @@ class SPMCommandInputSpec(BaseInterfaceInputSpec):
         True,
         min_ver="8",
         usedefault=True,
-        desc=("Generate SPM8 and higher " "compatible jobs"),
+        desc=("Generate SPM8 and higher compatible jobs"),
     )
 
 

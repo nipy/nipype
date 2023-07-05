@@ -580,9 +580,7 @@ class GraphPluginBase(PluginBase):
 
     def __init__(self, plugin_args=None):
         if plugin_args and plugin_args.get("status_callback"):
-            logger.warning(
-                "status_callback not supported for Graph submission" " plugins"
-            )
+            logger.warning("status_callback not supported for Graph submission plugins")
         super().__init__(plugin_args=plugin_args)
 
     def run(self, graph, config, updatehash=False):

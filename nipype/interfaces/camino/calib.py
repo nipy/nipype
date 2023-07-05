@@ -43,7 +43,7 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
         minlen=2,
         maxlen=2,
         units="NA",
-        desc=("Minimum and maximum FA for the single tensor " "synthetic data."),
+        desc=("Minimum and maximum FA for the single tensor synthetic data."),
     )
     onedtfastep = traits.Float(
         argstr="-onedtfastep %f",
@@ -80,7 +80,7 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
         minlen=2,
         maxlen=2,
         units="NA",
-        desc=("Minimum and maximum crossing angles " "between the two fibres."),
+        desc=("Minimum and maximum crossing angles between the two fibres."),
     )
     twodtanglestep = traits.Float(
         argstr="-twodtanglestep %f",

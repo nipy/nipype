@@ -44,7 +44,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
         "signals.tsv",
         usedefault=True,
         exists=False,
-        desc="The name of the file to output to. " "signals.tsv by default",
+        desc="The name of the file to output to. signals.tsv by default",
     )
     incl_shared_variance = traits.Bool(
         True,

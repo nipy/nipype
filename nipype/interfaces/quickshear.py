@@ -26,7 +26,7 @@ class QuickshearInputSpec(CommandLineInputSpec):
     buff = traits.Int(
         position=4,
         argstr="%d",
-        desc="buffer size (in voxels) between shearing " "plane and the brain",
+        desc="buffer size (in voxels) between shearing plane and the brain",
     )
 
 

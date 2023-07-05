@@ -49,7 +49,7 @@ class FitGLMInputSpec(BaseInterfaceInputSpec):
     model = traits.Enum(
         "ar1",
         "spherical",
-        desc=("autoregressive mode is available only for the " "kalman method"),
+        desc=("autoregressive mode is available only for the kalman method"),
         usedefault=True,
     )
     method = traits.Enum(
@@ -64,11 +64,11 @@ class FitGLMInputSpec(BaseInterfaceInputSpec):
     )
     mask = File(
         exists=True,
-        desc=("restrict the fitting only to the region defined " "by this mask"),
+        desc=("restrict the fitting only to the region defined by this mask"),
     )
     normalize_design_matrix = traits.Bool(
         False,
-        desc=("normalize (zscore) the " "regressors before fitting"),
+        desc=("normalize (zscore) the regressors before fitting"),
         usedefault=True,
     )
     save_residuals = traits.Bool(False, usedefault=True)

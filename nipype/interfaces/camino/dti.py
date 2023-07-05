@@ -738,7 +738,7 @@ class TrackInputSpec(CommandLineInputSpec):
     stepsize = traits.Float(
         argstr="-stepsize %f",
         requires=["tracker"],
-        desc=("Step size for EULER and RK4 tracking. " "The default is 1mm."),
+        desc=("Step size for EULER and RK4 tracking. The default is 1mm."),
     )
 
     inputdatatype = traits.Enum(
@@ -1092,7 +1092,7 @@ class TrackBayesDiracInputSpec(TrackInputSpec):
         argstr="-schemefile %s",
         mandatory=True,
         exists=True,
-        desc=("The scheme file corresponding to the data being " "processed."),
+        desc=("The scheme file corresponding to the data being processed."),
     )
 
     iterations = traits.Int(

@@ -465,12 +465,12 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         "cosine",
         False,
         usedefault=True,
-        desc="Detrend time series prior to component " "extraction",
+        desc="Detrend time series prior to component extraction",
     )
     use_regress_poly = traits.Bool(
         deprecated="0.15.0",
         new_name="pre_filter",
-        desc=("use polynomial regression " "pre-component extraction"),
+        desc=("use polynomial regression pre-component extraction"),
     )
     regress_poly_degree = traits.Range(
         low=1, value=1, usedefault=True, desc="the degree polynomial to use"
@@ -806,7 +806,7 @@ class TCompCorInputSpec(CompCorInputSpec):
 class TCompCorOutputSpec(CompCorOutputSpec):
     # and all the fields in CompCorOutputSpec
     high_variance_masks = OutputMultiPath(
-        File(exists=True), desc=("voxels exceeding the variance" " threshold")
+        File(exists=True), desc=("voxels exceeding the variance threshold")
     )
 
 
@@ -856,7 +856,7 @@ class TCompCor(CompCor):
             mask_file = os.path.abspath(f"mask_{i:03d}.nii.gz")
             out_image.to_filename(mask_file)
             IFLOGGER.debug(
-                "tCompcor computed and saved mask of shape %s to " "mask_file %s",
+                "tCompcor computed and saved mask of shape %s to mask_file %s",
                 str(mask.shape),
                 mask_file,
             )
@@ -1287,9 +1287,7 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
             mask = nb.load(mask_files[mask_index])
             return [mask]
         raise ValueError(
-            ("mask_index {} must be less than number of mask " "files {}").format(
-                mask_index, len(mask_files)
-            )
+            f"mask_index {mask_index} must be less than number of mask files {len(mask_files)}"
         )
     masks = []
     if mask_method == "none":

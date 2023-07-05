@@ -504,7 +504,7 @@ if __name__ == "__main__":
                                 '\\.interfaces\\.traits',
                                 '\\.pipeline\\.alloy$',
                                 '\\.pipeline\\.s3_node_wrapper$',
-                                '.\testing',
+                                '.\\testing',
                                        ]
     ic.class_skip_patterns += ['AFNI',
                                'ANTS',

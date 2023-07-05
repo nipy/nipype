@@ -1051,7 +1051,7 @@ class LibraryBaseInterface(BaseInterface):
                     failed_imports.append(pkg)
             if failed_imports:
                 iflogger.warning(
-                    "Unable to import %s; %s interface may fail to " "run",
+                    "Unable to import %s; %s interface may fail to run",
                     failed_imports,
                     self.__class__.__name__,
                 )

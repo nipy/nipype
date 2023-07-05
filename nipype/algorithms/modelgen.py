@@ -614,11 +614,8 @@ class SpecifySPMModel(SpecifyModel):
                         infoout.durations[j].extend(info.durations[j])
                     else:
                         raise ValueError(
-                            "Mismatch in number of onsets and \
-                                          durations for run {}, condition \
-                                          {}".format(
-                                i + 2, j + 1
-                            )
+                            f"Mismatch in number of onsets and durations for run {i + 2}, "
+                            f"condition {j + 1}"
                         )
 
                 if hasattr(info, "amplitudes") and info.amplitudes:

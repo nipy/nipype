@@ -298,7 +298,7 @@ class File(BasePath):
         resolve=False,
         allow_compressed=True,
         extensions=None,
-        **metadata
+        **metadata,
     ):
         """Create a File trait."""
         if extensions is not None:
@@ -309,7 +309,7 @@ class File(BasePath):
                 extensions = list(set(extensions) - IMG_ZIP_FMT)
 
             self._exts = sorted(
-                {".%s" % ext if not ext.startswith(".") else ext for ext in extensions}
+                {f".{ext}" if not ext.startswith(".") else ext for ext in extensions}
             )
 
         super().__init__(
@@ -317,7 +317,7 @@ class File(BasePath):
             exists=exists,
             resolve=resolve,
             extensions=self._exts,
-            **metadata
+            **metadata,
         )
 
     def validate(self, objekt, name, value, return_pathlike=False):
@@ -343,7 +343,7 @@ class ImageFile(File):
         exists=False,
         resolve=False,
         types=None,
-        **metadata
+        **metadata,
     ):
         """Create an ImageFile trait."""
         extensions = None
@@ -366,7 +366,7 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
             exists=exists,
             extensions=extensions,
             resolve=resolve,
-            **metadata
+            **metadata,
         )
 
 

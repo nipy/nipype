@@ -903,7 +903,7 @@ class LabelGeometryInputSpec(ANTSCommandInputSpec):
         mandatory=True,
         usedefault=True,
         position=2,
-        desc="Intensity image to extract values from. " "This is an optional input",
+        desc="Intensity image to extract values from. This is an optional input",
     )
     output_file = traits.Str(
         name_source=["label_image"],

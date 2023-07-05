@@ -82,7 +82,7 @@ class IPythonPlugin(DistributedPluginBase):
             self.iparallel = sys.modules[name]
         except ImportError as e:
             raise ImportError(
-                "ipyparallel not found. Parallel execution " "will be unavailable"
+                "ipyparallel not found. Parallel execution will be unavailable"
             ) from e
         try:
             self.taskclient = self.iparallel.Client(**self.client_args)

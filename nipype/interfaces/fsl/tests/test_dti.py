@@ -135,7 +135,7 @@ def test_Randomise_parallel():
     rand.inputs.t_contrast = "infile.con"
 
     actualCmdline = sorted(rand.cmdline.split())
-    cmd = "randomise_parallel -i infile.nii -o outfile -d design.mat -t " "infile.con"
+    cmd = "randomise_parallel -i infile.nii -o outfile -d design.mat -t infile.con"
     desiredCmdline = sorted(cmd.split())
     assert actualCmdline == desiredCmdline
 

@@ -10,13 +10,13 @@ def test_generate():
     desc = generate_boutiques_descriptor(
         module="nipype.interfaces.fsl",
         interface_name="FLIRT",
-        container_image=("mcin/" "docker-fsl:latest"),
+        container_image="mcin/docker-fsl:latest",
         container_index="index.docker.io",
         container_type="docker",
         verbose=False,
         save=False,
         ignore_inputs=ignored_inputs,
-        author=("Oxford Centre for Functional" " MRI of the Brain (FMRIB)"),
+        author="Oxford Centre for Functional MRI of the Brain (FMRIB)",
     )
 
     with open(example_data("nipype2boutiques_example.json")) as desc_file:

@@ -539,7 +539,7 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
         6,
         7,
         argstr="--trgicoorder %d",
-        desc=("order of the icosahedron if " "target_subject is 'ico'"),
+        desc=("order of the icosahedron if target_subject is 'ico'"),
     )
     source_type = traits.Enum(
         filetypes,
@@ -713,7 +713,7 @@ class Surface2VolTransformInputSpec(FSTraitedSpec):
     projfrac = traits.Float(argstr="--projfrac %s", desc="thickness fraction")
     subjects_dir = traits.Str(
         argstr="--sd %s",
-        desc=("freesurfer subjects directory defaults to " "$SUBJECTS_DIR"),
+        desc=("freesurfer subjects directory defaults to $SUBJECTS_DIR"),
     )
     subject_id = traits.Str(argstr="--identity %s", desc="subject id", xor=["reg_file"])
 
@@ -1359,7 +1359,7 @@ class MRIsCombineOutputSpec(TraitedSpec):
     """
 
     out_file = File(
-        exists=True, desc="Output filename. Combined surfaces from " "in_files."
+        exists=True, desc="Output filename. Combined surfaces from in_files."
     )
 
 
@@ -1534,7 +1534,7 @@ class MRIPretessInputSpec(FSTraitedSpec):
     nocorners = traits.Bool(
         False,
         argstr="-nocorners",
-        desc=("do not remove corner configurations" " in addition to edge ones."),
+        desc=("do not remove corner configurations in addition to edge ones."),
     )
     keep = traits.Bool(False, argstr="-keep", desc=("keep WM edits"))
     test = traits.Bool(

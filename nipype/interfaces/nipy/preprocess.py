@@ -119,7 +119,7 @@ class SpaceTimeRealignerOutputSpec(TraitedSpec):
     out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
     par_file = OutputMultiPath(
         File(exists=True),
-        desc=("Motion parameter files. Angles are not " "euler angles"),
+        desc=("Motion parameter files. Angles are not euler angles"),
     )
 
 

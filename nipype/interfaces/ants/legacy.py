@@ -38,7 +38,7 @@ class antsIntroductionInputSpec(ANTSCommandInputSpec):
     )
     force_proceed = traits.Bool(
         argstr="-f 1",
-        desc=("force script to proceed even if headers " "may be incompatible"),
+        desc=("force script to proceed even if headers may be incompatible"),
     )
     inverse_warp_template_labels = traits.Bool(
         argstr="-l",
@@ -61,7 +61,7 @@ class antsIntroductionInputSpec(ANTSCommandInputSpec):
         ),
     )
     bias_field_correction = traits.Bool(
-        argstr="-n 1", desc=("Applies bias field correction to moving " "image")
+        argstr="-n 1", desc=("Applies bias field correction to moving image")
     )
     similarity_metric = traits.Enum(
         "PR",
@@ -99,7 +99,7 @@ class antsIntroductionInputSpec(ANTSCommandInputSpec):
         "ants_",
         argstr="-o %s",
         usedefault=True,
-        desc=("Prefix that is prepended to all output " "files (default = ants_)"),
+        desc=("Prefix that is prepended to all output files (default = ants_)"),
     )
     quality_check = traits.Bool(
         argstr="-q 1", desc="Perform a quality check of the result"
@@ -186,7 +186,7 @@ class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
         "antsTMPL_",
         argstr="-o %s",
         usedefault=True,
-        desc=("Prefix that is prepended to all output " "files (default = antsTMPL_)"),
+        desc=("Prefix that is prepended to all output files (default = antsTMPL_)"),
     )
     in_files = traits.List(
         File(exists=True),
@@ -209,7 +209,7 @@ class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
     )
     gradient_step_size = traits.Float(
         argstr="-g %f",
-        desc=("smaller magnitude results in " "more cautious steps (default = " ".25)"),
+        desc=("smaller magnitude results in more cautious steps (default = .25)"),
     )
     iteration_limit = traits.Int(
         4, argstr="-i %d", usedefault=True, desc="iterations of template construction"
@@ -217,9 +217,7 @@ class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
     num_cores = traits.Int(
         argstr="-j %d",
         requires=["parallelization"],
-        desc=(
-            "Requires parallelization = 2 (PEXEC). " "Sets number of cpu cores to use"
-        ),
+        desc=("Requires parallelization = 2 (PEXEC). Sets number of cpu cores to use"),
     )
     max_iterations = traits.List(
         traits.Int,
@@ -234,7 +232,7 @@ class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
         ),
     )
     bias_field_correction = traits.Bool(
-        argstr="-n 1", desc=("Applies bias field correction to moving " "image")
+        argstr="-n 1", desc=("Applies bias field correction to moving image")
     )
     rigid_body_registration = traits.Bool(
         argstr="-r 1",

@@ -15,15 +15,13 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
         argstr="%s",
         mandatory=True,
         copyfile=True,
-        desc=(
-            "image to apply transformation to (generally a " "coregistered functional)"
-        ),
+        desc=("image to apply transformation to (generally a coregistered functional)"),
     )
     out_postfix = traits.Str(
         "_wtsimt",
         argstr="%s",
         usedefault=True,
-        desc=("Postfix that is prepended to all output " "files (default = _wtsimt)"),
+        desc=("Postfix that is prepended to all output files (default = _wtsimt)"),
     )
     reference_image = File(
         argstr="-R %s",
@@ -33,7 +31,7 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
     tightest_box = traits.Bool(
         argstr="--tightest-bounding-box",
         desc=(
-            "computes tightest bounding box (overridden by " "reference_image if given)"
+            "computes tightest bounding box (overridden by reference_image if given)"
         ),
         xor=["reference_image"],
     )
@@ -153,9 +151,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     input_image = File(
         argstr="%s",
         mandatory=True,
-        desc=(
-            "image to apply transformation to (generally a " "coregistered functional)"
-        ),
+        desc=("image to apply transformation to (generally a coregistered functional)"),
         position=2,
     )
     output_image = File(
@@ -170,7 +166,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
         "_wimt",
         usedefault=True,
         hash_files=False,
-        desc=("Postfix that is prepended to all output " "files (default = _wimt)"),
+        desc=("Postfix that is prepended to all output files (default = _wimt)"),
         xor=["output_image"],
     )
     reference_image = File(
@@ -181,7 +177,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     tightest_box = traits.Bool(
         argstr="--tightest-bounding-box",
         desc=(
-            "computes tightest bounding box (overridden by " "reference_image if given)"
+            "computes tightest bounding box (overridden by reference_image if given)"
         ),
         xor=["reference_image"],
     )
@@ -326,9 +322,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     input_image = File(
         argstr="--input %s",
         mandatory=True,
-        desc=(
-            "image to apply transformation to (generally a " "coregistered functional)"
-        ),
+        desc=("image to apply transformation to (generally a coregistered functional)"),
         exists=True,
     )
     output_image = traits.Str(
@@ -337,7 +331,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     out_postfix = traits.Str(
         "_trans",
         usedefault=True,
-        desc=("Postfix that is appended to all output " "files (default = _trans)"),
+        desc=("Postfix that is appended to all output files (default = _trans)"),
     )
     reference_image = File(
         argstr="--reference-image %s",

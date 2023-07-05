@@ -209,7 +209,7 @@ def convert():
     type=UnexistingFilePath,
     required=True,
     callback=check_not_none,
-    help="JSON file name where the Boutiques descriptor will be " "written.",
+    help="JSON file name where the Boutiques descriptor will be written.",
 )
 @click.option(
     "-c",

@@ -18,7 +18,7 @@ except ImportError:
 class Logging:
     """Nipype logging class"""
 
-    fmt = "%(asctime)s,%(msecs)d %(name)-2s " "%(levelname)-2s:\n\t %(message)s"
+    fmt = "%(asctime)s,%(msecs)d %(name)-2s %(levelname)-2s:\n\t %(message)s"
     datefmt = "%y%m%d-%H:%M:%S"
 
     def __init__(self, config):

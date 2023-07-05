@@ -1099,7 +1099,7 @@ def generate_expanded_graph(graph_in):
                             expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug(
-                    "The join node %s input %s was expanded" " to %d nodes.",
+                    "The join node %s input %s was expanded to %d nodes.",
                     jnode,
                     in_id,
                     len(in_nodes),
@@ -1262,7 +1262,7 @@ def _validate_iterables(node, iterables, fields):
         try:
             if len(item) != 2:
                 raise ValueError(
-                    "The %s iterables is not a [(field, values)]" " list" % node.name
+                    "The %s iterables is not a [(field, values)] list" % node.name
                 )
         except TypeError as e:
             raise TypeError(f"A {node.name} iterables member is not iterable: {e}")
@@ -1664,7 +1664,7 @@ def write_workflow_resources(graph, filename=None, append=None):
             rt_list = node.result.runtime
         except Exception:
             logger.warning(
-                "Could not access runtime info for node %s" " (%s interface)",
+                "Could not access runtime info for node %s (%s interface)",
                 nodename,
                 classname,
             )

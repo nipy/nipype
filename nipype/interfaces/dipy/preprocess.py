@@ -117,10 +117,10 @@ class DenoiseInputSpec(TraitedSpec):
         desc=("noise distribution model"),
     )
     signal_mask = File(
-        desc=("mask in which the mean signal " "will be computed"), exists=True
+        desc=("mask in which the mean signal will be computed"), exists=True
     )
     noise_mask = File(
-        desc=("mask in which the standard deviation of noise " "will be computed"),
+        desc=("mask in which the standard deviation of noise will be computed"),
         exists=True,
     )
     patch_radius = traits.Int(1, usedefault=True, desc="patch radius")

@@ -80,10 +80,10 @@ class RobustFOVInputSpec(FSLCommandInputSpec):
         name_template="%s_ROI",
     )
     brainsize = traits.Int(
-        desc=("size of brain in z-dimension (default " "170mm/150mm)"), argstr="-b %d"
+        desc=("size of brain in z-dimension (default 170mm/150mm)"), argstr="-b %d"
     )
     out_transform = File(
-        desc=("Transformation matrix in_file to out_roi " "output name"),
+        desc=("Transformation matrix in_file to out_roi output name"),
         argstr="-m %s",
         name_source=["in_file"],
         hash_files=False,
@@ -94,7 +94,7 @@ class RobustFOVInputSpec(FSLCommandInputSpec):
 class RobustFOVOutputSpec(TraitedSpec):
     out_roi = File(exists=True, desc="ROI volume output name")
     out_transform = File(
-        exists=True, desc=("Transformation matrix in_file to out_roi " "output name")
+        exists=True, desc=("Transformation matrix in_file to out_roi output name")
     )
 
 
@@ -127,26 +127,26 @@ class ImageMeantsInputSpec(FSLCommandInputSpec):
     mask = File(exists=True, desc="input 3D mask", argstr="-m %s")
     spatial_coord = traits.List(
         traits.Int,
-        desc=("<x y z>  requested spatial coordinate " "(instead of mask)"),
+        desc=("<x y z>  requested spatial coordinate (instead of mask)"),
         argstr="-c %s",
     )
     use_mm = traits.Bool(
-        desc=("use mm instead of voxel coordinates (for -c " "option)"),
+        desc=("use mm instead of voxel coordinates (for -c option)"),
         argstr="--usemm",
     )
     show_all = traits.Bool(
-        desc=("show all voxel time series (within mask) " "instead of averaging"),
+        desc=("show all voxel time series (within mask) instead of averaging"),
         argstr="--showall",
     )
     eig = traits.Bool(
-        desc=("calculate Eigenvariate(s) instead of mean (output will have 0 " "mean)"),
+        desc=("calculate Eigenvariate(s) instead of mean (output will have 0 mean)"),
         argstr="--eig",
     )
     order = traits.Int(
         1, desc="select number of Eigenvariates", argstr="--order=%d", usedefault=True
     )
     nobin = traits.Bool(
-        desc=("do not binarise the mask for calculation of " "Eigenvariates"),
+        desc=("do not binarise the mask for calculation of Eigenvariates"),
         argstr="--no_bin",
     )
     transpose = traits.Bool(
@@ -200,7 +200,7 @@ class SmoothInputSpec(FSLCommandInputSpec):
         position=1,
         xor=["sigma"],
         mandatory=True,
-        desc=("gaussian kernel fwhm, will be converted to sigma in mm " "(not voxels)"),
+        desc=("gaussian kernel fwhm, will be converted to sigma in mm (not voxels)"),
     )
     smoothed_file = File(
         argstr="%s",
@@ -592,7 +592,7 @@ class ImageMathsInputSpec(FSLCommandInputSpec):
         "input",
         argstr="-odt %s",
         position=-1,
-        desc=("output datatype, one of (char, short, " "int, float, double, input)"),
+        desc=("output datatype, one of (char, short, int, float, double, input)"),
     )
 
 
@@ -681,13 +681,13 @@ class FilterRegressorInputSpec(FSLCommandInputSpec):
         argstr="-f '%s'",
         xor=["filter_columns"],
         position=4,
-        desc=("use all columns in the design file in " "denoising"),
+        desc=("use all columns in the design file in denoising"),
     )
     mask = File(exists=True, argstr="-m %s", desc="mask image file name")
     var_norm = traits.Bool(argstr="--vn", desc="perform variance-normalization on data")
     out_vnscales = traits.Bool(
         argstr="--out_vnscales",
-        desc=("output scaling factors for variance " "normalization"),
+        desc=("output scaling factors for variance normalization"),
     )
 
 
@@ -737,7 +737,7 @@ class ImageStatsInputSpec(FSLCommandInputSpec):
     split_4d = traits.Bool(
         argstr="-t",
         position=1,
-        desc=("give a separate output line for each 3D " "volume of a 4D timeseries"),
+        desc=("give a separate output line for each 3D volume of a 4D timeseries"),
     )
     in_file = File(
         exists=True,
@@ -998,10 +998,10 @@ class OverlayInputSpec(FSLCommandInputSpec):
         position=7,
         mandatory=True,
         argstr="%.2f %.2f",
-        desc=("min and max values for the statistical " "overlay"),
+        desc=("min and max values for the statistical overlay"),
     )
     show_negative_stats = traits.Bool(
-        desc=("display negative statistics in " "overlay"),
+        desc=("display negative statistics in overlay"),
         xor=["stat_image2"],
         argstr="%s",
         position=8,
@@ -1017,7 +1017,7 @@ class OverlayInputSpec(FSLCommandInputSpec):
         traits.Float,
         traits.Float,
         position=10,
-        desc=("min and max values for second " "statistical overlay"),
+        desc=("min and max values for second statistical overlay"),
         argstr="%.2f %.2f",
     )
     out_file = File(
@@ -1108,9 +1108,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
         exists=True,
         position=2,
         argstr="%s",
-        desc=(
-            "volume to display edge overlay for (useful for " "checking registration"
-        ),
+        desc=("volume to display edge overlay for (useful for checking registration"),
     )
     label_slices = traits.Bool(
         position=3,
@@ -1123,7 +1121,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
         exists=True,
         position=4,
         argstr="-l %s",
-        desc=("use different colour map from that stored in " "nifti header"),
+        desc=("use different colour map from that stored in nifti header"),
     )
     intensity_range = traits.Tuple(
         traits.Float,
@@ -1136,12 +1134,12 @@ class SlicerInputSpec(FSLCommandInputSpec):
         position=6, argstr="-e %.3f", desc="use threshold for edges"
     )
     dither_edges = traits.Bool(
-        position=7, argstr="-t", desc=("produce semi-transparent (dithered) " "edges")
+        position=7, argstr="-t", desc=("produce semi-transparent (dithered) edges")
     )
     nearest_neighbour = traits.Bool(
         position=8,
         argstr="-n",
-        desc=("use nearest neighbor interpolation " "for output"),
+        desc=("use nearest neighbor interpolation for output"),
     )
     show_orientation = traits.Bool(
         position=9,
@@ -1168,7 +1166,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
         position=10,
         argstr="-a",
         xor=_xor_options,
-        desc=("output picture of mid-sagittal, axial, " "and coronal slices"),
+        desc=("output picture of mid-sagittal, axial, and coronal slices"),
     )
     all_axial = traits.Bool(
         position=10,
@@ -1182,7 +1180,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
         argstr="-S %d",
         xor=_xor_options,
         requires=["image_width"],
-        desc=("output every n axial slices into one " "picture"),
+        desc=("output every n axial slices into one picture"),
     )
     image_width = traits.Int(position=-2, argstr="%d", desc="max picture width")
     out_file = File(
@@ -1255,7 +1253,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
         mandatory=True,
         argstr="%s",
         position=1,
-        desc=("file or list of files with columns of " "timecourse information"),
+        desc=("file or list of files with columns of timecourse information"),
     )
     plot_start = traits.Int(
         argstr="--start=%d",
@@ -1272,7 +1270,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
         traits.Int,
         argstr="%s",
         xor=("plot_start", "plot_finish"),
-        desc=("first and last columns from the in-file " "to plot"),
+        desc=("first and last columns from the in-file to plot"),
     )
     title = traits.Str(argstr="%s", desc="plot title")
     legend_file = File(exists=True, argstr="--legend=%s", desc="legend file")
@@ -1382,7 +1380,7 @@ class PlotMotionParamsInputSpec(FSLCommandInputSpec):
         "spm",
         "fsl",
         mandatory=True,
-        desc=("which program generated the motion " "parameter file - fsl, spm"),
+        desc=("which program generated the motion parameter file - fsl, spm"),
     )
     plot_type = traits.Enum(
         "rotations",
@@ -1390,7 +1388,7 @@ class PlotMotionParamsInputSpec(FSLCommandInputSpec):
         "displacement",
         argstr="%s",
         mandatory=True,
-        desc=("which motion type to plot - rotations, " "translations, displacement"),
+        desc=("which motion type to plot - rotations, translations, displacement"),
     )
     plot_size = traits.Tuple(
         traits.Int, traits.Int, argstr="%s", desc="plot image height and width"
@@ -1520,14 +1518,14 @@ class ConvertXFMInputSpec(FSLCommandInputSpec):
         position=-3,
         xor=_options,
         requires=["in_file2"],
-        desc=("write joint transformation of two input " "matrices"),
+        desc=("write joint transformation of two input matrices"),
     )
     fix_scale_skew = traits.Bool(
         argstr="-fixscaleskew",
         position=-3,
         xor=_options,
         requires=["in_file2"],
-        desc=("use secondary matrix to fix scale and " "skew"),
+        desc=("use secondary matrix to fix scale and skew"),
     )
     out_file = File(
         genfile=True,
@@ -1871,11 +1869,11 @@ class InvWarpInputSpec(FSLCommandInputSpec):
     )
     jacobian_min = traits.Float(
         argstr="--jmin=%f",
-        desc=("Minimum acceptable Jacobian value for " "constraint (default 0.01)"),
+        desc=("Minimum acceptable Jacobian value for constraint (default 0.01)"),
     )
     jacobian_max = traits.Float(
         argstr="--jmax=%f",
-        desc=("Maximum acceptable Jacobian value for " "constraint (default 100.0)"),
+        desc=("Maximum acceptable Jacobian value for constraint (default 100.0)"),
     )
 
 
@@ -2182,7 +2180,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
 
 class WarpUtilsOutputSpec(TraitedSpec):
     out_file = File(
-        desc=("Name of output file, containing the warp as field or " "coefficients.")
+        desc=("Name of output file, containing the warp as field or coefficients.")
     )
     out_jacobian = File(
         desc=(
@@ -2339,11 +2337,11 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
 
     jacobian_min = traits.Float(
         argstr="--jmin=%f",
-        desc="Minimum acceptable Jacobian value for " "constraint (default 0.01)",
+        desc="Minimum acceptable Jacobian value for constraint (default 0.01)",
     )
     jacobian_max = traits.Float(
         argstr="--jmax=%f",
-        desc="Maximum acceptable Jacobian value for " "constraint (default 100.0)",
+        desc="Maximum acceptable Jacobian value for constraint (default 100.0)",
     )
 
     abswarp = traits.Bool(
@@ -2384,7 +2382,7 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
 class ConvertWarpOutputSpec(TraitedSpec):
     out_file = File(
         exists=True,
-        desc="Name of output file, containing the warp as field or " "coefficients.",
+        desc="Name of output file, containing the warp as field or coefficients.",
     )
 
 
@@ -2432,7 +2430,7 @@ class WarpPointsBaseInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-warp %s",
         xor=["xfm_file"],
-        desc="filename of warpfield (e.g. " "intermediate2dest_warp.nii.gz)",
+        desc="filename of warpfield (e.g. intermediate2dest_warp.nii.gz)",
     )
     coord_vox = traits.Bool(
         True,
@@ -2466,7 +2464,7 @@ class WarpPointsInputSpec(WarpPointsBaseInputSpec):
 class WarpPointsOutputSpec(TraitedSpec):
     out_file = File(
         exists=True,
-        desc="Name of output file, containing the warp as field or " "coefficients.",
+        desc="Name of output file, containing the warp as field or coefficients.",
     )
 
 
@@ -2629,9 +2627,7 @@ class WarpPointsToStdInputSpec(WarpPointsBaseInputSpec):
     premat_file = File(
         exists=True,
         argstr="-premat %s",
-        desc=(
-            "filename of pre-warp affine transform " "(e.g. example_func2highres.mat)"
-        ),
+        desc=("filename of pre-warp affine transform (e.g. example_func2highres.mat)"),
     )
 
 
@@ -2697,7 +2693,7 @@ class WarpPointsFromStdInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-warp %s",
         xor=["xfm_file"],
-        desc="filename of warpfield (e.g. " "intermediate2dest_warp.nii.gz)",
+        desc="filename of warpfield (e.g. intermediate2dest_warp.nii.gz)",
     )
     coord_vox = traits.Bool(
         True,

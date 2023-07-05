@@ -277,7 +277,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
 
         if np.any(np.array(tasks_mem_gb) > self.memory_gb):
             logger.warning(
-                "Some nodes exceed the total amount of memory available " "(%0.2fGB).",
+                "Some nodes exceed the total amount of memory available (%0.2fGB).",
                 self.memory_gb,
             )
             if self.raise_insufficient:

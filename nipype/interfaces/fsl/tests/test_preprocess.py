@@ -434,7 +434,7 @@ def test_fnirt(setup_flirt):
                 " --iout=%s" % (infile, log, flag, strval, reffile, iout)
             )
         elif item in ("in_fwhm", "intensity_mapping_model"):
-            cmd = "fnirt --in=%s %s=%s --logout=%s " "--ref=%s --iout=%s" % (
+            cmd = "fnirt --in={} {}={} --logout={} --ref={} --iout={}".format(
                 infile,
                 flag,
                 strval,

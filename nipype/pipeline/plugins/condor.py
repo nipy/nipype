@@ -104,7 +104,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit condor " "cluster" " for node %s")
+                                "Could not submit condor cluster for node %s"
                                 % node._id,
                                 str(e),
                             )

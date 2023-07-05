@@ -77,7 +77,7 @@ class RigidInputSpec(CommandLineInputSpec):
     )
     initialize_xfm = File(
         copyfile=True,
-        desc="Initialize w/DTITK-FORMAT" "affine",
+        desc="Initialize w/DTITK-FORMAT affine",
         position=5,
         argstr="%s",
         exists=True,
@@ -317,7 +317,7 @@ class AffSymTensor3DVolInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-target %s",
         xor=["transform"],
-        desc="output volume specification read from the target " "volume if specified",
+        desc="output volume specification read from the target volume if specified",
     )
     translation = traits.Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
@@ -388,13 +388,13 @@ class AffScalarVolInputSpec(CommandLineInputSpec):
         "NN",
         usedefault=True,
         argstr="-interp %s",
-        desc="trilinear or nearest neighbor" " interpolation",
+        desc="trilinear or nearest neighbor interpolation",
     )
     target = File(
         exists=True,
         argstr="-target %s",
         xor=["transform"],
-        desc="output volume specification read from the target " "volume if specified",
+        desc="output volume specification read from the target volume if specified",
     )
     translation = traits.Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
@@ -482,7 +482,7 @@ class DiffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-target %s",
         xor=["voxel_size"],
-        desc="output volume specification read from the target " "volume if specified",
+        desc="output volume specification read from the target volume if specified",
     )
     voxel_size = traits.Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
@@ -550,7 +550,7 @@ class DiffeoScalarVolInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-target %s",
         xor=["voxel_size"],
-        desc="output volume specification read from the target " "volume if specified",
+        desc="output volume specification read from the target volume if specified",
     )
     voxel_size = traits.Tuple(
         (traits.Float(), traits.Float(), traits.Float()),

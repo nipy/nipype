@@ -155,7 +155,7 @@ class C3dInputSpec(CommandLineInputSpec):
     is_4d = traits.Bool(
         False,
         usedefault=True,
-        desc=("Changes command to support 4D file operations (default is" " false)."),
+        desc=("Changes command to support 4D file operations (default is false)."),
     )
 
 
@@ -218,7 +218,7 @@ class C3d(CommandLine):
         # if many infiles, raise exception
         if (len(self.inputs.in_file) > 1) or ("*" in self.inputs.in_file[0]):
             raise AttributeError(
-                "Multiple in_files found - specify either" " `out_file` or `out_files`."
+                "Multiple in_files found - specify either `out_file` or `out_files`."
             )
         _, fn, ext = split_filename(self.inputs.in_file[0])
         self.inputs.out_file = fn + "_generated" + ext

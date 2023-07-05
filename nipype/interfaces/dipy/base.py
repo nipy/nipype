@@ -132,9 +132,7 @@ def convert_to_traits_type(dipy_type, is_file=False):
     elif "complex" in dipy_type:
         return traits.Complex, is_mandatory
     else:
-        msg = (
-            f"Error during convert_to_traits_type({dipy_type})." + "Unknown DIPY type."
-        )
+        msg = f"Error during convert_to_traits_type({dipy_type}). Unknown DIPY type."
         raise OSError(msg)
 
 

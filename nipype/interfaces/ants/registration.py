@@ -15,7 +15,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     fixed_image = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("image to which the moving image is " "warped"),
+        desc=("image to which the moving image is warped"),
     )
     moving_image = InputMultiPath(
         File(exists=True),

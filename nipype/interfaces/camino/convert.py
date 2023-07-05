@@ -716,7 +716,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         argstr="%s",
         position=2,
-        desc=("Camino scheme file (b values / vectors, " "see camino.fsl2scheme)"),
+        desc=("Camino scheme file (b values / vectors, see camino.fsl2scheme)"),
     )
 
     readheader = File(
@@ -735,9 +735,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         argstr="-printimagedims %s",
         position=3,
-        desc=(
-            "Prints image data and voxel dimensions as " "Camino arguments and exits."
-        ),
+        desc=("Prints image data and voxel dimensions as Camino arguments and exits."),
     )
 
     # How do we implement both file and enum (for the program) in one argument?
@@ -762,14 +760,14 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         argstr="-printintelbyteorder %s",
         position=3,
-        desc=("Prints 1 if the header is little-endian, " "0 otherwise."),
+        desc=("Prints 1 if the header is little-endian, 0 otherwise."),
     )
 
     printbigendian = File(
         exists=True,
         argstr="-printbigendian %s",
         position=3,
-        desc=("Prints 1 if the header is big-endian, 0 " "otherwise."),
+        desc=("Prints 1 if the header is big-endian, 0 otherwise."),
     )
 
     initfromheader = File(
@@ -820,7 +818,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         argstr="-picoseed %s",
         minlen=3,
         maxlen=3,
-        desc=("Voxel specifying the seed (for PICo maps), " "default [0 0 0]."),
+        desc=("Voxel specifying the seed (for PICo maps), default [0 0 0]."),
         units="mm",
     )
 
@@ -866,7 +864,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         argstr="-gl %s",
         minlen=2,
         maxlen=2,
-        desc=("Minimum and maximum greylevels. Stored as " "shorts in the header."),
+        desc=("Minimum and maximum greylevels. Stored as shorts in the header."),
         units="NA",
     )
 
@@ -883,7 +881,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
     scaleinter = traits.Float(
         argstr="-scaleinter %d",
         units="NA",
-        desc=("Constant to add to the image intensities. " "Used by SPM and MRIcro."),
+        desc=("Constant to add to the image intensities. Used by SPM and MRIcro."),
     )
 
     description = traits.String(
@@ -897,7 +895,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
 
     intelbyteorder = traits.Bool(
         argstr="-intelbyteorder",
-        desc=("Write header in intel byte order " "(little-endian)."),
+        desc=("Write header in intel byte order (little-endian)."),
     )
 
     networkbyteorder = traits.Bool(

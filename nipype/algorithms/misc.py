@@ -870,7 +870,7 @@ class AddCSVRow(BaseInterface):
             import pandas as pd
         except ImportError as e:
             raise ImportError(
-                "This interface requires pandas " "(http://pandas.pydata.org/) to run."
+                "This interface requires pandas (http://pandas.pydata.org/) to run."
             ) from e
 
         try:
@@ -1000,7 +1000,7 @@ class AddNoiseInputSpec(TraitedSpec):
     )
     in_mask = File(
         exists=True,
-        desc=("input mask, voxels outside this mask " "will be considered background"),
+        desc=("input mask, voxels outside this mask will be considered background"),
     )
     snr = traits.Float(10.0, desc="desired output SNR in dB", usedefault=True)
     dist = traits.Enum(
@@ -1015,7 +1015,7 @@ class AddNoiseInputSpec(TraitedSpec):
         "rayleigh",
         usedefault=True,
         mandatory=True,
-        desc=("desired noise distribution, currently " "only normal is implemented"),
+        desc=("desired noise distribution, currently only normal is implemented"),
     )
     out_file = File(desc="desired output filename")
 
@@ -1118,7 +1118,7 @@ class AddNoise(BaseInterface):
             im_noise = np.sqrt((image + stde_1) ** 2 + (stde_2) ** 2)
         else:
             raise NotImplementedError(
-                "Only normal and rician distributions " "are supported"
+                "Only normal and rician distributions are supported"
             )
 
         return im_noise

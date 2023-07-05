@@ -364,7 +364,7 @@ class BinThreshInputSpec(CommandLineInputSpec):
         argstr="%g",
         usedefault=True,
         mandatory=True,
-        desc="value for voxels in " "binarization range",
+        desc="value for voxels in binarization range",
     )
     outside_value = traits.Float(
         0,
@@ -372,7 +372,7 @@ class BinThreshInputSpec(CommandLineInputSpec):
         argstr="%g",
         usedefault=True,
         mandatory=True,
-        desc="value for voxels" "outside of binarization range",
+        desc="value for voxels outside of binarization range",
     )
 
 

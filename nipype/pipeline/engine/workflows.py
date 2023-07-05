@@ -334,7 +334,7 @@ connected.
                 for subnode in node._get_all_nodes():
                     if subnode in all_nodes:
                         raise OSError(
-                            ("Subnode %s of node %s already exists " "in the workflow")
+                            "Subnode %s of node %s already exists in the workflow"
                             % (subnode, node)
                         )
             newnodes.append(node)
@@ -523,7 +523,7 @@ connected.
 
         all_lines = None
         lines = ["# Workflow"]
-        importlines = ["from nipype.pipeline.engine import Workflow, " "Node, MapNode"]
+        importlines = ["from nipype.pipeline.engine import Workflow, Node, MapNode"]
         functions = {}
         if format == "python":
             connect_template = '%s.connect(%%s, %%s, %%s, "%%s")' % self.name
@@ -948,7 +948,7 @@ connected.
         nodes2remove = []
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception(
-                ("Workflow: %s is not a directed acyclic graph " "(DAG)") % self.name
+                ("Workflow: %s is not a directed acyclic graph (DAG)") % self.name
             )
         nodes = list(self._graph.nodes)
         for node in nodes:
