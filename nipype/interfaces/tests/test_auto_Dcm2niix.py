@@ -41,7 +41,7 @@ def test_Dcm2niix_inputs():
             argstr="-i",
         ),
         merge_imgs=dict(
-            argstr="-m",
+            argstr="-m %d",
             usedefault=True,
         ),
         out_filename=dict(

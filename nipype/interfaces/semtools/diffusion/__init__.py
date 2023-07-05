@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .diffusion import dtiaverage, dtiestim, dtiprocess, DWIConvert
 from .tractography import *
 from .gtract import (

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
@@ -109,15 +108,15 @@ class HARDIMat(CommandLine):
         for i in range(len(bvals)):
             if int(bvals[i]) == 0:
                 continue
-            gradient_matrix_f.write("%s %s %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i]))
+            gradient_matrix_f.write(f"{bvecs_x[i]} {bvecs_y[i]} {bvecs_z[i]}\n")
         gradient_matrix_f.close()
         return _gradient_matrix_file
 
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
             new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
-            return super(HARDIMat, self)._format_arg("bvecs", spec, new_val)
-        return super(HARDIMat, self)._format_arg(name, spec, value)
+            return super()._format_arg("bvecs", spec, new_val)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -388,7 +387,7 @@ class ODFTracker(CommandLine):
             copy=False,
         )
 
-        return super(ODFTracker, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

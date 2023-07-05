@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from multiprocessing import Pool, cpu_count
 import os.path as op
 
@@ -29,7 +28,7 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     in_vfms = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("volume fractions of isotropic " "compartiments"),
+        desc=("volume fractions of isotropic compartiments"),
     )
     in_mask = File(exists=True, desc="mask to simulate data")
 
@@ -56,15 +55,13 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     num_dirs = traits.Int(
         32,
         usedefault=True,
-        desc=(
-            "number of gradient directions (when table " "is automatically generated)"
-        ),
+        desc=("number of gradient directions (when table is automatically generated)"),
     )
     bvalues = traits.List(
         traits.Int,
         value=[1000, 3000],
         usedefault=True,
-        desc=("list of b-values (when table " "is automatically generated)"),
+        desc=("list of b-values (when table is automatically generated)"),
     )
     out_file = File(
         "sim_dwi.nii.gz",
@@ -134,7 +131,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         nsticks = len(self.inputs.in_dirs)
         if len(self.inputs.in_frac) != nsticks:
             raise RuntimeError(
-                ("Number of sticks and their volume fractions" " must match.")
+                "Number of sticks and their volume fractions must match."
             )
 
         # Volume fractions of isotropic compartments
@@ -256,9 +253,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         )
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
-            raise RuntimeError(
-                ("Computed directions do not match number" "of b-values.")
-            )
+            raise RuntimeError("Computed directions do not match number of b-values.")
 
         signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
         signal[msk > 0] = result

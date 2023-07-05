@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -58,7 +57,7 @@ class IdentityInterface(IOBase):
     output_spec = DynamicTraitedSpec
 
     def __init__(self, fields=None, mandatory_inputs=True, **inputs):
-        super(IdentityInterface, self).__init__(**inputs)
+        super().__init__(**inputs)
         if fields is None or not fields:
             raise ValueError("Identity Interface fields must be a non-empty list")
         # Each input must be in the fields.
@@ -175,7 +174,7 @@ class Merge(IOBase):
     output_spec = MergeOutputSpec
 
     def __init__(self, numinputs=0, **inputs):
-        super(Merge, self).__init__(**inputs)
+        super().__init__(**inputs)
         self._numinputs = numinputs
         if numinputs >= 1:
             input_names = ["in%d" % (i + 1) for i in range(numinputs)]
@@ -211,14 +210,12 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
     in_file = File(exists=True, mandatory=True, desc="file to rename")
     keep_ext = traits.Bool(
-        desc=("Keep in_file extension, replace " "non-extension component of name")
+        desc="Keep in_file extension, replace non-extension component of name"
     )
     format_string = Str(
         mandatory=True, desc="Python formatting string for output template"
     )
-    parse_string = Str(
-        desc="Python regexp parse string to define " "replacement inputs"
-    )
+    parse_string = Str(desc="Python regexp parse string to define replacement inputs")
     use_fullpath = traits.Bool(
         False, usedefault=True, desc="Use full path as input to regex parser"
     )
@@ -229,7 +226,7 @@ class RenameOutputSpec(TraitedSpec):
 
 
 class Rename(SimpleInterface, IOBase):
-    """Change the name of a file based on a mapped format string.
+    r"""Change the name of a file based on a mapped format string.
 
     To use additional inputs that will be defined at run-time, the class
     constructor must be called with the format template, and the fields
@@ -275,7 +272,7 @@ class Rename(SimpleInterface, IOBase):
     output_spec = RenameOutputSpec
 
     def __init__(self, format_string=None, **inputs):
-        super(Rename, self).__init__(**inputs)
+        super().__init__(**inputs)
         if format_string is not None:
             self.inputs.format_string = format_string
             self.fmt_fields = re.findall(r"%\((.+?)\)", format_string)

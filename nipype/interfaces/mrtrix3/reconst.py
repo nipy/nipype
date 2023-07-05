@@ -29,9 +29,7 @@ class FitTensorInputSpec(MRTrix3BaseInputSpec):
     in_mask = File(
         exists=True,
         argstr="-mask %s",
-        desc=(
-            "only perform computation within the specified " "binary brain mask image"
-        ),
+        desc=("only perform computation within the specified binary brain mask image"),
     )
     method = traits.Enum(
         "nonlinear",

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces."""
@@ -11,7 +10,7 @@ from ...interfaces.base import DynamicTraitedSpec
 from ...utils.filemanip import loadpkl, savepkl
 
 
-class EngineBase(object):
+class EngineBase:
     """
     Defines common attributes and functions for workflows and nodes.
 
@@ -57,7 +56,7 @@ class EngineBase(object):
     def fullname(self):
         """Build the full name down the hierarchy."""
         if self._hierarchy:
-            return "%s.%s" % (self._hierarchy, self.name)
+            return f"{self._hierarchy}.{self.name}"
         return self.name
 
     @property
@@ -73,7 +72,7 @@ class EngineBase(object):
         """Get the name of the expanded iterable."""
         itername = self._id
         if self._hierarchy:
-            itername = "%s.%s" % (self._hierarchy, self._id)
+            itername = f"{self._hierarchy}.{self._id}"
         return itername
 
     def clone(self, name):

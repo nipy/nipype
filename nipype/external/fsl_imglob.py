@@ -65,7 +65,6 @@
 #   innovation@isis.ox.ac.uk quoting reference DE/9564.
 import sys
 import glob
-from builtins import range
 
 
 def usage():

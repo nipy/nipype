@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """DTITK utility interfaces
@@ -365,7 +364,7 @@ class BinThreshInputSpec(CommandLineInputSpec):
         argstr="%g",
         usedefault=True,
         mandatory=True,
-        desc="value for voxels in " "binarization range",
+        desc="value for voxels in binarization range",
     )
     outside_value = traits.Float(
         0,
@@ -373,7 +372,7 @@ class BinThreshInputSpec(CommandLineInputSpec):
         argstr="%g",
         usedefault=True,
         mandatory=True,
-        desc="value for voxels" "outside of binarization range",
+        desc="value for voxels outside of binarization range",
     )
 
 

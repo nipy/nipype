@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -264,7 +263,7 @@ class CoherenceAnalyzer(NitimeBaseInterface):
             fid.write("," + ",".join(self.ROIs) + "\n")
             # this writes ROI and data to a line
             for r, line in zip(self.ROIs, open(tmp_f)):
-                fid.write("%s,%s" % (r, line))
+                fid.write(f"{r},{line}")
             fid.close()
 
     def _make_output_figures(self):

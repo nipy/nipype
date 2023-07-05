@@ -90,16 +90,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-20.04']
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        os: ['ubuntu-22.04']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         check: ['test']
         pip-flags: ['']
         depends: ['REQUIREMENTS']
         deb-depends: [false]
         nipype-extras: ['doc,tests,profiler']
         include:
-          - os: ubuntu-20.04
-            python-version: 3.8
+          - os: ubuntu-22.04
+            python-version: '3.8'
             check: test
             pip-flags: ''
             depends: REQUIREMENTS

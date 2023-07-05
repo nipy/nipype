@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import os.path as op
 import datetime
@@ -134,7 +132,7 @@ class CFFConverter(CFFBaseInterface):
             for ntwk in self.inputs.graphml_networks:
                 # There must be a better way to deal with the unique name problem
                 # (i.e. tracks and networks can't use the same name, and previously we were pulling them both from the input files)
-                ntwk_name = "Network {cnt}".format(cnt=count)
+                ntwk_name = f"Network {count}"
                 a.add_connectome_network_from_graphml(ntwk_name, ntwk)
                 count += 1
 

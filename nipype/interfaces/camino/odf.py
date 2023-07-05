@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 
 from ...utils.filemanip import split_filename
@@ -152,9 +150,7 @@ class LinReconInputSpec(StdOutCommandLineInputSpec):
     )
     log = traits.Bool(
         argstr="-log",
-        desc=(
-            "Transform the log measurements rather than the " "measurements themselves"
-        ),
+        desc=("Transform the log measurements rather than the measurements themselves"),
     )
     bgmask = File(exists=True, argstr="-bgmask %s", desc="background mask")
 

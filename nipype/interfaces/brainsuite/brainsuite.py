@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This script provides interfaces for BrainSuite command line tools.
 Please see brainsuite.org for more information.
 
@@ -269,7 +268,7 @@ class Bfc(CommandLine):
                 }[value]
             )
 
-        return super(Bfc, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         return l_outputs(self)
@@ -777,12 +776,12 @@ class Dfs(CommandLine):
             return (
                 spec.argstr
                 % {
-                    "greater_than": "".join(("-gt %f" % threshold)),
-                    "less_than": "".join(("-lt %f" % threshold)),
-                    "equal_to": "".join(("-eq %f" % threshold)),
+                    "greater_than": "".join("-gt %f" % threshold),
+                    "less_than": "".join("-lt %f" % threshold),
+                    "equal_to": "".join("-eq %f" % threshold),
                 }[value]
             )
-        return super(Dfs, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         inputs = self.inputs.get()
@@ -1206,7 +1205,7 @@ class SVReg(CommandLine):
             return spec.argstr % os.path.expanduser(value)
         if name == "dataSinkDelay":
             return spec.argstr % ""
-        return super(SVReg, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class BDPInputSpec(CommandLineInputSpec):
@@ -1756,7 +1755,7 @@ class BDP(CommandLine):
             return spec.argstr % (value[0], value[1])
         if name == "dataSinkDelay":
             return spec.argstr % ""
-        return super(BDP, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ThicknessPVCInputSpec(CommandLineInputSpec):

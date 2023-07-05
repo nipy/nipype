@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -10,7 +9,7 @@ import pytest
 
 def test_ActivationCount(tmpdir):
     tmpdir.chdir()
-    in_files = ["{:d}.nii".format(i) for i in range(3)]
+    in_files = [f"{i:d}.nii" for i in range(3)]
     for fname in in_files:
         nb.Nifti1Image(np.random.normal(size=(5, 5, 5)), np.eye(4)).to_filename(fname)
 
@@ -32,7 +31,7 @@ def test_ActivationCount(tmpdir):
 )
 def test_ActivationCount_normaldistr(tmpdir, threshold, above_thresh):
     tmpdir.chdir()
-    in_files = ["{:d}.nii".format(i) for i in range(3)]
+    in_files = [f"{i:d}.nii" for i in range(3)]
     for fname in in_files:
         nb.Nifti1Image(np.random.normal(size=(100, 100, 100)), np.eye(4)).to_filename(
             fname

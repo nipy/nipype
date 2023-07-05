@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via LSF
 """
 
@@ -39,7 +38,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
                 self._max_tries = kwargs["plugin_args"]["max_tries"]
             if "bsub_args" in kwargs["plugin_args"]:
                 self._bsub_args = kwargs["plugin_args"]["bsub_args"]
-        super(LSFPlugin, self).__init__(template, **kwargs)
+        super().__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         """LSF lists a status of 'PEND' when a job has been submitted but is
@@ -76,10 +75,10 @@ class LSFPlugin(SGELikeBatchManagerBase):
             else:
                 bsubargs += " " + node.plugin_args["bsub_args"]
         if "-o" not in bsubargs:  # -o outfile
-            bsubargs = "%s -o %s" % (bsubargs, scriptfile + ".log")
+            bsubargs = "{} -o {}".format(bsubargs, scriptfile + ".log")
         if "-e" not in bsubargs:
             # -e error file
-            bsubargs = "%s -e %s" % (bsubargs, scriptfile + ".log")
+            bsubargs = "{} -e {}".format(bsubargs, scriptfile + ".log")
         if node._hierarchy:
             jobname = ".".join((dict(os.environ)["LOGNAME"], node._hierarchy, node._id))
         else:
@@ -87,7 +86,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split(".")
         jobnameitems.reverse()
         jobname = ".".join(jobnameitems)
-        cmd.inputs.args = "%s -J %s sh %s" % (
+        cmd.inputs.args = "{} -J {} sh {}".format(
             bsubargs,
             jobname,
             scriptfile,
@@ -108,7 +107,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit lsf task" " for node %s") % node._id,
+                                "Could not submit lsf task for node %s" % node._id,
                                 str(e),
                             )
                         )
@@ -121,7 +120,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if match:
             taskid = int(match.groups()[0])
         else:
-            raise IOError(
+            raise OSError(
                 "Can't parse submission job output id: %s" % result.runtime.stdout
             )
         self._pending[taskid] = node.output_dir()

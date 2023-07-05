@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pytest
 from nipype.utils.functions import getsource, create_function_from_source
 

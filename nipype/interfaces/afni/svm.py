@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI's svm interfaces."""
@@ -107,7 +106,7 @@ class SVMTrain(AFNICommand):
     _additional_metadata = ["suffix"]
 
     def _format_arg(self, name, trait_spec, value):
-        return super(SVMTrain, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class SVMTestInputSpec(AFNICommandInputSpec):

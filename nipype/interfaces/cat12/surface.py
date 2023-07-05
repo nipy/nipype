@@ -163,9 +163,7 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
     def _format_arg(self, opt, spec, val):
         if opt == "left_central_surfaces":
             return Cell2Str(val)
-        return super(ExtractAdditionalSurfaceParameters, self)._format_arg(
-            opt, spec, val
-        )
+        return super()._format_arg(opt, spec, val)
 
 
 class ExtractROIBasedSurfaceMeasuresInputSpec(SPMCommandInputSpec):
@@ -174,7 +172,7 @@ class ExtractROIBasedSurfaceMeasuresInputSpec(SPMCommandInputSpec):
 
     surface_files = InputMultiPath(
         File(exists=True),
-        desc="Surface data files. This variable should be a list " "with all",
+        desc="Surface data files. This variable should be a list with all",
         mandatory=False,
         copyfile=False,
     )
@@ -257,7 +255,7 @@ class ExtractROIBasedSurfaceMeasures(SPMCommand):
         elif opt == "lh_roi_atlas":
             return Cell2Str(val)
 
-        return super(ExtractROIBasedSurfaceMeasures, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

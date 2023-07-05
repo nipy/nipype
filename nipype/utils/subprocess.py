@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
@@ -19,7 +18,7 @@ from .. import logging
 iflogger = logging.getLogger("nipype.interface")
 
 
-class Stream(object):
+class Stream:
     """Function to capture stdout and stderr streams with timestamps
 
     stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359
@@ -64,7 +63,7 @@ class Stream(object):
         self._buf = rest
         now = datetime.datetime.now().isoformat()
         rows = tmp.split("\n")
-        self._rows += [(now, "%s %s:%s" % (self._name, now, r), r) for r in rows]
+        self._rows += [(now, f"{self._name} {now}:{r}", r) for r in rows]
         for idx in range(self._lastidx, len(self._rows)):
             iflogger.info(self._rows[idx][1])
         self._lastidx = len(self._rows)
@@ -126,7 +125,7 @@ def run_command(runtime, output=None, timeout=0.01, write_cmdline=False):
         def _process(drain=0):
             try:
                 res = select.select(streams, [], [], timeout)
-            except select.error as e:
+            except OSError as e:
                 iflogger.info(e)
                 if e.errno == errno.EINTR:
                     return

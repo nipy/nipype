@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -168,7 +167,7 @@ class FSLCommand(CommandLine):
     ]
 
     def __init__(self, **inputs):
-        super(FSLCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, "output_type")
 
         if self._output_type is None:

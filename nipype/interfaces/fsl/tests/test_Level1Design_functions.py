@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from ...base import Undefined
 from ..model import Level1Design
@@ -35,4 +34,4 @@ def test_level1design(tmpdir):
             do_tempfilter,
             key,
         )
-        assert "set fmri(convolve1) {0}".format(val) in output_txt
+        assert f"set fmri(convolve1) {val}" in output_txt

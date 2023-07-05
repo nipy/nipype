@@ -199,7 +199,7 @@ class Atropos(ANTSCommand):
                     self.inputs.prior_probability_threshold
                 ):
                     brackets.append("%g" % self.inputs.prior_probability_threshold)
-            return "--initialization %s[%s]" % (val, ",".join(brackets))
+            return "--initialization {}[{}]".format(val, ",".join(brackets))
         if opt == "mrf_smoothing_factor":
             retval = "--mrf [%g" % val
             if isdefined(self.inputs.mrf_radius):
@@ -227,7 +227,7 @@ class Atropos(ANTSCommand):
             if isdefined(self.inputs.save_posteriors):
                 retval += ",%s" % self.inputs.output_posteriors_name_template
             return retval + "]"
-        return super(Atropos, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _gen_filename(self, name):
         if name == "out_classified_image_name":
@@ -499,11 +499,11 @@ class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
     def __init__(self, *args, **kwargs):
         """Instantiate the N4BiasFieldCorrection interface."""
         self._out_bias_file = None
-        super(N4BiasFieldCorrection, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def _format_arg(self, name, trait_spec, value):
         if name == "output_image" and self._out_bias_file:
-            newval = "[ %s, %s ]" % (value, self._out_bias_file)
+            newval = f"[ {value}, {self._out_bias_file} ]"
             return trait_spec.argstr % newval
 
         if name == "bspline_fitting_distance":
@@ -515,7 +515,7 @@ class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
 
         if name == "n_iterations":
             if isdefined(self.inputs.convergence_threshold):
-                newval = "[ %s, %g ]" % (
+                newval = "[ {}, {:g} ]".format(
                     self._format_xarray([str(elt) for elt in value]),
                     self.inputs.convergence_threshold,
                 )
@@ -523,7 +523,7 @@ class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
                 newval = "[ %s ]" % self._format_xarray([str(elt) for elt in value])
             return trait_spec.argstr % newval
 
-        return super(N4BiasFieldCorrection, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         skip = (skip or []) + ["save_bias", "bias_image"]
@@ -535,10 +535,10 @@ class N4BiasFieldCorrection(ANTSCommand, CopyHeaderInterface):
                     os.path.basename(self.inputs.input_image), suffix="_bias"
                 )
             self._out_bias_file = bias_image
-        return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
-        outputs = super(N4BiasFieldCorrection, self)._list_outputs()
+        outputs = super()._list_outputs()
         if self._out_bias_file:
             outputs["bias_image"] = os.path.abspath(self._out_bias_file)
         return outputs
@@ -767,7 +767,7 @@ class CorticalThickness(ANTSCommand):
             _, _, ext = split_filename(self.inputs.segmentation_priors[0])
             retval = "-p nipype_priors/BrainSegmentationPrior%02d" + ext
             return retval
-        return super(CorticalThickness, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         priors_directory = os.path.join(os.getcwd(), "nipype_priors")
@@ -783,7 +783,7 @@ class CorticalThickness(ANTSCommand):
                 and os.path.realpath(target) == os.path.abspath(f)
             ):
                 copyfile(os.path.abspath(f), target)
-        runtime = super(CorticalThickness, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         return runtime
 
     def _list_outputs(self):
@@ -1006,7 +1006,7 @@ class BrainExtraction(ANTSCommand):
 
         self.inputs.environ.update({"ANTSPATH": ants_path})
         runtime.environ.update({"ANTSPATH": ants_path})
-        runtime = super(BrainExtraction, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
 
         # Still, double-check if it didn't found N4
         if "we can't find" in runtime.stdout:
@@ -1235,13 +1235,13 @@ class DenoiseImage(ANTSCommand):
         if (name == "output_image") and (
             self.inputs.save_noise or isdefined(self.inputs.noise_image)
         ):
-            newval = "[ %s, %s ]" % (
+            newval = "[ {}, {} ]".format(
                 self._filename_from_source("output_image"),
                 self._filename_from_source("noise_image"),
             )
             return trait_spec.argstr % newval
 
-        return super(DenoiseImage, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class JointFusionInputSpec(ANTSCommandInputSpec):
@@ -1482,16 +1482,16 @@ class JointFusion(ANTSCommand):
             retval = []
             for ii in range(len(self.inputs.exclusion_image_label)):
                 retval.append(
-                    "-e {0}[{1}]".format(
+                    "-e {}[{}]".format(
                         self.inputs.exclusion_image_label[ii],
                         self.inputs.exclusion_image[ii],
                     )
                 )
             return " ".join(retval)
         if opt == "patch_radius":
-            return "-p {0}".format(self._format_xarray(val))
+            return f"-p {self._format_xarray(val)}"
         if opt == "search_radius":
-            return "-s {0}".format(self._format_xarray(val))
+            return f"-s {self._format_xarray(val)}"
         if opt == "out_label_fusion":
             args = [self.inputs.out_label_fusion]
             for option in (
@@ -1508,19 +1508,19 @@ class JointFusion(ANTSCommand):
             return "-o [{}]".format(", ".join(args))
         if opt == "out_intensity_fusion_name_format":
             if not isdefined(self.inputs.out_label_fusion):
-                return "-o {0}".format(self.inputs.out_intensity_fusion_name_format)
+                return f"-o {self.inputs.out_intensity_fusion_name_format}"
             return ""
         if opt == "atlas_image":
             return " ".join(
                 [
-                    "-g [{0}]".format(", ".join("'%s'" % fn for fn in ai))
+                    "-g [{}]".format(", ".join("'%s'" % fn for fn in ai))
                     for ai in self.inputs.atlas_image
                 ]
             )
         if opt == "target_image":
             return " ".join(
                 [
-                    "-t [{0}]".format(", ".join("'%s'" % fn for fn in ai))
+                    "-t [{}]".format(", ".join("'%s'" % fn for fn in ai))
                     for ai in self.inputs.target_image
                 ]
             )
@@ -1528,14 +1528,12 @@ class JointFusion(ANTSCommand):
             if len(val) != len(self.inputs.atlas_image):
                 raise ValueError(
                     "Number of specified segmentations should be identical to the number "
-                    "of atlas image sets {0}!={1}".format(
+                    "of atlas image sets {}!={}".format(
                         len(val), len(self.inputs.atlas_image)
                     )
                 )
 
-            return " ".join(
-                ["-l {0}".format(fn) for fn in self.inputs.atlas_segmentation_image]
-            )
+            return " ".join([f"-l {fn}" for fn in self.inputs.atlas_segmentation_image])
         return super(AntsJointFusion, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
@@ -1760,7 +1758,7 @@ class KellyKapowski(ANTSCommand):
         if skip is None:
             skip = []
         skip += ["warped_white_matter", "gray_matter_label", "white_matter_label"]
-        return super(KellyKapowski, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _gen_filename(self, name):
         if name == "cortical_thickness":
@@ -1779,7 +1777,7 @@ class KellyKapowski(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == "segmentation_image":
-            newval = "[{0},{1},{2}]".format(
+            newval = "[{},{},{}]".format(
                 self.inputs.segmentation_image,
                 self.inputs.gray_matter_label,
                 self.inputs.white_matter_label,
@@ -1789,7 +1787,7 @@ class KellyKapowski(ANTSCommand):
         if opt == "cortical_thickness":
             ct = self._gen_filename("cortical_thickness")
             wm = self._gen_filename("warped_white_matter")
-            newval = "[{},{}]".format(ct, wm)
+            newval = f"[{ct},{wm}]"
             return spec.argstr % newval
 
-        return super(KellyKapowski, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)

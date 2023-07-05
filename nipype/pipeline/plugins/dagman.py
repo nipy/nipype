@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via Condor DAGMan
 """
 import os
@@ -99,14 +98,14 @@ getenv = True
                 warn(
                     "the 'submit_specs' argument is deprecated, use 'override_specs' instead"
                 )
-        super(CondorDAGManPlugin, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         # location of all scripts, place dagman output in here too
         batch_dir, _ = os.path.split(pyfiles[0])
         # DAG description filename
         dagfilename = os.path.join(batch_dir, "workflow-%s.dag" % uuid.uuid4())
-        with open(dagfilename, "wt") as dagfileptr:
+        with open(dagfilename, "w") as dagfileptr:
             # loop over all scripts, create submit files, and define them
             # as jobs in the DAG
             for idx, pyscript in enumerate(pyfiles):
@@ -130,7 +129,7 @@ getenv = True
                     ],
                 )
                 # add required slots to the template
-                template = "%s\n%s\n%s\nqueue\n" % (
+                template = "{}\n{}\n{}\nqueue\n".format(
                     "%(initial_specs)s",
                     template,
                     "%(override_specs)s",
@@ -147,7 +146,7 @@ getenv = True
                 )
                 if wrapper_cmd is not None:
                     specs["executable"] = wrapper_cmd
-                    specs["nodescript"] = "%s %s %s" % (
+                    specs["nodescript"] = "{} {} {}".format(
                         wrapper_args % specs,  # give access to variables
                         sys.executable,
                         pyscript,
@@ -155,7 +154,7 @@ getenv = True
                 submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir, "%s.submit" % name)
-                with open(submitfile, "wt") as submitfileprt:
+                with open(submitfile, "w") as submitfileprt:
                     submitfileprt.writelines(submitspec)
                     submitfileprt.close()
                 # define job in DAG
@@ -176,14 +175,14 @@ getenv = True
             terminal_output="allatonce",
         )
         # needs -update_submit or re-running a workflow will fail
-        cmd.inputs.args = "%s -update_submit %s" % (self._dagman_args, dagfilename)
+        cmd.inputs.args = f"{self._dagman_args} -update_submit {dagfilename}"
         cmd.run()
         logger.info("submitted all jobs to Condor DAGMan")
         if self._block:
             # wait for DAGMan to settle down, no time wasted it is already running
             time.sleep(10)
             if not os.path.exists("%s.condor.sub" % dagfilename):
-                raise EnvironmentError(
+                raise OSError(
                     "DAGMan did not create its submit file, please check the logs"
                 )
             # wait for completion

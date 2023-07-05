@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to assorted Freesurfer utility programs.
@@ -341,7 +340,7 @@ class SampleToSurface(FSCommand):
             else:
                 range = "%.3f" % range
             method = dict(point="", max="-max", average="-avg")[value]
-            return "--proj%s%s %s" % (units, method, range)
+            return f"--proj{units}{method} {range}"
 
         if name == "reg_header":
             return spec.argstr % self.inputs.subject_id
@@ -373,7 +372,7 @@ class SampleToSurface(FSCommand):
             if value is True:
                 return spec.argstr % "sphere.reg"
 
-        return super(SampleToSurface, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _get_outfilename(self, opt="out_file"):
         outfile = getattr(self.inputs, opt)
@@ -540,7 +539,7 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
         6,
         7,
         argstr="--trgicoorder %d",
-        desc=("order of the icosahedron if " "target_subject is 'ico'"),
+        desc=("order of the icosahedron if target_subject is 'ico'"),
     )
     source_type = traits.Enum(
         filetypes,
@@ -608,7 +607,7 @@ class SurfaceTransform(FSCommand):
                         )
             if value in implicit_filetypes:
                 return ""
-        return super(SurfaceTransform, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -652,7 +651,7 @@ class SurfaceTransform(FSCommand):
                 use_ext = False
             outputs["out_file"] = fname_presuffix(
                 source,
-                suffix=".%s%s" % (self.inputs.target_subject, ext),
+                suffix=f".{self.inputs.target_subject}{ext}",
                 newpath=os.getcwd(),
                 use_ext=use_ext,
             )
@@ -714,7 +713,7 @@ class Surface2VolTransformInputSpec(FSTraitedSpec):
     projfrac = traits.Float(argstr="--projfrac %s", desc="thickness fraction")
     subjects_dir = traits.Str(
         argstr="--sd %s",
-        desc=("freesurfer subjects directory defaults to " "$SUBJECTS_DIR"),
+        desc=("freesurfer subjects directory defaults to $SUBJECTS_DIR"),
     )
     subject_id = traits.Str(argstr="--identity %s", desc="subject id", xor=["reg_file"])
 
@@ -998,7 +997,7 @@ class SurfaceSnapshots(FSCommand):
                 if len(value) == 2:
                     return "-fminmax %.3f %.3f" % value
                 else:
-                    return "-fminmax %.3f %.3f -fmid %.3f" % (
+                    return "-fminmax {:.3f} {:.3f} -fmid {:.3f}".format(
                         value[0],
                         value[2],
                         value[1],
@@ -1011,11 +1010,11 @@ class SurfaceSnapshots(FSCommand):
             if re.match(r"%s[\.\-_]" % self.inputs.hemi, value[:3]):
                 value = value[3:]
             return "-annotation %s" % value
-        return super(SurfaceSnapshots, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.screenshot_stem):
-            stem = "%s_%s_%s" % (
+            stem = "{}_{}_{}".format(
                 self.inputs.subject_id,
                 self.inputs.hemi,
                 self.inputs.surface,
@@ -1031,7 +1030,7 @@ class SurfaceSnapshots(FSCommand):
             raise RuntimeError("Graphics are not enabled -- cannot run tksurfer")
         runtime.environ["_SNAPSHOT_STEM"] = stem
         self._write_tcl_script()
-        runtime = super(SurfaceSnapshots, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         # If a display window can't be opened, this will crash on
         # aggregate_outputs.  Let's try to parse stderr and raise a
         # better exception here if that happened.
@@ -1085,7 +1084,7 @@ class SurfaceSnapshots(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.screenshot_stem):
-            stem = "%s_%s_%s" % (
+            stem = "{}_{}_{}".format(
                 self.inputs.subject_id,
                 self.inputs.hemi,
                 self.inputs.surface,
@@ -1133,7 +1132,7 @@ class ImageInfo(FSCommand):
     output_spec = ImageInfoOutputSpec
 
     def info_regexp(self, info, field, delim="\n"):
-        m = re.search(r"%s\s*:\s+(.+?)%s" % (field, delim), info)
+        m = re.search(fr"{field}\s*:\s+(.+?){delim}", info)
         if m:
             return m.group(1)
         else:
@@ -1299,7 +1298,7 @@ class MRIsConvert(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == "out_file" and not os.path.isabs(value):
             value = os.path.abspath(value)
-        return super(MRIsConvert, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1360,7 +1359,7 @@ class MRIsCombineOutputSpec(TraitedSpec):
     """
 
     out_file = File(
-        exists=True, desc="Output filename. Combined surfaces from " "in_files."
+        exists=True, desc="Output filename. Combined surfaces from in_files."
     )
 
 
@@ -1535,7 +1534,7 @@ class MRIPretessInputSpec(FSTraitedSpec):
     nocorners = traits.Bool(
         False,
         argstr="-nocorners",
-        desc=("do not remove corner configurations" " in addition to edge ones."),
+        desc=("do not remove corner configurations in addition to edge ones."),
     )
     keep = traits.Bool(False, argstr="-keep", desc=("keep WM edits"))
     test = traits.Bool(
@@ -1764,7 +1763,7 @@ class SmoothTessellation(FSCommand):
         # The returncode is meaningless in BET.  So check the output
         # in stderr and if it's set, then update the returncode
         # accordingly.
-        runtime = super(SmoothTessellation, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if "failed" in runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -1968,7 +1967,7 @@ class Tkregister2(FSCommand):
             spec = "--lta-inv %s"
         if name in ("fsl_out", "lta_out") and value is True:
             value = self._list_outputs()[name]
-        return super(Tkregister2, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -2064,7 +2063,7 @@ class AddXFormToHeader(FSCommand):
             return value  # os.path.abspath(value)
         # if name == 'copy_name' and value:
         #     self.input_spec.transform
-        return super(AddXFormToHeader, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -2543,24 +2542,24 @@ class FixTopology(FSCommand):
                 self,
                 self.inputs.in_orig,
                 folder="surf",
-                basename="{0}.orig".format(hemi),
+                basename=f"{hemi}.orig",
             )
             copy2subjdir(
                 self,
                 self.inputs.in_inflated,
                 folder="surf",
-                basename="{0}.inflated".format(hemi),
+                basename=f"{hemi}.inflated",
             )
             copy2subjdir(self, self.inputs.in_brain, folder="mri", basename="brain.mgz")
             copy2subjdir(self, self.inputs.in_wm, folder="mri", basename="wm.mgz")
-        return super(FixTopology, self).run(**inputs)
+        return super().run(**inputs)
 
     def _format_arg(self, name, spec, value):
         if name == "sphere":
             # get the basename and take out the hemisphere
             suffix = os.path.basename(value).split(".", 1)[1]
             return spec.argstr % suffix
-        return super(FixTopology, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -2793,7 +2792,7 @@ class MakeSurfaces(FSCommand):
                 self,
                 self.inputs.in_white,
                 "surf",
-                "{0}.white".format(self.inputs.hemisphere),
+                f"{self.inputs.hemisphere}.white",
             )
             for originalfile in [self.inputs.in_aseg, self.inputs.in_T1]:
                 copy2subjdir(self, originalfile, folder="mri")
@@ -2808,7 +2807,7 @@ class MakeSurfaces(FSCommand):
                     self,
                     self.inputs.in_label,
                     "label",
-                    "{0}.aparc.annot".format(self.inputs.hemisphere),
+                    f"{self.inputs.hemisphere}.aparc.annot",
                 )
             else:
                 os.makedirs(
@@ -2816,7 +2815,7 @@ class MakeSurfaces(FSCommand):
                         self.inputs.subjects_dir, self.inputs.subject_id, "label"
                     )
                 )
-        return super(MakeSurfaces, self).run(**inputs)
+        return super().run(**inputs)
 
     def _format_arg(self, name, spec, value):
         if name in ["in_T1", "in_aseg"]:
@@ -2845,7 +2844,7 @@ class MakeSurfaces(FSCommand):
                 basename = os.path.basename(value)
                 suffix = basename.split(".")[1]
                 return spec.argstr % suffix
-        return super(MakeSurfaces, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -2948,7 +2947,7 @@ class Curvature(FSCommand):
             if name == "in_file":
                 basename = os.path.basename(value)
                 return spec.argstr % basename
-        return super(Curvature, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -3069,7 +3068,7 @@ class CurvatureStats(FSCommand):
         if name in ["surface", "curvfile1", "curvfile2"]:
             prefix = os.path.basename(value).split(".")[1]
             return spec.argstr % prefix
-        return super(CurvatureStats, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -3084,7 +3083,7 @@ class CurvatureStats(FSCommand):
             copy2subjdir(self, self.inputs.surface, "surf")
             copy2subjdir(self, self.inputs.curvfile1, "surf")
             copy2subjdir(self, self.inputs.curvfile2, "surf")
-        return super(CurvatureStats, self).run(**inputs)
+        return super().run(**inputs)
 
 
 class JacobianInputSpec(FSTraitedSpec):
@@ -3316,12 +3315,12 @@ class VolumeMask(FSCommand):
             copy2subjdir(self, self.inputs.in_aseg, "mri")
             copy2subjdir(self, self.inputs.aseg, "mri", "aseg.mgz")
 
-        return super(VolumeMask, self).run(**inputs)
+        return super().run(**inputs)
 
     def _format_arg(self, name, spec, value):
         if name == "in_aseg":
             return spec.argstr % os.path.basename(value).rstrip(".mgz")
-        return super(VolumeMask, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -3504,17 +3503,17 @@ class ParcellationStats(FSCommand):
                 self,
                 self.inputs.thickness,
                 "surf",
-                "{0}.thickness".format(self.inputs.hemisphere),
+                f"{self.inputs.hemisphere}.thickness",
             )
             if isdefined(self.inputs.cortex_label):
                 copy2subjdir(
                     self,
                     self.inputs.cortex_label,
                     "label",
-                    "{0}.cortex.label".format(self.inputs.hemisphere),
+                    f"{self.inputs.hemisphere}.cortex.label",
                 )
         createoutputdirs(self._list_outputs())
-        return super(ParcellationStats, self).run(**inputs)
+        return super().run(**inputs)
 
     def _gen_filename(self, name):
         if name in ["out_table", "out_color"]:
@@ -3665,21 +3664,15 @@ class Contrast(FSCommand):
             if "subjects_dir" in inputs:
                 inputs["subjects_dir"] = self.inputs.subjects_dir
             hemi = self.inputs.hemisphere
-            copy2subjdir(
-                self, self.inputs.annotation, "label", "{0}.aparc.annot".format(hemi)
-            )
-            copy2subjdir(
-                self, self.inputs.cortex, "label", "{0}.cortex.label".format(hemi)
-            )
-            copy2subjdir(self, self.inputs.white, "surf", "{0}.white".format(hemi))
-            copy2subjdir(
-                self, self.inputs.thickness, "surf", "{0}.thickness".format(hemi)
-            )
+            copy2subjdir(self, self.inputs.annotation, "label", f"{hemi}.aparc.annot")
+            copy2subjdir(self, self.inputs.cortex, "label", f"{hemi}.cortex.label")
+            copy2subjdir(self, self.inputs.white, "surf", f"{hemi}.white")
+            copy2subjdir(self, self.inputs.thickness, "surf", f"{hemi}.thickness")
             copy2subjdir(self, self.inputs.orig, "mri", "orig.mgz")
             copy2subjdir(self, self.inputs.rawavg, "mri", "rawavg.mgz")
         # need to create output directories
         createoutputdirs(self._list_outputs())
-        return super(Contrast, self).run(**inputs)
+        return super().run(**inputs)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -3907,7 +3900,7 @@ class Aparc2Aseg(FSCommand):
             copy2subjdir(self, self.inputs.lh_annotation, "label")
             copy2subjdir(self, self.inputs.rh_annotation, "label")
 
-        return super(Aparc2Aseg, self).run(**inputs)
+        return super().run(**inputs)
 
     def _format_arg(self, name, spec, value):
         if name == "aseg":
@@ -3917,7 +3910,7 @@ class Aparc2Aseg(FSCommand):
         elif name == "out_file":
             return spec.argstr % os.path.abspath(value)
 
-        return super(Aparc2Aseg, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -4201,7 +4194,7 @@ class LTAConvert(CommandLine):
     def _format_arg(self, name, spec, value):
         if name.startswith("out_") and value is True:
             value = self._list_outputs()[name]
-        return super(LTAConvert, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

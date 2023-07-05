@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -259,9 +258,9 @@ def test_outputs_removal(tmpdir):
 
         file1 = os.path.join(os.getcwd(), "file1.txt")
         file2 = os.path.join(os.getcwd(), "file2.txt")
-        with open(file1, "wt") as fp:
+        with open(file1, "w") as fp:
             fp.write("%d" % arg1)
-        with open(file2, "wt") as fp:
+        with open(file2, "w") as fp:
             fp.write("%d" % arg1)
         return file1, file2
 

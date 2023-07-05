@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -160,13 +159,13 @@ class BET(FSLCommand):
         # The returncode is meaningless in BET.  So check the output
         # in stderr and if it's set, then update the returncode
         # accordingly.
-        runtime = super(BET, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
 
     def _format_arg(self, name, spec, value):
-        formatted = super(BET, self)._format_arg(name, spec, value)
+        formatted = super()._format_arg(name, spec, value)
         if name == "in_file":
             # Convert to relative path to prevent BET failure
             # with long paths.
@@ -241,7 +240,7 @@ class FASTInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(
         File(exists=True),
         copyfile=False,
-        desc="image, or multi-channel set of images, " "to be segmented",
+        desc="image, or multi-channel set of images, to be segmented",
         argstr="%s",
         position=-1,
         mandatory=True,
@@ -264,12 +263,12 @@ class FASTInputSpec(FSLCommandInputSpec):
         low=1,
         high=10,
         argstr="-I %d",
-        desc="number of main-loop iterations during " "bias-field removal",
+        desc="number of main-loop iterations during bias-field removal",
     )
     bias_lowpass = traits.Range(
         low=4,
         high=40,
-        desc="bias field smoothing extent (FWHM) " "in mm",
+        desc="bias field smoothing extent (FWHM) in mm",
         argstr="-l %d",
         units="mm",
     )
@@ -282,11 +281,11 @@ class FASTInputSpec(FSLCommandInputSpec):
         argstr="-f %.3f",
     )
     segments = traits.Bool(
-        desc="outputs a separate binary image for each " "tissue type", argstr="-g"
+        desc="outputs a separate binary image for each tissue type", argstr="-g"
     )
     init_transform = File(
         exists=True,
-        desc="<standard2input.mat> initialise" " using priors",
+        desc="<standard2input.mat> initialise using priors",
         argstr="-a %s",
     )
     other_priors = InputMultiPath(
@@ -305,7 +304,7 @@ class FASTInputSpec(FSLCommandInputSpec):
     segment_iters = traits.Range(
         low=1,
         high=50,
-        desc="number of segmentation-initialisation" " iterations",
+        desc="number of segmentation-initialisation iterations",
         argstr="-W %d",
     )
     mixel_smooth = traits.Range(
@@ -314,7 +313,7 @@ class FASTInputSpec(FSLCommandInputSpec):
     iters_afterbias = traits.Range(
         low=1,
         high=20,
-        desc="number of main-loop iterations " "after bias-field removal",
+        desc="number of main-loop iterations after bias-field removal",
         argstr="-O %d",
     )
     hyper = traits.Range(
@@ -391,7 +390,7 @@ class FAST(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         # first do what should be done in general
-        formatted = super(FAST, self)._format_arg(name, spec, value)
+        formatted = super()._format_arg(name, spec, value)
         if name == "in_files":
             # FAST needs the -S parameter value to correspond to the number
             # of input images, otherwise it will ignore all but the first
@@ -595,7 +594,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     padding_size = traits.Int(
         argstr="-paddingsize %d",
         units="voxels",
-        desc="for applyxfm: interpolates outside image " "by size",
+        desc="for applyxfm: interpolates outside image by size",
     )
     searchr_x = traits.List(
         traits.Int,
@@ -649,7 +648,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     bgvalue = traits.Float(
         0,
         argstr="-setbackground %f",
-        desc=("use specified background value for points " "outside FOV"),
+        desc=("use specified background value for points outside FOV"),
     )
 
     # BBR options
@@ -695,7 +694,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
         "local_abs",
         argstr="-bbrtype %s",
         min_ver="5.0.0",
-        desc=("type of bbr cost function: signed [default], global_abs, " "local_abs"),
+        desc=("type of bbr cost function: signed [default], global_abs, local_abs"),
     )
     bbrslope = traits.Float(
         argstr="-bbrslope %f", min_ver="5.0.0", desc="value of bbr slope"
@@ -705,7 +704,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
 class FLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="path/name of registered file (if generated)")
     out_matrix_file = File(
-        exists=True, desc="path/name of calculated affine transform " "(if generated)"
+        exists=True, desc="path/name of calculated affine transform (if generated)"
     )
     out_log = File(desc="path/name of output log (if generated)")
 
@@ -739,7 +738,7 @@ class FLIRT(FSLCommand):
     _log_written = False
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = super(FLIRT, self).aggregate_outputs(
+        outputs = super().aggregate_outputs(
             runtime=runtime, needed_outputs=needed_outputs
         )
         if self.inputs.save_log and not self._log_written:
@@ -761,7 +760,7 @@ class FLIRT(FSLCommand):
                 "uses_qform arguments to run"
             )
         skip.append("save_log")
-        return super(FLIRT, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
 
 class ApplyXFMInputSpec(FLIRTInputSpec):
@@ -901,7 +900,7 @@ class MCFLIRT(FSLCommand):
                 return ""
             else:
                 return spec.argstr % value
-        return super(MCFLIRT, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1083,7 +1082,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         traits.Enum(0, 1),
         argstr="--applyrefmask=%s",
         xor=["skip_refmask"],
-        desc=("list of iterations to use reference mask on (1 to use, 0 to " "skip)"),
+        desc=("list of iterations to use reference mask on (1 to use, 0 to skip)"),
         sep=",",
     )
     apply_inmask = traits.List(
@@ -1095,11 +1094,11 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     )
     skip_implicit_ref_masking = traits.Bool(
         argstr="--imprefm=0",
-        desc=("skip implicit masking  based on value in --ref image. " "Default = 0"),
+        desc=("skip implicit masking  based on value in --ref image. Default = 0"),
     )
     skip_implicit_in_masking = traits.Bool(
         argstr="--impinm=0",
-        desc=("skip implicit masking  based on value in --in image. " "Default = 0"),
+        desc=("skip implicit masking  based on value in --in image. Default = 0"),
     )
     refmask_val = traits.Float(
         argstr="--imprefval=%f", desc="Value to mask out in --ref image. Default =0.0"
@@ -1181,7 +1180,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     )
     derive_from_ref = traits.Bool(
         argstr="--refderiv",
-        desc=("If true, ref image is used to calculate derivatives. " "Default false"),
+        desc=("If true, ref image is used to calculate derivatives. Default false"),
     )
     intensity_mapping_model = traits.Enum(
         "none",
@@ -1230,7 +1229,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         "double",
         "float",
         argstr="--numprec=%s",
-        desc=("Precision for representing Hessian, double or float. " "Default double"),
+        desc=("Precision for representing Hessian, double or float. Default double"),
     )
 
 
@@ -1336,7 +1335,7 @@ class FNIRT(FSLCommand):
             return spec.argstr % value[0]
         if name in list(self.filemap.keys()):
             return spec.argstr % self._list_outputs()[name]
-        return super(FNIRT, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name in ["warped_file", "log_file"]:
@@ -1354,7 +1353,7 @@ class FNIRT(FSLCommand):
         """
         try:
             fid = open(configfile, "w+")
-        except IOError:
+        except OSError:
             print("unable to create config_file %s" % (configfile))
 
         for item in list(self.inputs.get().items()):
@@ -1481,7 +1480,7 @@ class ApplyWarp(FSLCommand):
     def _format_arg(self, name, spec, value):
         if name == "superlevel":
             return spec.argstr % str(value)
-        return super(ApplyWarp, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1681,7 +1680,7 @@ class SUSAN(FSLCommand):
             for filename, thresh in value:
                 arglist.extend([filename, "%.10f" % thresh])
             return " ".join(arglist)
-        return super(SUSAN, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1784,7 +1783,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     icorr = traits.Bool(
         argstr="--icorr",
         requires=["shift_in_file"],
-        desc=("apply intensity correction to unwarping (pixel shift method " "only)"),
+        desc=("apply intensity correction to unwarping (pixel shift method only)"),
     )
     icorr_only = traits.Bool(
         argstr="--icorronly",
@@ -1912,10 +1911,7 @@ class FUGUE(FSLCommand):
 
         if not input_phase and not input_vsm and not input_fmap:
             raise RuntimeError(
-                (
-                    "Either phasemap_in_file, shift_in_file or fmap_in_file must "
-                    "be set."
-                )
+                "Either phasemap_in_file, shift_in_file or fmap_in_file must be set."
             )
 
         if not isdefined(self.inputs.in_file):
@@ -1956,10 +1952,8 @@ class FUGUE(FSLCommand):
                     trait_spec.name_source = "shift_in_file"
                 else:
                     raise RuntimeError(
-                        (
-                            "Either phasemap_in_file, shift_in_file or "
-                            "fmap_in_file must be set."
-                        )
+                        "Either phasemap_in_file, shift_in_file or "
+                        "fmap_in_file must be set."
                     )
 
                 if vsm_save_unmasked:
@@ -1991,10 +1985,8 @@ class FUGUE(FSLCommand):
                     trait_spec.name_source = "fmap_in_file"
                 else:
                     raise RuntimeError(
-                        (
-                            "Either phasemap_in_file, shift_in_file or "
-                            "fmap_in_file must be set."
-                        )
+                        "Either phasemap_in_file, shift_in_file or "
+                        "fmap_in_file must be set."
                     )
 
                 if fmap_save_unmasked:
@@ -2004,7 +1996,7 @@ class FUGUE(FSLCommand):
             else:
                 skip += ["save_fmap", "save_unmasked_fmap", "fmap_out_file"]
 
-        return super(FUGUE, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
@@ -2096,7 +2088,7 @@ class PRELUDE(FSLCommand):
     _cmd = "prelude"
 
     def __init__(self, **kwargs):
-        super(PRELUDE, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         warn("This has not been fully tested. Please report any failures.")
 
     def _list_outputs(self):
@@ -2183,9 +2175,7 @@ class FIRSTInputSpec(FSLCommandInputSpec):
         exists=True,
         position=6,
         argstr="-a %s",
-        desc=(
-            "Affine matrix to use (e.g. img2std.mat) (does not " "re-run registration)"
-        ),
+        desc=("Affine matrix to use (e.g. img2std.mat) (does not re-run registration)"),
     )
 
 
@@ -2203,7 +2193,7 @@ class FIRSTOutputSpec(TraitedSpec):
     )
     segmentation_file = File(
         exists=True,
-        desc=("4D image file containing a single volume per " "segmented region"),
+        desc=("4D image file containing a single volume per segmented region"),
     )
 
 
@@ -2270,9 +2260,9 @@ class FIRST(FSLCommand):
             method = thres.replace(".", "")
 
         if basename == "original_segmentations":
-            return op.abspath("%s_all_%s_origsegs.nii.gz" % (outname, method))
+            return op.abspath(f"{outname}_all_{method}_origsegs.nii.gz")
         if basename == "segmentation_file":
-            return op.abspath("%s_all_%s_firstseg.nii.gz" % (outname, method))
+            return op.abspath(f"{outname}_all_{method}_firstseg.nii.gz")
 
         return None
 

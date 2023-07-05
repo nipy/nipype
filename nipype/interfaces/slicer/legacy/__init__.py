@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .diffusion import *
 from .segmentation import OtsuThresholdSegmentation
 from .filtering import OtsuThresholdImageFilter, ResampleScalarVolume

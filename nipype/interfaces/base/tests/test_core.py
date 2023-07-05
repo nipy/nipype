@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -117,7 +116,7 @@ def test_BaseInterface_load_save_inputs(tmpdir):
         input_spec = InputSpec
 
         def __init__(self, **inputs):
-            super(DerivedInterface, self).__init__(**inputs)
+            super().__init__(**inputs)
 
     inputs_dict = {"input1": 12, "input3": True, "input4": "some string"}
     bif = DerivedInterface(**inputs_dict)
@@ -571,13 +570,13 @@ def test_CommandLine_prefix(tmpdir):
     ci.run()
 
     class OOPShell(nib.CommandLine):
-        _cmd_prefix = "bash {}/".format(oop)
+        _cmd_prefix = f"bash {oop}/"
 
     ci = OOPShell(command=script_name)
     ci.run()
 
     class OOPBadShell(nib.CommandLine):
-        _cmd_prefix = "shell_dne {}/".format(oop)
+        _cmd_prefix = f"shell_dne {oop}/"
 
     ci = OOPBadShell(command=script_name)
     with pytest.raises(IOError):

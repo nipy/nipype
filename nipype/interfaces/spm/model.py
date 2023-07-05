@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with matlab
@@ -153,13 +152,11 @@ class Level1Design(SPMCommand):
                 return [val]
             else:
                 return val
-        return super(Level1Design, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore"""
-        einputs = super(Level1Design, self)._parse_inputs(
-            skip=("mask_threshold", "flags")
-        )
+        einputs = super()._parse_inputs(skip=("mask_threshold", "flags"))
         if isdefined(self.inputs.flags):
             einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
         for sessinfo in einputs[0]["sess"]:
@@ -191,9 +188,7 @@ class Level1Design(SPMCommand):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        return super(Level1Design, self)._make_matlab_command(
-            content, postscript=postscript
-        )
+        return super()._make_matlab_command(content, postscript=postscript)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -276,14 +271,14 @@ class EstimateModel(SPMCommand):
             return np.array([str(val)], dtype=object)
         if opt == "estimation_method":
             if isinstance(val, (str, bytes)):
-                return {"{}".format(val): 1}
+                return {f"{val}": 1}
             else:
                 return val
-        return super(EstimateModel, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore"""
-        einputs = super(EstimateModel, self)._parse_inputs(skip=("flags"))
+        einputs = super()._parse_inputs(skip=("flags"))
         if isdefined(self.inputs.flags):
             einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
         return einputs
@@ -301,26 +296,22 @@ class EstimateModel(SPMCommand):
             "Bayesian" in self.inputs.estimation_method.keys()
             or "Bayesian2" in self.inputs.estimation_method.keys()
         ):
-            outputs["labels"] = os.path.join(pth, "labels.{}".format(outtype))
+            outputs["labels"] = os.path.join(pth, f"labels.{outtype}")
             outputs["SDerror"] = glob(os.path.join(pth, "Sess*_SDerror*"))
             outputs["ARcoef"] = glob(os.path.join(pth, "Sess*_AR_*"))
             if betas:
-                outputs["Cbetas"] = [
-                    os.path.join(pth, "C{}".format(beta)) for beta in betas
-                ]
-                outputs["SDbetas"] = [
-                    os.path.join(pth, "SD{}".format(beta)) for beta in betas
-                ]
+                outputs["Cbetas"] = [os.path.join(pth, f"C{beta}") for beta in betas]
+                outputs["SDbetas"] = [os.path.join(pth, f"SD{beta}") for beta in betas]
 
         if "Classical" in self.inputs.estimation_method.keys():
-            outputs["residual_image"] = os.path.join(pth, "ResMS.{}".format(outtype))
-            outputs["RPVimage"] = os.path.join(pth, "RPV.{}".format(outtype))
+            outputs["residual_image"] = os.path.join(pth, f"ResMS.{outtype}")
+            outputs["RPVimage"] = os.path.join(pth, f"RPV.{outtype}")
             if self.inputs.write_residuals:
                 outputs["residual_images"] = glob(os.path.join(pth, "Res_*"))
             if betas:
                 outputs["beta_images"] = [os.path.join(pth, beta) for beta in betas]
 
-        outputs["mask_image"] = os.path.join(pth, "mask.{}".format(outtype))
+        outputs["mask_image"] = os.path.join(pth, f"mask.{outtype}")
         outputs["spm_mat_file"] = os.path.join(pth, "SPM.mat")
         return outputs
 
@@ -1055,11 +1046,11 @@ class FactorialDesign(SPMCommand):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
-        return super(FactorialDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore"""
-        einputs = super(FactorialDesign, self)._parse_inputs()
+        einputs = super()._parse_inputs()
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]["dir"] = np.array([str(os.getcwd())], dtype=object)
         return einputs
@@ -1098,7 +1089,7 @@ class OneSampleTTestDesign(FactorialDesign):
         """Convert input to appropriate format for spm"""
         if opt in ["in_files"]:
             return np.array(val, dtype=object)
-        return super(OneSampleTTestDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
 
 class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
@@ -1145,7 +1136,7 @@ class TwoSampleTTestDesign(FactorialDesign):
         """Convert input to appropriate format for spm"""
         if opt in ["group1_files", "group2_files"]:
             return np.array(val, dtype=object)
-        return super(TwoSampleTTestDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
 
 class PairedTTestDesignInputSpec(FactorialDesignInputSpec):
@@ -1181,7 +1172,7 @@ class PairedTTestDesign(FactorialDesign):
         """Convert input to appropriate format for spm"""
         if opt in ["paired_files"]:
             return [dict(scans=np.array(files, dtype=object)) for files in val]
-        return super(PairedTTestDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
 
 class MultipleRegressionDesignInputSpec(FactorialDesignInputSpec):
@@ -1231,4 +1222,4 @@ class MultipleRegressionDesign(FactorialDesign):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
-        return super(MultipleRegressionDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
