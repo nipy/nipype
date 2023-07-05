@@ -12,3 +12,7 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.5
+    hooks:
+    - id: codespell
