@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Convert3D is a command-line tool for converting 3D images between common file formats."""
 import os
 from glob import glob
@@ -156,7 +155,7 @@ class C3dInputSpec(CommandLineInputSpec):
     is_4d = traits.Bool(
         False,
         usedefault=True,
-        desc=("Changes command to support 4D file operations (default is" " false)."),
+        desc=("Changes command to support 4D file operations (default is false)."),
     )
 
 
@@ -197,7 +196,7 @@ class C3d(CommandLine):
     _cmd = "c3d"
 
     def __init__(self, **inputs):
-        super(C3d, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._is_4d, "is_4d")
         if self.inputs.is_4d:
             self._is_4d()
@@ -211,7 +210,7 @@ class C3d(CommandLine):
             # Convert3d does not want to override file, by default
             # so we define a new output file
             self._gen_outfile()
-        runtime = super(C3d, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         self._cmd = cmd
         return runtime
 
@@ -219,13 +218,13 @@ class C3d(CommandLine):
         # if many infiles, raise exception
         if (len(self.inputs.in_file) > 1) or ("*" in self.inputs.in_file[0]):
             raise AttributeError(
-                "Multiple in_files found - specify either" " `out_file` or `out_files`."
+                "Multiple in_files found - specify either `out_file` or `out_files`."
             )
         _, fn, ext = split_filename(self.inputs.in_file[0])
         self.inputs.out_file = fn + "_generated" + ext
         # if generated file will overwrite, raise error
         if os.path.exists(os.path.abspath(self.inputs.out_file)):
-            raise IOError("File already found - to overwrite, use `out_file`.")
+            raise OSError("File already found - to overwrite, use `out_file`.")
         iflogger.info("Generating `out_file`.")
 
     def _list_outputs(self):

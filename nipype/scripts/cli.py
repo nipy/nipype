@@ -145,12 +145,12 @@ def run(ctx, module, interface, list, help):
         iface_names = list_interfaces(module)
         click.echo("Available Interfaces:")
         for if_name in iface_names:
-            click.echo("    {}".format(if_name))
+            click.echo(f"    {if_name}")
 
     # check the interface
     elif module_given and interface:
         # create the argument parser
-        description = "Run {}".format(interface)
+        description = f"Run {interface}"
         prog = " ".join([ctx.command_path, module.__name__, interface] + ctx.args)
         iface_parser = argparse.ArgumentParser(description=description, prog=prog)
 
@@ -209,7 +209,7 @@ def convert():
     type=UnexistingFilePath,
     required=True,
     callback=check_not_none,
-    help="JSON file name where the Boutiques descriptor will be " "written.",
+    help="JSON file name where the Boutiques descriptor will be written.",
 )
 @click.option(
     "-c",

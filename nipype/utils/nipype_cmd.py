@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import argparse
 import inspect
@@ -53,7 +52,7 @@ def run_instance(interface, options):
             try:
                 setattr(interface.inputs, input_name, value)
             except ValueError as e:
-                print("Error when setting the value of %s: '%s'" % (input_name, str(e)))
+                print(f"Error when setting the value of {input_name}: '{str(e)}'")
 
     print(interface.inputs)
     res = interface.run()
@@ -61,7 +60,6 @@ def run_instance(interface, options):
 
 
 def main(argv):
-
     if len(argv) == 2 and not argv[1].startswith("-"):
         listClasses(argv[1])
         sys.exit(0)

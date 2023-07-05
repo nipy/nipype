@@ -1,19 +1,80 @@
-# Commits with messages like "STY: black" or "run black"
+# Wed Apr 5 14:01:05 2023 -0400 - effigies@gmail.com - STY: black [ignore-rev]
+a9ce9b78a402ebacf7726ad6454bb75b1447f52f
+# Wed Sep 14 14:12:07 2022 -0400 - mathiasg@stanford.edu - STY: Black
+f4a779223c6b0dffa47138d24ec9ef378c7164a9
+# Tue Apr 19 14:09:31 2022 -0400 - markiewicz@stanford.edu - STY: black [ignore-rev]
+b9716ebd46541f7fb1b96a94cc35b5e2ea6c3bba
+# Fri Apr 15 06:59:48 2022 -0700 - markiewicz@stanford.edu - STY: black [ignore-rev]
+d223fbccda6dee0ef39e00084296a3292f2ccf87
+# Fri Apr 8 21:34:43 2022 -0400 - markiewicz@stanford.edu - STY: black [ignore-rev]
+e3f56da124fd58041018c2e70d16a130ef189a66
+# Sun Apr 3 10:27:07 2022 -0400 - markiewicz@stanford.edu - STY: black [ignore-rev]
+988c382ebfc7df964874b6287b9d9e27e274a4a4
+# Sat Apr 2 21:32:56 2022 -0400 - markiewicz@stanford.edu - STY: black [ignore-rev]
+230fac6149d4dfbd5da669a983332a1fe318ef57
+# Sat Apr 2 12:49:15 2022 -0400 - markiewicz@stanford.edu - STY/TEST: Make specs and run black [ignore-rev]
+2ba8dacb8cc1f6f9c5b15b1cfb7b0395d45dcfb3
+# Sun Mar 20 21:19:39 2022 -0400 - markiewicz@stanford.edu - STY: black [ignore-rev]
+87cc1b54981113024ec3fd594881f72cf67513fb
+# Wed Dec 8 17:02:09 2021 -0500 - markiewicz@stanford.edu - STY: black [ignore-rev]
+5ac2f18ac116832d81a13f0c83e0a6aeda1457cf
+# Thu Dec 2 09:30:42 2021 -0500 - markiewicz@stanford.edu - STY: black
+ee50279ebf061a70ff502e7d2e51385b285cfda4
+# Tue Oct 26 11:18:02 2021 +0200 - code@oscaresteban.es - sty: run black
+5d9adbbb77b7047b9b47cd2fa079dee0094cfc91
+# Wed Oct 20 12:07:15 2021 +0200 - fabio.bernardoni@uniklinikum-dresden.de - run black on the preprocess.py file to improve formatting
+674e9b0eeca082efb5322b61fea57ee89a3e4a24
+# Wed Oct 13 16:08:23 2021 -0400 - markiewicz@stanford.edu - ENH: Add expected steps for FreeSurfer 7 recon-all (#3389)
+8f7c0bf2ec9c819844a2736a9ae2f6eef19a8e7f
+# Wed Oct 13 14:26:48 2021 -0400 - markiewicz@stanford.edu - STY: black
+d8dbc6f7b6a5385535e2fa53b7c6af7aa1370f46
+# Wed Sep 29 16:53:54 2021 +0200 - code@oscaresteban.es - sty: run black on affected files
+5f280da629bb7b5dce908633d2deea85b55dd67b
+# Thu Jun 24 17:43:22 2021 +0200 - code@oscaresteban.es - sty: run black
+135ce497a18adbe0811441c2b720910ec549aa6f
+# Thu Sep 23 08:56:28 2021 -0400 - markiewicz@stanford.edu - STY: black
+f69b3fb09560616822737764bb07272cd587e4a0
+# Fri Apr 30 17:19:55 2021 -0400 - markiewicz@stanford.edu - STY: black
+04718ac71436b6f283af7575dda0f6998b64f893
+# Fri Apr 30 16:50:00 2021 -0400 - markiewicz@stanford.edu - STY: black
 12deb959cccc431fb8222cc5854f1c92a0080021
+# Thu Apr 1 12:26:08 2021 -0400 - markiewicz@stanford.edu - STY: black
 f64bf338f630a9ee5cbe7a3ec98c68292897e720
+# Thu Dec 3 09:24:05 2020 +1100 - tom.g.close@gmail.com - run black over touched files
+c81259bc3b28baa1f18f95f6b056c228c6bfd115
+# Fri Aug 14 17:15:15 2020 -0400 - markiewicz@stanford.edu - STY: Black
 83358d7f17aac07cb90d0330f11ea2322e2974d8
+# Sat Mar 14 12:44:20 2020 -0400 - markiewicz@stanford.edu - STY: black
 faef7d0f93013a700c882f709e98fb3cd36ebb03
+# Sun Mar 8 15:05:28 2020 +0100 - 3453485+daniel-ge@users.noreply.github.com - FIX: get length of generator + STY: Black
+02991da67458b879d7c6360aa6457eb3c1bd5a07
+# Wed Mar 4 16:30:39 2020 -0500 - markiewicz@stanford.edu - STY: black
 d50c1858564c0b3073fb23c54886a0454cb66afa
+# Thu Feb 27 15:08:42 2020 -0800 - code@oscaresteban.es - sty: black
 417b8897a116fcded5000e21e2b6ccbe29452a52
+# Thu Jan 2 11:29:05 2020 -0800 - code@oscaresteban.es - sty: black
 aaf677a87f64c485f3e305799e4a5dc73b69e5fb
+# Sun Dec 29 17:47:51 2019 -0800 - code@oscaresteban.es - sty: black
 f763008442d88d8ce00ec266698268389415f8d6
+# Thu Jan 2 11:29:05 2020 -0800 - code@oscaresteban.es - sty: black
 b1eccafd4edc8503b02d715f5b5f6f783520fdf9
+# Sun Dec 29 17:47:51 2019 -0800 - code@oscaresteban.es - sty: black
 70db90349598cc7f26a4a513779529fba7d0a797
+# Thu Dec 19 09:22:22 2019 -0500 - markiewicz@stanford.edu - STY: Black
 6c1d91d71f6f0db0e985bd2adc34206442b0653d
+# Thu Dec 19 15:51:11 2019 -0500 - markiewicz@stanford.edu - STY: Black
 97bdbd5f48ab242de5288ba4715192a27619a803
+# Fri Nov 15 14:38:10 2019 -0500 - steve@steventilley.com - run black
 78fa360f5b785224349b8b85b07e510d2233bb63
+# Fri Nov 15 14:34:03 2019 -0500 - steve@steventilley.com - run black
 7f85f43a34de8bff8e634232c939b17cee8e8fc5
+# Thu Nov 14 11:14:51 2019 -0500 - markiewicz@stanford.edu - Merge pull request #3096 from effigies/sty/black
+1a869991adc024577536689d557fc748c764f15d
+# Thu Nov 14 09:15:20 2019 -0500 - markiewicz@stanford.edu - STY: Black setup.py
 9c50b5daa797def5672dd057155b0e2c658853e2
+# Thu Nov 14 09:14:38 2019 -0500 - markiewicz@stanford.edu - STY: Black for tools/
 47194993ae14aceeec436cfb3769def667196668
+# Wed Nov 13 23:41:15 2019 -0500 - markiewicz@stanford.edu - STY: Black
 75653feadc6667d5313d83e9c62a5d5819771a9c
+# Tue Nov 12 09:43:34 2019 -0500 - markiewicz@stanford.edu - STY: Black files pre-merge
 497b44d680eee0892fa59c6aaaae22a17d70a536

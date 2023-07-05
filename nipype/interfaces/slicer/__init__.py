@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 3D Slicer is a platform for medical image informatics processing and visualization.
 

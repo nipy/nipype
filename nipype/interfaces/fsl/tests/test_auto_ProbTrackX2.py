@@ -116,13 +116,13 @@ def test_ProbTrackX2_inputs():
             argstr="--randfib=%d",
         ),
         random_seed=dict(
-            argstr="--rseed",
+            argstr="--rseed=%d",
         ),
         s2tastext=dict(
             argstr="--s2tastext",
         ),
         sample_random_points=dict(
-            argstr="--sampvox",
+            argstr="--sampvox=%.3f",
         ),
         samples_base_name=dict(
             argstr="--samples=%s",

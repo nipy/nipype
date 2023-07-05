@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI utility interfaces."""
@@ -121,7 +120,7 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
         argstr="-denote",
     )
     oldid = traits.Bool(
-        desc="Give the new dataset the input dataset" "s AFNI ID code.",
+        desc="Give the new dataset the input datasets AFNI ID code.",
         argstr="-oldid",
         xor=["newid"],
     )
@@ -163,7 +162,7 @@ class AFNItoNIFTI(AFNICommand):
         return os.path.join(path, base + ext)
 
     def _gen_filename(self, name):
-        return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
+        return os.path.abspath(super()._gen_filename(name))
 
 
 class AutoboxInputSpec(AFNICommandInputSpec):
@@ -224,7 +223,7 @@ class Autobox(AFNICommand):
     output_spec = AutoboxOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = super(Autobox, self).aggregate_outputs(runtime, needed_outputs)
+        outputs = super().aggregate_outputs(runtime, needed_outputs)
         pattern = (
             r"x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  "
             r"y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  "
@@ -302,7 +301,6 @@ class BrickStat(AFNICommandBase):
     output_spec = BrickStatOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
 
         outfile = os.path.join(os.getcwd(), "stat_result.json")
@@ -310,7 +308,7 @@ class BrickStat(AFNICommandBase):
         if runtime is None:
             try:
                 min_val = load_json(outfile)["stat"]
-            except IOError:
+            except OSError:
                 return self.run().outputs
         else:
             min_val = []
@@ -419,7 +417,7 @@ class Bucket(AFNICommand):
     def _format_arg(self, name, spec, value):
         if name == "in_file":
             return spec.argstr % (" ".join([i[0] + "'" + i[1] + "'" for i in value]))
-        return super(Bucket, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class CalcInputSpec(AFNICommandInputSpec):
@@ -493,11 +491,11 @@ class Calc(AFNICommand):
             if isdefined(self.inputs.single_idx):
                 arg += "[%d]" % (self.inputs.single_idx)
             return arg
-        return super(Calc, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         """Skip the arguments without argstr metadata"""
-        return super(Calc, self)._parse_inputs(skip=("start_idx", "stop_idx", "other"))
+        return super()._parse_inputs(skip=("start_idx", "stop_idx", "other"))
 
 
 class CatInputSpec(AFNICommandInputSpec):
@@ -655,9 +653,9 @@ class CatMatvec(AFNICommand):
         if name == "in_file":
             # Concatenate a series of filenames, with optional opkeys
             return " ".join(
-                "%s -%s" % (mfile, opkey) if opkey else mfile for mfile, opkey in value
+                f"{mfile} -{opkey}" if opkey else mfile for mfile, opkey in value
             )
-        return super(CatMatvec, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class CenterMassInputSpec(CommandLineInputSpec):
@@ -748,7 +746,7 @@ class CenterMass(AFNICommandBase):
     output_spec = CenterMassOutputSpec
 
     def _list_outputs(self):
-        outputs = super(CenterMass, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["out_file"] = os.path.abspath(self.inputs.in_file)
         outputs["cm_file"] = os.path.abspath(self.inputs.cm_file)
         sout = np.loadtxt(outputs["cm_file"], ndmin=2)
@@ -1126,11 +1124,11 @@ class Eval(AFNICommand):
             if isdefined(self.inputs.single_idx):
                 arg += "[%d]" % (self.inputs.single_idx)
             return arg
-        return super(Eval, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         """Skip the arguments without argstr metadata"""
-        return super(Eval, self)._parse_inputs(skip=("start_idx", "stop_idx", "other"))
+        return super()._parse_inputs(skip=("start_idx", "stop_idx", "other"))
 
 
 class FWHMxInputSpec(CommandLineInputSpec):
@@ -1361,7 +1359,7 @@ class FWHMx(AFNICommandBase):
             if skip is None:
                 skip = []
             skip += ["out_detrend"]
-        return super(FWHMx, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _format_arg(self, name, trait_spec, value):
         if name == "detrend":
@@ -1382,10 +1380,10 @@ class FWHMx(AFNICommandBase):
                 return trait_spec.argstr + " %s %f" % value
             elif isinstance(value, (str, bytes)):
                 return trait_spec.argstr + " " + value
-        return super(FWHMx, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = super(FWHMx, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if self.inputs.detrend:
             fname, ext = op.splitext(self.inputs.in_file)
@@ -1551,7 +1549,7 @@ class LocalBistat(AFNICommand):
         if name == "neighborhood" and value[0] == "RECT":
             value = ("RECT", "%s,%s,%s" % value[1])
 
-        return super(LocalBistat, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class LocalstatInputSpec(AFNICommandInputSpec):
@@ -1688,7 +1686,7 @@ voxels.""",
         traits.Tuple(traits.Float, traits.Float, traits.Float),
         argstr="-reduce_restore_grid %s",
         xor=["reduce_max_vox", "reduce_grid"],
-        desc="Like reduce_grid, but also resample output back to input" "grid.",
+        desc="Like reduce_grid, but also resample output back to input grid.",
     )
     reduce_max_vox = traits.Float(
         argstr="-reduce_max_vox %s",
@@ -1762,7 +1760,7 @@ class Localstat(AFNICommand):
             if len(value) == 3:
                 value = "%s %s %s" % value
 
-        return super(Localstat, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class MaskToolInputSpec(AFNICommandInputSpec):
@@ -2012,7 +2010,7 @@ class NwarpAdjust(AFNICommandBase):
             if skip is None:
                 skip = []
             skip += ["out_file"]
-        return super(NwarpAdjust, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -2038,7 +2036,7 @@ class NwarpApplyInputSpec(CommandLineInputSpec):
         traits.List(File(exists=True)),
         mandatory=True,
         argstr="-source %s",
-        desc="the name of the dataset to be warped " "can be multiple datasets",
+        desc="the name of the dataset to be warped can be multiple datasets",
     )
     warp = traits.String(
         desc="the name of the warp dataset. "
@@ -2137,7 +2135,7 @@ class NwarpCatInputSpec(AFNICommandInputSpec):
         position=-1,
     )
     space = traits.String(
-        desc="string to attach to the output dataset as its atlas space " "marker.",
+        desc="string to attach to the output dataset as its atlas space marker.",
         argstr="-space %s",
     )
     inv_warp = traits.Bool(desc="invert the final warp before output", argstr="-iwarp")
@@ -2231,7 +2229,7 @@ class NwarpCat(AFNICommand):
                     ]
                 )
             )
-        return super(NwarpCat, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name == "out_file":
@@ -2582,7 +2580,7 @@ class ReHo(AFNICommandBase):
     output_spec = ReHoOutputSpec
 
     def _list_outputs(self):
-        outputs = super(ReHo, self)._list_outputs()
+        outputs = super()._list_outputs()
         if self.inputs.label_set:
             outputs["out_vals"] = outputs["out_file"] + "_ROI_reho.vals"
         return outputs
@@ -2591,11 +2589,10 @@ class ReHo(AFNICommandBase):
         _neigh_dict = {"faces": 7, "edges": 19, "vertices": 27}
         if name == "neighborhood":
             value = _neigh_dict[value]
-        return super(ReHo, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ResampleInputSpec(AFNICommandInputSpec):
-
     in_file = File(
         desc="input file to 3dresample",
         argstr="-inset %s",
@@ -2624,7 +2621,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
     voxel_size = traits.Tuple(
         *[traits.Float()] * 3,
         argstr="-dxyz %f %f %f",
-        desc="resample to new dx, dy and dz"
+        desc="resample to new dx, dy and dz",
     )
     master = File(argstr="-master %s", desc="align dataset grid to a reference file")
 
@@ -3239,7 +3236,7 @@ class GCOR(CommandLine):
     output_spec = GCOROutputSpec
 
     def _run_interface(self, runtime):
-        runtime = super(GCOR, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
 
         gcor_line = [
             line.strip()

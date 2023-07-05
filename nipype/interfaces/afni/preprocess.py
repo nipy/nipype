@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI preprocessing interfaces."""
@@ -584,7 +583,7 @@ class Allineate(AFNICommand):
     output_spec = AllineateOutputSpec
 
     def _list_outputs(self):
-        outputs = super(Allineate, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if self.inputs.out_weight_file:
             outputs["out_weight_file"] = op.abspath(self.inputs.out_weight_file)
@@ -1133,7 +1132,6 @@ class ClipLevel(AFNICommandBase):
     output_spec = ClipLevelOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
 
         outfile = os.path.join(os.getcwd(), "stat_result.json")
@@ -1141,7 +1139,7 @@ class ClipLevel(AFNICommandBase):
         if runtime is None:
             try:
                 clip_val = load_json(outfile)["stat"]
-            except IOError:
+            except OSError:
                 return self.run().outputs
         else:
             clip_val = []
@@ -1218,7 +1216,7 @@ class DegreeCentrality(AFNICommand):
     # Re-define generated inputs
     def _list_outputs(self):
         # Update outputs dictionary if oned file is defined
-        outputs = super(DegreeCentrality, self)._list_outputs()
+        outputs = super()._list_outputs()
         if self.inputs.oned_file:
             outputs["oned_file"] = os.path.abspath(self.inputs.oned_file)
 
@@ -1555,7 +1553,7 @@ class Hist(AFNICommandBase):
     _redirect_x = True
 
     def __init__(self, **inputs):
-        super(Hist, self).__init__(**inputs)
+        super().__init__(**inputs)
         if not no_afni():
             version = Info.version()
 
@@ -1568,10 +1566,10 @@ class Hist(AFNICommandBase):
             if skip is None:
                 skip = []
             skip += ["out_show"]
-        return super(Hist, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
-        outputs = super(Hist, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["out_file"] += ".niml.hist"
         if not self.inputs.showhist:
             outputs["out_show"] = Undefined
@@ -1834,12 +1832,10 @@ class OutlierCount(CommandLine):
 
         if not self.inputs.save_outliers:
             skip += ["outliers_file"]
-        return super(OutlierCount, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(OutlierCount, self)._run_interface(
-            runtime, correct_return_codes
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         # Read from runtime.stdout or runtime.merged
         with open(op.abspath(self.inputs.out_file), "w") as outfh:
@@ -2107,7 +2103,7 @@ class ROIStats(AFNICommandBase):
         }
         if name == "stat":
             value = [_stat_dict[v] for v in value]
-        return super(ROIStats, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class RetroicorInputSpec(AFNICommandInputSpec):
@@ -2207,7 +2203,7 @@ class Retroicor(AFNICommand):
         if name == "in_file":
             if not isdefined(self.inputs.card) and not isdefined(self.inputs.resp):
                 return None
-        return super(Retroicor, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class SegInputSpec(CommandLineInputSpec):
@@ -2295,7 +2291,6 @@ class Seg(AFNICommandBase):
     output_spec = AFNICommandOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         import glob
 
         outputs = self._outputs()
@@ -2353,7 +2348,7 @@ class SkullStrip(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
     def __init__(self, **inputs):
-        super(SkullStrip, self).__init__(**inputs)
+        super().__init__(**inputs)
 
         if not no_afni():
             v = Info.version()
@@ -2548,7 +2543,7 @@ class TCorrMap(AFNICommand):
         elif name == "histogram":
             return trait_spec.argstr % (self.inputs.histogram_bin_numbers, value)
         else:
-            return super(TCorrMap, self)._format_arg(name, trait_spec, value)
+            return super()._format_arg(name, trait_spec, value)
 
 
 class NetCorrInputSpec(AFNICommandInputSpec):
@@ -3289,7 +3284,7 @@ class TShift(AFNICommand):
             )
         elif name == "slice_timing" and isinstance(value, list):
             value = self._write_slice_timing()
-        return super(TShift, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _write_slice_timing(self):
         slice_timing = list(self.inputs.slice_timing)
@@ -3302,7 +3297,7 @@ class TShift(AFNICommand):
         return fname
 
     def _list_outputs(self):
-        outputs = super(TShift, self)._list_outputs()
+        outputs = super()._list_outputs()
         if isdefined(self.inputs.slice_timing):
             if isinstance(self.inputs.slice_timing, list):
                 outputs["timing_file"] = os.path.abspath("slice_timing.1D")
@@ -3509,7 +3504,7 @@ rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.
     def _format_arg(self, name, trait_spec, value):
         if name == "in_weight_volume" and not isinstance(value, tuple):
             value = (value, 0)
-        return super(Volreg, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class WarpInputSpec(AFNICommandInputSpec):
@@ -3605,17 +3600,17 @@ class Warp(AFNICommand):
     output_spec = WarpOutputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(Warp, self)._run_interface(runtime, correct_return_codes)
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         if self.inputs.save_warp:
             import numpy as np
 
             warp_file = self._list_outputs()["warp_file"]
-            np.savetxt(warp_file, [runtime.stdout], fmt=str("%s"))
+            np.savetxt(warp_file, [runtime.stdout], fmt="%s")
         return runtime
 
     def _list_outputs(self):
-        outputs = super(Warp, self)._list_outputs()
+        outputs = super()._list_outputs()
         if self.inputs.save_warp:
             outputs["warp_file"] = fname_presuffix(
                 outputs["out_file"], suffix="_transform.mat", use_ext=False
@@ -4369,7 +4364,7 @@ warp+tlrc.HEAD -prefix Q11'
     def _format_arg(self, name, trait_spec, value):
         if name == "allineate_opts":
             return trait_spec.argstr % ("'" + value + "'")
-        return super(Qwarp, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -13,7 +12,7 @@ Top-level module API
 """
 import os
 
-# XXX Deprecate this import
+# No longer used internally but could be used externally.
 from looseversion import LooseVersion
 
 from .info import URL as __url__, STATUS as __status__, __version__
@@ -26,14 +25,14 @@ try:
     import faulthandler
 
     faulthandler.enable()
-except (ImportError, IOError) as e:
+except (ImportError, OSError) as e:
     pass
 
 config = NipypeConfig()
 logging = Logging(config)
 
 
-class NipypeTester(object):
+class NipypeTester:
     def __call__(self, doctests=True, parallel=False):
         try:
             import pytest

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -25,9 +24,7 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
         argstr="%s",
         position=2,
         mandatory=True,
-        desc=(
-            "Phase difference map, in SIEMENS format range from " "0-4096 or 0-8192)"
-        ),
+        desc=("Phase difference map, in SIEMENS format range from 0-4096 or 0-8192)"),
     )
     in_magnitude = File(
         exists=True,
@@ -53,7 +50,7 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
         position=-1,
         argstr="--nocheck",
         usedefault=True,
-        desc=("do not perform sanity checks for image " "size/range/dimensions"),
+        desc=("do not perform sanity checks for image size/range/dimensions"),
     )
     out_fieldmap = File(
         argstr="%s", position=4, desc="output name for prepared fieldmap"
@@ -105,7 +102,7 @@ class PrepareFieldmap(FSLCommand):
         if not isdefined(self.inputs.nocheck) or not self.inputs.nocheck:
             skip += ["nocheck"]
 
-        return super(PrepareFieldmap, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -113,7 +110,7 @@ class PrepareFieldmap(FSLCommand):
         return outputs
 
     def _run_interface(self, runtime):
-        runtime = super(PrepareFieldmap, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
 
         if runtime.returncode == 0:
             out_file = self.inputs.out_fieldmap
@@ -145,14 +142,14 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         xor=["encoding_file"],
         requires=["readout_times"],
         argstr="--datain=%s",
-        desc=("encoding direction for automatic " "generation of encoding_file"),
+        desc=("encoding direction for automatic generation of encoding_file"),
     )
     readout_times = InputMultiPath(
         traits.Float,
         requires=["encoding_direction"],
         xor=["encoding_file"],
         mandatory=True,
-        desc=("readout times (dwell times by # " "phase-encode steps minus 1)"),
+        desc=("readout times (dwell times by # phase-encode steps minus 1)"),
     )
     out_base = File(
         desc=(
@@ -225,7 +222,7 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         "b02b0.cnf",
         argstr="--config=%s",
         usedefault=True,
-        desc=("Name of config file specifying command line " "arguments"),
+        desc=("Name of config file specifying command line arguments"),
     )
     max_iter = traits.Int(argstr="--miter=%d", desc="max # of non-linear iterations")
     reg_lambda = traits.Float(
@@ -271,19 +268,17 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         0,
         1,
         argstr="--minmet=%d",
-        desc=(
-            "Minimisation method 0=Levenberg-Marquardt, " "1=Scaled Conjugate Gradient"
-        ),
+        desc=("Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate Gradient"),
     )
     splineorder = traits.Int(
         argstr="--splineorder=%d",
-        desc=("order of spline, 2->Qadratic spline, " "3->Cubic spline"),
+        desc=("order of spline, 2->Qadratic spline, 3->Cubic spline"),
     )
     numprec = traits.Enum(
         "double",
         "float",
         argstr="--numprec=%s",
-        desc=("Precision for representing Hessian, double " "or float."),
+        desc=("Precision for representing Hessian, double or float."),
     )
     interp = traits.Enum(
         "spline",
@@ -295,13 +290,13 @@ class TOPUPInputSpec(FSLCommandInputSpec):
         0,
         1,
         argstr="--scale=%d",
-        desc=("If set (=1), the images are individually scaled" " to a common mean"),
+        desc=("If set (=1), the images are individually scaled to a common mean"),
     )
     regrid = traits.Enum(
         1,
         0,
         argstr="--regrid=%d",
-        desc=("If set (=1), the calculations are done in a " "different grid"),
+        desc=("If set (=1), the calculations are done in a different grid"),
     )
 
 
@@ -356,10 +351,10 @@ class TOPUP(FSLCommand):
             if path != "":
                 if not os.path.exists(path):
                     raise ValueError("out_base path must exist if provided")
-        return super(TOPUP, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = super(TOPUP, self)._list_outputs()
+        outputs = super()._list_outputs()
         del outputs["out_base"]
         base_path = None
         if isdefined(self.inputs.out_base):
@@ -408,10 +403,8 @@ class TOPUP(FSLCommand):
         if len(self.inputs.encoding_direction) != len(durations):
             if len(self.inputs.readout_times) != 1:
                 raise ValueError(
-                    (
-                        "Readout time must be a float or match the"
-                        "length of encoding directions"
-                    )
+                    "Readout time must be a float or match the"
+                    "length of encoding directions"
                 )
             durations = durations * len(self.inputs.encoding_direction)
 
@@ -430,7 +423,7 @@ class TOPUP(FSLCommand):
     def _overload_extension(self, value, name=None):
         if name == "out_base":
             return value
-        return super(TOPUP, self)._overload_extension(value, name)
+        return super()._overload_extension(value, name)
 
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
@@ -458,7 +451,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
         argstr="--topup=%s",
         copyfile=False,
         requires=["in_topup_movpar"],
-        desc=("topup file containing the field " "coefficients"),
+        desc=("topup file containing the field coefficients"),
     )
     in_topup_movpar = File(
         exists=True,
@@ -476,7 +469,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
         "jac",
         "lsr",
         argstr="--method=%s",
-        desc=("use jacobian modulation (jac) or least-squares" " resampling (lsr)"),
+        desc=("use jacobian modulation (jac) or least-squares resampling (lsr)"),
     )
     interp = traits.Enum(
         "trilinear", "spline", argstr="--interp=%s", desc="interpolation method"
@@ -494,7 +487,7 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
 
 class ApplyTOPUPOutputSpec(TraitedSpec):
     out_corrected = File(
-        exists=True, desc=("name of 4D image file with " "unwarped images")
+        exists=True, desc=("name of 4D image file with unwarped images")
     )
 
 
@@ -538,12 +531,12 @@ class ApplyTOPUP(FSLCommand):
         if not isdefined(self.inputs.in_index):
             self.inputs.in_index = list(range(1, len(self.inputs.in_files) + 1))
 
-        return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _format_arg(self, name, spec, value):
         if name == "in_topup_fieldcoef":
             return spec.argstr % value.split("_fieldcoef")[0]
-        return super(ApplyTOPUP, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class EddyInputSpec(FSLCommandInputSpec):
@@ -851,12 +844,6 @@ class EddyOutputSpec(TraitedSpec):
         "between the different shells as estimated by a "
         "post-hoc mutual information based registration",
     )
-    out_shell_pe_translation_parameters = File(
-        exists=True,
-        desc="Text file containing translation along the PE-direction "
-        "between the different shells as estimated by a "
-        "post-hoc mutual information based registration",
-    )
     out_outlier_map = File(
         exists=True,
         desc="Matrix where rows represent volumes and columns represent "
@@ -957,7 +944,7 @@ class Eddy(FSLCommand):
     _num_threads = 1
 
     def __init__(self, **inputs):
-        super(Eddy, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, "num_threads")
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
@@ -990,7 +977,7 @@ class Eddy(FSLCommand):
             )
         ):
             self._cmd = "eddy"
-        runtime = super(Eddy, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
 
         # Restore command to avoid side-effects
         self._cmd = cmd
@@ -1003,7 +990,7 @@ class Eddy(FSLCommand):
             return spec.argstr % fname_presuffix(value, use_ext=False)
         if name == "out_base":
             return spec.argstr % os.path.abspath(value)
-        return super(Eddy, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1417,10 +1404,10 @@ class EPIDeWarp(FSLCommand):
             ),
             DeprecationWarning,
         )
-        return super(EPIDeWarp, self).__init__(**inputs)
+        return super().__init__(**inputs)
 
     def _run_interface(self, runtime):
-        runtime = super(EPIDeWarp, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -1517,13 +1504,13 @@ class EddyCorrect(FSLCommand):
 
     def __init__(self, **inputs):
         warnings.warn(
-            ("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy " "instead"),
+            ("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy instead"),
             DeprecationWarning,
         )
-        return super(EddyCorrect, self).__init__(**inputs)
+        return super().__init__(**inputs)
 
     def _run_interface(self, runtime):
-        runtime = super(EddyCorrect, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -1544,7 +1531,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
         exists=True,
         mandatory=True,
         argstr="--eddyIdx %s",
-        desc=("File containing indices for all volumes into acquisition " "parameters"),
+        desc=("File containing indices for all volumes into acquisition parameters"),
     )
     param_file = File(
         exists=True,
@@ -1584,7 +1571,7 @@ class EddyQuadInputSpec(FSLCommandInputSpec):
 class EddyQuadOutputSpec(TraitedSpec):
     qc_json = File(
         exists=True,
-        desc=("Single subject database containing quality metrics and data " "info."),
+        desc=("Single subject database containing quality metrics and data info."),
     )
     qc_pdf = File(exists=True, desc="Single subject QC report.")
     avg_b_png = traits.List(

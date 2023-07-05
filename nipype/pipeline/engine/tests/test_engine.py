@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine module
@@ -196,7 +195,6 @@ def test_synchronize_tuples_expansion():
 
 
 def test_itersource_expansion():
-
     wf1 = pe.Workflow(name="test")
     node1 = pe.Node(EngineTestInterface(), name="node1")
     node1.iterables = ("input1", [1, 2])
@@ -356,7 +354,7 @@ def test_mapnode_json(tmpdir):
     assert len(outjson) == 1
 
     # check that multiple json's don't trigger rerun
-    with open(os.path.join(node.output_dir(), "test.json"), "wt") as fp:
+    with open(os.path.join(node.output_dir(), "test.json"), "w") as fp:
         fp.write("dummy file")
     w1.config["execution"].update(**{"stop_on_first_rerun": True})
 
@@ -459,7 +457,7 @@ def test_deep_nested_write_graph_runs(tmpdir):
             pipe = pe.Workflow(name="pipe")
             parent = pipe
             for depth in range(10):
-                sub = pe.Workflow(name="pipe_nest_{}".format(depth))
+                sub = pe.Workflow(name=f"pipe_nest_{depth}")
                 parent.add_nodes([sub])
                 parent = sub
             mod1 = pe.Node(interface=EngineTestInterface(), name="mod1")

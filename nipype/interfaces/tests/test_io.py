@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -536,7 +535,7 @@ def test_datafinder_depth(tmpdir):
             df.inputs.min_depth = min_depth
             df.inputs.max_depth = max_depth
             result = df.run()
-            expected = ["{}".format(x) for x in range(min_depth, max_depth + 1)]
+            expected = [f"{x}" for x in range(min_depth, max_depth + 1)]
             for path, exp_fname in zip(result.outputs.out_paths, expected):
                 _, fname = os.path.split(path)
                 assert fname == exp_fname
@@ -571,7 +570,6 @@ def test_freesurfersource_incorrectdir():
 
 
 def test_jsonsink_input():
-
     ds = nio.JSONFileSink()
     assert ds.inputs._outputs == {}
 
@@ -596,7 +594,7 @@ def test_jsonsink(tmpdir, inputs_attributes):
         expected_data[key] = val
 
     res = js.run()
-    with open(res.outputs.out_file, "r") as f:
+    with open(res.outputs.out_file) as f:
         data = simplejson.load(f)
 
     assert data == expected_data
@@ -708,10 +706,10 @@ def test_SSHDataGrabber(tmpdir):
 
 
 def test_ExportFile(tmp_path):
-    testin = tmp_path / "in.txt"
-    testin.write_text("test string", encoding='utf-8')
+    test_in = tmp_path / "in.txt"
+    test_in.write_text("test string", encoding='utf-8')
     i = nio.ExportFile()
-    i.inputs.in_file = str(testin)
+    i.inputs.in_file = str(test_in)
     i.inputs.out_file = str(tmp_path / "out.tsv")
     i.inputs.check_extension = True
     with pytest.raises(RuntimeError):

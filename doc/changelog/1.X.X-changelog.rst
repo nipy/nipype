@@ -1,3 +1,20 @@
+1.8.6 (April 05, 2023)
+======================
+
+Bug-fix release in the 1.8.x series.
+
+  * FIX: Update dcmstack interface for Py3 / newer pydicom (https://github.com/nipy/nipype/pull/3541)
+  * FIX: NiBabel 5, and NetworkX 3 and DIPY 1.6 compatibility (https://github.com/nipy/nipype/pull/3538)
+  * FIX: Check for non-mandatory output in DWIBiasCorrect (https://github.com/nipy/nipype/pull/3523)
+  * FIX: Removed leftover debug print statement in FEAT class (https://github.com/nipy/nipype/pull/3521)
+  * DOC: Fix a few more typos (https://github.com/nipy/nipype/pull/3516)
+  * DOC: Fix typos found by codespell (https://github.com/nipy/nipype/pull/3512)
+  * CI: Drop nipy tests until a fixed nipy is released (https://github.com/nipy/nipype/pull/3559)
+  * CI: Disable nipy tests generally, re-add with max numpy  (https://github.com/nipy/nipype/pull/3532)
+  * CI: GitHub Workflows security hardening  (https://github.com/nipy/nipype/pull/3519)
+  * CI: Allow tutorial test cancellation (https://github.com/nipy/nipype/pull/3514)
+
+
 1.8.5 (September 21, 2022)
 ==========================
 
@@ -426,7 +443,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 
   * FIX: ANTS LaplacianThickness cmdline opts fixed up (https://github.com/nipy/nipype/pull/2846)
   * FIX: Resolve LinAlgError during SVD (https://github.com/nipy/nipype/pull/2838)
-  * ENH: Add interfaces wrapping DIPY worflows (https://github.com/nipy/nipype/pull/2830)
+  * ENH: Add interfaces wrapping DIPY workflows (https://github.com/nipy/nipype/pull/2830)
   * ENH: Update BIDSDataGrabber for pybids 0.7 (https://github.com/nipy/nipype/pull/2737)
   * ENH: Add FSL `eddy_quad` interface (https://github.com/nipy/nipype/pull/2825)
   * ENH: Support tckgen -select in MRtrix3 v3+ (https://github.com/nipy/nipype/pull/2823)

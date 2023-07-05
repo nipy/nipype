@@ -29,8 +29,12 @@ concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
 jobs:
   build:
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -80,24 +84,34 @@ jobs:
 
   stable:
     # Check each OS, all supported Python, minimum versions and latest releases
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-latest']
-        python-version: [3.7, 3.8, 3.9, "3.10"]
+        os: ['ubuntu-22.04']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         check: ['test']
         pip-flags: ['']
         depends: ['REQUIREMENTS']
         deb-depends: [false]
         nipype-extras: ['doc,tests,profiler']
         include:
-          - os: ubuntu-latest
-            python-version: 3.8
+          - os: ubuntu-22.04
+            python-version: '3.8'
             check: test
             pip-flags: ''
             depends: REQUIREMENTS
             deb-depends: true
-            nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
+            nipype-extras: doc,tests,profiler,duecredit,ssh
+          # - os: ubuntu-20.04
+          #   python-version: 3.8
+          #   check: test
+          #   pip-flags: ''
+          #   depends: NUMPY123
+          #   deb-depends: true
+          #   nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
     env:
       DEPENDS: ${{ matrix.depends }}
       CHECK_TYPE: ${{ matrix.check }}

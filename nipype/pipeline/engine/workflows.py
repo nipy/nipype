@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
@@ -56,7 +55,7 @@ class Workflow(EngineBase):
         """
         import networkx as nx
 
-        super(Workflow, self).__init__(name, base_dir)
+        super().__init__(name, base_dir)
         self._graph = nx.DiGraph()
 
         self._nodes_cache = set()
@@ -78,7 +77,7 @@ class Workflow(EngineBase):
             unique name for the workflow
 
         """
-        clone = super(Workflow, self).clone(name)
+        clone = super().clone(name)
         clone._reset_hierarchy()
         return clone
 
@@ -152,7 +151,7 @@ class Workflow(EngineBase):
                     " src[%s] dest[%s] workflow[%s]"
                 ) % (srcnode, destnode, self.name)
 
-                raise IOError(msg)
+                raise OSError(msg)
             if (srcnode not in newnodes) and not self._has_node(srcnode):
                 newnodes.add(srcnode)
             if (destnode not in newnodes) and not self._has_node(destnode):
@@ -232,9 +231,7 @@ connected.
                 connected_ports[destnode].add(dest)
         infostr = []
         for info in not_found:
-            infostr += [
-                "Module %s has no %sput called %s\n" % (info[1], info[0], info[2])
-            ]
+            infostr += [f"Module {info[1]} has no {info[0]}put called {info[2]}\n"]
         if not_found:
             raise Exception("\n".join(["Some connections were not found"] + infostr))
 
@@ -332,12 +329,12 @@ connected.
         all_nodes = self._get_all_nodes()
         for node in nodes:
             if node in all_nodes:
-                raise IOError("Node %s already exists in the workflow" % node)
+                raise OSError("Node %s already exists in the workflow" % node)
             if isinstance(node, Workflow):
                 for subnode in node._get_all_nodes():
                     if subnode in all_nodes:
-                        raise IOError(
-                            ("Subnode %s of node %s already exists " "in the workflow")
+                        raise OSError(
+                            "Subnode %s of node %s already exists in the workflow"
                             % (subnode, node)
                         )
             newnodes.append(node)
@@ -493,7 +490,7 @@ connected.
         dotlist.append("}")
         dotstr = "\n".join(dotlist)
         if dotfilename:
-            fp = open(dotfilename, "wt")
+            fp = open(dotfilename, "w")
             fp.writelines(dotstr)
             fp.close()
         else:
@@ -526,15 +523,15 @@ connected.
 
         all_lines = None
         lines = ["# Workflow"]
-        importlines = ["from nipype.pipeline.engine import Workflow, " "Node, MapNode"]
+        importlines = ["from nipype.pipeline.engine import Workflow, Node, MapNode"]
         functions = {}
         if format == "python":
             connect_template = '%s.connect(%%s, %%s, %%s, "%%s")' % self.name
             connect_template2 = '%s.connect(%%s, "%%s", %%s, "%%s")' % self.name
-            wfdef = '%s = Workflow("%s")' % (self.name, self.name)
+            wfdef = f'{self.name} = Workflow("{self.name}")'
             lines.append(wfdef)
             if include_config:
-                lines.append("%s.config = %s" % (self.name, self.config))
+                lines.append(f"{self.name}.config = {self.config}")
             for idx, node in enumerate(nodes):
                 nodename = node.fullname.replace(".", "_")
                 # write nodes
@@ -587,8 +584,8 @@ connected.
             all_lines = importlines + functionlines + lines
 
             if not filename:
-                filename = "%s%s.py" % (prefix, self.name)
-            with open(filename, "wt") as fp:
+                filename = f"{prefix}{self.name}.py"
+            with open(filename, "w") as fp:
                 fp.writelines("\n".join(all_lines))
         return all_lines
 
@@ -672,7 +669,7 @@ connected.
             report_file = "%s/_report/report.rst" % node.output_dir().replace(
                 report_dir, ""
             )
-            result_file = "%s/result_%s.pklz" % (
+            result_file = "{}/result_{}.pklz".format(
                 node.output_dir().replace(report_dir, ""),
                 node.name,
             )
@@ -763,10 +760,10 @@ connected.
                 try:
                     this_node_lineage = node_lineage[idx]
                 except IndexError:
-                    raise IOError('Duplicate node name "%s" found.' % node.name)
+                    raise OSError('Duplicate node name "%s" found.' % node.name)
                 else:
                     if this_node_lineage in [node._hierarchy, self.name]:
-                        raise IOError('Duplicate node name "%s" found.' % node.name)
+                        raise OSError('Duplicate node name "%s" found.' % node.name)
             else:
                 node_names.append(node.name)
 
@@ -951,7 +948,7 @@ connected.
         nodes2remove = []
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception(
-                ("Workflow: %s is not a directed acyclic graph " "(DAG)") % self.name
+                ("Workflow: %s is not a directed acyclic graph (DAG)") % self.name
             )
         nodes = list(self._graph.nodes)
         for node in nodes:
@@ -1037,7 +1034,7 @@ connected.
         if level > len(colorset) - 2:
             level = 3  # Loop back to blue
 
-        dotlist = ['%slabel="%s";' % (prefix, self.name)]
+        dotlist = [f'{prefix}label="{self.name}";']
         for node in nx.topological_sort(self._graph):
             fullname = ".".join(hierarchy + [node.fullname])
             nodename = fullname.replace(".", "_")
@@ -1098,7 +1095,7 @@ connected.
                         nodename = nodefullname.replace(".", "_")
                         subnodename = subnodefullname.replace(".", "_")
                         for _ in self._graph.get_edge_data(node, subnode)["connect"]:
-                            dotlist.append("%s -> %s;" % (nodename, subnodename))
+                            dotlist.append(f"{nodename} -> {subnodename};")
                         logger.debug("connection: %s", dotlist[-1])
         # add between workflow connections
         for u, v, d in self._graph.edges(data=True):

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -238,7 +237,7 @@ def test_copyfallback(_temp_analyze_files):
     pth, hdrname = os.path.split(orig_hdr)
     try:
         fatfs = TempFATFS()
-    except (IOError, OSError):
+    except OSError:
         raise SkipTest("Fuse mount failed. copyfile fallback tests skipped.")
 
     with fatfs as fatdir:
@@ -612,7 +611,6 @@ def test_versioned_pklization(tmpdir):
         with mock.patch(
             "nipype.utils.tests.test_filemanip.Pickled", PickledBreaker
         ), mock.patch("nipype.__version__", "0.0.0"):
-
             loadpkl("./pickled.pkz")
 
 

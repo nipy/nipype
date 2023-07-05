@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -44,7 +43,7 @@ class ResourceMonitorMock:
 
 class ResourceMonitor(threading.Thread):
     """
-    A ``Thread`` to monitor a specific PID with a certain frequence
+    A ``Thread`` to monitor a specific PID with a certain frequency
     to a file
     """
 
@@ -132,7 +131,7 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        print("%f,%f,%f,%f" % (time(), cpu, rss / _MB, vms / _MB), file=self._logfile)
+        print(f"{time():f},{cpu:f},{rss / _MB:f},{vms / _MB:f}", file=self._logfile)
         self._logfile.flush()
 
     def run(self):
@@ -203,7 +202,7 @@ def get_system_total_memory_gb():
 
     # Get memory
     if "linux" in sys.platform:
-        with open("/proc/meminfo", "r") as f_in:
+        with open("/proc/meminfo") as f_in:
             meminfo_lines = f_in.readlines()
             mem_total_line = [line for line in meminfo_lines if "MemTotal" in line][0]
             mem_total = float(mem_total_line.split()[1])

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -129,10 +128,10 @@ class NipypeInterfaceError(Exception):
         self.value = value
 
     def __str__(self):
-        return "{}".format(self.value)
+        return f"{self.value}"
 
 
-class Bunch(object):
+class Bunch:
     """
     Dictionary-like class that provides attribute-style access to its items.
 
@@ -203,11 +202,11 @@ class Bunch(object):
             if isinstance(v, dict):
                 pairs = []
                 for key, value in sorted(v.items()):
-                    pairs.append("'%s': %s" % (key, value))
+                    pairs.append(f"'{key}': {value}")
                 v = "{" + ", ".join(pairs) + "}"
-                outstr.append("%s=%s" % (k, v))
+                outstr.append(f"{k}={v}")
             else:
-                outstr.append("%s=%r" % (k, v))
+                outstr.append(f"{k}={v!r}")
             first = False
         outstr.append(")")
         return "".join(outstr)
@@ -289,7 +288,7 @@ def _hash_bunch_dict(adict, key):
     return [(afile, hash_infile(afile)) for afile in stuff]
 
 
-class InterfaceResult(object):
+class InterfaceResult:
     """Object that contains the results of running a particular Interface.
 
     Attributes
@@ -448,7 +447,7 @@ def get_trait_desc(inputs, name, spec):
     default = ""
     if spec.usedefault:
         default = ", nipype default value: %s" % str(spec.default_value()[1])
-    line = "(%s%s)" % (type_info, default)
+    line = f"({type_info}{default})"
 
     manhelpstr = wrap(
         line,
@@ -468,7 +467,7 @@ def get_trait_desc(inputs, name, spec):
         pos = spec.position
         if pos is not None:
             manhelpstr += wrap(
-                "argument: ``%s``, position: %s" % (argstr, pos),
+                f"argument: ``{argstr}``, position: {pos}",
                 HELP_LINEWIDTH,
                 initial_indent="\t\t",
                 subsequent_indent="\t\t",

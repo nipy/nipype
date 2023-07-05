@@ -74,7 +74,7 @@ class BuildWithCommitInfoCommand(build_py):
         cfg_parser.read(pjoin("nipype", "COMMIT_INFO.txt"))
         cfg_parser.set("commit hash", "install_hash", repo_commit.strip())
         out_pth = pjoin(self.build_lib, "nipype", "COMMIT_INFO.txt")
-        cfg_parser.write(open(out_pth, "wt"))
+        cfg_parser.write(open(out_pth, "w"))
 
 
 def main():

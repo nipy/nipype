@@ -1,5 +1,3 @@
-# emacs: -*- coding: utf-8; mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set fileencoding=utf-8 ft=python sts=4 ts=4 sw=4 et:
 #
 # nipype documentation build configuration file, created by
 # sphinx-quickstart on Mon Jul 20 12:30:18 2009.
@@ -151,8 +149,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"nipype"
-copyright = u"2009-21, Neuroimaging in Python team"
+project = "nipype"
+copyright = "2009-21, Neuroimaging in Python team"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

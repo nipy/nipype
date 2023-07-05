@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The regutils module provides classes for interfacing with the `niftyreg
@@ -117,12 +116,12 @@ warpfield.nii -res im2_res.nii.gz'
             inter_val = {"NN": 0, "LIN": 1, "CUB": 3, "SINC": 4}
             return spec.argstr % inter_val[value]
         else:
-            return super(RegResample, self)._format_arg(name, spec, value)
+            return super()._format_arg(name, spec, value)
 
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
         suffix = self.inputs.type
-        return os.path.join(path, "{0}_{1}.nii.gz".format(base, suffix))
+        return os.path.join(path, f"{base}_{suffix}.nii.gz")
 
 
 class RegJacobianInputSpec(NiftyRegCommandInputSpec):
@@ -190,7 +189,7 @@ warpfield_jac.nii.gz'
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
         suffix = self.inputs.type
-        return os.path.join(path, "{0}_{1}.nii.gz".format(base, suffix))
+        return os.path.join(path, f"{base}_{suffix}.nii.gz")
 
 
 class RegToolsInputSpec(NiftyRegCommandInputSpec):
@@ -339,7 +338,7 @@ class RegTools(NiftyRegCommand):
             inter_val = {"NN": 0, "LIN": 1, "CUB": 3, "SINC": 4}
             return spec.argstr % inter_val[value]
         else:
-            return super(RegTools, self)._format_arg(name, spec, value)
+            return super()._format_arg(name, spec, value)
 
 
 class RegAverageInputSpec(NiftyRegCommandInputSpec):
@@ -523,11 +522,11 @@ class RegAverage(NiftyRegCommand):
     @property
     def cmdline(self):
         """Rewrite the cmdline to write options in text_file."""
-        argv = super(RegAverage, self).cmdline
+        argv = super().cmdline
         reg_average_cmd = os.path.join(os.getcwd(), "reg_average_cmd")
         with open(reg_average_cmd, "w") as f:
             f.write(argv)
-        return "%s --cmd_file %s" % (self.cmd, reg_average_cmd)
+        return f"{self.cmd} --cmd_file {reg_average_cmd}"
 
 
 class RegTransformInputSpec(NiftyRegCommandInputSpec):
@@ -960,4 +959,4 @@ class RegMeasure(NiftyRegCommand):
     def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
         suffix = self.inputs.measure_type
-        return os.path.join(path, "{0}_{1}.txt".format(base, suffix))
+        return os.path.join(path, f"{base}_{suffix}.txt")

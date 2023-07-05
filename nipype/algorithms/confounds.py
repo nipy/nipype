@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -150,7 +149,7 @@ Bradley L. and Petersen, Steven E.},
 
     def __init__(self, **inputs):
         self._results = {}
-        super(ComputeDVARS, self).__init__(**inputs)
+        super().__init__(**inputs)
 
     def _gen_fname(self, suffix, ext=None):
         fname, in_ext = op.splitext(op.basename(self.inputs.in_file))
@@ -165,7 +164,7 @@ Bradley L. and Petersen, Steven E.},
         if ext.startswith("."):
             ext = ext[1:]
 
-        return op.abspath("{}_{}.{}".format(fname, suffix, ext))
+        return op.abspath(f"{fname}_{suffix}.{ext}")
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(
@@ -466,12 +465,12 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         "cosine",
         False,
         usedefault=True,
-        desc="Detrend time series prior to component " "extraction",
+        desc="Detrend time series prior to component extraction",
     )
     use_regress_poly = traits.Bool(
         deprecated="0.15.0",
         new_name="pre_filter",
-        desc=("use polynomial regression " "pre-component extraction"),
+        desc=("use polynomial regression pre-component extraction"),
     )
     regress_poly_degree = traits.Range(
         low=1, value=1, usedefault=True, desc="the degree polynomial to use"
@@ -584,7 +583,7 @@ class CompCor(SimpleInterface):
 
     def __init__(self, *args, **kwargs):
         """exactly the same as compcor except the header"""
-        super(CompCor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._header = "CompCor"
 
     def _run_interface(self, runtime):
@@ -713,7 +712,7 @@ class CompCor(SimpleInterface):
                 self.inputs.pre_filter
             ]
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
-            header = ["{}{:02d}".format(ftype, i) for i in range(ncols)]
+            header = [f"{ftype}{i:02d}" for i in range(ncols)]
             if skip_vols:
                 old_basis = filter_basis
                 # nrows defined above
@@ -724,7 +723,7 @@ class CompCor(SimpleInterface):
                     filter_basis[skip_vols:, :ncols] = old_basis
                 filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
                 header.extend(
-                    ["NonSteadyStateOutlier{:02d}".format(i) for i in range(skip_vols)]
+                    [f"NonSteadyStateOutlier{i:02d}" for i in range(skip_vols)]
                 )
             np.savetxt(
                 self._results["pre_filter_file"],
@@ -747,7 +746,7 @@ class CompCor(SimpleInterface):
             not_retained = np.where(np.logical_not(metadata["retained"]))
             components_names[retained] = components_header
             components_names[not_retained] = [
-                "dropped{}".format(i) for i in range(len(not_retained[0]))
+                f"dropped{i}" for i in range(len(not_retained[0]))
             ]
             with open(self._results["metadata_file"], "w") as f:
                 f.write("\t".join(["component"] + list(metadata.keys())) + "\n")
@@ -768,7 +767,7 @@ class CompCor(SimpleInterface):
             if isdefined(self.inputs.header_prefix)
             else self._header
         )
-        headers = ["{}{:02d}".format(header, i) for i in range(num_col)]
+        headers = [f"{header}{i:02d}" for i in range(num_col)]
         return headers
 
 
@@ -781,7 +780,7 @@ class ACompCor(CompCor):
 
     def __init__(self, *args, **kwargs):
         """exactly the same as compcor except the header"""
-        super(ACompCor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._header = "aCompCor"
 
 
@@ -807,7 +806,7 @@ class TCompCorInputSpec(CompCorInputSpec):
 class TCompCorOutputSpec(CompCorOutputSpec):
     # and all the fields in CompCorOutputSpec
     high_variance_masks = OutputMultiPath(
-        File(exists=True), desc=(("voxels exceeding the variance" " threshold"))
+        File(exists=True), desc=("voxels exceeding the variance threshold")
     )
 
 
@@ -832,7 +831,7 @@ class TCompCor(CompCor):
 
     def __init__(self, *args, **kwargs):
         """exactly the same as compcor except the header"""
-        super(TCompCor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._header = "tCompCor"
         self._mask_files = []
 
@@ -854,10 +853,10 @@ class TCompCor(CompCor):
             out_image = nb.Nifti1Image(mask_data, affine=img.affine, header=img.header)
 
             # save mask
-            mask_file = os.path.abspath("mask_{:03d}.nii.gz".format(i))
+            mask_file = os.path.abspath(f"mask_{i:03d}.nii.gz")
             out_image.to_filename(mask_file)
             IFLOGGER.debug(
-                "tCompcor computed and saved mask of shape %s to " "mask_file %s",
+                "tCompcor computed and saved mask of shape %s to mask_file %s",
                 str(mask.shape),
                 mask_file,
             )
@@ -866,7 +865,7 @@ class TCompCor(CompCor):
         return out_images
 
     def _list_outputs(self):
-        outputs = super(TCompCor, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["high_variance_masks"] = self._mask_files
         return outputs
 
@@ -1136,7 +1135,7 @@ def plot_confound(tseries, figsize, name, units=None, series_tr=None, normalize=
 
     xlabel = "Frame #"
     if series_tr is not None:
-        xlabel = "Frame # ({} sec TR)".format(series_tr)
+        xlabel = f"Frame # ({series_tr} sec TR)"
     ax.set_xlabel(xlabel)
     ylim = ax.get_ylim()
 
@@ -1280,19 +1279,15 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
                 mask_index = 0
             else:
                 raise ValueError(
-                    (
-                        "When more than one mask file is provided, "
-                        "one of merge_method or mask_index must be "
-                        "set"
-                    )
+                    "When more than one mask file is provided, "
+                    "one of merge_method or mask_index must be "
+                    "set"
                 )
         if mask_index < len(mask_files):
             mask = nb.load(mask_files[mask_index])
             return [mask]
         raise ValueError(
-            ("mask_index {0} must be less than number of mask " "files {1}").format(
-                mask_index, len(mask_files)
-            )
+            f"mask_index {mask_index} must be less than number of mask files {len(mask_files)}"
         )
     masks = []
     if mask_method == "none":

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import glob
 
@@ -446,10 +444,10 @@ class ProcStreamlines(StdOutCommandLine):
     def _format_arg(self, name, spec, value):
         if name == "outputroot":
             return spec.argstr % self._get_actual_outputroot(value)
-        return super(ProcStreamlines, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def __init__(self, *args, **kwargs):
-        super(ProcStreamlines, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.outputroot_files = []
 
     def _run_interface(self, runtime):
@@ -459,13 +457,13 @@ class ProcStreamlines(StdOutCommandLine):
             base, filename, ext = split_filename(actual_outputroot)
             if not os.path.exists(base):
                 os.makedirs(base)
-            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            new_runtime = super()._run_interface(runtime)
             self.outputroot_files = glob.glob(
                 os.path.join(os.getcwd(), actual_outputroot + "*")
             )
             return new_runtime
         else:
-            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            new_runtime = super()._run_interface(runtime)
             return new_runtime
 
     def _get_actual_outputroot(self, outputroot):
@@ -718,7 +716,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         argstr="%s",
         position=2,
-        desc=("Camino scheme file (b values / vectors, " "see camino.fsl2scheme)"),
+        desc=("Camino scheme file (b values / vectors, see camino.fsl2scheme)"),
     )
 
     readheader = File(
@@ -737,9 +735,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         argstr="-printimagedims %s",
         position=3,
-        desc=(
-            "Prints image data and voxel dimensions as " "Camino arguments and exits."
-        ),
+        desc=("Prints image data and voxel dimensions as Camino arguments and exits."),
     )
 
     # How do we implement both file and enum (for the program) in one argument?
@@ -764,14 +760,14 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         exists=True,
         argstr="-printintelbyteorder %s",
         position=3,
-        desc=("Prints 1 if the header is little-endian, " "0 otherwise."),
+        desc=("Prints 1 if the header is little-endian, 0 otherwise."),
     )
 
     printbigendian = File(
         exists=True,
         argstr="-printbigendian %s",
         position=3,
-        desc=("Prints 1 if the header is big-endian, 0 " "otherwise."),
+        desc=("Prints 1 if the header is big-endian, 0 otherwise."),
     )
 
     initfromheader = File(
@@ -822,7 +818,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         argstr="-picoseed %s",
         minlen=3,
         maxlen=3,
-        desc=("Voxel specifying the seed (for PICo maps), " "default [0 0 0]."),
+        desc=("Voxel specifying the seed (for PICo maps), default [0 0 0]."),
         units="mm",
     )
 
@@ -868,7 +864,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
         argstr="-gl %s",
         minlen=2,
         maxlen=2,
-        desc=("Minimum and maximum greylevels. Stored as " "shorts in the header."),
+        desc=("Minimum and maximum greylevels. Stored as shorts in the header."),
         units="NA",
     )
 
@@ -885,7 +881,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
     scaleinter = traits.Float(
         argstr="-scaleinter %d",
         units="NA",
-        desc=("Constant to add to the image intensities. " "Used by SPM and MRIcro."),
+        desc=("Constant to add to the image intensities. Used by SPM and MRIcro."),
     )
 
     description = traits.String(
@@ -899,7 +895,7 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
 
     intelbyteorder = traits.Bool(
         argstr="-intelbyteorder",
-        desc=("Write header in intel byte order " "(little-endian)."),
+        desc=("Write header in intel byte order (little-endian)."),
     )
 
     networkbyteorder = traits.Bool(

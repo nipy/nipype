@@ -31,7 +31,6 @@ class SLURMPlugin(SGELikeBatchManagerBase):
     """
 
     def __init__(self, **kwargs):
-
         template = "#!/bin/bash"
 
         self._retry_timeout = 2
@@ -55,7 +54,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             if "sbatch_args" in kwargs["plugin_args"]:
                 self._sbatch_args = kwargs["plugin_args"]["sbatch_args"]
         self._pending = {}
-        super(SLURMPlugin, self).__init__(self._template, **kwargs)
+        super().__init__(self._template, **kwargs)
 
     def _is_pending(self, taskid):
         try:
@@ -105,9 +104,13 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             else:
                 sbatch_args += " " + node.plugin_args["sbatch_args"]
         if "-o" not in sbatch_args:
-            sbatch_args = "%s -o %s" % (sbatch_args, os.path.join(path, "slurm-%j.out"))
+            sbatch_args = "{} -o {}".format(
+                sbatch_args, os.path.join(path, "slurm-%j.out")
+            )
         if "-e" not in sbatch_args:
-            sbatch_args = "%s -e %s" % (sbatch_args, os.path.join(path, "slurm-%j.out"))
+            sbatch_args = "{} -e {}".format(
+                sbatch_args, os.path.join(path, "slurm-%j.out")
+            )
         if node._hierarchy:
             jobname = ".".join((dict(os.environ)["LOGNAME"], node._hierarchy, node._id))
         else:
@@ -115,7 +118,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split(".")
         jobnameitems.reverse()
         jobname = ".".join(jobnameitems)
-        cmd.inputs.args = "%s -J %s %s" % (sbatch_args, jobname, scriptfile)
+        cmd.inputs.args = f"{sbatch_args} -J {jobname} {scriptfile}"
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName("CRITICAL"))
         tries = 0
@@ -132,15 +135,14 @@ class SLURMPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit sbatch task" " for node %s")
-                                % node._id,
+                                "Could not submit sbatch task for node %s" % node._id,
                                 str(e),
                             )
                         )
                     )
             else:
                 break
-        logger.debug("Ran command ({0})".format(cmd.cmdline))
+        logger.debug(f"Ran command ({cmd.cmdline})")
         iflogger.setLevel(oldlevel)
         # retrieve taskid
         lines = [line for line in result.runtime.stdout.split("\n") if line]

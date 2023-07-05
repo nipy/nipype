@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
 import os
@@ -25,7 +24,7 @@ def sge_debug_print(message):
     # print DEBUGGING_PREFIX + " " + "=!" * 3 + "  " + message
 
 
-class QJobInfo(object):
+class QJobInfo:
     """Information about a single job created by OGE/SGE or similar
     Each job is responsible for knowing it's own refresh state
     :author Hans J. Johnson
@@ -82,7 +81,7 @@ class QJobInfo(object):
         time_diff = time.time() - self._job_info_creation_time
         if self.is_zombie():
             sge_debug_print(
-                "DONE! QJobInfo.IsPending found in 'zombie' list, returning False so claiming done!\n{0}".format(
+                "DONE! QJobInfo.IsPending found in 'zombie' list, returning False so claiming done!\n{}".format(
                     self
                 )
             )
@@ -111,7 +110,7 @@ class QJobInfo(object):
         self._job_queue_state = new_state
 
 
-class QstatSubstitute(object):
+class QstatSubstitute:
     """A wrapper for Qstat to avoid overloading the
     SGE/OGS server with rapid continuous qstat requests"""
 
@@ -158,7 +157,7 @@ class QstatSubstitute(object):
         sge_debug_print(
             "WARNING:  "
             "CONTACTING qacct for finished jobs, "
-            "{0}: {1}".format(time.time(), "Verifying Completion")
+            "{}: {}".format(time.time(), "Verifying Completion")
         )
 
         this_command = "qacct"
@@ -181,7 +180,7 @@ class QstatSubstitute(object):
                 qacct_result, _ = proc.communicate()
                 if qacct_result.find(str(taskid)):
                     is_complete = True
-                sge_debug_print("NOTE: qacct for jobs\n{0}".format(qacct_result))
+                sge_debug_print(f"NOTE: qacct for jobs\n{qacct_result}")
                 break
             except:
                 sge_debug_print("NOTE: qacct call failed")
@@ -235,9 +234,7 @@ class QstatSubstitute(object):
                 self._task_dictionary[task_id].update_info(
                     job_queue_state, job_time, job_queue_name, job_slots
                 )
-                sge_debug_print(
-                    "Updating job:  {0}".format(self._task_dictionary[task_id])
-                )
+                sge_debug_print(f"Updating job:  {self._task_dictionary[task_id]}")
                 current_jobs_parsed.append(task_id)
                 # Changed from job_num as "in" is used to check which does not cast
             else:
@@ -259,7 +256,7 @@ class QstatSubstitute(object):
                 else:
                     sge_debug_print(
                         "ERROR:  Job not in current parselist, "
-                        "and not in done list {0}: {1}".format(
+                        "and not in done list {}: {}".format(
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
                     )
@@ -271,7 +268,7 @@ class QstatSubstitute(object):
                 else:
                     sge_debug_print(
                         "ERROR:  Job not in still in initialization mode, "
-                        "and not in done list {0}: {1}".format(
+                        "and not in done list {}: {}".format(
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
                     )
@@ -287,7 +284,7 @@ class QstatSubstitute(object):
         """
         sge_debug_print(
             "WARNING:  CONTACTING qmaster for jobs, "
-            "{0}: {1}".format(time.time(), reason_for_qstat)
+            "{}: {}".format(time.time(), reason_for_qstat)
         )
         if force_instant:
             this_command = self._qstat_instant_executable
@@ -318,7 +315,7 @@ class QstatSubstitute(object):
                 self._parse_qstat_job_list(runjobs)
                 break
             except Exception as inst:
-                exception_message = "QstatParsingError:\n\t{0}\n\t{1}\n".format(
+                exception_message = "QstatParsingError:\n\t{}\n\t{}\n".format(
                     type(inst),  # the exception instance
                     inst,  # __str__ allows args to printed directly
                 )
@@ -339,32 +336,28 @@ class QstatSubstitute(object):
             job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
             # Double check pending jobs in case of change (since we don't check at the beginning)
             if job_is_pending:
-                self._run_qstat(
-                    "checking job pending status {0}".format(task_id), False
-                )
+                self._run_qstat(f"checking job pending status {task_id}", False)
                 job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
         else:
-            self._run_qstat("checking job pending status {0}".format(task_id), True)
+            self._run_qstat(f"checking job pending status {task_id}", True)
             if task_id in self._task_dictionary:
                 # Trust the cache, only False if state='zombie'
                 job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
             else:
                 sge_debug_print(
-                    "ERROR: Job {0} not in task list, "
+                    "ERROR: Job {} not in task list, "
                     "even after forced qstat!".format(task_id)
                 )
                 job_is_pending = False
         if not job_is_pending:
-            sge_debug_print("DONE! Returning for {0} claiming done!".format(task_id))
+            sge_debug_print(f"DONE! Returning for {task_id} claiming done!")
             if task_id in self._task_dictionary:
-                sge_debug_print(
-                    "NOTE: Adding {0} to OutOfScopeJobs list!".format(task_id)
-                )
+                sge_debug_print(f"NOTE: Adding {task_id} to OutOfScopeJobs list!")
                 self._out_of_scope_jobs.append(int(task_id))
                 self._task_dictionary.pop(task_id)
             else:
                 sge_debug_print(
-                    "ERROR: Job {0} not in task list, "
+                    "ERROR: Job {} not in task list, "
                     "but attempted to be removed!".format(task_id)
                 )
         return job_is_pending
@@ -419,7 +412,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
                 cached_qstat = kwargs["plugin_args"]["qstatCachedProgramPath"]
         self._refQstatSubstitute = QstatSubstitute(instant_qstat, cached_qstat)
 
-        super(SGEPlugin, self).__init__(template, **kwargs)
+        super().__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         return self._refQstatSubstitute.is_job_pending(int(taskid))
@@ -441,9 +434,9 @@ class SGEPlugin(SGELikeBatchManagerBase):
             else:
                 qsubargs += " " + node.plugin_args["qsub_args"]
         if "-o" not in qsubargs:
-            qsubargs = "%s -o %s" % (qsubargs, path)
+            qsubargs = f"{qsubargs} -o {path}"
         if "-e" not in qsubargs:
-            qsubargs = "%s -e %s" % (qsubargs, path)
+            qsubargs = f"{qsubargs} -e {path}"
         if node._hierarchy:
             jobname = ".".join((dict(os.environ)["LOGNAME"], node._hierarchy, node._id))
         else:
@@ -452,7 +445,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         jobnameitems.reverse()
         jobname = ".".join(jobnameitems)
         jobname = qsub_sanitize_job_name(jobname)
-        cmd.inputs.args = "%s -N %s %s" % (qsubargs, jobname, scriptfile)
+        cmd.inputs.args = f"{qsubargs} -N {jobname} {scriptfile}"
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName("CRITICAL"))
         tries = 0
@@ -469,7 +462,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
                     raise RuntimeError(
                         "\n".join(
                             (
-                                ("Could not submit sge task" " for node %s") % node._id,
+                                "Could not submit sge task for node %s" % node._id,
                                 str(e),
                             )
                         )

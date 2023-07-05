@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various longitudinal commands provided by freesurfer
@@ -37,7 +36,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         File(exists=True),
         mandatory=True,
         argstr="--mov %s",
-        desc="input movable volumes to be aligned to common mean/median " "template",
+        desc="input movable volumes to be aligned to common mean/median template",
     )
     out_file = File(
         "mri_robust_template_out.mgz",
@@ -90,7 +89,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
     )
     initial_timepoint = traits.Int(
         argstr="--inittp %d",
-        desc="use TP# for spacial init (default random), 0: no init",
+        desc="use TP# for special init (default random), 0: no init",
     )
     fixed_timepoint = traits.Bool(
         default_value=False,
@@ -174,7 +173,7 @@ class RobustTemplate(FSCommandOpenMP):
             return spec.argstr % {"mean": 0, "median": 1}[value]
         if name in ("transform_outputs", "scaled_intensity_outputs"):
             value = self._list_outputs()[name]
-        return super(RobustTemplate, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -262,7 +261,7 @@ class FuseSegmentations(FSCommand):
         if name in ("in_segmentations", "in_segmentations_noCC", "in_norms"):
             # return enumeration value
             return spec.argstr % os.path.basename(value[0])
-        return super(FuseSegmentations, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

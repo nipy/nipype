@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The minc module provides classes for interfacing with the `MINC
@@ -691,7 +690,7 @@ class Dump(StdOutCommandLine):
                 return "-p %d,%d" % (value[0], value[1])
             else:
                 raise ValueError("Invalid precision argument: " + str(value))
-        return super(Dump, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class AverageInputSpec(CommandLineInputSpec):
@@ -1633,10 +1632,10 @@ class Pik(CommandLine):
             if isinstance(value, bool) and value:
                 return "--title"
             elif isinstance(value, str):
-                return "--title --title_text %s" % (value,)
+                return f"--title --title_text {value}"
             else:
                 raise ValueError('Unknown value for "title" argument: ' + str(value))
-        return super(Pik, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class BlurInputSpec(CommandLineInputSpec):
@@ -1803,7 +1802,7 @@ class Blur(StdOutCommandLine):
     @property
     def cmdline(self):
         output_file_base = self.inputs.output_file_base
-        orig_cmdline = super(Blur, self).cmdline
+        orig_cmdline = super().cmdline
 
         if isdefined(output_file_base):
             return orig_cmdline
@@ -1811,7 +1810,7 @@ class Blur(StdOutCommandLine):
             # FIXME this seems like a bit of a hack. Can we force output_file
             # to show up in cmdline by default, even if it isn't specified in
             # the instantiation of Pik?
-            return "%s %s" % (orig_cmdline, self._gen_output_base())
+            return f"{orig_cmdline} {self._gen_output_base()}"
 
 
 class MathInputSpec(CommandLineInputSpec):
@@ -2205,13 +2204,13 @@ class Math(StdOutCommandLine):
             if isinstance(value, bool) and value:
                 return spec.argstr
             elif isinstance(value, bool) and not value:
-                raise ValueError("Does not make sense to specify %s=False" % (name,))
+                raise ValueError(f"Does not make sense to specify {name}=False")
             elif isinstance(value, float):
-                return "%s -const %s" % (spec.argstr, value)
+                return f"{spec.argstr} -const {value}"
             else:
-                raise ValueError("Invalid %s argument: %s" % (name, value))
+                raise ValueError(f"Invalid {name} argument: {value}")
 
-        return super(Math, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _parse_inputs(self):
         """A number of the command line options expect precisely one or two files."""
@@ -2269,7 +2268,7 @@ class Math(StdOutCommandLine):
                         % (n, nr_input_files)
                     )
 
-        return super(Math, self)._parse_inputs()
+        return super()._parse_inputs()
 
 
 class ResampleInputSpec(CommandLineInputSpec):
@@ -3031,7 +3030,6 @@ class Volpad(CommandLine):
 
 
 class VolisoInputSpec(CommandLineInputSpec):
-
     input_file = File(
         desc="input file to convert to isotropic sampling",
         exists=True,
@@ -3155,7 +3153,7 @@ class Gennlxfm(CommandLine):
     _cmd = "gennlxfm"
 
     def _list_outputs(self):
-        outputs = super(Gennlxfm, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["output_grid"] = re.sub(
             ".(nlxfm|xfm)$", "_grid_0.mnc", outputs["output_file"]
         )
@@ -3220,10 +3218,10 @@ class XfmConcat(CommandLine):
     _cmd = "xfmconcat"
 
     def _list_outputs(self):
-        outputs = super(XfmConcat, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if os.path.exists(outputs["output_file"]):
-            if "grid" in open(outputs["output_file"], "r").read():
+            if "grid" in open(outputs["output_file"]).read():
                 outputs["output_grids"] = glob.glob(
                     re.sub(".(nlxfm|xfm)$", "_grid_*.mnc", outputs["output_file"])
                 )
@@ -3411,7 +3409,7 @@ class NlpFit(CommandLine):
         outputs["output_xfm"] = os.path.abspath(self._gen_filename("output_xfm"))
 
         assert os.path.exists(outputs["output_xfm"])
-        if "grid" in open(outputs["output_xfm"], "r").read():
+        if "grid" in open(outputs["output_xfm"]).read():
             outputs["output_grid"] = re.sub(
                 ".(nlxfm|xfm)$", "_grid_0.mnc", outputs["output_xfm"]
             )
@@ -3513,7 +3511,7 @@ class XfmAvg(CommandLine):
         outputs["output_file"] = os.path.abspath(self._gen_outfilename())
 
         assert os.path.exists(outputs["output_file"])
-        if "grid" in open(outputs["output_file"], "r").read():
+        if "grid" in open(outputs["output_file"]).read():
             outputs["output_grid"] = re.sub(
                 ".(nlxfm|xfm)$", "_grid_0.mnc", outputs["output_file"]
             )
@@ -3584,7 +3582,7 @@ class XfmInvert(CommandLine):
         outputs["output_file"] = os.path.abspath(self._gen_outfilename())
 
         assert os.path.exists(outputs["output_file"])
-        if "grid" in open(outputs["output_file"], "r").read():
+        if "grid" in open(outputs["output_file"]).read():
             outputs["output_grid"] = re.sub(
                 ".(nlxfm|xfm)$", "_grid_0.mnc", outputs["output_file"]
             )
@@ -3844,11 +3842,11 @@ class VolSymm(CommandLine):
     _cmd = "volsymm"
 
     def _list_outputs(self):
-        outputs = super(VolSymm, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         # Have to manually check for the grid files.
         if os.path.exists(outputs["trans_file"]):
-            if "grid" in open(outputs["trans_file"], "r").read():
+            if "grid" in open(outputs["trans_file"]).read():
                 outputs["output_grid"] = re.sub(
                     ".(nlxfm|xfm)$", "_grid_0.mnc", outputs["trans_file"]
                 )

@@ -27,7 +27,6 @@ def _docdir(request):
     # Trigger ONLY for the doctests.
     doctest_plugin = request.config.pluginmanager.getplugin("doctest")
     if isinstance(request.node, doctest_plugin.DoctestItem):
-
         # Get the fixture dynamically by its name.
         tmpdir = pp.local(data_dir)
 

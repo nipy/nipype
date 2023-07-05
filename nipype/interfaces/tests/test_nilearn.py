@@ -22,7 +22,6 @@ except ImportError:
 
 @pytest.mark.skipif(no_nilearn, reason="the nilearn library is not available")
 class TestSignalExtraction:
-
     filenames = {
         "in_file": "fmri.nii",
         "label_files": "labels.nii",
@@ -157,7 +156,7 @@ class TestSignalExtraction:
         self.assert_expected_output(wanted_labels, wanted)
 
     def assert_expected_output(self, labels, wanted):
-        with open(self.filenames["out_file"], "r") as output:
+        with open(self.filenames["out_file"]) as output:
             got = [line.split() for line in output]
             labels_got = got.pop(0)  # remove header
             assert labels_got == labels
@@ -184,10 +183,11 @@ class TestSignalExtraction:
                 [[2, -2, -1, -2, -5], [3, 0, 3, -5, -2]],
                 [[-4, -2, -2, 1, -2], [3, 1, 4, -3, -2]],
             ],
-        ]
+        ],
+        np.int16,
     )
 
-    fake_label_data = np.array([[[1, 0], [3, 1]], [[2, 0], [1, 3]]])
+    fake_label_data = np.array([[[1, 0], [3, 1]], [[2, 0], [1, 3]]], np.uint8)
 
     fake_equiv_4d_label_data = np.array(
         [

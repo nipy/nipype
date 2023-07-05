@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2008 Lowell Alleman
 #
 #   Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -40,7 +39,6 @@ See the README file for an example usage of this module.
 
 """
 
-from builtins import range
 
 __version__ = "$Id: cloghandler.py 6175 2009-11-02 18:40:35Z lowell $"
 __author__ = "Lowell Alleman"
@@ -151,7 +149,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 )
         try:
             BaseRotatingHandler.__init__(self, filename, mode, encoding)
-        except TypeError:  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
+        except (
+            TypeError
+        ):  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
             BaseRotatingHandler.__init__(self, filename, mode)
             self.encoding = encoding
 
@@ -189,7 +189,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 self.stream.flush()
                 if self._rotateFailed:
                     self.stream.close()
-        except IOError:
+        except OSError:
             if self._rotateFailed:
                 self.stream.close()
         finally:
@@ -264,10 +264,10 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             try:
                 # Do a rename test to determine if we can successfully rename the log file
                 os.rename(self.baseFilename, tmpname)
-            except (IOError, OSError):
+            except OSError:
                 exc_value = sys.exc_info()[1]
                 self._degrade(
-                    True, "rename failed.  File in use?  " "exception=%s", exc_value
+                    True, "rename failed.  File in use?  exception=%s", exc_value
                 )
                 return
 
@@ -317,7 +317,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if self.maxBytes > 0:  # are we rolling over?
             try:
                 self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
-            except IOError:
+            except OSError:
                 return True
             if self.stream.tell() >= self.maxBytes:
                 return True

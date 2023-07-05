@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution."""
@@ -21,7 +20,19 @@ from .tools import report_crash, report_nodes_not_run, create_pyscript
 logger = logging.getLogger("nipype.workflow")
 
 
-class PluginBase(object):
+def _graph_to_lil_matrix(graph, nodelist):
+    """Provide a sparse linked list matrix across various NetworkX versions"""
+    import scipy.sparse as ssp
+
+    try:
+        from networkx import to_scipy_sparse_array
+    except ImportError:  # NetworkX < 2.7
+        from networkx import to_scipy_sparse_matrix as to_scipy_sparse_array
+
+    return ssp.lil_matrix(to_scipy_sparse_array(graph, nodelist=nodelist, format="lil"))
+
+
+class PluginBase:
     """Base class for plugins."""
 
     def __init__(self, plugin_args=None):
@@ -91,7 +102,7 @@ class DistributedPluginBase(PluginBase):
         Initialize runtime attributes to none
 
         """
-        super(DistributedPluginBase, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self.procs = None
         self.depidx = None
         self.refidx = None
@@ -431,12 +442,8 @@ class DistributedPluginBase(PluginBase):
 
     def _generate_dependency_list(self, graph):
         """Generates a dependency list for a list of graphs."""
-        import networkx as nx
-
         self.procs, _ = topological_sort(graph)
-        self.depidx = nx.to_scipy_sparse_matrix(
-            graph, nodelist=self.procs, format="lil"
-        )
+        self.depidx = _graph_to_lil_matrix(graph, nodelist=self.procs)
         self.refidx = self.depidx.astype(int)
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
@@ -479,7 +486,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
     """Execute workflow with SGE/OGE/PBS like batch system"""
 
     def __init__(self, template, plugin_args=None):
-        super(SGELikeBatchManagerBase, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self._template = template
         self._qsub_args = None
         if plugin_args:
@@ -527,14 +534,14 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             results_file = None
             try:
                 error_message = (
-                    "Job id ({0}) finished or terminated, but "
-                    "results file does not exist after ({1}) "
+                    "Job id ({}) finished or terminated, but "
+                    "results file does not exist after ({}) "
                     "seconds. Batch dir contains crashdump file "
                     "if node raised an exception.\n"
-                    "Node working directory: ({2}) ".format(taskid, timeout, node_dir)
+                    "Node working directory: ({}) ".format(taskid, timeout, node_dir)
                 )
-                raise IOError(error_message)
-            except IOError as e:
+                raise OSError(error_message)
+            except OSError as e:
                 result_data["traceback"] = "\n".join(format_exception(*sys.exc_info()))
         else:
             results_file = glob(os.path.join(node_dir, "result_*.pklz"))[0]
@@ -557,10 +564,10 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
         batchscript = "\n".join(
-            (self._template.rstrip("\n"), "%s %s" % (sys.executable, pyscript))
+            (self._template.rstrip("\n"), f"{sys.executable} {pyscript}")
         )
         batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
-        with open(batchscriptfile, "wt") as fp:
+        with open(batchscriptfile, "w") as fp:
             fp.writelines(batchscript)
         return self._submit_batchtask(batchscriptfile, node)
 
@@ -573,10 +580,8 @@ class GraphPluginBase(PluginBase):
 
     def __init__(self, plugin_args=None):
         if plugin_args and plugin_args.get("status_callback"):
-            logger.warning(
-                "status_callback not supported for Graph submission" " plugins"
-            )
-        super(GraphPluginBase, self).__init__(plugin_args=plugin_args)
+            logger.warning("status_callback not supported for Graph submission plugins")
+        super().__init__(plugin_args=plugin_args)
 
     def run(self, graph, config, updatehash=False):
         import networkx as nx

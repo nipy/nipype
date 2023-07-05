@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands for running PET analyses provided by FreeSurfer
@@ -24,7 +23,6 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 class GTMSegInputSpec(FSTraitedSpec):
-
     subject_id = traits.String(argstr="--s %s", desc="subject id", mandatory=True)
 
     xcerseg = traits.Bool(
@@ -136,7 +134,6 @@ class GTMSeg(FSCommand):
 
 
 class GTMPVCInputSpec(FSTraitedSpec):
-
     in_file = File(
         exists=True,
         argstr="--i %s",
@@ -422,7 +419,6 @@ class GTMPVCInputSpec(FSTraitedSpec):
 
 
 class GTMPVCOutputSpec(TraitedSpec):
-
     pvc_dir = Directory(desc="output directory")
     ref_file = File(desc="Reference TAC in .dat")
     hb_nifti = File(desc="High-binding TAC in nifti")
@@ -520,7 +516,7 @@ class GTMPVC(FSCommand):
             )
         if name == 'mg':
             return spec.argstr % (val[0], ' '.join(val[1]))
-        return super(GTMPVC, self)._format_arg(name, spec, val)
+        return super()._format_arg(name, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -560,7 +556,7 @@ class GTMPVC(FSCommand):
             outputs["rbv"] = os.path.join(pvcdir, "rbv.nii.gz")
             outputs["reg_rbvpet2anat"] = os.path.join(pvcdir, "aux", "rbv2anat.lta")
             outputs["reg_anat2rbvpet"] = os.path.join(pvcdir, "aux", "anat2rbv.lta")
-        if self.inputs.opt:
+        if self.inputs.optimization_schema:
             outputs["opt_params"] = os.path.join(pvcdir, "aux", "opt.params.dat")
 
         return outputs

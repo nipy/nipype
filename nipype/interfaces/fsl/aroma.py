@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """This commandline module provides classes for interfacing with the
@@ -146,7 +145,7 @@ class ICA_AROMA(CommandLine):
     def _format_arg(self, name, trait_spec, value):
         if name == "out_dir":
             return trait_spec.argstr % os.path.abspath(value)
-        return super(ICA_AROMA, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from functools import lru_cache
 import numpy as np
@@ -150,8 +149,8 @@ def ICC_rep_anova(Y, projection_matrix=None):
     SSR = SST - SSC - SSE
     MSR = SSR / dfr
 
-    # ICC(3,1) = (mean square subjeT - mean square error) /
-    #            (mean square subjeT + (k-1)*-mean square error)
+    # ICC(3,1) = (mean square subject - mean square error) /
+    #            (mean square subject + (k-1)*-mean square error)
     ICC = (MSR - MSE) / (MSR + dfc * MSE)
 
     e_var = MSE  # variance of error

@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 
 import pytest
-from nipype.testing.fixtures import create_files_in_directory
+from looseversion import LooseVersion
 
+from nipype.testing.fixtures import create_files_in_directory
 from nipype.interfaces import freesurfer
 from nipype.interfaces.freesurfer import Info
-from nipype import LooseVersion
 
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
@@ -66,7 +65,7 @@ def test_fitmsparams(create_files_in_directory):
     # .inputs based parameters setting
     fit.inputs.in_files = filelist
     fit.inputs.out_dir = outdir
-    assert fit.cmdline == "mri_ms_fitparms  %s %s %s" % (
+    assert fit.cmdline == "mri_ms_fitparms  {} {} {}".format(
         filelist[0],
         filelist[1],
         outdir,
@@ -137,7 +136,7 @@ def test_mandatory_outvol(create_files_in_directory):
         ext = ext2 + ext
 
     assert mni.cmdline == (
-        "mri_nu_correct.mni --i %s --n 4 --o %s_output%s" % (filelist[0], base, ext)
+        f"mri_nu_correct.mni --i {filelist[0]} --n 4 --o {base}_output{ext}"
     )
 
     # test with custom outfile

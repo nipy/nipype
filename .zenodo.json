@@ -117,13 +117,13 @@
       "name": "Yvernault, Benjamin"
     },
     {
-      "name": "Hamalainen, Carlo",
-      "orcid": "0000-0001-7655-3830"
-    },
-    {
       "affiliation": "Institute for Biomedical Engineering, ETH and University of Zurich",
       "name": "Christian, Horea",
       "orcid": "0000-0001-7037-2449"
+    },
+    {
+      "name": "Hamalainen, Carlo",
+      "orcid": "0000-0001-7655-3830"
     },
     {
       "affiliation": "Stanford University",
@@ -194,6 +194,9 @@
       "orcid": "0000-0001-8878-1750"
     },
     {
+      "name": "Moloney, Brendan"
+    },
+    {
       "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
       "name": "Hanke, Michael",
       "orcid": "0000-0001-6398-6370"
@@ -201,9 +204,6 @@
     {
       "affiliation": "Child Mind Institute",
       "name": "Giavasis, Steven"
-    },
-    {
-      "name": "Moloney, Brendan"
     },
     {
       "affiliation": "SRI International",
@@ -364,6 +364,11 @@
       "orcid": "0000-0001-6488-4739"
     },
     {
+      "affiliation": "CEA",
+      "name": "Papadopoulos Orfanos, Dimitri",
+      "orcid": "0000-0002-1242-8990"
+    },
+    {
       "affiliation": "UniversityHospital Heidelberg, Germany",
       "name": "Kleesiek, Jens"
     },
@@ -418,11 +423,6 @@
     },
     {
       "name": "Haselgrove, Christian"
-    },
-    {
-      "affiliation": "CEA",
-      "name": "Papadopoulos Orfanos, Dimitri",
-      "orcid": "0000-0002-1242-8990"
     },
     {
       "affiliation": "Department of Psychology, Stanford University; Parietal, INRIA",
@@ -895,6 +895,11 @@
       "affiliation": "MIT, HMS",
       "name": "Ghosh, Satrajit",
       "orcid": "0000-0002-5312-6729"
+    },
+    {
+      "affiliation": "University of Tübingen and MPI for Biological Cybernertics",
+      "name": "Bannert, Michael M.",
+      "orcid": "0000-0003-1010-7517"
     }
   ],
   "keywords": [

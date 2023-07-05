@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide a base interface to AFNI commands."""
@@ -6,7 +5,9 @@ import os
 from sys import platform
 import shutil
 
-from ... import logging, LooseVersion
+from looseversion import LooseVersion
+
+from ... import logging
 from ...utils.filemanip import split_filename, fname_presuffix
 from ..base import (
     CommandLine,
@@ -121,9 +122,7 @@ class AFNICommandBase(CommandLine):
     def _run_interface(self, runtime, correct_return_codes=(0,)):
         if platform == "darwin":
             runtime.environ["DYLD_FALLBACK_LIBRARY_PATH"] = "/usr/local/afni/"
-        return super(AFNICommandBase, self)._run_interface(
-            runtime, correct_return_codes
-        )
+        return super()._run_interface(runtime, correct_return_codes)
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
@@ -211,7 +210,7 @@ class AFNICommand(AFNICommandBase):
 
     def __init__(self, **inputs):
         """Instantiate an AFNI command tool wrapper."""
-        super(AFNICommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, "outputtype")
 
         if hasattr(self.inputs, "num_threads"):
@@ -246,7 +245,7 @@ class AFNICommand(AFNICommandBase):
         )
 
     def _list_outputs(self):
-        outputs = super(AFNICommand, self)._list_outputs()
+        outputs = super()._list_outputs()
         metadata = dict(name_source=lambda t: t is not None)
         out_names = list(self.inputs.traits(**metadata).keys())
         if out_names:
@@ -316,13 +315,13 @@ class AFNIPythonCommand(AFNICommand):
     @property
     def cmd(self):
         """Revise the command path."""
-        orig_cmd = super(AFNIPythonCommand, self).cmd
+        orig_cmd = super().cmd
         found = shutil.which(orig_cmd)
         return found if found is not None else orig_cmd
 
     @property
     def _cmd_prefix(self):
-        return "{} ".format(self.inputs.py27_path)
+        return f"{self.inputs.py27_path} "
 
 
 def no_afni():

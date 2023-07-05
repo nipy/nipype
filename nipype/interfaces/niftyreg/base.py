@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -61,7 +60,7 @@ class NiftyRegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         self.num_threads = 1
-        super(NiftyRegCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.required_version = required_version
         _version = self.version
         if _version:
@@ -120,7 +119,7 @@ class NiftyRegCommand(CommandLine):
     def _format_arg(self, name, spec, value):
         if name == "omp_core_val":
             self.numthreads = value
-        return super(NiftyRegCommand, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == "":

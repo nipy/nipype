@@ -27,7 +27,7 @@ License:    BSD-2
 __version__ = "0.0.5"
 
 
-class InactiveDueCreditCollector(object):
+class InactiveDueCreditCollector:
     """Just a stub at the Collector which would not do anything"""
 
     def _donothing(self, *args, **kwargs):
@@ -45,7 +45,7 @@ class InactiveDueCreditCollector(object):
     cite = load = add = _donothing
 
     def __repr__(self):
-        return "{}()".format(self.__class__.__name__)
+        return f"{self.__class__.__name__}()"
 
 
 def _donothing_func(*args, **kwargs):

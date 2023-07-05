@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-# coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -28,7 +26,7 @@ class EditTransformInputSpec(BaseInterfaceInputSpec):
     )
     reference_image = File(
         exists=True,
-        desc=("set a new reference image to change the " "target coordinate system."),
+        desc=("set a new reference image to change the target coordinate system."),
     )
     interpolation = traits.Enum(
         "cubic",
@@ -96,7 +94,7 @@ class EditTransform(BaseInterface):
 
         contents = ""
 
-        with open(self.inputs.transform_file, "r") as f:
+        with open(self.inputs.transform_file) as f:
             contents = f.read()
 
         if isdefined(self.inputs.output_type):

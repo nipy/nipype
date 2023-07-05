@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by FreeSurfer
@@ -9,10 +8,11 @@ from glob import glob
 import shutil
 import sys
 
+from looseversion import LooseVersion
 import numpy as np
 from nibabel import load
 
-from ... import logging, LooseVersion
+from ... import logging
 from ...utils.filemanip import fname_presuffix, check_depends
 from ..io import FreeSurferSource
 from ..base import (
@@ -546,7 +546,7 @@ class MRIConvert(FSCommand):
         if name in ["in_type", "out_type", "template_type"]:
             if value == "niigz":
                 return spec.argstr % "nii"
-        return super(MRIConvert, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _get_outfilename(self):
         outfile = self.inputs.out_file
@@ -728,19 +728,19 @@ class DICOMConvert(FSCommand):
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = "%s -c \"import os; os.makedirs('%s')\"" % (
+            cmdstr = "{} -c \"import os; os.makedirs('{}')\"".format(
                 op.basename(sys.executable),
                 outdir,
             )
             cmd.extend([cmdstr])
         infofile = os.path.join(outdir, "shortinfo.txt")
         if not os.path.exists(infofile):
-            cmdstr = "dcmdir-info-mgh %s > %s" % (self.inputs.dicom_dir, infofile)
+            cmdstr = f"dcmdir-info-mgh {self.inputs.dicom_dir} > {infofile}"
             cmd.extend([cmdstr])
         files = self._get_filelist(outdir)
         for infile, outfile in files:
             if not os.path.exists(outfile):
-                single_cmd = "%s%s %s %s" % (
+                single_cmd = "{}{} {} {}".format(
                     self._cmd_prefix,
                     self.cmd,
                     infile,
@@ -900,7 +900,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
     )
     big_ventricles = traits.Bool(
         argstr="-bigventricles",
-        desc=("For use in subjects with enlarged " "ventricles"),
+        desc=("For use in subjects with enlarged ventricles"),
     )
     brainstem = traits.Bool(
         argstr="-brainstem-structures",
@@ -1658,7 +1658,7 @@ class ReconAll(CommandLine):
         if name == "directive" and value == "autorecon-hemi":
             if not isdefined(self.inputs.hemi):
                 raise ValueError(
-                    "Directive 'autorecon-hemi' requires hemi " "input to be set"
+                    "Directive 'autorecon-hemi' requires hemi input to be set"
                 )
             value += " " + self.inputs.hemi
         if all(
@@ -1669,11 +1669,11 @@ class ReconAll(CommandLine):
             )
         ):
             return None
-        return super(ReconAll, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     @property
     def cmdline(self):
-        cmd = super(ReconAll, self).cmdline
+        cmd = super().cmdline
 
         # Adds '-expert' flag if expert flags are passed
         # Mutually exclusive with 'expert' input parameter
@@ -1716,8 +1716,8 @@ class ReconAll(CommandLine):
         no_run = True
         flags = []
         for step, outfiles, infiles in steps:
-            flag = "-{}".format(step)
-            noflag = "-no{}".format(step)
+            flag = f"-{step}"
+            noflag = f"-no{step}"
             if noflag in cmd:
                 continue
             elif flag in cmd:
@@ -1749,7 +1749,7 @@ class ReconAll(CommandLine):
         for binary in self._binaries:
             args = getattr(self.inputs, binary)
             if isdefined(args):
-                lines.append("{} {}\n".format(binary, args))
+                lines.append(f"{binary} {args}\n")
 
         if lines == []:
             return ""
@@ -1761,7 +1761,7 @@ class ReconAll(CommandLine):
         expert_fname = os.path.abspath("expert.opts")
         with open(expert_fname, "w") as fobj:
             fobj.write(contents)
-        return " -expert {}".format(expert_fname)
+        return f" -expert {expert_fname}"
 
     def _get_expert_file(self):
         # Read pre-existing options file, if it exists
@@ -1775,7 +1775,7 @@ class ReconAll(CommandLine):
         )
         if not os.path.exists(xopts_file):
             return ""
-        with open(xopts_file, "r") as fobj:
+        with open(xopts_file) as fobj:
             return fobj.read()
 
     @property
@@ -1931,7 +1931,6 @@ class BBRegister(FSCommand):
     output_spec = BBRegisterOutputSpec
 
     def _list_outputs(self):
-
         outputs = self.output_spec().get()
         _in = self.inputs
 
@@ -1988,10 +1987,9 @@ class BBRegister(FSCommand):
             "init_cost_file",
         ) and isinstance(value, bool):
             value = self._list_outputs()[name]
-        return super(BBRegister, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
-
         if name == "out_reg_file":
             return self._list_outputs()[name]
         return None
@@ -2278,7 +2276,6 @@ class Smooth(FSCommand):
 
 
 class RobustRegisterInputSpec(FSTraitedSpec):
-
     source_file = File(
         exists=True, mandatory=True, argstr="--mov %s", desc="volume to be registered"
     )
@@ -2400,7 +2397,6 @@ class RobustRegisterInputSpec(FSTraitedSpec):
 
 
 class RobustRegisterOutputSpec(TraitedSpec):
-
     out_reg_file = File(exists=True, desc="output registration file")
     registered_file = File(exists=True, desc="output image with registration applied")
     weights_file = File(exists=True, desc="image of weights used")
@@ -2454,7 +2450,7 @@ class RobustRegister(FSCommand):
         )
         if name in options and isinstance(value, bool):
             value = self._list_outputs()[name]
-        return super(RobustRegister, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -2486,7 +2482,6 @@ class RobustRegister(FSCommand):
 
 
 class FitMSParamsInputSpec(FSTraitedSpec):
-
     in_files = traits.List(
         File(exists=True),
         argstr="%s",
@@ -2506,7 +2501,6 @@ class FitMSParamsInputSpec(FSTraitedSpec):
 
 
 class FitMSParamsOutputSpec(TraitedSpec):
-
     t1_image = File(exists=True, desc="image of estimated T1 relaxation values")
     pd_image = File(exists=True, desc="image of estimated proton density values")
     t2star_image = File(exists=True, desc="image of estimated T2* values")
@@ -2544,7 +2538,7 @@ class FitMSParams(FSCommand):
                     cmd = " ".join((cmd, "-at %s" % self.inputs.xfm_list[i]))
                 cmd = " ".join((cmd, file))
             return cmd
-        return super(FitMSParams, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -2564,7 +2558,6 @@ class FitMSParams(FSCommand):
 
 
 class SynthesizeFLASHInputSpec(FSTraitedSpec):
-
     fixed_weighting = traits.Bool(
         position=1,
         argstr="-w",
@@ -2593,7 +2586,6 @@ class SynthesizeFLASHInputSpec(FSTraitedSpec):
 
 
 class SynthesizeFLASHOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="synthesized FLASH acquisition")
 
 
@@ -2999,7 +2991,7 @@ class CARegister(FSCommandOpenMP):
     def _format_arg(self, name, spec, value):
         if name == "l_files" and len(value) == 1:
             value.append("identity.nofile")
-        return super(CARegister, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_fname(self, name):
         if name == "out_file":
@@ -3220,19 +3212,19 @@ class MRIsCALabel(FSCommandOpenMP):
                 self,
                 self.inputs.smoothwm,
                 folder="surf",
-                basename="{0}.smoothwm".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.smoothwm",
             )
             copy2subjdir(
                 self,
                 self.inputs.curv,
                 folder="surf",
-                basename="{0}.curv".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.curv",
             )
             copy2subjdir(
                 self,
                 self.inputs.sulc,
                 folder="surf",
-                basename="{0}.sulc".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.sulc",
             )
 
         # The label directory must exist in order for an output to be written
@@ -3242,7 +3234,7 @@ class MRIsCALabel(FSCommandOpenMP):
         if not os.path.isdir(label_dir):
             os.makedirs(label_dir)
 
-        return super(MRIsCALabel, self).run(**inputs)
+        return super().run(**inputs)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3336,7 +3328,7 @@ class SegmentCC(FSCommand):
             # mri_cc can't use abspaths just the basename
             basename = os.path.basename(value)
             return spec.argstr % basename
-        return super(SegmentCC, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3351,7 +3343,7 @@ class SegmentCC(FSCommand):
                 inputs["subjects_dir"] = self.inputs.subjects_dir
             for originalfile in [self.inputs.in_file, self.inputs.in_norm]:
                 copy2subjdir(self, originalfile, folder="mri")
-        return super(SegmentCC, self).run(**inputs)
+        return super().run(**inputs)
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         # it is necessary to find the output files and move
@@ -3378,7 +3370,7 @@ class SegmentCC(FSCommand):
                     if not os.path.isdir(os.path.dirname(out_tmp)):
                         os.makedirs(os.path.dirname(out_tmp))
                     shutil.move(out_tmp, out_file)
-        return super(SegmentCC, self).aggregate_outputs(runtime, needed_outputs)
+        return super().aggregate_outputs(runtime, needed_outputs)
 
 
 class SegmentWMInputSpec(FSTraitedSpec):
@@ -3592,4 +3584,4 @@ class ConcatenateLTA(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == "out_type":
             value = {"VOX2VOX": 0, "RAS2RAS": 1}[value]
-        return super(ConcatenateLTA, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)

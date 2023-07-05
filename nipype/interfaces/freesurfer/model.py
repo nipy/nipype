@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The freesurfer module provides basic functions for interfacing with
@@ -137,7 +136,7 @@ class MRISPreproc(FSCommand):
         outputs["out_file"] = outfile
         if not isdefined(outfile):
             outputs["out_file"] = os.path.join(
-                os.getcwd(), "concat_%s_%s.mgz" % (self.inputs.hemi, self.inputs.target)
+                os.getcwd(), f"concat_{self.inputs.hemi}_{self.inputs.target}.mgz"
             )
         return outputs
 
@@ -231,7 +230,7 @@ class MRISPreprocReconAll(MRISPreproc):
             if isdefined(self.inputs.surf_measure_file):
                 copy2subjdir(self, self.inputs.surf_measure_file, folder)
 
-        return super(MRISPreprocReconAll, self).run(**inputs)
+        return super().run(**inputs)
 
     def _format_arg(self, name, spec, value):
         # mris_preproc looks for these files in the surf dir
@@ -241,7 +240,7 @@ class MRISPreprocReconAll(MRISPreproc):
         if name == "surf_measure_file":
             basename = os.path.basename(value)
             return spec.argstr % basename.lstrip("rh.").lstrip("lh.")
-        return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class GLMFitInputSpec(FSTraitedSpec):
@@ -449,7 +448,6 @@ class GLMFitInputSpec(FSTraitedSpec):
 
 
 class GLMFitOutputSpec(TraitedSpec):
-
     glm_dir = Directory(exists=True, desc="output directory")
     beta_file = File(exists=True, desc="map of regression coefficients")
     error_file = File(desc="map of residual error")
@@ -492,7 +490,7 @@ class GLMFit(FSCommand):
         if name == "surf":
             _si = self.inputs
             return spec.argstr % (_si.subject_id, _si.hemi, _si.surf_geo)
-        return super(GLMFit, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -566,7 +564,7 @@ class GLMFit(FSCommand):
 
 class OneSampleTTest(GLMFit):
     def __init__(self, **kwargs):
-        super(OneSampleTTest, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.inputs.one_sample = True
 
 
@@ -698,7 +696,7 @@ class Binarize(FSCommand):
             return spec.argstr % fname
         if name == "out_type":
             return ""
-        return super(Binarize, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name == "binary_file":
@@ -1067,7 +1065,7 @@ class SegStats(FSCommand):
                 ".mgz", ""
             )
             return spec.argstr % (value, intensity_name)
-        return super(SegStats, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name == "summary_file":
@@ -1159,7 +1157,7 @@ class SegStatsReconAll(SegStats):
     def _format_arg(self, name, spec, value):
         if name == "brainmask_file":
             return spec.argstr % os.path.basename(value)
-        return super(SegStatsReconAll, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def run(self, **inputs):
         if self.inputs.copy_inputs:
@@ -1183,7 +1181,7 @@ class SegStatsReconAll(SegStats):
             )
             copy2subjdir(self, self.inputs.in_intensity, "mri")
             copy2subjdir(self, self.inputs.brainmask_file, "mri")
-        return super(SegStatsReconAll, self).run(**inputs)
+        return super().run(**inputs)
 
 
 class Label2VolInputSpec(FSTraitedSpec):
@@ -1334,7 +1332,7 @@ class MS_LDAInputSpec(FSTraitedSpec):
         exists=False,
         argstr="-synth %s",
         mandatory=True,
-        desc=("filename for the synthesized output " "volume"),
+        desc=("filename for the synthesized output volume"),
     )
     label_file = File(
         exists=True, argstr="-label %s", desc="filename of the label volume"
@@ -1347,10 +1345,10 @@ class MS_LDAInputSpec(FSTraitedSpec):
     )
     conform = traits.Bool(
         argstr="-conform",
-        desc=("Conform the input volumes (brain mask " "typically already conformed)"),
+        desc=("Conform the input volumes (brain mask typically already conformed)"),
     )
     use_weights = traits.Bool(
-        argstr="-W", desc=("Use the weights from a previously " "generated weight file")
+        argstr="-W", desc=("Use the weights from a previously generated weight file")
     )
     images = InputMultiPath(
         File(exists=True),
@@ -1412,7 +1410,7 @@ class MS_LDA(FSCommand):
             else:
                 return ""
                 # TODO: Fix bug when boolean values are set explicitly to false
-        return super(MS_LDA, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         pass
@@ -1520,22 +1518,20 @@ class Label2Label(FSCommand):
             if "subjects_dir" in inputs:
                 inputs["subjects_dir"] = self.inputs.subjects_dir
             hemi = self.inputs.hemisphere
-            copy2subjdir(
-                self, self.inputs.sphere_reg, "surf", "{0}.sphere.reg".format(hemi)
-            )
-            copy2subjdir(self, self.inputs.white, "surf", "{0}.white".format(hemi))
+            copy2subjdir(self, self.inputs.sphere_reg, "surf", f"{hemi}.sphere.reg")
+            copy2subjdir(self, self.inputs.white, "surf", f"{hemi}.white")
             copy2subjdir(
                 self,
                 self.inputs.source_sphere_reg,
                 "surf",
-                "{0}.sphere.reg".format(hemi),
+                f"{hemi}.sphere.reg",
                 subject_id=self.inputs.source_subject,
             )
             copy2subjdir(
                 self,
                 self.inputs.source_white,
                 "surf",
-                "{0}.white".format(hemi),
+                f"{hemi}.white",
                 subject_id=self.inputs.source_subject,
             )
 
@@ -1546,7 +1542,7 @@ class Label2Label(FSCommand):
         if not os.path.isdir(label_dir):
             os.makedirs(label_dir)
 
-        return super(Label2Label, self).run(**inputs)
+        return super().run(**inputs)
 
 
 class Label2AnnotInputSpec(FSTraitedSpec):
@@ -1619,7 +1615,7 @@ class Label2Annot(FSCommand):
                 self,
                 self.inputs.orig,
                 folder="surf",
-                basename="{0}.orig".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.orig",
             )
         # label dir must exist in order for output file to be written
         label_dir = os.path.join(
@@ -1627,7 +1623,7 @@ class Label2Annot(FSCommand):
         )
         if not os.path.isdir(label_dir):
             os.makedirs(label_dir)
-        return super(Label2Annot, self).run(**inputs)
+        return super().run(**inputs)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1717,7 +1713,7 @@ class SphericalAverage(FSCommand):
             for item in ["lh.", "rh."]:
                 surf = surf.replace(item, "")
             return spec.argstr % surf
-        return super(SphericalAverage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name == "in_average":

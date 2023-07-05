@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .denoising import UnbiasedNonLocalMeans
 from .featuredetection import (
     GenerateSummedGradientImage,

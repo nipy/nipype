@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -13,7 +12,6 @@ from .base import FSLCommand, FSLCommandInputSpec
 
 
 class MathsInput(FSLCommandInputSpec):
-
     in_file = File(
         position=2, argstr="%s", exists=True, mandatory=True, desc="image to operate on"
     )
@@ -25,13 +23,13 @@ class MathsInput(FSLCommandInputSpec):
         *_dtypes,
         position=1,
         argstr="-dt %s",
-        desc=("datatype to use for calculations " "(default is float)")
+        desc=("datatype to use for calculations (default is float)")
     )
     output_datatype = traits.Enum(
         *_dtypes,
         position=-1,
         argstr="-odt %s",
-        desc=("datatype to use for output (default " "uses input type)")
+        desc=("datatype to use for output (default uses input type)")
     )
 
     nan2zeros = traits.Bool(
@@ -40,12 +38,10 @@ class MathsInput(FSLCommandInputSpec):
 
 
 class MathsOutput(TraitedSpec):
-
     out_file = File(desc="image written after calculations")
 
 
 class MathsCommand(FSLCommand):
-
     _cmd = "fslmaths"
     input_spec = MathsInput
     output_spec = MathsOutput
@@ -68,7 +64,6 @@ class MathsCommand(FSLCommand):
 
 
 class ChangeDataTypeInput(MathsInput):
-
     _dtypes = ["float", "char", "int", "short", "double", "input"]
     output_datatype = traits.Enum(
         *_dtypes, position=-1, argstr="-odt %s", mandatory=True, desc="output data type"
@@ -83,7 +78,6 @@ class ChangeDataType(MathsCommand):
 
 
 class ThresholdInputSpec(MathsInput):
-
     thresh = traits.Float(
         mandatory=True, position=4, argstr="%s", desc="threshold value"
     )
@@ -122,11 +116,10 @@ class Threshold(MathsCommand):
                     arg += "p"
             arg += " %.10f" % value
             return arg
-        return super(Threshold, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class StdImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -149,7 +142,6 @@ class StdImage(MathsCommand):
 
 
 class MeanImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -170,7 +162,6 @@ class MeanImage(MathsCommand):
 
 
 class MaxImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -202,7 +193,6 @@ class MaxImage(MathsCommand):
 
 
 class PercentileImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -218,7 +208,7 @@ class PercentileImageInput(MathsInput):
         high=100,
         argstr="%f",
         position=5,
-        desc=("nth percentile (0-100) of FULL RANGE " "across dimension"),
+        desc=("nth percentile (0-100) of FULL RANGE across dimension"),
     )
 
 
@@ -242,7 +232,6 @@ class PercentileImage(MathsCommand):
 
 
 class MaxnImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -266,7 +255,6 @@ class MaxnImage(MathsCommand):
 
 
 class MinImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -287,7 +275,6 @@ class MinImage(MathsCommand):
 
 
 class MedianImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -308,7 +295,6 @@ class MedianImage(MathsCommand):
 
 
 class AR1ImageInput(MathsInput):
-
     dimension = traits.Enum(
         "T",
         "X",
@@ -317,7 +303,7 @@ class AR1ImageInput(MathsInput):
         usedefault=True,
         argstr="-%sar1",
         position=4,
-        desc=("dimension to find AR(1) coefficient" "across"),
+        desc=("dimension to find AR(1) coefficient across"),
     )
 
 
@@ -332,7 +318,6 @@ class AR1Image(MathsCommand):
 
 
 class IsotropicSmoothInput(MathsInput):
-
     fwhm = traits.Float(
         mandatory=True,
         xor=["sigma"],
@@ -359,11 +344,10 @@ class IsotropicSmooth(MathsCommand):
         if name == "fwhm":
             sigma = float(value) / np.sqrt(8 * np.log(2))
             return spec.argstr % sigma
-        return super(IsotropicSmooth, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ApplyMaskInput(MathsInput):
-
     mask_file = File(
         exists=True,
         mandatory=True,
@@ -381,7 +365,6 @@ class ApplyMask(MathsCommand):
 
 
 class KernelInput(MathsInput):
-
     kernel_shape = traits.Enum(
         "3D",
         "2D",
@@ -398,9 +381,7 @@ class KernelInput(MathsInput):
         argstr="%.4f",
         position=5,
         xor=["kernel_file"],
-        desc=(
-            "kernel size - voxels for box/boxv, mm " "for sphere, mm sigma for gauss"
-        ),
+        desc=("kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss"),
     )
     kernel_file = File(
         exists=True,
@@ -412,7 +393,6 @@ class KernelInput(MathsInput):
 
 
 class DilateInput(KernelInput):
-
     operation = traits.Enum(
         "mean",
         "modal",
@@ -433,17 +413,16 @@ class DilateImage(MathsCommand):
     def _format_arg(self, name, spec, value):
         if name == "operation":
             return spec.argstr % dict(mean="M", modal="D", max="F")[value]
-        return super(DilateImage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class ErodeInput(KernelInput):
-
     minimum_filter = traits.Bool(
         argstr="%s",
         position=6,
         usedefault=True,
         default_value=False,
-        desc=("if true, minimum filter rather than " "erosion by zeroing-out"),
+        desc=("if true, minimum filter rather than erosion by zeroing-out"),
     )
 
 
@@ -458,11 +437,10 @@ class ErodeImage(MathsCommand):
             if value:
                 return "-eroF"
             return "-ero"
-        return super(ErodeImage, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class SpatialFilterInput(KernelInput):
-
     operation = traits.Enum(
         "mean",
         "median",
@@ -482,7 +460,6 @@ class SpatialFilter(MathsCommand):
 
 
 class UnaryMathsInput(MathsInput):
-
     operation = traits.Enum(
         "exp",
         "log",
@@ -521,11 +498,10 @@ class UnaryMaths(MathsCommand):
 
     def _list_outputs(self):
         self._suffix = "_" + self.inputs.operation
-        return super(UnaryMaths, self)._list_outputs()
+        return super()._list_outputs()
 
 
 class BinaryMathsInput(MathsInput):
-
     operation = traits.Enum(
         "add",
         "sub",
@@ -566,17 +542,16 @@ class BinaryMaths(MathsCommand):
 
 
 class MultiImageMathsInput(MathsInput):
-
     op_string = traits.String(
         position=4,
         argstr="%s",
         mandatory=True,
-        desc=("python formatted string of operations " "to perform"),
+        desc=("python formatted string of operations to perform"),
     )
     operand_files = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("list of file names to plug into op " "string"),
+        desc=("list of file names to plug into op string"),
     )
 
 
@@ -601,11 +576,10 @@ class MultiImageMaths(MathsCommand):
     def _format_arg(self, name, spec, value):
         if name == "op_string":
             return value % tuple(self.inputs.operand_files)
-        return super(MultiImageMaths, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
 
 class TemporalFilterInput(MathsInput):
-
     lowpass_sigma = traits.Float(
         -1,
         argstr="%.6f",
