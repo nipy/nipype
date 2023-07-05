@@ -820,7 +820,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         "recon_all",
         argstr="-subjid %s",
         desc="subject name",
-        xor=["base_template_id","longitudinal_timepoint_id"],
+        xor=["base_template_id", "longitudinal_timepoint_id"],
     )
     directive = traits.Enum(
         "all",
@@ -846,13 +846,17 @@ class ReconAllInputSpec(CommandLineInputSpec):
         usedefault=True,
         position=0,
     )
-    hemi = traits.Enum("lh", "rh",
+    hemi = traits.Enum(
+        "lh",
+        "rh",
         desc="hemisphere to process",
         argstr="-hemi %s",
         requires=["subject_id"],
     )
     T1_files = InputMultiPath(
-        File(exists=True), argstr="-i %s...", desc="name of T1 file to process",
+        File(exists=True),
+        argstr="-i %s...",
+        desc="name of T1 file to process",
         requires=["subject_id"],
     )
     T2_file = File(
@@ -963,7 +967,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         position=1,
     )
     longitudinal_template_id = traits.Str(
-        argstr="%s", desc="longitudinal base tempalte id", position=2
+        argstr="%s", desc="longitudinal base template id", position=2
     )
 
     # Expert options
