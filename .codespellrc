@@ -5,8 +5,8 @@ skip = .git,*.pdf,*.svg,external
 # whos - smth used in matlab things
 # SMAL - Stanford CNI MRS Library
 # Suh - name
-# noo,crasher - field/var name used
+# noo,crasher,afile - field/var name used
 # Reson - short journal name
 # ALS, FWE - neuroimaging specific abbrevs
 # Comision - foreign word used
-ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,suh,noo,reson,als,fwe,crasher,comision
+ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,suh,noo,reson,als,fwe,crasher,comision,afile
