@@ -6,8 +6,25 @@
 import os
 
 from ... import logging
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
-from .base import FSCommand, FSTraitedSpec, FSCommandOpenMP, FSTraitedSpecOpenMP
+from ..base import (
+    TraitedSpec,
+    File,
+    traits,
+    InputMultiPath,
+    OutputMultiPath,
+    isdefined,
+    InputMultiObject,
+    Directory,
+)
+from .base import (
+    FSCommand,
+    FSTraitedSpec,
+    FSCommandOpenMP,
+    FSTraitedSpecOpenMP,
+    CommandLine,
+)
+from .preprocess import ReconAllInputSpec
+from ..io import FreeSurferSource
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")

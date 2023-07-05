@@ -25,6 +25,7 @@ from ..base import (
     CommandLine,
     CommandLineInputSpec,
     isdefined,
+    InputMultiObject,
 )
 from .base import FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP, FSCommandOpenMP, Info
 from .utils import copy2subjdir
@@ -816,7 +817,10 @@ class Resample(FSCommand):
 
 class ReconAllInputSpec(CommandLineInputSpec):
     subject_id = traits.Str(
-        "recon_all", argstr="-subjid %s", desc="subject name", usedefault=True
+        "recon_all",
+        argstr="-subjid %s",
+        desc="subject name",
+        xor=["base_template_id", "longitudinal_timepoint_id"],
     )
     directive = traits.Enum(
         "all",
@@ -842,21 +846,32 @@ class ReconAllInputSpec(CommandLineInputSpec):
         usedefault=True,
         position=0,
     )
-    hemi = traits.Enum("lh", "rh", desc="hemisphere to process", argstr="-hemi %s")
+    hemi = traits.Enum(
+        "lh",
+        "rh",
+        desc="hemisphere to process",
+        argstr="-hemi %s",
+        requires=["subject_id"],
+    )
     T1_files = InputMultiPath(
-        File(exists=True), argstr="-i %s...", desc="name of T1 file to process"
+        File(exists=True),
+        argstr="-i %s...",
+        desc="name of T1 file to process",
+        requires=["subject_id"],
     )
     T2_file = File(
         exists=True,
         argstr="-T2 %s",
         min_ver="5.3.0",
         desc="Convert T2 image to orig directory",
+        requires=["subject_id"],
     )
     FLAIR_file = File(
         exists=True,
         argstr="-FLAIR %s",
         min_ver="5.3.0",
         desc="Convert FLAIR image to orig directory",
+        requires=["subject_id"],
     )
     use_T2 = traits.Bool(
         argstr="-T2pial",
@@ -885,18 +900,22 @@ class ReconAllInputSpec(CommandLineInputSpec):
             "Assume scan parameters are MGH MP-RAGE "
             "protocol, which produces darker gray matter"
         ),
+        requires=["subject_id"],
     )
     big_ventricles = traits.Bool(
         argstr="-bigventricles",
         desc=("For use in subjects with enlarged ventricles"),
     )
     brainstem = traits.Bool(
-        argstr="-brainstem-structures", desc="Segment brainstem structures"
+        argstr="-brainstem-structures",
+        desc="Segment brainstem structures",
+        requires=["subject_id"],
     )
     hippocampal_subfields_T1 = traits.Bool(
         argstr="-hippocampal-subfields-T1",
         min_ver="6.0.0",
         desc="segment hippocampal subfields using input T1 scan",
+        requires=["subject_id"],
     )
     hippocampal_subfields_T2 = traits.Tuple(
         File(exists=True),
@@ -907,6 +926,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
             "segment hippocampal subfields using T2 scan, identified by "
             "ID (may be combined with hippocampal_subfields_T1)"
         ),
+        requires=["subject_id"],
     )
     expert = File(
         exists=True, argstr="-expert %s", desc="Set parameters using expert file"
@@ -926,6 +946,29 @@ class ReconAllInputSpec(CommandLineInputSpec):
         genfile=True,
     )
     flags = InputMultiPath(traits.Str, argstr="%s", desc="additional parameters")
+
+    # Longitudinal runs
+    base_template_id = traits.Str(
+        argstr="-base %s",
+        desc="base template id",
+        xor=["subject_id", "longitudinal_timepoint_id"],
+        requires=["base_timepoint_ids"],
+    )
+    base_timepoint_ids = InputMultiObject(
+        traits.Str(),
+        argstr="-base-tp %s...",
+        desc="processed timepoint to use in template",
+    )
+    longitudinal_timepoint_id = traits.Str(
+        argstr="-long %s",
+        desc="longitudinal session/timepoint id",
+        xor=["subject_id", "base_template_id"],
+        requires=["longitudinal_template_id"],
+        position=1,
+    )
+    longitudinal_template_id = traits.Str(
+        argstr="%s", desc="longitudinal base template id", position=2
+    )
 
     # Expert options
     talairach = traits.Str(desc="Flags to pass to talairach commands", xor=["expert"])
@@ -1019,7 +1062,7 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive = 'all'
     >>> reconall.inputs.subjects_dir = '.'
-    >>> reconall.inputs.T1_files = 'structural.nii'
+    >>> reconall.inputs.T1_files = ['structural.nii']
     >>> reconall.cmdline
     'recon-all -all -i structural.nii -subjid foo -sd .'
     >>> reconall.inputs.flags = "-qcache"
@@ -1049,7 +1092,7 @@ class ReconAll(CommandLine):
     >>> reconall_subfields.inputs.subject_id = 'foo'
     >>> reconall_subfields.inputs.directive = 'all'
     >>> reconall_subfields.inputs.subjects_dir = '.'
-    >>> reconall_subfields.inputs.T1_files = 'structural.nii'
+    >>> reconall_subfields.inputs.T1_files = ['structural.nii']
     >>> reconall_subfields.inputs.hippocampal_subfields_T1 = True
     >>> reconall_subfields.cmdline
     'recon-all -all -i structural.nii -hippocampal-subfields-T1 -subjid foo -sd .'
@@ -1060,6 +1103,24 @@ class ReconAll(CommandLine):
     >>> reconall_subfields.inputs.hippocampal_subfields_T1 = False
     >>> reconall_subfields.cmdline
     'recon-all -all -i structural.nii -hippocampal-subfields-T2 structural.nii test -subjid foo -sd .'
+
+    Base template creation for longitudinal pipeline:
+    >>> baserecon = ReconAll()
+    >>> baserecon.inputs.base_template_id = 'sub-template'
+    >>> baserecon.inputs.base_timepoint_ids = ['ses-1','ses-2']
+    >>> baserecon.inputs.directive = 'all'
+    >>> baserecon.inputs.subjects_dir = '.'
+    >>> baserecon.cmdline
+    'recon-all -all -base sub-template -base-tp ses-1 -base-tp ses-2 -sd .'
+
+    Longitudinal timepoint run:
+    >>> longrecon = ReconAll()
+    >>> longrecon.inputs.longitudinal_timepoint_id = 'ses-1'
+    >>> longrecon.inputs.longitudinal_template_id = 'sub-template'
+    >>> longrecon.inputs.directive = 'all'
+    >>> longrecon.inputs.subjects_dir = '.'
+    >>> longrecon.cmdline
+    'recon-all -all -long ses-1 sub-template -sd .'
     """
 
     _cmd = "recon-all"
@@ -1523,12 +1584,35 @@ class ReconAll(CommandLine):
 
         outputs = self._outputs().get()
 
-        outputs.update(
-            FreeSurferSource(
-                subject_id=self.inputs.subject_id, subjects_dir=subjects_dir, hemi=hemi
-            )._list_outputs()
-        )
-        outputs["subject_id"] = self.inputs.subject_id
+        # If using longitudinal pipeline, update subject id accordingly,
+        # otherwise use original/default subject_id
+        if isdefined(self.inputs.base_template_id):
+            outputs.update(
+                FreeSurferSource(
+                    subject_id=self.inputs.base_template_id,
+                    subjects_dir=subjects_dir,
+                    hemi=hemi,
+                )._list_outputs()
+            )
+            outputs["subject_id"] = self.inputs.base_template_id
+        elif isdefined(self.inputs.longitudinal_timepoint_id):
+            subject_id = f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}"
+            outputs.update(
+                FreeSurferSource(
+                    subject_id=subject_id, subjects_dir=subjects_dir, hemi=hemi
+                )._list_outputs()
+            )
+            outputs["subject_id"] = subject_id
+        else:
+            outputs.update(
+                FreeSurferSource(
+                    subject_id=self.inputs.subject_id,
+                    subjects_dir=subjects_dir,
+                    hemi=hemi,
+                )._list_outputs()
+            )
+            outputs["subject_id"] = self.inputs.subject_id
+
         outputs["subjects_dir"] = subjects_dir
         return outputs
 
@@ -1536,8 +1620,26 @@ class ReconAll(CommandLine):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
-        if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id, "mri")):
-            return True
+
+        # Check for longitudinal pipeline
+        if not isdefined(self.inputs.subject_id):
+            if isdefined(self.inputs.base_template_id):
+                if os.path.isdir(
+                    os.path.join(subjects_dir, self.inputs.base_template_id, "mri")
+                ):
+                    return True
+            elif isdefined(self.inputs.longitudinal_template_id):
+                if os.path.isdir(
+                    os.path.join(
+                        subjects_dir,
+                        f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}",
+                        "mri",
+                    )
+                ):
+                    return True
+        else:
+            if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id, "mri")):
+                return True
         return False
 
     def _format_arg(self, name, trait_spec, value):

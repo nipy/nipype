@@ -8,23 +8,35 @@ def test_ReconAll_inputs():
             argstr="-FLAIR %s",
             extensions=None,
             min_ver="5.3.0",
+            requires=["subject_id"],
         ),
         T1_files=dict(
             argstr="-i %s...",
+            requires=["subject_id"],
         ),
         T2_file=dict(
             argstr="-T2 %s",
             extensions=None,
             min_ver="5.3.0",
+            requires=["subject_id"],
         ),
         args=dict(
             argstr="%s",
+        ),
+        base_template_id=dict(
+            argstr="-base %s",
+            requires=["base_timepoint_ids"],
+            xor=["subject_id", "longitudinal_timepoint_id"],
+        ),
+        base_timepoint_ids=dict(
+            argstr="-base-tp %s...",
         ),
         big_ventricles=dict(
             argstr="-bigventricles",
         ),
         brainstem=dict(
             argstr="-brainstem-structures",
+            requires=["subject_id"],
         ),
         directive=dict(
             argstr="-%s",
@@ -44,21 +56,35 @@ def test_ReconAll_inputs():
         ),
         hemi=dict(
             argstr="-hemi %s",
+            requires=["subject_id"],
         ),
         hippocampal_subfields_T1=dict(
             argstr="-hippocampal-subfields-T1",
             min_ver="6.0.0",
+            requires=["subject_id"],
         ),
         hippocampal_subfields_T2=dict(
             argstr="-hippocampal-subfields-T2 %s %s",
             min_ver="6.0.0",
+            requires=["subject_id"],
         ),
         hires=dict(
             argstr="-hires",
             min_ver="6.0.0",
         ),
+        longitudinal_template_id=dict(
+            argstr="%s",
+            position=2,
+        ),
+        longitudinal_timepoint_id=dict(
+            argstr="-long %s",
+            position=1,
+            requires=["longitudinal_template_id"],
+            xor=["subject_id", "base_template_id"],
+        ),
         mprage=dict(
             argstr="-mprage",
+            requires=["subject_id"],
         ),
         mri_aparc2aseg=dict(
             xor=["expert"],
@@ -143,7 +169,7 @@ def test_ReconAll_inputs():
         ),
         subject_id=dict(
             argstr="-subjid %s",
-            usedefault=True,
+            xor=["base_template_id", "longitudinal_timepoint_id"],
         ),
         subjects_dir=dict(
             argstr="-sd %s",
