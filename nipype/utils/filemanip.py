@@ -28,30 +28,8 @@ fmlogger = logging.getLogger("nipype.utils")
 related_filetype_sets = [(".hdr", ".img", ".mat"), (".nii", ".mat"), (".BRIK", ".HEAD")]
 
 
-def _resolve_with_filenotfound(path, **kwargs):
-    """Raise FileNotFoundError instead of OSError"""
-    try:
-        return path.resolve(**kwargs)
-    except OSError as e:
-        if isinstance(e, FileNotFoundError):
-            raise
-        raise FileNotFoundError(str(path))
-
-
-def path_resolve(path, strict=False):
-    try:
-        return _resolve_with_filenotfound(path, strict=strict)
-    except TypeError:  # PY35
-        pass
-
-    path = path.absolute()
-    if strict or path.exists():
-        return _resolve_with_filenotfound(path)
-
-    # This is a hacky shortcut, using path.absolute() unmodified
-    # In cases where the existing part of the path contains a
-    # symlink, different results will be produced
-    return path
+# Previously a patch, not worth deprecating
+path_resolve = Path.resolve
 
 
 def split_filename(fname):
