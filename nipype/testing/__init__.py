@@ -16,10 +16,7 @@ anatfile = os.path.join(basedir, "data", "structural.nii")
 template = funcfile
 transfm = funcfile
 
-from . import decorators
 from .utils import package_check, TempFATFS
-
-skipif = decorators.dec.skipif
 
 
 def example_data(infile="functional.nii"):
