@@ -1678,7 +1678,7 @@ class FSSourceOutputSpec(TraitedSpec):
         File(exists=True), desc="Inflated surface meshes", loc="surf"
     )
     pial = OutputMultiPath(
-        File(exists=True), desc="Gray matter/pia mater surface meshes", loc="surf"
+        File(exists=True), desc="Gray matter/pia matter surface meshes", loc="surf"
     )
     area_pial = OutputMultiPath(
         File(exists=True),

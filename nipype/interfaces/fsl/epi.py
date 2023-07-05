@@ -851,12 +851,6 @@ class EddyOutputSpec(TraitedSpec):
         "between the different shells as estimated by a "
         "post-hoc mutual information based registration",
     )
-    out_shell_pe_translation_parameters = File(
-        exists=True,
-        desc="Text file containing translation along the PE-direction "
-        "between the different shells as estimated by a "
-        "post-hoc mutual information based registration",
-    )
     out_outlier_map = File(
         exists=True,
         desc="Matrix where rows represent volumes and columns represent "

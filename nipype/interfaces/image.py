@@ -4,7 +4,8 @@
 
 from ..utils.filemanip import fname_presuffix
 from .base import SimpleInterface, TraitedSpec, BaseInterfaceInputSpec, traits, File
-from .. import LooseVersion
+
+from looseversion import LooseVersion
 
 
 class RescaleInputSpec(BaseInterfaceInputSpec):

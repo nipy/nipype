@@ -542,8 +542,8 @@ class NetworkXMetrics(BaseInterface):
             "Saving extra measure file to %s in Pickle format",
             op.abspath(out_pickled_extra_measures),
         )
-        with open(out_pickled_extra_measures, "w") as fo:
-            pickle.dump(dict_measures, fo)
+        with open(out_pickled_extra_measures, "w") as f:
+            pickle.dump(dict_measures, f)
 
         iflogger.info("Saving MATLAB measures as %s", matlab)
 

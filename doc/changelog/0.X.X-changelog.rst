@@ -15,7 +15,7 @@
 * ENH: Generate Dockerfiles with neurodocker (https://github.com/nipy/nipype/pull/2202)
 * ENH: FLAIR options for recon-all (https://github.com/nipy/nipype/pull/2279)
 * ENH: Config option for setting maxtasksperchild when multiprocessing (https://github.com/nipy/nipype/pull/2284)
-* FIX: Testing maintainance and improvements (https://github.com/nipy/nipype/pull/2252)
+* FIX: Testing maintenance and improvements (https://github.com/nipy/nipype/pull/2252)
 * ENH: Add elapsed_time and final metric_value to ants.Registration (https://github.com/nipy/nipype/pull/1985)
 * ENH: Improve terminal_output feature (https://github.com/nipy/nipype/pull/2209)
 * ENH: Simple interface to FSL std2imgcoords (https://github.com/nipy/nipype/pull/2209, prev #1398)
@@ -39,7 +39,7 @@
 * ENH: Add cosine-basis high-pass-filter to CompCor, allow skip of initial volumes (https://github.com/nipy/nipype/pull/2107, https://github.com/nipy/nipype/pull/#2122)
 * FIX: Catch more dcm2niix DTI conversions (https://github.com/nipy/nipype/pull/2110)
 * FIX: Retrieve aseg + wmparc stats properly (https://github.com/nipy/nipype/pull/2117)
-* ENH: ANTs MeasureImageSimilarity Inteface (https://github.com/nipy/nipype/pull/2128)
+* ENH: ANTs MeasureImageSimilarity Interface (https://github.com/nipy/nipype/pull/2128)
 * FIX: CompCor filter_basis of correct size, pre-filter column headers (https://github.com/nipy/nipype/pull/2136, https://github.com/nipy/nipype/pull/2138)
 * ENH: FreeSurfer lta_convert and mri_coreg interfaces (https://github.com/nipy/nipype/pull/2140, https://github.com/nipy/nipype/pull/2172)
 * ENH: Speed up S3DataGrabber (https://github.com/nipy/nipype/pull/2143)
@@ -311,16 +311,16 @@ Release 0.11.0 (September 15, 2015)
 Release 0.10.0 (October 10, 2014)
 =================================
 
-* ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
+* ENH: New miscellaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
        to enable parallel processing of very large images.
 * ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still
        available with the version suffix: BEDPOSTX4 and XFibres4. Added gpu
        versions of BEDPOSTX: BEDPOSTXGPU, BEDPOSTX5GPU, and BEDPOSTX4GPU
-* ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins
+* ENH: Added experimental support for MIPAV algorithms through JIST plugins
 * ENH: New dipy interfaces: Denoise, Resample
 * ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format), MRIPretess
 * ENH: New FSL interfaces: WarpPoints, WarpPointsToStd, EpiReg, ProbTrackX2, WarpUtils, ConvertWarp
-* ENH: New miscelaneous interfaces: AddCSVRow, NormalizeProbabilityMapSet, AddNoise
+* ENH: New miscellaneous interfaces: AddCSVRow, NormalizeProbabilityMapSet, AddNoise
 * ENH: New AFNI interfaces:  Eval, Means, SVMTest, SVMTrain
 * ENH: FUGUE interface has been refactored to use the name_template system, 3 examples
        added to doctests, some bugs solved.
@@ -510,7 +510,7 @@ Release 0.5 (Mar 10, 2012)
 * API: By default inputs are removed from Node working directory
 * API: InterfaceResult class is now versioned and stores class type not instance
 * API: Added FIRST interface
-* API: Added max_jobs paramter to plugin_args. limits the number of jobs
+* API: Added max_jobs parameter to plugin_args. limits the number of jobs
        executing at any given point in time
 * API: crashdump_dir is now a config execution option
 * API: new config execution options for controlling hash checking, execution and

@@ -4,11 +4,11 @@
 import os
 
 import pytest
-from nipype.testing.fixtures import create_files_in_directory
+from looseversion import LooseVersion
 
+from nipype.testing.fixtures import create_files_in_directory
 from nipype.interfaces import freesurfer
 from nipype.interfaces.freesurfer import Info
-from nipype import LooseVersion
 
 
 @pytest.mark.skipif(freesurfer.no_freesurfer(), reason="freesurfer is not installed")
