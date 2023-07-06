@@ -30,7 +30,7 @@ class Stream:
         self._buf = ""
         self._rows = []
         self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1] or "UTF-8"
+        self.default_encoding = locale.getpreferredencoding(do_setlocale=False)
 
     def fileno(self):
         "Pass-through for file descriptor."

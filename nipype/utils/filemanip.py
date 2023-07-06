@@ -670,7 +670,7 @@ def read_stream(stream, logger=None, encoding=None):
 
 
     """
-    default_encoding = encoding or locale.getdefaultlocale()[1] or "UTF-8"
+    default_encoding = encoding or locale.getpreferredencoding(do_setlocale=False)
     logger = logger or fmlogger
     try:
         out = stream.decode(default_encoding)
