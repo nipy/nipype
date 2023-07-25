@@ -446,8 +446,7 @@ class Dcm2niix(CommandLine):
         return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
-        # may use return code 1 despite conversion
-        runtime = super()._run_interface(runtime, correct_return_codes=(0, 1))
+        runtime = super()._run_interface(runtime)
         self._parse_files(self._parse_stdout(runtime.stdout))
         return runtime
 
