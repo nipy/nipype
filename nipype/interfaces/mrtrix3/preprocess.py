@@ -406,7 +406,7 @@ class DWIPreproc(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
-        if self.inputs.export_grad_mrtrix:
+        if self.inputs.out_grad_mrtrix:
             outputs["out_grad_mrtrix"] = op.abspath(self.inputs.out_grad_mrtrix)
         if self.inputs.export_grad_fsl:
             outputs["out_fsl_bvec"] = op.abspath(self.inputs.out_grad_fsl[0])
