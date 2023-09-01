@@ -1290,6 +1290,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
         field="subj.vol",
         desc=("file to estimate normalization parameters with"),
         xor=["deformation_file"],
+        mandatory=True,
         copyfile=True,
     )
     apply_to_files = InputMultiPath(
@@ -1302,6 +1303,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
     )
     deformation_file = ImageFileSPM(
         field="subj.def",
+        mandatory=True,
         xor=["image_to_align", "tpm"],
         copyfile=False,
         desc=(
