@@ -1485,13 +1485,7 @@ class Normalize12(SPMCommand):
                 outputs["deformation_field"].append(fname_presuffix(imgf, prefix="y_"))
             outputs["deformation_field"] = simplify_list(outputs["deformation_field"])
 
-        if self.inputs.jobtype == "estimate":
-            if isdefined(self.inputs.apply_to_files):
-                outputs["normalized_files"] = self.inputs.apply_to_files
-            outputs["normalized_image"] = fname_presuffix(
-                self.inputs.image_to_align, prefix="w"
-            )
-        elif "write" in self.inputs.jobtype:
+        if "write" in self.inputs.jobtype:
             outputs["normalized_files"] = []
             if isdefined(self.inputs.apply_to_files):
                 filelist = ensure_list(self.inputs.apply_to_files)
