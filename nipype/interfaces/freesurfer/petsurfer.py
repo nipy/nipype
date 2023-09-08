@@ -633,7 +633,7 @@ class MRTM2(GLMFit):
     input_spec = MRTM2InputSpec
 
 
-class LoganRefInputSpec(GLMFitInputSpec):
+class LoganInputSpec(GLMFitInputSpec):
     logan = traits.Tuple(
         File(exists=True),
         File(exists=True),
@@ -644,11 +644,11 @@ class LoganRefInputSpec(GLMFitInputSpec):
     )
 
 
-class LoganRef(GLMFit):
-    """Perform Logan reference kinetic modeling.
+class Logan(GLMFit):
+    """Perform Logan kinetic modeling.
     Examples
     --------
-    >>> logan = LoganRef()
+    >>> logan = Logan()
     >>> logan.inputs.in_file = 'tac.nii'
     >>> logan.inputs.logan = ('ref_tac.dat', 'timing.dat', 2600)
     >>> logan.inputs.glm_dir = 'logan'
@@ -656,4 +656,4 @@ class LoganRef(GLMFit):
     'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
     """
 
-    input_spec = LoganRefInputSpec
+    input_spec = LoganInputSpec
