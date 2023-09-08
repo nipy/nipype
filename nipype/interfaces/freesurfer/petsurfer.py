@@ -475,7 +475,7 @@ class GTMPVCOutputSpec(TraitedSpec):
     )
 
 class GTMPVC(FSCommand):
-    """create an anatomical segmentation for the geometric transfer matrix (GTM).
+    """Perform Partial Volume Correction (PVC) to PET Data.
 
     Examples
     --------
