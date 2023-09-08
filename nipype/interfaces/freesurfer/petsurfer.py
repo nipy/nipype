@@ -458,7 +458,21 @@ class GTMPVCOutputSpec(TraitedSpec):
     yhat_with_noise = File(
         desc="4D PET file with full FOV of signal estimate (yhat) with noise after PVC (smoothed with PSF)",
     )
-
+    eres = File(
+        desc="4D PET file of residual error after PVC (smoothed with PSF)",
+        )
+    tissue_fraction = File(
+        desc="4D PET file of tissue fraction before PVC",
+    )
+    tissue_fraction_psf = File(
+        desc="4D PET file of tissue fraction after PVC (smoothed with PSF)",
+    )
+    seg = File(
+        desc="Segmentation file of regions used for PVC",
+    )
+    seg_ctab = File(
+        desc="Color table file for segmentation file",
+    )
 
 class GTMPVC(FSCommand):
     """create an anatomical segmentation for the geometric transfer matrix (GTM).
@@ -536,6 +550,11 @@ class GTMPVC(FSCommand):
         outputs["gtm_stats"] = os.path.join(pvcdir, "gtm.stats.dat")
         outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux", "bbpet2anat.lta")
         outputs["reg_anat2pet"] = os.path.join(pvcdir, "aux", "anat2bbpet.lta")
+        outputs["eres"] = os.path.join(pvcdir, "eres.nii.gz")
+        outputs["tissue_fraction"] = os.path.join(pvcdir, "aux", "tissue.fraction.nii.gz")
+        outputs["tissue_fraction_psf"] = os.path.join(pvcdir, "aux", "tissue.fraction.psf.nii.gz")
+        outputs["seg"] = os.path.join(pvcdir, "aux", "seg.nii.gz")
+        outputs["seg_ctab"] = os.path.join(pvcdir, "aux", "seg.ctab")
 
         # Assign the conditional outputs
         if self.inputs.save_input:
