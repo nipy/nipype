@@ -581,7 +581,7 @@ class GTMPVC(FSCommand):
         return outputs
 
 
-class MRTMInputSpec(GLMFitInputSpec):
+class MRTM1InputSpec(GLMFitInputSpec):
     mrtm1 = traits.Tuple(
         File(exists=True),
         File(exists=True),
@@ -591,12 +591,12 @@ class MRTMInputSpec(GLMFitInputSpec):
     )
 
 
-class MRTM(GLMFit):
+class MRTM1(GLMFit):
     """Perform MRTM1 kinetic modeling.
 
     Examples
     --------
-    >>> mrtm = MRTM()
+    >>> mrtm = MRTM1()
     >>> mrtm.inputs.in_file = 'tac.nii'
     >>> mrtm.inputs.mrtm1 = ('ref_tac.dat', 'timing.dat')
     >>> mrtm.inputs.glm_dir = 'mrtm'
@@ -604,7 +604,7 @@ class MRTM(GLMFit):
     'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
     """
 
-    input_spec = MRTMInputSpec
+    input_spec = MRTM1InputSpec
 
 
 class MRTM2InputSpec(GLMFitInputSpec):
