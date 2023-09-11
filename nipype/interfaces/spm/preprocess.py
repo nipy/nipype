@@ -1491,13 +1491,16 @@ class Normalize12(SPMCommand):
                 filelist = ensure_list(self.inputs.apply_to_files)
                 for f in filelist:
                     if isinstance(f, list):
-                        run = [fname_presuffix(in_f, prefix="w") for in_f in f]
+                        run = [
+                            fname_presuffix(in_f, prefix=self.inputs.out_prefix)
+                            for in_f in f
+                        ]
                     else:
-                        run = [fname_presuffix(f, prefix="w")]
+                        run = [fname_presuffix(f, prefix=self.inputs.out_prefix)]
                     outputs["normalized_files"].extend(run)
             if isdefined(self.inputs.image_to_align):
                 outputs["normalized_image"] = fname_presuffix(
-                    self.inputs.image_to_align, prefix="w"
+                    self.inputs.image_to_align, prefix=self.inputs.out_prefix
                 )
 
         return outputs
