@@ -80,7 +80,7 @@ jobs:
       - name: Install test extras
         run: pip install nipype[tests]
       - name: Run tests
-        run: pytest --doctest-modules -v --pyargs nipype
+        run: TMPDIR=$(mktemp -t -d 't m p.XXXXXXXXXX') pytest --doctest-modules -v --pyargs nipype
 
   stable:
     # Check each OS, all supported Python, minimum versions and latest releases
