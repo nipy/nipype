@@ -621,7 +621,7 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
         copyfile=False,
     )
     polort = traits.Int(
-        desc="Remove polynomical trend of order m or -1 for no detrending",
+        desc="Remove polynomial trend of order m or -1 for no detrending",
         argstr="-polort %d",
     )
     eta2 = traits.Bool(desc="eta^2 similarity", argstr="-eta2")
@@ -2774,7 +2774,7 @@ class TCorrelateInputSpec(AFNICommandInputSpec):
         desc="Correlation is the normal Pearson correlation coefficient",
         argstr="-pearson",
     )
-    polort = traits.Int(desc="Remove polynomical trend of order m", argstr="-polort %d")
+    polort = traits.Int(desc="Remove polynomial trend of order m", argstr="-polort %d")
 
 
 class TCorrelate(AFNICommand):

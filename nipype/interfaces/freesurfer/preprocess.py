@@ -2688,7 +2688,7 @@ class MNIBiasCorrectionOutputSpec(TraitedSpec):
 
 
 class MNIBiasCorrection(FSCommand):
-    """Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI)
+    """Wrapper for nu_correct, a program from the Montreal Neurological Institute (MNI)
     used for correcting intensity non-uniformity (ie, bias fields). You must have the
     MNI software installed on your system to run this. See [www.bic.mni.mcgill.ca/software/N3]
     for more info.
@@ -3292,7 +3292,7 @@ class SegmentCCInputSpec(FSTraitedSpec):
 
 
 class SegmentCCOutputSpec(TraitedSpec):
-    out_file = File(exists=False, desc="Output segmentation uncluding corpus collosum")
+    out_file = File(exists=False, desc="Output segmentation including corpus collosum")
     out_rotation = File(exists=False, desc="Output lta rotation file")
 
 

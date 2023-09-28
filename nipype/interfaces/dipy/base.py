@@ -188,7 +188,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     cls_name: string
         new class name
     dipy_flow: Workflow class type.
-        It should be any children class of `dipy.workflows.workflow.Worflow`
+        It should be any children class of `dipy.workflows.workflow.Workflow`
     BaseClass: object
         nipype instance object
 

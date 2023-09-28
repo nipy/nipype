@@ -63,23 +63,23 @@ class BRAINSFitInputSpec(CommandLineInputSpec):
         argstr="--initializeTransformMode %s",
     )
     useRigid = traits.Bool(
-        desc="Perform a rigid registration as part of the sequential registration steps.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="Perform a rigid registration as part of the sequential registration steps.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useRigid ",
     )
     useScaleVersor3D = traits.Bool(
-        desc="Perform a ScaleVersor3D registration as part of the sequential registration steps.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="Perform a ScaleVersor3D registration as part of the sequential registration steps.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useScaleVersor3D ",
     )
     useScaleSkewVersor3D = traits.Bool(
-        desc="Perform a ScaleSkewVersor3D registration as part of the sequential registration steps.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="Perform a ScaleSkewVersor3D registration as part of the sequential registration steps.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useScaleSkewVersor3D ",
     )
     useAffine = traits.Bool(
-        desc="Perform an Affine registration as part of the sequential registration steps.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="Perform an Affine registration as part of the sequential registration steps.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useAffine ",
     )
     useBSpline = traits.Bool(
-        desc="Perform a BSpline registration as part of the sequential registration steps.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="Perform a BSpline registration as part of the sequential registration steps.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useBSpline ",
     )
     numberOfSamples = traits.Int(
