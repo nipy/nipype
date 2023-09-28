@@ -57,7 +57,7 @@ class HistogramMatchingFilterInputSpec(CommandLineInputSpec):
         argstr="--histogramAlgorithm %s",
     )
     verbose = traits.Bool(
-        desc=" verbose mode running for debbuging", argstr="--verbose "
+        desc=" verbose mode running for debugging", argstr="--verbose "
     )
 
 

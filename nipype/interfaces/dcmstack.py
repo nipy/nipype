@@ -100,7 +100,7 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     )
     embed_meta = traits.Bool(desc="Embed DICOM meta data into result")
     exclude_regexes = traits.List(
-        desc="Meta data to exclude, suplementing any default exclude filters"
+        desc="Meta data to exclude, supplementing any default exclude filters"
     )
     include_regexes = traits.List(
         desc="Meta data to include, overriding any exclude filters"

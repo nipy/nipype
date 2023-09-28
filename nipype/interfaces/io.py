@@ -163,7 +163,7 @@ class IOBase(BaseInterface):
 # Class to track percentage of S3 file upload
 class ProgressPercentage:
     """
-    Callable class instsance (via __call__ method) that displays
+    Callable class instance (via __call__ method) that displays
     upload percentage of a file to S3
     """
 

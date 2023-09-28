@@ -141,7 +141,7 @@ class QstatSubstitute:
     def add_startup_job(self, taskid, qsub_command_line):
         """
         :param taskid: The job id
-        :param qsub_command_line: When initializing, re-use the job_queue_name
+        :param qsub_command_line: When initializing, reuse the job_queue_name
         :return: NONE
         """
         taskid = int(taskid)  # Ensure that it is an integer

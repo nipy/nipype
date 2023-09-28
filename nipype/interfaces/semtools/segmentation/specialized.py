@@ -587,7 +587,7 @@ class BinaryMaskEditorBasedOnLandmarksInputSpec(CommandLineInputSpec):
     )
     setCutDirectionForObliquePlane = InputMultiPath(
         traits.Str,
-        desc="If this is true, the mask will be thresholded out to the direction of inferior, posterior,  and/or left. Default behavrior is that cutting out to the direction of superior, anterior and/or right. ",
+        desc="If this is true, the mask will be thresholded out to the direction of inferior, posterior,  and/or left. Default behavior is that cutting out to the direction of superior, anterior and/or right. ",
         sep=",",
         argstr="--setCutDirectionForObliquePlane %s",
     )

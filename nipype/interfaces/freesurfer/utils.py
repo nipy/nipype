@@ -1906,7 +1906,7 @@ class Tkregister2InputSpec(FSTraitedSpec):
         desc="freesurfer-style registration file",
     )
     reg_header = traits.Bool(
-        False, argstr="--regheader", desc="compute regstration from headers"
+        False, argstr="--regheader", desc="compute registration from headers"
     )
     fstal = traits.Bool(
         False,

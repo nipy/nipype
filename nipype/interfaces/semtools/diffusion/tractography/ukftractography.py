@@ -55,7 +55,7 @@ class UKFTractographyInputSpec(CommandLineInputSpec):
         "1", "2", desc="Number of tensors used", argstr="--numTensor %s"
     )
     freeWater = traits.Bool(
-        desc="Adds a term for free water difusion to the model. (Note for experts: if checked, the 1T simple model is forced) ",
+        desc="Adds a term for free water diffusion to the model. (Note for experts: if checked, the 1T simple model is forced) ",
         argstr="--freeWater ",
     )
     recordFA = traits.Bool(

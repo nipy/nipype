@@ -41,7 +41,7 @@ The current list of issue labels are [here][link_labels] and include:
 * [![Orphaned](https://img.shields.io/badge/-orphaned-9baddd.svg)][link_orphaned] *These pull requests have been closed for inactivity.*
 
     Before proposing a new pull request, browse through the "orphaned" pull requests.
-    You may find that someone has already made significant progress toward your goal, and you can re-use their
+    You may find that someone has already made significant progress toward your goal, and you can reuse their
     unfinished work.
     An adopted PR should be updated to merge or rebase the current master, and a new PR should be created (see
     below) that references the original PR.

@@ -1194,15 +1194,15 @@ class gtractCoRegAnatomyInputSpec(CommandLineInputSpec):
         argstr="--samplingPercentage %f",
     )
     useMomentsAlign = traits.Bool(
-        desc="MomentsAlign assumes that the center of mass of the images represent similar structures.  Perform a MomentsAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either CenterOfHeadLAlign, GeometryAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="MomentsAlign assumes that the center of mass of the images represent similar structures.  Perform a MomentsAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either CenterOfHeadLAlign, GeometryAlign, or initialTransform file.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useMomentsAlign ",
     )
     useGeometryAlign = traits.Bool(
-        desc="GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures. Perform a GeometryCenterAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, CenterOfHeadAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="GeometryAlign on assumes that the center of the voxel lattice of the images represent similar structures. Perform a GeometryCenterAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, CenterOfHeadAlign, or initialTransform file.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useGeometryAlign ",
     )
     useCenterOfHeadAlign = traits.Bool(
-        desc="CenterOfHeadAlign attempts to find a hemisphere full of foreground voxels from the superior direction as an estimate of where the center of a head shape would be to drive a center of mass estimate.  Perform a CenterOfHeadAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, GeometryAlign, or initialTransform file.  This family of options superceeds the use of transformType if any of them are set.",
+        desc="CenterOfHeadAlign attempts to find a hemisphere full of foreground voxels from the superior direction as an estimate of where the center of a head shape would be to drive a center of mass estimate.  Perform a CenterOfHeadAlign registration as part of the sequential registration steps.   This option MUST come first, and CAN NOT be used with either MomentsAlign, GeometryAlign, or initialTransform file.  This family of options supersedes the use of transformType if any of them are set.",
         argstr="--useCenterOfHeadAlign ",
     )
     numberOfThreads = traits.Int(
@@ -1370,7 +1370,7 @@ class gtractCostFastMarchingInputSpec(CommandLineInputSpec):
         argstr="--anisotropyWeight %f",
     )
     stoppingValue = traits.Float(
-        desc="Terminiating value for vcl_cost function estimation",
+        desc="Terminating value for vcl_cost function estimation",
         argstr="--stoppingValue %f",
     )
     seedThreshold = traits.Float(
