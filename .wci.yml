@@ -1,0 +1,32 @@
+# Project available at https://github.com/nipy/nipype
+
+name: nipype
+
+headline: Neuroimaging in Python pipelines and interfaces package.
+
+description: Algorithms,Image manipulation,I/O Operations,Self-reporting interfaces,Utilities
+
+language: Python3
+
+documentation:
+  general: https://nipype.readthedocs.io/en/latest/
+  installation: https://nipype.readthedocs.io/en/latest/users/install.html
+  tutorial: https://miykael.github.io/nipype_tutorial/
+
+# Set the OS, Python version and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.10"
+
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  configuration: doc/conf.py
+
+execution_environment: 
+  interfaces:
+  - docker
+  - conda
+  - pypi
+
+
