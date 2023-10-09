@@ -485,6 +485,11 @@ class Dcm2niix(CommandLine):
                     mvecs.append(fl)
                 elif fl.endswith(".json") or fl.endswith(".txt"):
                     bids.append(fl)
+
+        # in siemens mosaic conversion nipype misread dcm2niix output and generate a duplicate list of results
+        # next line remove duplicates from output files array
+        outfiles = [*set(outfiles)]
+
         self.output_files = outfiles
         self.bvecs = bvecs
         self.mvecs = mvecs
