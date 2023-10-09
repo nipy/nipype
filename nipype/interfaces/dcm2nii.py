@@ -469,7 +469,7 @@ class Dcm2niix(CommandLine):
 
         for filename in filenames:
             # search for relevant files, and sort accordingly
-            for fl in search_files(filename, outtypes):
+            for fl in search_files(filename, outtypes, self.inputs.crop):
                 if (
                     fl.endswith(".nii")
                     or fl.endswith(".gz")
@@ -502,7 +502,13 @@ class Dcm2niix(CommandLine):
 
 
 # https://stackoverflow.com/a/4829130
-def search_files(prefix, outtypes):
-    return it.chain.from_iterable(
+def search_files(prefix, outtypes, search_crop):
+    found = it.chain.from_iterable(
         iglob(glob.escape(prefix + outtype)) for outtype in outtypes
     )
+    if search_crop:
+        found = it.chain(
+            it.chain.from_iterable(iglob(glob.escape(prefix) + "_Crop_*" + outtype) for outtype in outtypes),
+            found
+        )
+    return found
