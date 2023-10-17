@@ -1243,7 +1243,5 @@ class MaskFilter(CommandLine):
         
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs = self.output_spec().get()
-        inputs = self.input_spec().get()
-        outputs["output_image"] = self._gen_filename(inputs["input_image"], suffix="_filtered")
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
