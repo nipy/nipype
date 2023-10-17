@@ -1221,6 +1221,7 @@ class MaskFilter(CommandLine):
     """
     Perform filtering operations on 3D / 4D mask images. 
     Only supports dilate / erode filters at the moment.
+    For more information see: https://mrtrix.readthedocs.io/en/latest/reference/commands/maskfilter.html
     
 
     Example
