@@ -30,4 +30,5 @@ from .utils import (
     SHConv,
     TensorMetrics,
     TransformFSLConvert,
+    MaskFilter,
 )
