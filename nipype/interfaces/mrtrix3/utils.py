@@ -1205,7 +1205,7 @@ class MaskFilterInputSpec(CommandLineInputSpec):
         name_source=["input_image"],
         mandatory=True,
         argstr="%s",
-        position=-1
+        position=-1,
         desc="Output mask"
     )
     npass = traits.Int(
