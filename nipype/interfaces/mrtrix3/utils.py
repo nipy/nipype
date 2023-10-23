@@ -1250,6 +1250,7 @@ class MaskFilter(CommandLine):
 class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
     fod_wm = File(
         argstr="%s",
+        exists=True,
         mandatory=False,
         position=1,
         desc="input fod of white matter tissue compartment"
@@ -1262,6 +1263,7 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
     )
     fod_gm = File(
         argstr="%s",
+        exists=True,
         mandatory=False,
         position=3,
         desc="input fod of grey matter tissue compartment"
@@ -1272,8 +1274,9 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
         position=4,
         desc="output file of grey matter tissue compartment"
     )
-    fod_tissue_csf = File(
+    fod_csf = File(
         argstr="%s",
+        exists=True,
         mandatory=False,
         position=5,
         desc="input fod of CSF tissue compartment"
@@ -1283,6 +1286,12 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
         mandatory=False,
         position=6,
         desc="output file of CSF tissue compartment 3"
+    )
+    mask = File(
+        argstr="-mask %s",
+        exists=True,
+        position=0,
+        desc="input brain mask"
     )
 
 class MTNormaliseOutputSpec(TraitedSpec):
@@ -1307,8 +1316,9 @@ class MTNormalise(CommandLine):
     >>> mtn.inputs.out_file_wm = 'wmfod_norm.mif'
     >>> mtn.inputs.out_file_gm = 'gmfod_norm.mif'
     >>> mtn.inputs.out_file_csf = 'csffod_norm.mif'
+    >>> mtn.inputs.mask = 'mask.mif'
     >>> mtn.cmdline                      
-    'mtnormalise wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif'
+    'mtnormalise -mask mask.mif wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif'
     >>> mtn.run()                                 
     """
 
