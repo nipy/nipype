@@ -1248,7 +1248,7 @@ class MaskFilter(CommandLine):
         return outputs
     
 class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
-    fod_wm = File(
+    wm_fod = File(
         argstr="%s",
         exists=True,
         mandatory=False,
@@ -1261,7 +1261,7 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
         position=2,
         desc="output file of white matter tissue compartment"
     )
-    fod_gm = File(
+    gm_fod = File(
         argstr="%s",
         exists=True,
         mandatory=False,
@@ -1274,7 +1274,7 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
         position=4,
         desc="output file of grey matter tissue compartment"
     )
-    fod_csf = File(
+    csf_fod = File(
         argstr="%s",
         exists=True,
         mandatory=False,
