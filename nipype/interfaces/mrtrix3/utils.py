@@ -1246,3 +1246,72 @@ class MaskFilter(CommandLine):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
+    
+class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
+    fod_wm = File(
+        argstr="%s",
+        mandatory=False,
+        position=1,
+        desc="input fod of white matter tissue compartment"
+    )
+    out_file_wm = File(
+        argstr="%s",
+        mandatory=False,
+        position=2,
+        desc="output file of white matter tissue compartment"
+    )
+    fod_gm = File(
+        argstr="%s",
+        mandatory=False,
+        position=3,
+        desc="input fod of grey matter tissue compartment"
+    )
+    out_file_gm = File(
+        argstr="%s",
+        mandatory=False,
+        position=4,
+        desc="output file of grey matter tissue compartment"
+    )
+    fod_tissue_csf = File(
+        argstr="%s",
+        mandatory=False,
+        position=5,
+        desc="input fod of CSF tissue compartment"
+    )
+    out_file_csf = File(
+        argstr="%s",
+        mandatory=False,
+        position=6,
+        desc="output file of CSF tissue compartment 3"
+    )
+
+class MTNormaliseOutputSpec(TraitedSpec):
+    out_file_wm = File(exists=True, desc="the normalized white matter fod")
+    out_file_gm = File(exists=True, desc="the normalized grey matter fod")
+    out_file_csf = File(exists=True, desc="the normalized csf fod")
+
+
+class MTNormalise(CommandLine):
+    """
+    Multi-tissue informed log-domain intensity normalisation
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mtn = mrt.MTnormalise()
+    >>> mtn.inputs.fod_wm = 'wmfod.mif'
+    >>> mtn.inputs.fod_gm = 'gmfod.mif'
+    >>> mtn.inputs.fod_csf = 'csffod.mif'
+    >>> mtn.inputs.out_file_wm = 'wmfod_norm.mif'
+    >>> mtn.inputs.out_file_gm = 'gmfod_norm.mif'
+    >>> mtn.inputs.out_file_csf = 'csffod_norm.mif'
+    >>> mtn.cmdline                      
+    'mtnormalise wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif'
+    >>> mtn.run()                                 
+    """
+
+    _cmd = "mtnormalise"
+    input_spec = MTNormaliseInputSpec
+    output_spec = MTNormaliseOutputSpec
