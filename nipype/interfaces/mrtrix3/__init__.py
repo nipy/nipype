@@ -31,4 +31,5 @@ from .utils import (
     TensorMetrics,
     TransformFSLConvert,
     MaskFilter,
+    MTNormalise,
 )
