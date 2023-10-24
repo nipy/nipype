@@ -1329,8 +1329,6 @@ class MTNormalise(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file_wm"] = op.abspath(self.inputs.out_file_wm)
-        if self.inputs.gm_file != Undefined:
-            outputs["out_file_gm"] = op.abspath(self.inputs.out_file_gm)
-        if self.inputs.csf_file != Undefined:
-            outputs["out_file_csf"] = op.abspath(self.inputs.out_file_csf)
+        outputs["out_file_gm"] = op.abspath(self.inputs.out_file_gm)
+        outputs["out_file_csf"] = op.abspath(self.inputs.out_file_csf)
         return outputs
