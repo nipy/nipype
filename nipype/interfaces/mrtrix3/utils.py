@@ -1332,3 +1332,57 @@ class MTNormalise(CommandLine):
         outputs["out_file_gm"] = op.abspath(self.inputs.out_file_gm)
         outputs["out_file_csf"] = op.abspath(self.inputs.out_file_csf)
         return outputs
+    
+
+class Generate5tt2gmwmiInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="the input 5TT segmented anatomical image",
+       )
+    mask_out = File(
+        "mask_gmwmi.mif"
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        desc="the output mask image",
+        )
+    mask_in = File(
+        argstr="-mask_in %s",
+        position=-3,
+        desc="filter an imput mask image according to those voxels that lie upon the grey matter - white matter boundary",
+        )
+
+
+class Generate5tt2gmwmiOutputSpec(TraitedSpec):
+    mask_out = File(exists=True, desc="the output mask file")
+
+
+class Generate5tt2gmwmi(CommandLine):
+    """
+    Generate a mask image appropriate for seeding streamlines on 
+    the grey matter-white matter interface
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> gmwmi = mrt.Generate5TT2GMWMI()
+    >>> gmwmi.inputs.in_file = '5tt_in.mif'
+    >>> gmwmi.inputs.mask_out = 'mask_gmwmi.mif'
+    >>> gmwmi.cmdline                               
+    '5tt2gmwmi 5tt_in.mif mask_gmwmi.mif'
+    >>> gmwmi.run()                             
+    """
+
+    _cmd = "5tt2gmwmi"
+    input_spec = Generate5tt2gmwmiInputSpec
+    output_spec = Generate5tt2gmwmiOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["mask_out"] = op.abspath(self.inputs.mask_out)
+        return outputs
