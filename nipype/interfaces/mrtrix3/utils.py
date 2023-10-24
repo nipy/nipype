@@ -1290,7 +1290,7 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
     mask = File(
         argstr="-mask %s",
         exists=True,
-        position=0,
+        position=-1,
         desc="input brain mask"
     )
 
@@ -1318,10 +1318,19 @@ class MTNormalise(CommandLine):
     >>> mtn.inputs.out_file_csf = 'csffod_norm.mif'
     >>> mtn.inputs.mask = 'mask.mif'
     >>> mtn.cmdline                      
-    'mtnormalise -mask mask.mif wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif'
+    'mtnormalise wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif -mask mask.mif'
     >>> mtn.run()                                 
     """
 
     _cmd = "mtnormalise"
     input_spec = MTNormaliseInputSpec
     output_spec = MTNormaliseOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file_wm"] = op.abspath(self.inputs.out_file_wm)
+        if self.inputs.gm_file != Undefined:
+            outputs["out_file_gm"] = op.abspath(self.inputs.out_file_gm)
+        if self.inputs.csf_file != Undefined:
+            outputs["out_file_csf"] = op.abspath(self.inputs.out_file_csf)
+        return outputs
