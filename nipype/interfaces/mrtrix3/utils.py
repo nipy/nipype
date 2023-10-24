@@ -1343,7 +1343,7 @@ class Generate5tt2gmwmiInputSpec(MRTrix3BaseInputSpec):
         desc="the input 5TT segmented anatomical image",
        )
     mask_out = File(
-        "mask_gmwmi.mif"
+        "mask_gmwmi.mif",
         argstr="%s",
         mandatory=True,
         position=-1,
