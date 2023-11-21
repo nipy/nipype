@@ -18,11 +18,11 @@ def test_ApplyInverseDeformation_inputs():
             xor=["deformation"],
         ),
         in_files=dict(
-            field="fnames",
+            field="out{1}.pull.fnames",
             mandatory=True,
         ),
         interpolation=dict(
-            field="interp",
+            field="out{1}.pull.interp",
         ),
         matlab_cmd=dict(),
         mfile=dict(
