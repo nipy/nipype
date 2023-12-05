@@ -358,6 +358,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         traits.Tuple(
             traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
         ),
+        traits.Tuple(traits.Str()),  # GenericLabel
     )
     transforms = InputMultiObject(
         traits.Either(File(exists=True), "identity"),
