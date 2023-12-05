@@ -349,6 +349,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         "MultiLabel",
         "Gaussian",
         "BSpline",
+        "GenericLabel",
         argstr="%s",
         usedefault=True,
     )
@@ -497,6 +498,7 @@ class ApplyTransforms(ANTSCommand):
                 "BSpline",
                 "MultiLabel",
                 "Gaussian",
+                "GenericLabel",
             ] and isdefined(self.inputs.interpolation_parameters):
                 return "--interpolation {}[ {} ]".format(
                     self.inputs.interpolation,
