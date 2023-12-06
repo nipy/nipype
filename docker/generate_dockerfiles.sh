@@ -52,10 +52,10 @@ do
   esac
 done
 
-# neurodocker version 0.5.0-3-g1788917
-NEURODOCKER_IMAGE="kaczmarj/neurodocker:master@sha256:ac2085702daac716481daae5da055e2062be52075f8f3881672e958e0cd53e6b"
+# neurodocker version 0.7.0
+NEURODOCKER_IMAGE="repronim/neurodocker:0.7.0@sha256:5e93c12b96863ee6af5f15a889f8ead2f729a4e31c31daf31006c836f8176870"
 # neurodebian:stretch-non-free pulled on September 19, 2018
-BASE_IMAGE="neurodebian:stretch-non-free@sha256:7cd978427d7ad215834fee221d0536ed7825b3cddebc481eba2d792dfc2f7332"
+BASE_IMAGE="neurodebian:nd110-non-free@sha256:da71cf9be42f2798bc93383e60c8f98a2dd53c7996ca7c250fc0056eed13afe8"
 
 NIPYPE_BASE_IMAGE="nipype/nipype:base"
 PKG_MANAGER="apt"
