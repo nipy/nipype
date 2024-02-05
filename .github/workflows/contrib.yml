@@ -71,7 +71,7 @@ jobs:
       - name: Run tests
         run: tools/ci/check.sh
         if: ${{ matrix.check != 'skiptests' }}
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
           file: coverage.xml
         if: ${{ always() }}
