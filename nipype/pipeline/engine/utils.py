@@ -510,15 +510,15 @@ def _write_detailed_dot(graph, dotfilename):
     edges = []
     for n in nx.topological_sort(graph):
         nodename = n.itername
-        inports = []
+        in_ports = []
         for u, v, d in graph.in_edges(nbunch=n, data=True):
             for cd in d["connect"]:
                 if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
-                inport = cd[1]
-                ipstrip = "in%s" % _replacefunk(inport)
+                in_port = cd[1]
+                ipstrip = "in%s" % _replacefunk(in_port)
                 opstrip = "out%s" % _replacefunk(outport)
                 edges.append(
                     "%s:%s:e -> %s:%s:w;"
@@ -529,11 +529,11 @@ def _write_detailed_dot(graph, dotfilename):
                         ipstrip,
                     )
                 )
-                if inport not in inports:
-                    inports.append(inport)
+                if in_port not in in_ports:
+                    in_ports.append(in_port)
         inputstr = (
             ["{IN"]
-            + [f"|<in{_replacefunk(ip)}> {ip}" for ip in sorted(inports)]
+            + [f"|<in{_replacefunk(ip)}> {ip}" for ip in sorted(in_ports)]
             + ["}"]
         )
         outports = []
@@ -886,34 +886,34 @@ def _node_ports(graph, node):
     for _, v, d in graph.out_edges(node, data=True):
         for src, dest in d["connect"]:
             if isinstance(src, tuple):
-                srcport = src[0]
+                src_port = src[0]
             else:
-                srcport = src
-            if srcport not in portoutputs:
-                portoutputs[srcport] = []
-            portoutputs[srcport].append((v, dest, src))
+                src_port = src
+            if src_port not in portoutputs:
+                portoutputs[src_port] = []
+            portoutputs[src_port].append((v, dest, src))
     return (portinputs, portoutputs)
 
 
 def _propagate_root_output(graph, node, field, connections):
     """Propagates the given graph root node output port
     field connections to the out-edge destination nodes."""
-    for destnode, inport, src in connections:
+    for destnode, in_port, src in connections:
         value = getattr(node.inputs, field)
         if isinstance(src, tuple):
             value = evaluate_connect_function(src[1], src[2], value)
-        destnode.set_input(inport, value)
+        destnode.set_input(in_port, value)
 
 
 def _propagate_internal_output(graph, node, field, connections, portinputs):
     """Propagates the given graph internal node output port
     field connections to the out-edge source node and in-edge
     destination nodes."""
-    for destnode, inport, src in connections:
+    for destnode, in_port, src in connections:
         if field in portinputs:
-            srcnode, srcport = portinputs[field]
-            if isinstance(srcport, tuple) and isinstance(src, tuple):
-                src_func = srcport[1].split("\\n")[0]
+            srcnode, src_port = portinputs[field]
+            if isinstance(src_port, tuple) and isinstance(src, tuple):
+                src_func = src_port[1].split("\\n")[0]
                 dst_func = src[1].split("\\n")[0]
                 raise ValueError(
                     "Does not support two inline functions "
@@ -924,9 +924,9 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
 
             connect = graph.get_edge_data(srcnode, destnode, default={"connect": []})
             if isinstance(src, tuple):
-                connect["connect"].append(((srcport, src[1], src[2]), inport))
+                connect["connect"].append(((src_port, src[1], src[2]), in_port))
             else:
-                connect = {"connect": [(srcport, inport)]}
+                connect = {"connect": [(src_port, in_port)]}
             old_connect = graph.get_edge_data(
                 srcnode, destnode, default={"connect": []}
             )
@@ -936,7 +936,7 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
             value = getattr(node.inputs, field)
             if isinstance(src, tuple):
                 value = evaluate_connect_function(src[1], src[2], value)
-            destnode.set_input(inport, value)
+            destnode.set_input(in_port, value)
 
 
 def generate_expanded_graph(graph_in):
