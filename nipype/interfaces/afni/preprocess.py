@@ -180,7 +180,7 @@ class AlignEpiAnatPy(AFNIPythonCommand):
     >>> al_ea.cmdline # doctest: +ELLIPSIS
     'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi \
 functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
-    >>> res = allineate.run()  # doctest: +SKIP
+    >>> res = al_ea.run()  # doctest: +SKIP
 
     See Also
     --------
