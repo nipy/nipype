@@ -823,7 +823,7 @@ class MRTransformInputSpec(MRTrix3BaseInputSpec):
     )
     invert = traits.Bool(
         argstr="-inverse",
-        position=1,
+        position=2,
         desc="Invert the specified transform before using it",
     )
     linear_transform = File(
