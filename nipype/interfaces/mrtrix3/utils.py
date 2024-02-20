@@ -224,13 +224,14 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
         "fsl",
         "gif",
         "freesurfer",
+        "hsvs",
         argstr="%s",
         position=-3,
         mandatory=True,
         desc="tissue segmentation algorithm",
     )
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+        exists=False, argstr="%s", mandatory=True, position=-2, desc="input image"
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
