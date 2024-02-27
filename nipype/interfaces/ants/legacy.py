@@ -4,7 +4,6 @@ These interfaces are for programs that have been deprecated by ANTs, but
 are preserved for backwards compatibility.
 """
 
-
 import os
 from glob import glob
 

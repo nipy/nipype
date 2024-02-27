@@ -38,6 +38,7 @@ class Config(NapoleonConfig):
         (requires duecredit to be installed).
 
     """
+
     _config_values = {
         "nipype_skip_classes": (
             ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester"],
