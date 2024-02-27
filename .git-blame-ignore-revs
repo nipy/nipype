@@ -1,3 +1,13 @@
+# Tue Feb 27 14:28:18 2024 -0500 - effigies@gmail.com - STY: black 2024.2 [ignore-rev]
+f1cbc1c941f8d02659f8ef245aac0862efb80ccf
+# Mon Sep 11 13:36:40 2023 +0200 - 37933899+servoz@users.noreply.github.com - run black for nipype/interfaces/spm/preprocess.py
+b9cac5e993143febb01ade42e56b41009427a4b6
+# Wed Jul 5 16:31:45 2023 -0400 - effigies@gmail.com - STY: Run black and fix typo
+34a4ac6eeff8d4924b40875c45df5d84a97da90b
+# Wed Jul 5 11:30:42 2023 -0400 - effigies@gmail.com - STY: black
+3b89ca85faf2428ecf7844de9c0db4aa7c329c93
+# Wed Jul 5 09:49:31 2023 -0400 - effigies@gmail.com - STY: black
+4a6a7d9d25d5d1e1f0eb55828dede58f8b9c9f80
 # Wed Apr 5 14:01:05 2023 -0400 - effigies@gmail.com - STY: black [ignore-rev]
 a9ce9b78a402ebacf7726ad6454bb75b1447f52f
 # Wed Sep 14 14:12:07 2022 -0400 - mathiasg@stanford.edu - STY: Black
