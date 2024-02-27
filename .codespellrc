@@ -9,4 +9,5 @@ skip = .git,*.pdf,*.svg,external
 # Reson - short journal name
 # ALS, FWE - neuroimaging specific abbrevs
 # Comision - foreign word used
-ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,suh,noo,reson,als,fwe,crasher,comision,afile
+# expad - AFNI flag
+ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,suh,noo,reson,als,fwe,crasher,comision,afile,expad
