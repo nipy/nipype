@@ -152,7 +152,7 @@ jobs:
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}
+          name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.deb-depends }}
           path: test-results.xml
         if: ${{ always() && matrix.check == 'test' }}
 
