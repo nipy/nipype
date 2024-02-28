@@ -11,6 +11,7 @@ from ..base import (
     traits,
     TraitedSpec,
     File,
+    Directory,
     InputMultiPath,
     isdefined,
 )
@@ -230,8 +231,10 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc="tissue segmentation algorithm",
     )
-    in_file = File(
-        exists=False, argstr="%s", mandatory=True, position=-2, desc="input image"
+    in_file = traits.Either(
+        File(exists=True),
+        Directory(exists=True),
+        argstr="%s", mandatory=True, position=-2, desc="input image / directory"
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
