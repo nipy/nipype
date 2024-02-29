@@ -40,14 +40,14 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3
       - run: pip install --upgrade build twine
       - name: Build sdist and wheel
         run: python -m build
       - run: twine check dist/*
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
@@ -59,11 +59,11 @@ jobs:
       matrix:
         package: ['wheel', 'sdist']
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: 3
       - name: Display Python version
@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -151,9 +151,9 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
       - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}
+          name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.deb-depends }}
           path: test-results.xml
         if: ${{ always() && matrix.check == 'test' }}
 
@@ -163,7 +163,7 @@ jobs:
     needs: [stable, test-package]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
