@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
@@ -10,7 +9,7 @@ http://stackoverflow.com/a/8963618/1183453
 # Import packages
 import os
 import multiprocessing as mp
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, wait
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -28,7 +27,7 @@ try:
 except ImportError:
 
     def indent(text, prefix):
-        """ A textwrap.indent replacement for Python < 3.3 """
+        """A textwrap.indent replacement for Python < 3.3"""
         if not prefix:
             return text
         splittext = text.splitlines(True)
@@ -73,6 +72,12 @@ def run_node(node, updatehash, taskid):
     return result
 
 
+def process_initializer(cwd):
+    """Initializes the environment of the child process"""
+    os.chdir(cwd)
+    os.environ["NIPYPE_NO_ET"] = "1"
+
+
 class MultiProcPlugin(DistributedPluginBase):
     """
     Execute workflow with multiprocessing, not sending more jobs at once
@@ -108,7 +113,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
-        super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
@@ -127,23 +132,25 @@ class MultiProcPlugin(DistributedPluginBase):
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug(
-            "[MultiProc] Starting (n_procs=%d, " "mem_gb=%0.2f, cwd=%s)",
+            "[MultiProc] Starting (n_procs=%d, mem_gb=%0.2f, cwd=%s)",
             self.processors,
             self.memory_gb,
             self._cwd,
         )
 
         try:
-            mp_context = mp.context.get_context(self.plugin_args.get("mp_context"))
+            mp_context = mp.get_context(self.plugin_args.get("mp_context"))
             self.pool = ProcessPoolExecutor(
                 max_workers=self.processors,
-                initializer=os.chdir,
+                initializer=process_initializer,
                 initargs=(self._cwd,),
                 mp_context=mp_context,
             )
         except (AttributeError, TypeError):
             # Python < 3.7 does not support initialization or contexts
             self.pool = ProcessPoolExecutor(max_workers=self.processors)
+            result_future = self.pool.submit(process_initializer, self._cwd)
+            wait([result_future], timeout=5)
 
         self._stats = None
 
@@ -174,7 +181,7 @@ class MultiProcPlugin(DistributedPluginBase):
         return self._taskid
 
     def _prerun_check(self, graph):
-        """Check if any node exeeds the available resources"""
+        """Check if any node exceeds the available resources"""
         tasks_mem_gb = []
         tasks_num_th = []
         for node in graph.nodes():
@@ -183,7 +190,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
         if np.any(np.array(tasks_mem_gb) > self.memory_gb):
             logger.warning(
-                "Some nodes exceed the total amount of memory available " "(%0.2fGB).",
+                "Some nodes exceed the total amount of memory available (%0.2fGB).",
                 self.memory_gb,
             )
             if self.raise_insufficient:

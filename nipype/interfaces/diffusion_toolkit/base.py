@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The dtk module provides basic functions for interfacing with
@@ -19,8 +18,8 @@ from ..base import CommandLine
 __docformat__ = "restructuredtext"
 
 
-class Info(object):
-    """ Handle dtk output type and version information.
+class Info:
+    """Handle dtk output type and version information.
 
     Examples
     --------
@@ -47,7 +46,7 @@ class Info(object):
         """
         clout = CommandLine(command="dti_recon", terminal_output="allatonce").run()
 
-        if clout.runtime.returncode is not 0:
+        if clout.runtime.returncode != 0:
             return None
 
         dtirecon = clout.runtime.stdout

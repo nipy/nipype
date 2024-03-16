@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The minc module provides classes for interfacing with the `MINC
@@ -18,19 +17,17 @@ warnings.filterwarnings("always", category=UserWarning)
 
 
 def check_minc():
-    """Returns True if and only if MINC is installed.'
-    """
+    """Returns True if and only if MINC is installed.'"""
 
     return Info.version() is not None
 
 
 def no_minc():
-    """Returns True if and only if MINC is *not* installed.
-    """
+    """Returns True if and only if MINC is *not* installed."""
     return not check_minc()
 
 
-class Info(object):
+class Info:
     """Handle MINC version information.
 
     version refers to the version of MINC on the system
@@ -54,7 +51,7 @@ class Info(object):
             clout = CommandLine(
                 command="mincinfo", args="-version", terminal_output="allatonce"
             ).run()
-        except IOError:
+        except OSError:
             return None
 
         out = clout.runtime.stdout
@@ -79,15 +76,10 @@ class Info(object):
                 return s.split(":")[1].strip()
             return None
 
-        versions = {
-            "minc": None,
-            "libminc": None,
-            "netcdf": None,
-            "hdf5": None,
-        }
+        versions = {"minc": None, "libminc": None, "netcdf": None, "hdf5": None}
 
         for l in out.split("\n"):
-            for (name, f) in [
+            for name, f in [
                 ("minc", read_program_version),
                 ("libminc", read_libminc_version),
                 ("netcdf", read_netcdf_version),

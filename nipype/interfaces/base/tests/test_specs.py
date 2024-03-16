@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -183,7 +182,7 @@ def test_deprecation():
         except nib.TraitError:
             not_raised = False
         assert not_raised
-        assert len(w) == 1, "deprecated warning 1 %s" % [w1.message for w1 in w]
+        assert len(w) == 1, f"deprecated warning 1 {[str(w1) for w1 in w]}"
 
     with warnings.catch_warnings(record=True) as w:
         warnings.filterwarnings("always", "", UserWarning)
@@ -201,7 +200,7 @@ def test_deprecation():
         assert not_raised
         assert spec_instance.foo == Undefined
         assert spec_instance.bar == 1
-        assert len(w) == 1, "deprecated warning 2 %s" % [w1.message for w1 in w]
+        assert len(w) == 1, f"deprecated warning 2 {[str(w1) for w1 in w]}"
 
 
 def test_namesource(setup_file):

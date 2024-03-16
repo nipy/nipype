@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine utils module
@@ -11,7 +10,12 @@ from ... import engine as pe
 from ....interfaces import base as nib
 from ....interfaces import utility as niu
 from .... import config
-from ..utils import clean_working_directory, write_workflow_prov, load_resultfile
+from ..utils import (
+    clean_working_directory,
+    write_workflow_prov,
+    load_resultfile,
+    format_node,
+)
 
 
 class InputSpec(nib.TraitedSpec):
@@ -174,11 +178,11 @@ def test_mapnode_crash(tmpdir):
         iterfield=["WRONG"],
         name="myfunc",
     )
-    node.inputs.WRONG = ["string{}".format(i) for i in range(3)]
+    node.inputs.WRONG = [f"string{i}" for i in range(3)]
     node.config = deepcopy(config._sections)
     node.config["execution"]["stop_on_first_crash"] = True
     node.base_dir = tmpdir.strpath
-    with pytest.raises(TypeError):
+    with pytest.raises(pe.nodes.NodeExecutionError):
         node.run()
     os.chdir(cwd)
 
@@ -193,7 +197,7 @@ def test_mapnode_crash2(tmpdir):
         iterfield=["WRONG"],
         name="myfunc",
     )
-    node.inputs.WRONG = ["string{}".format(i) for i in range(3)]
+    node.inputs.WRONG = [f"string{i}" for i in range(3)]
     node.base_dir = tmpdir.strpath
 
     with pytest.raises(Exception):
@@ -211,7 +215,7 @@ def test_mapnode_crash3(tmpdir):
         iterfield=["WRONG"],
         name="myfunc",
     )
-    node.inputs.WRONG = ["string{}".format(i) for i in range(3)]
+    node.inputs.WRONG = [f"string{i}" for i in range(3)]
     wf = pe.Workflow("testmapnodecrash")
     wf.add_nodes([node])
     wf.base_dir = tmpdir.strpath
@@ -327,3 +331,11 @@ def test_save_load_resultfile(tmpdir, use_relative):
             )
 
     config.set("execution", "use_relative_paths", old_use_relative)
+
+
+def test_format_node():
+    node = pe.Node(niu.IdentityInterface(fields=["a", "b"]), name="node")
+    serialized = format_node(node)
+    workspace = {"Node": pe.Node}
+    exec("\n".join(serialized), workspace)
+    assert workspace["node"].interface._fields == node.interface._fields

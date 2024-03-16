@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -15,11 +14,11 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
-from distutils.version import StrictVersion
 import os
+from packaging.version import Version
 
 from ... import logging
-from ..base import CommandLine, CommandLineInputSpec, traits, Undefined
+from ..base import CommandLine, CommandLineInputSpec, traits, Undefined, PackageInfo
 from ...utils.filemanip import split_filename
 
 iflogger = logging.getLogger("nipype.interface")
@@ -27,6 +26,14 @@ iflogger = logging.getLogger("nipype.interface")
 
 def get_custom_path(command, env_dir="NIFTYREGDIR"):
     return os.path.join(os.getenv(env_dir, ""), command)
+
+
+class Info(PackageInfo):
+    version_cmd = get_custom_path("reg_aladin") + " --version"
+
+    @staticmethod
+    def parse_version(raw_info):
+        return raw_info
 
 
 class NiftyRegCommandInputSpec(CommandLineInputSpec):
@@ -53,18 +60,17 @@ class NiftyRegCommand(CommandLine):
 
     def __init__(self, required_version=None, **inputs):
         self.num_threads = 1
-        super(NiftyRegCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.required_version = required_version
-        _version = self.version_from_command()
+        _version = self.version
         if _version:
-            _version = _version.decode("utf-8")
-            if self._min_version is not None and StrictVersion(
-                _version
-            ) < StrictVersion(self._min_version):
+            if self._min_version is not None and Version(_version) < Version(
+                self._min_version
+            ):
                 msg = "A later version of Niftyreg is required (%s < %s)"
                 iflogger.warning(msg, _version, self._min_version)
             if required_version is not None:
-                if StrictVersion(_version) != StrictVersion(required_version):
+                if Version(_version) != Version(required_version):
                     msg = "The version of NiftyReg differs from the required"
                     msg += "(%s != %s)"
                     iflogger.warning(msg, _version, self.required_version)
@@ -91,31 +97,29 @@ class NiftyRegCommand(CommandLine):
             self.inputs.omp_core_val = Undefined
 
     def check_version(self):
-        _version = self.version_from_command()
+        _version = self.version
         if not _version:
             raise Exception("Niftyreg not found")
-        # Decoding to string:
-        _version = _version.decode("utf-8")
-        if StrictVersion(_version) < StrictVersion(self._min_version):
+        if Version(_version) < Version(self._min_version):
             err = "A later version of Niftyreg is required (%s < %s)"
             raise ValueError(err % (_version, self._min_version))
         if self.required_version:
-            if StrictVersion(_version) != StrictVersion(self.required_version):
+            if Version(_version) != Version(self.required_version):
                 err = "The version of NiftyReg differs from the required"
                 err += "(%s != %s)"
                 raise ValueError(err % (_version, self.required_version))
 
     @property
     def version(self):
-        return self.version_from_command()
+        return Info.version()
 
     def exists(self):
-        return self.version_from_command() is not None
+        return self.version is not None
 
     def _format_arg(self, name, spec, value):
         if name == "omp_core_val":
             self.numthreads = value
-        return super(NiftyRegCommand, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == "":

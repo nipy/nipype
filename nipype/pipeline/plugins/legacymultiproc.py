@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
@@ -28,7 +27,7 @@ try:
 except ImportError:
 
     def indent(text, prefix):
-        """ A textwrap.indent replacement for Python < 3.3 """
+        """A textwrap.indent replacement for Python < 3.3"""
         if not prefix:
             return text
         splittext = text.splitlines(True)
@@ -76,7 +75,7 @@ def run_node(node, updatehash, taskid):
 # Pythons 2.7, 3.4-3.7.0, and 3.7.1 have three different implementations of
 # pool.Pool().Process(), and the type of the result varies based on the default
 # multiprocessing context, so we need to dynamically patch the daemon property
-class NonDaemonMixin(object):
+class NonDaemonMixin:
     @property
     def daemon(self):
         return False
@@ -135,14 +134,13 @@ try:
             if context is None:
                 context = mp.get_context()
             context = _nondaemon_context_mapper[context._name]
-            super(NonDaemonPool, self).__init__(
+            super().__init__(
                 processes=processes,
                 initializer=initializer,
                 initargs=initargs,
                 maxtasksperchild=maxtasksperchild,
                 context=context,
             )
-
 
 except ImportError:
 
@@ -151,6 +149,12 @@ except ImportError:
 
     class NonDaemonPool(pool.Pool):
         Process = NonDaemonProcess
+
+
+def process_initializer(cwd):
+    """Initializes the environment of the child process"""
+    os.chdir(cwd)
+    os.environ["NIPYPE_NO_ET"] = "1"
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):
@@ -189,7 +193,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         # Init variables and instance attributes
-        super(LegacyMultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._task_obj = {}
         self._taskid = 0
@@ -223,7 +227,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
             self.pool = NipypePool(
                 processes=self.processors,
                 maxtasksperchild=maxtasks,
-                initializer=os.chdir,
+                initializer=process_initializer,
                 initargs=(self._cwd,),
             )
         except TypeError:
@@ -264,7 +268,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
         return self._taskid
 
     def _prerun_check(self, graph):
-        """Check if any node exeeds the available resources"""
+        """Check if any node exceeds the available resources"""
         tasks_mem_gb = []
         tasks_num_th = []
         for node in graph.nodes():
@@ -273,7 +277,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
 
         if np.any(np.array(tasks_mem_gb) > self.memory_gb):
             logger.warning(
-                "Some nodes exceed the total amount of memory available " "(%0.2fGB).",
+                "Some nodes exceed the total amount of memory available (%0.2fGB).",
                 self.memory_gb,
             )
             if self.raise_insufficient:

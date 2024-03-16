@@ -4,6 +4,7 @@
 
 import os.path as op
 
+from ...utils.filemanip import split_filename
 from ..base import (
     CommandLineInputSpec,
     CommandLine,
@@ -57,6 +58,101 @@ class BrainMask(CommandLine):
     _cmd = "dwi2mask"
     input_spec = BrainMaskInputSpec
     output_spec = BrainMaskOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRCatInputSpec(MRTrix3BaseInputSpec):
+    in_files = traits.List(
+        File(exists=True),
+        argstr="%s",
+        position=-2,
+        mandatory=True,
+        desc="files to concatenate",
+    )
+
+    out_file = File(
+        "concatenated.mif",
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc="output concatenated image",
+    )
+
+    axis = traits.Int(
+        argstr="-axis %s",
+        desc="""specify axis along which concatenation should be performed. By default,
+     the program will use the last non-singleton, non-spatial axis of any of
+     the input images - in other words axis 3 or whichever axis (greater than
+     3) of the input images has size greater than one""",
+    )
+
+    datatype = traits.Enum(
+        "float32",
+        "float32le",
+        "float32be",
+        "float64",
+        "float64le",
+        "float64be",
+        "int64",
+        "uint64",
+        "int64le",
+        "uint64le",
+        "int64be",
+        "uint64be",
+        "int32",
+        "uint32",
+        "int32le",
+        "uint32le",
+        "int32be",
+        "uint32be",
+        "int16",
+        "uint16",
+        "int16le",
+        "uint16le",
+        "int16be",
+        "uint16be",
+        "cfloat32",
+        "cfloat32le",
+        "cfloat32be",
+        "cfloat64",
+        "cfloat64le",
+        "cfloat64be",
+        "int8",
+        "uint8",
+        "bit",
+        argstr="-datatype %s",
+        desc="specify output image data type",
+    )
+
+
+class MRCatOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output concatenated image")
+
+
+class MRCat(CommandLine):
+    """
+    Concatenate several images into one
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mrcat = mrt.MRCat()
+    >>> mrcat.inputs.in_files = ['dwi.mif','mask.mif']
+    >>> mrcat.cmdline                               # doctest: +ELLIPSIS
+    'mrcat dwi.mif mask.mif concatenated.mif'
+    >>> mrcat.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "mrcat"
+    input_spec = MRCatInputSpec
+    output_spec = MRCatOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -173,11 +269,20 @@ class Generate5tt(MRTrix3Base):
 
 class TensorMetricsInputSpec(CommandLineInputSpec):
     in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-1, desc="input DTI image"
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        desc="input DTI image",
     )
 
     out_fa = File(argstr="-fa %s", desc="output FA file")
     out_adc = File(argstr="-adc %s", desc="output ADC file")
+    out_ad = File(argstr="-ad %s", desc="output AD file")
+    out_rd = File(argstr="-rd %s", desc="output RD file")
+    out_cl = File(argstr="-cl %s", desc="output CL file")
+    out_cp = File(argstr="-cp %s", desc="output CP file")
+    out_cs = File(argstr="-cs %s", desc="output CS file")
     out_evec = File(argstr="-vector %s", desc="output selected eigenvector(s) file")
     out_eval = File(argstr="-value %s", desc="output selected eigenvalue(s) file")
     component = traits.List(
@@ -193,22 +298,25 @@ class TensorMetricsInputSpec(CommandLineInputSpec):
     in_mask = File(
         exists=True,
         argstr="-mask %s",
-        desc=(
-            "only perform computation within the specified binary" " brain mask image"
-        ),
+        desc=("only perform computation within the specified binary brain mask image"),
     )
     modulate = traits.Enum(
         "FA",
         "none",
         "eval",
         argstr="-modulate %s",
-        desc=("how to modulate the magnitude of the" " eigenvectors"),
+        desc=("how to modulate the magnitude of the eigenvectors"),
     )
 
 
 class TensorMetricsOutputSpec(TraitedSpec):
     out_fa = File(desc="output FA file")
     out_adc = File(desc="output ADC file")
+    out_ad = File(desc="output AD file")
+    out_rd = File(desc="output RD file")
+    out_cl = File(desc="output CL file")
+    out_cp = File(desc="output CP file")
+    out_cs = File(desc="output CS file")
     out_evec = File(desc="output selected eigenvector(s) file")
     out_eval = File(desc="output selected eigenvalue(s) file")
 
@@ -254,7 +362,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
     reference = File(
         exists=True,
         argstr="-template %s",
-        desc="a reference" "image to be used as template",
+        desc="a reference image to be used as template",
     )
     vox_size = traits.List(
         traits.Int, argstr="-vox %s", sep=",", desc="voxel dimensions"
@@ -274,7 +382,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
     )
     max_tod = traits.Int(
         argstr="-tod %d",
-        desc="generate a Track Orientation " "Distribution (TOD) in each voxel.",
+        desc="generate a Track Orientation Distribution (TOD) in each voxel.",
     )
 
     contrast = traits.Enum(
@@ -286,7 +394,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         "fod_amp",
         "curvature",
         argstr="-constrast %s",
-        desc="define the desired " "form of contrast for the output image",
+        desc="define the desired form of contrast for the output image",
     )
     in_map = File(
         exists=True,
@@ -343,7 +451,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         argstr="-upsample %d",
         desc="upsample the tracks by"
         " some ratio using Hermite interpolation before "
-        "mappping",
+        "mapping",
     )
 
     precise = traits.Bool(
@@ -353,17 +461,17 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
         "(these lengths are then taken into account during TWI calculation)",
     )
     ends_only = traits.Bool(
-        argstr="-ends_only", desc="only map the streamline" " endpoints to the image"
+        argstr="-ends_only", desc="only map the streamline endpoints to the image"
     )
 
     tck_weights = File(
         exists=True,
         argstr="-tck_weights_in %s",
-        desc="specify" " a text scalar file containing the streamline weights",
+        desc="specify a text scalar file containing the streamline weights",
     )
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 
@@ -460,7 +568,7 @@ class TCK2VTKInputSpec(CommandLineInputSpec):
 
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 
@@ -560,7 +668,7 @@ class MRConvertInputSpec(MRTrix3BaseInputSpec):
         desc="output image",
     )
     coord = traits.List(
-        traits.Float,
+        traits.Int,
         sep=" ",
         argstr="-coord %s",
         desc="extract data at the specified coordinates",
@@ -580,10 +688,28 @@ class MRConvertInputSpec(MRTrix3BaseInputSpec):
         argstr="-scaling %s",
         desc="specify the data scaling parameter",
     )
+    json_import = File(
+        exists=True,
+        argstr="-json_import %s",
+        mandatory=False,
+        desc="import data from a JSON file into header key-value pairs",
+    )
+    json_export = File(
+        exists=False,
+        argstr="-json_export %s",
+        mandatory=False,
+        desc="export data from an image header key-value pairs into a JSON file",
+    )
 
 
 class MRConvertOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output image")
+    json_export = File(
+        exists=True,
+        desc="exported data from an image header key-value pairs in a JSON file",
+    )
+    out_bvec = File(exists=True, desc="export bvec file in FSL format")
+    out_bval = File(exists=True, desc="export bvec file in FSL format")
 
 
 class MRConvert(MRTrix3Base):
@@ -610,7 +736,172 @@ class MRConvert(MRTrix3Base):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
+        if self.inputs.json_export:
+            outputs["json_export"] = op.abspath(self.inputs.json_export)
+        if self.inputs.out_bvec:
+            outputs["out_bvec"] = op.abspath(self.inputs.out_bvec)
+        if self.inputs.out_bval:
+            outputs["out_bval"] = op.abspath(self.inputs.out_bval)
         return outputs
+
+
+class TransformFSLConvertInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=1,
+        desc="FLIRT input image",
+    )
+    reference = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=2,
+        desc="FLIRT reference image",
+    )
+    in_transform = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=0,
+        desc="FLIRT output transformation matrix",
+    )
+    out_transform = File(
+        "transform_mrtrix.txt",
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        usedefault=True,
+        desc="output transformed affine in mrtrix3's format",
+    )
+    flirt_import = traits.Bool(
+        True,
+        argstr="flirt_import",
+        mandatory=True,
+        usedefault=True,
+        position=-2,
+        desc="import transform from FSL's FLIRT.",
+    )
+
+
+class TransformFSLConvertOutputSpec(TraitedSpec):
+    out_transform = File(
+        exists=True, desc="output transformed affine in mrtrix3's format"
+    )
+
+
+class TransformFSLConvert(MRTrix3Base):
+    """
+    Perform conversion between FSL's transformation matrix format to mrtrix3's.
+    """
+
+    _cmd = "transformconvert"
+    input_spec = TransformFSLConvertInputSpec
+    output_spec = TransformFSLConvertOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_transform"] = op.abspath(self.inputs.out_transform)
+        return outputs
+
+
+class MRTransformInputSpec(MRTrix3BaseInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True),
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="Input images to be transformed",
+    )
+    out_file = File(
+        genfile=True,
+        argstr="%s",
+        position=-1,
+        desc="Output image",
+    )
+    invert = traits.Bool(
+        argstr="-inverse",
+        desc="Invert the specified transform before using it",
+    )
+    linear_transform = File(
+        exists=True,
+        argstr="-linear %s",
+        desc=(
+            "Specify a linear transform to apply, in the form of a 3x4 or 4x4 ascii file. "
+            "Note the standard reverse convention is used, "
+            "where the transform maps points in the template image to the moving image. "
+            "Note that the reverse convention is still assumed even if no -template image is supplied."
+        ),
+    )
+    replace_transform = traits.Bool(
+        argstr="-replace",
+        desc="replace the current transform by that specified, rather than applying it to the current transform",
+    )
+    transformation_file = File(
+        exists=True,
+        argstr="-transform %s",
+        desc="The transform to apply, in the form of a 4x4 ascii file.",
+    )
+    template_image = File(
+        exists=True,
+        argstr="-template %s",
+        desc="Reslice the input image to match the specified template image.",
+    )
+    reference_image = File(
+        exists=True,
+        argstr="-reference %s",
+        desc="in case the transform supplied maps from the input image onto a reference image, use this option to specify the reference. Note that this implicitly sets the -replace option.",
+    )
+    flip_x = traits.Bool(
+        argstr="-flipx",
+        desc="assume the transform is supplied assuming a coordinate system with the x-axis reversed relative to the MRtrix convention (i.e. x increases from right to left). This is required to handle transform matrices produced by FSL's FLIRT command. This is only used in conjunction with the -reference option.",
+    )
+    quiet = traits.Bool(
+        argstr="-quiet",
+        desc="Do not display information messages or progress status.",
+    )
+    debug = traits.Bool(argstr="-debug", desc="Display debugging messages.")
+
+
+class MRTransformOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output image of the transformation")
+
+
+class MRTransform(MRTrix3Base):
+    """
+    Apply spatial transformations or reslice images
+
+    Example
+    -------
+
+    >>> MRxform = MRTransform()
+    >>> MRxform.inputs.in_files = 'anat_coreg.mif'
+    >>> MRxform.run()                                   # doctest: +SKIP
+    """
+
+    _cmd = "mrtransform"
+    input_spec = MRTransformInputSpec
+    output_spec = MRTransformOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(outputs["out_file"]):
+            outputs["out_file"] = op.abspath(self._gen_outfilename())
+        else:
+            outputs["out_file"] = op.abspath(outputs["out_file"])
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_files[0])
+        return name + "_MRTransform.mif"
 
 
 class MRMathInputSpec(MRTrix3BaseInputSpec):
@@ -637,7 +928,7 @@ class MRMathInputSpec(MRTrix3BaseInputSpec):
         desc="operation to computer along a specified axis",
     )
     axis = traits.Int(
-        0, argstr="-axis %d", desc="specfied axis to perform the operation along"
+        0, argstr="-axis %d", desc="specified axis to perform the operation along"
     )
 
 
@@ -765,3 +1056,125 @@ class MRResize(MRTrix3Base):
     _cmd = "mrresize"
     input_spec = MRResizeInputSpec
     output_spec = MRResizeOutputSpec
+
+
+class SHConvInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input ODF image",
+    )
+    # General options
+    response = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc=("The response function"),
+    )
+    out_file = File(
+        name_template="%s_shconv.mif",
+        name_source=["in_file"],
+        argstr="%s",
+        position=-1,
+        usedefault=True,
+        desc="the output spherical harmonics",
+    )
+
+
+class SHConvOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
+
+
+class SHConv(CommandLine):
+    """
+    Convolve spherical harmonics with a tissue response function. Useful for
+    checking residuals of ODF estimates.
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> sh = mrt.SHConv()
+    >>> sh.inputs.in_file = 'csd.mif'
+    >>> sh.inputs.response = 'response.txt'
+    >>> sh.cmdline
+    'shconv csd.mif response.txt csd_shconv.mif'
+    >>> sh.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "shconv"
+    input_spec = SHConvInputSpec
+    output_spec = SHConvOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class SH2AmpInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-3,
+        desc="input ODF image",
+    )
+    # General options
+    directions = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc=(
+            "The gradient directions along which to sample the spherical "
+            "harmonics MRtrix format"
+        ),
+    )
+    out_file = File(
+        name_template="%s_amp.mif",
+        name_source=["in_file"],
+        argstr="%s",
+        position=-1,
+        usedefault=True,
+        desc="the output spherical harmonics",
+    )
+    nonnegative = traits.Bool(
+        argstr="-nonnegative", desc="cap all negative amplitudes to zero"
+    )
+
+
+class SH2AmpOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the output convoluted spherical harmonics file")
+
+
+class SH2Amp(CommandLine):
+    """
+    Sample spherical harmonics on a set of gradient orientations.  Useful for
+    checking residuals of ODF estimates.
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> sh = mrt.SH2Amp()
+    >>> sh.inputs.in_file = 'sh.mif'
+    >>> sh.inputs.directions = 'grads.txt'
+    >>> sh.cmdline
+    'sh2amp sh.mif grads.txt sh_amp.mif'
+    >>> sh.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "sh2amp"
+    input_spec = SH2AmpInputSpec
+    output_spec = SH2AmpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs

@@ -4,8 +4,13 @@ from ..preprocess import SkullStrip
 
 def test_SkullStrip_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         in_file=dict(
             argstr="-input %s",
             copyfile=False,
@@ -13,7 +18,10 @@ def test_SkullStrip_inputs():
             mandatory=True,
             position=1,
         ),
-        num_threads=dict(nohash=True, usedefault=True,),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -30,7 +38,11 @@ def test_SkullStrip_inputs():
 
 
 def test_SkullStrip_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = SkullStrip.output_spec()
 
     for key, metadata in list(output_map.items()):

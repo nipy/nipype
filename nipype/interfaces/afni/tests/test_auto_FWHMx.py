@@ -4,18 +4,53 @@ from ..utils import FWHMx
 
 def test_FWHMx_inputs():
     input_map = dict(
-        acf=dict(argstr="-acf", usedefault=True,),
-        args=dict(argstr="%s",),
-        arith=dict(argstr="-arith", xor=["geom"],),
-        automask=dict(argstr="-automask", usedefault=True,),
-        combine=dict(argstr="-combine",),
-        compat=dict(argstr="-compat",),
-        demed=dict(argstr="-demed", xor=["detrend"],),
-        detrend=dict(argstr="-detrend", usedefault=True, xor=["demed"],),
-        environ=dict(nohash=True, usedefault=True,),
-        geom=dict(argstr="-geom", xor=["arith"],),
-        in_file=dict(argstr="-input %s", extensions=None, mandatory=True,),
-        mask=dict(argstr="-mask %s", extensions=None,),
+        acf=dict(
+            argstr="-acf",
+            usedefault=True,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        arith=dict(
+            argstr="-arith",
+            xor=["geom"],
+        ),
+        automask=dict(
+            argstr="-automask",
+            usedefault=True,
+        ),
+        combine=dict(
+            argstr="-combine",
+        ),
+        compat=dict(
+            argstr="-compat",
+        ),
+        demed=dict(
+            argstr="-demed",
+            xor=["detrend"],
+        ),
+        detrend=dict(
+            argstr="-detrend",
+            usedefault=True,
+            xor=["demed"],
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        geom=dict(
+            argstr="-geom",
+            xor=["arith"],
+        ),
+        in_file=dict(
+            argstr="-input %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
         out_detrend=dict(
             argstr="-detprefix %s",
             extensions=None,
@@ -38,7 +73,9 @@ def test_FWHMx_inputs():
             name_source="in_file",
             name_template="%s_subbricks.out",
         ),
-        unif=dict(argstr="-unif",),
+        unif=dict(
+            argstr="-unif",
+        ),
     )
     inputs = FWHMx.input_spec()
 
@@ -51,10 +88,18 @@ def test_FWHMx_outputs():
     output_map = dict(
         acf_param=dict(),
         fwhm=dict(),
-        out_acf=dict(extensions=None,),
-        out_detrend=dict(extensions=None,),
-        out_file=dict(extensions=None,),
-        out_subbricks=dict(extensions=None,),
+        out_acf=dict(
+            extensions=None,
+        ),
+        out_detrend=dict(
+            extensions=None,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        out_subbricks=dict(
+            extensions=None,
+        ),
     )
     outputs = FWHMx.output_spec()
 

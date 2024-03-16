@@ -13,7 +13,7 @@ from .. import LabelFusion, CalcTopNCC
     no_nifty_tool(cmd="seg_LabFusion"), reason="niftyseg is not installed"
 )
 def test_seg_lab_fusion():
-    """ Test interfaces for seg_labfusion"""
+    """Test interfaces for seg_labfusion"""
     # Create a node object
     steps = LabelFusion()
 
@@ -98,7 +98,7 @@ def test_seg_lab_fusion():
     no_nifty_tool(cmd="seg_CalcTopNCC"), reason="niftyseg is not installed"
 )
 def test_seg_calctopncc():
-    """ Test interfaces for seg_CalctoNCC"""
+    """Test interfaces for seg_CalctoNCC"""
     # Create a node object
     calctopncc = CalcTopNCC()
 
@@ -120,6 +120,6 @@ def test_seg_calctopncc():
     calctopncc.inputs.top_templates = 1
 
     cmd_tmp = "{cmd} -target {in_file} -templates 2 {file1} {file2} -n 1"
-    expected_cmd = cmd_tmp.format(cmd=cmd, in_file=in_file, file1=file1, file2=file2,)
+    expected_cmd = cmd_tmp.format(cmd=cmd, in_file=in_file, file1=file1, file2=file2)
 
     assert calctopncc.cmdline == expected_cmd

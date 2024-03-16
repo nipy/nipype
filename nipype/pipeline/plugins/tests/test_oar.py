@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-import os
-from shutil import rmtree
-from tempfile import mkdtemp
+from shutil import which
 
 import nipype.interfaces.base as nib
 import pytest
@@ -31,13 +28,10 @@ class OarTestInterface(nib.BaseInterface):
         return outputs
 
 
-@pytest.mark.xfail(reason="not known")
-def test_run_oar():
-    cur_dir = os.getcwd()
-    temp_dir = mkdtemp(prefix="test_engine_", dir=os.getcwd())
-    os.chdir(temp_dir)
-
-    pipe = pe.Workflow(name="pipe")
+@pytest.mark.skipif(which("oarsub") is None, reason="OAR not installed")
+@pytest.mark.timeout(60)
+def test_run_oargraph(tmp_path):
+    pipe = pe.Workflow(name="pipe", base_dir=str(tmp_path))
     mod1 = pe.Node(interface=OarTestInterface(), name="mod1")
     mod2 = pe.MapNode(interface=OarTestInterface(), iterfield=["input1"], name="mod2")
     pipe.connect([(mod1, mod2, [("output1", "input1")])])
@@ -48,5 +42,3 @@ def test_run_oar():
     node = list(execgraph.nodes())[names.index("pipe.mod1")]
     result = node.get_output("output1")
     assert result == [1, 1]
-    os.chdir(cur_dir)
-    rmtree(temp_dir)

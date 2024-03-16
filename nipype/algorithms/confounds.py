@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -49,6 +48,11 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     in_mask = File(exists=True, mandatory=True, desc="a brain mask")
     remove_zerovariance = traits.Bool(
         True, usedefault=True, desc="remove voxels with zero variance"
+    )
+    variance_tol = traits.Float(
+        1e-7,
+        usedefault=True,
+        desc="maximum variance to consider \"close to\" zero for the purposes of removal",
     )
     save_std = traits.Bool(True, usedefault=True, desc="save standardized DVARS")
     save_nstd = traits.Bool(False, usedefault=True, desc="save non-standardized DVARS")
@@ -104,7 +108,7 @@ class ComputeDVARS(BaseInterface):
 
     input_spec = ComputeDVARSInputSpec
     output_spec = ComputeDVARSOutputSpec
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 """\
@@ -145,7 +149,7 @@ Bradley L. and Petersen, Steven E.},
 
     def __init__(self, **inputs):
         self._results = {}
-        super(ComputeDVARS, self).__init__(**inputs)
+        super().__init__(**inputs)
 
     def _gen_fname(self, suffix, ext=None):
         fname, in_ext = op.splitext(op.basename(self.inputs.in_file))
@@ -160,13 +164,14 @@ Bradley L. and Petersen, Steven E.},
         if ext.startswith("."):
             ext = ext[1:]
 
-        return op.abspath("{}_{}.{}".format(fname, suffix, ext))
+        return op.abspath(f"{fname}_{suffix}.{ext}")
 
     def _run_interface(self, runtime):
         dvars = compute_dvars(
             self.inputs.in_file,
             self.inputs.in_mask,
             remove_zerovariance=self.inputs.remove_zerovariance,
+            variance_tol=self.inputs.variance_tol,
             intensity_normalization=self.inputs.intensity_normalization,
         )
 
@@ -311,7 +316,7 @@ class FramewiseDisplacement(BaseInterface):
     input_spec = FramewiseDisplacementInputSpec
     output_spec = FramewiseDisplacementOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 """\
@@ -460,12 +465,12 @@ class CompCorInputSpec(BaseInterfaceInputSpec):
         "cosine",
         False,
         usedefault=True,
-        desc="Detrend time series prior to component " "extraction",
+        desc="Detrend time series prior to component extraction",
     )
     use_regress_poly = traits.Bool(
         deprecated="0.15.0",
         new_name="pre_filter",
-        desc=("use polynomial regression " "pre-component extraction"),
+        desc=("use polynomial regression pre-component extraction"),
     )
     regress_poly_degree = traits.Range(
         low=1, value=1, usedefault=True, desc="the degree polynomial to use"
@@ -556,7 +561,7 @@ class CompCor(SimpleInterface):
 
     input_spec = CompCorInputSpec
     output_spec = CompCorOutputSpec
-    references_ = [
+    _references = [
         {
             "tags": ["method", "implementation"],
             "entry": BibTeX(
@@ -577,8 +582,8 @@ class CompCor(SimpleInterface):
     ]
 
     def __init__(self, *args, **kwargs):
-        """ exactly the same as compcor except the header """
-        super(CompCor, self).__init__(*args, **kwargs)
+        """exactly the same as compcor except the header"""
+        super().__init__(*args, **kwargs)
         self._header = "CompCor"
 
     def _run_interface(self, runtime):
@@ -613,7 +618,7 @@ class CompCor(SimpleInterface):
 
         if len(mask_images) == 0:
             img = nb.Nifti1Image(
-                np.ones(imgseries.shape[:3], dtype=np.bool),
+                np.ones(imgseries.shape[:3], dtype=bool),
                 affine=imgseries.affine,
                 header=imgseries.header,
             )
@@ -707,7 +712,7 @@ class CompCor(SimpleInterface):
                 self.inputs.pre_filter
             ]
             ncols = filter_basis.shape[1] if filter_basis.size > 0 else 0
-            header = ["{}{:02d}".format(ftype, i) for i in range(ncols)]
+            header = [f"{ftype}{i:02d}" for i in range(ncols)]
             if skip_vols:
                 old_basis = filter_basis
                 # nrows defined above
@@ -718,7 +723,7 @@ class CompCor(SimpleInterface):
                     filter_basis[skip_vols:, :ncols] = old_basis
                 filter_basis[:skip_vols, -skip_vols:] = np.eye(skip_vols)
                 header.extend(
-                    ["NonSteadyStateOutlier{:02d}".format(i) for i in range(skip_vols)]
+                    [f"NonSteadyStateOutlier{i:02d}" for i in range(skip_vols)]
                 )
             np.savetxt(
                 self._results["pre_filter_file"],
@@ -741,7 +746,7 @@ class CompCor(SimpleInterface):
             not_retained = np.where(np.logical_not(metadata["retained"]))
             components_names[retained] = components_header
             components_names[not_retained] = [
-                "dropped{}".format(i) for i in range(len(not_retained[0]))
+                f"dropped{i}" for i in range(len(not_retained[0]))
             ]
             with open(self._results["metadata_file"], "w") as f:
                 f.write("\t".join(["component"] + list(metadata.keys())) + "\n")
@@ -762,7 +767,7 @@ class CompCor(SimpleInterface):
             if isdefined(self.inputs.header_prefix)
             else self._header
         )
-        headers = ["{}{:02d}".format(header, i) for i in range(num_col)]
+        headers = [f"{header}{i:02d}" for i in range(num_col)]
         return headers
 
 
@@ -774,8 +779,8 @@ class ACompCor(CompCor):
     """
 
     def __init__(self, *args, **kwargs):
-        """ exactly the same as compcor except the header """
-        super(ACompCor, self).__init__(*args, **kwargs)
+        """exactly the same as compcor except the header"""
+        super().__init__(*args, **kwargs)
         self._header = "aCompCor"
 
 
@@ -801,7 +806,7 @@ class TCompCorInputSpec(CompCorInputSpec):
 class TCompCorOutputSpec(CompCorOutputSpec):
     # and all the fields in CompCorOutputSpec
     high_variance_masks = OutputMultiPath(
-        File(exists=True), desc=(("voxels exceeding the variance" " threshold"))
+        File(exists=True), desc=("voxels exceeding the variance threshold")
     )
 
 
@@ -825,8 +830,8 @@ class TCompCor(CompCor):
     output_spec = TCompCorOutputSpec
 
     def __init__(self, *args, **kwargs):
-        """ exactly the same as compcor except the header """
-        super(TCompCor, self).__init__(*args, **kwargs)
+        """exactly the same as compcor except the header"""
+        super().__init__(*args, **kwargs)
         self._header = "tCompCor"
         self._mask_files = []
 
@@ -835,7 +840,7 @@ class TCompCor(CompCor):
         self._mask_files = []
         timeseries = np.asanyarray(timeseries)
         for i, img in enumerate(mask_images):
-            mask = np.asanyarray(img.dataobj).astype(np.bool)
+            mask = np.asanyarray(img.dataobj).astype(bool)
             imgseries = timeseries[mask, :]
             imgseries = regress_poly(2, imgseries)[0]
             tSTD = _compute_tSTD(imgseries, 0, axis=-1)
@@ -848,10 +853,10 @@ class TCompCor(CompCor):
             out_image = nb.Nifti1Image(mask_data, affine=img.affine, header=img.header)
 
             # save mask
-            mask_file = os.path.abspath("mask_{:03d}.nii.gz".format(i))
+            mask_file = os.path.abspath(f"mask_{i:03d}.nii.gz")
             out_image.to_filename(mask_file)
             IFLOGGER.debug(
-                "tCompcor computed and saved mask of shape %s to " "mask_file %s",
+                "tCompcor computed and saved mask of shape %s to mask_file %s",
                 str(mask.shape),
                 mask_file,
             )
@@ -860,7 +865,7 @@ class TCompCor(CompCor):
         return out_images
 
     def _list_outputs(self):
-        outputs = super(TCompCor, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["high_variance_masks"] = self._mask_files
         return outputs
 
@@ -994,8 +999,19 @@ class NonSteadyStateDetector(BaseInterface):
         return self._results
 
 
+def _AR_est_YW(x, order, rxx=None):
+    """Retrieve AR coefficients while dropping the sig_sq return value"""
+    from nitime.algorithms import AR_est_YW
+
+    return AR_est_YW(x, order, rxx=rxx)[0]
+
+
 def compute_dvars(
-    in_file, in_mask, remove_zerovariance=False, intensity_normalization=1000
+    in_file,
+    in_mask,
+    remove_zerovariance=False,
+    intensity_normalization=1000,
+    variance_tol=0.0,
 ):
     """
     Compute the :abbr:`DVARS (D referring to temporal
@@ -1027,36 +1043,41 @@ research/nichols/scripts/fsl/standardizeddvars.pdf>`_, 2013.
     """
     import numpy as np
     import nibabel as nb
-    from nitime.algorithms import AR_est_YW
     import warnings
 
-    func = nb.load(in_file).get_fdata(dtype=np.float32)
-    mask = np.asanyarray(nb.load(in_mask).dataobj).astype(np.uint8)
+    func = np.float32(nb.load(in_file).dataobj)
+    mask = np.bool_(nb.load(in_mask).dataobj)
 
     if len(func.shape) != 4:
         raise RuntimeError("Input fMRI dataset should be 4-dimensional")
 
-    idx = np.where(mask > 0)
-    mfunc = func[idx[0], idx[1], idx[2], :]
+    mfunc = func[mask]
 
     if intensity_normalization != 0:
         mfunc = (mfunc / np.median(mfunc)) * intensity_normalization
 
     # Robust standard deviation (we are using "lower" interpolation
     # because this is what FSL is doing
-    func_sd = (
-        np.percentile(mfunc, 75, axis=1, interpolation="lower")
-        - np.percentile(mfunc, 25, axis=1, interpolation="lower")
-    ) / 1.349
+    try:
+        func_sd = (
+            np.percentile(mfunc, 75, axis=1, method="lower")
+            - np.percentile(mfunc, 25, axis=1, method="lower")
+        ) / 1.349
+    except TypeError:  # NP < 1.22
+        func_sd = (
+            np.percentile(mfunc, 75, axis=1, interpolation="lower")
+            - np.percentile(mfunc, 25, axis=1, interpolation="lower")
+        ) / 1.349
 
     if remove_zerovariance:
-        mfunc = mfunc[func_sd != 0, :]
-        func_sd = func_sd[func_sd != 0]
+        zero_variance_voxels = func_sd > variance_tol
+        mfunc = mfunc[zero_variance_voxels, :]
+        func_sd = func_sd[zero_variance_voxels]
 
     # Compute (non-robust) estimate of lag-1 autocorrelation
     ar1 = np.apply_along_axis(
-        AR_est_YW, 1, regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32), 1
-    )[:, 0]
+        _AR_est_YW, 1, regress_poly(0, mfunc, remove_mean=True)[0].astype(np.float32), 1
+    )
 
     # Compute (predicted) standard deviation of temporal difference time series
     diff_sdhat = np.squeeze(np.sqrt(((1 - ar1) * 2).tolist())) * func_sd
@@ -1114,7 +1135,7 @@ def plot_confound(tseries, figsize, name, units=None, series_tr=None, normalize=
 
     xlabel = "Frame #"
     if series_tr is not None:
-        xlabel = "Frame # ({} sec TR)".format(series_tr)
+        xlabel = f"Frame # ({series_tr} sec TR)"
     ax.set_xlabel(xlabel)
     ylim = ax.get_ylim()
 
@@ -1136,7 +1157,7 @@ def is_outlier(points, thresh=3.5):
         a modified z-score (based on the median absolute deviation) greater
         than this value will be classified as outliers.
 
-    :return: A bolean mask, of size numobservations-length array.
+    :return: A boolean mask, of size numobservations-length array.
 
     .. note:: References
 
@@ -1258,19 +1279,15 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
                 mask_index = 0
             else:
                 raise ValueError(
-                    (
-                        "When more than one mask file is provided, "
-                        "one of merge_method or mask_index must be "
-                        "set"
-                    )
+                    "When more than one mask file is provided, "
+                    "one of merge_method or mask_index must be "
+                    "set"
                 )
         if mask_index < len(mask_files):
             mask = nb.load(mask_files[mask_index])
             return [mask]
         raise ValueError(
-            ("mask_index {0} must be less than number of mask " "files {1}").format(
-                mask_index, len(mask_files)
-            )
+            f"mask_index {mask_index} must be less than number of mask files {len(mask_files)}"
         )
     masks = []
     if mask_method == "none":
@@ -1379,7 +1396,7 @@ def compute_noise_components(
     md_retained = []
 
     for name, img in zip(mask_names, mask_images):
-        mask = np.asanyarray(nb.squeeze_image(img).dataobj).astype(np.bool)
+        mask = np.asanyarray(nb.squeeze_image(img).dataobj).astype(bool)
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 "Inputs for CompCor, timeseries and mask, do not have "
@@ -1435,7 +1452,7 @@ def compute_noise_components(
             else:
                 u = np.full((M.shape[0], 1), np.nan, dtype=np.float32)
 
-        variance_explained = (s ** 2) / np.sum(s ** 2)
+        variance_explained = (s**2) / np.sum(s**2)
         cumulative_variance_explained = np.cumsum(variance_explained)
 
         num_components = int(components_criterion)

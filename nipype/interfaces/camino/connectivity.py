@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 from ...utils.filemanip import split_filename
@@ -133,7 +132,7 @@ class Conmat(CommandLine):
     Such fibers will add to the diagonal elements of the matrix. To remove
     these entries, run procstreamlines with -endpointfile before running conmat.
 
-    If the seed point is inside a labled region, it counts as one end of the
+    If the seed point is inside a labeled region, it counts as one end of the
     connection.  So ::
 
          ----[SEED inside A]---------B

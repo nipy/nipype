@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import os.path as op
 import numpy as np
 import nibabel as nb
-from distutils.version import LooseVersion
+from looseversion import LooseVersion
 
 from ... import logging
 from ..base import TraitedSpec, BaseInterfaceInputSpec, File, isdefined, traits
@@ -63,7 +61,7 @@ class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
     out_filename = File(
         "tdi.nii",
         usedefault=True,
-        desc="The output filename for the tracks in TrackVis " "(.trk) format",
+        desc="The output filename for the tracks in TrackVis (.trk) format",
     )
 
 
@@ -149,7 +147,7 @@ class StreamlineTractographyInputSpec(BaseInterfaceInputSpec):
     in_peaks = File(exists=True, desc=("peaks computed from the odf"))
     seed_coord = File(
         exists=True,
-        desc=("file containing the list of seed voxel " "coordinates (N,3)"),
+        desc=("file containing the list of seed voxel coordinates (N,3)"),
     )
     gfa_thresh = traits.Float(
         0.2,
@@ -184,13 +182,11 @@ class StreamlineTractographyInputSpec(BaseInterfaceInputSpec):
 class StreamlineTractographyOutputSpec(TraitedSpec):
     tracks = File(desc="TrackVis file containing extracted streamlines")
     gfa = File(
-        desc=(
-            "The resulting GFA (generalized FA) computed using the " "peaks of the ODF"
-        )
+        desc=("The resulting GFA (generalized FA) computed using the peaks of the ODF")
     )
     odf_peaks = File(desc=("peaks computed from the odf"))
     out_seeds = File(
-        desc=("file containing the (N,3) *voxel* coordinates used" " in seeding.")
+        desc=("file containing the (N,3) *voxel* coordinates used in seeding.")
     )
 
 
@@ -226,7 +222,7 @@ class StreamlineTractography(DipyBaseInterface):
 
         if not (isdefined(self.inputs.in_model) or isdefined(self.inputs.in_peaks)):
             raise RuntimeError(
-                ("At least one of in_model or in_peaks should " "be supplied")
+                "At least one of in_model or in_peaks should be supplied"
             )
 
         img = nb.load(self.inputs.in_file)

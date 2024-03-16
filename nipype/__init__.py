@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -12,13 +11,11 @@ Top-level module API
 
 """
 import os
-from distutils.version import LooseVersion
 
-from .info import (
-    URL as __url__,
-    STATUS as __status__,
-    __version__,
-)
+# No longer used internally but could be used externally.
+from looseversion import LooseVersion
+
+from .info import URL as __url__, STATUS as __status__, __version__
 from .utils.config import NipypeConfig
 from .utils.logger import Logging
 from .refs import due
@@ -28,14 +25,14 @@ try:
     import faulthandler
 
     faulthandler.enable()
-except (ImportError, IOError) as e:
+except (ImportError, OSError) as e:
     pass
 
 config = NipypeConfig()
 logging = Logging(config)
 
 
-class NipypeTester(object):
+class NipypeTester:
     def __call__(self, doctests=True, parallel=False):
         try:
             import pytest
@@ -87,47 +84,17 @@ def check_latest_version(raise_exception=False):
     import etelemetry
 
     logger = logging.getLogger("nipype.utils")
-
-    INIT_MSG = "Running {packname} version {version} (latest: {latest})".format
-
-    latest = {"version": "Unknown", "bad_versions": []}
-    result = None
-    try:
-        result = etelemetry.get_project("nipy/nipype")
-    except Exception as e:
-        logger.warning("Could not check for version updates: \n%s", e)
-    finally:
-        if result:
-            latest.update(**result)
-            if LooseVersion(__version__) != LooseVersion(latest["version"]):
-                logger.info(
-                    INIT_MSG(
-                        packname="nipype", version=__version__, latest=latest["version"]
-                    )
-                )
-            if latest["bad_versions"] and any(
-                [
-                    LooseVersion(__version__) == LooseVersion(ver)
-                    for ver in latest["bad_versions"]
-                ]
-            ):
-                message = (
-                    "You are using a version of Nipype with a critical "
-                    "bug. Please use a different version."
-                )
-                if raise_exception:
-                    raise RuntimeError(message)
-                else:
-                    logger.critical(message)
-    return latest
+    return etelemetry.check_available_version(
+        "nipy/nipype", __version__, logger, raise_exception
+    )
 
 
 # Run telemetry on import for interactive sessions, such as IPython, Jupyter notebooks, Python REPL
 if config.getboolean("execution", "check_version"):
     import __main__
 
-    if not hasattr(__main__, "__file__"):
+    if not hasattr(__main__, "__file__") and "NIPYPE_NO_ET" not in os.environ:
         from .interfaces.base import BaseInterface
 
         if BaseInterface._etelemetry_version_data is None:
-            BaseInterface._etelemetry_version_data = check_latest_version()
+            BaseInterface._etelemetry_version_data = check_latest_version() or "n/a"

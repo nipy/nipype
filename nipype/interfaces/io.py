@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Set of interfaces that allow interaction with data. Currently
@@ -85,7 +84,7 @@ def copytree(src, dst, use_hardlink=False):
                     hashmethod="content",
                     use_hardlink=use_hardlink,
                 )
-        except (IOError, os.error) as why:
+        except (OSError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
@@ -96,7 +95,7 @@ def copytree(src, dst, use_hardlink=False):
 
 
 def add_traits(base, names, trait_type=None):
-    """ Add traits to a traited class.
+    """Add traits to a traited class.
 
     All traits are set to Undefined by default
     """
@@ -114,7 +113,7 @@ def add_traits(base, names, trait_type=None):
 
 
 def _get_head_bucket(s3_resource, bucket_name):
-    """ Try to get the header info of a bucket, in order to
+    """Try to get the header info of a bucket, in order to
     check if it exists and its permissions
     """
 
@@ -135,12 +134,12 @@ def _get_head_bucket(s3_resource, bucket_name):
             )
             raise Exception(err_msg)
         else:
-            err_msg = "Unable to connect to bucket: %s. Error message:\n%s" % (
+            err_msg = "Unable to connect to bucket: {}. Error message:\n{}".format(
                 bucket_name,
                 exc,
             )
     except Exception as exc:
-        err_msg = "Unable to connect to bucket: %s. Error message:\n%s" % (
+        err_msg = "Unable to connect to bucket: {}. Error message:\n{}".format(
             bucket_name,
             exc,
         )
@@ -155,22 +154,21 @@ class IOBase(BaseInterface):
         raise NotImplementedError
 
     def _outputs(self):
-        return self._add_output_traits(super(IOBase, self)._outputs())
+        return self._add_output_traits(super()._outputs())
 
     def _add_output_traits(self, base):
         return base
 
 
 # Class to track percentage of S3 file upload
-class ProgressPercentage(object):
+class ProgressPercentage:
     """
-    Callable class instsance (via __call__ method) that displays
+    Callable class instance (via __call__ method) that displays
     upload percentage of a file to S3
     """
 
     def __init__(self, filename):
-        """
-        """
+        """ """
 
         # Import packages
         import threading
@@ -182,8 +180,7 @@ class ProgressPercentage(object):
         self._lock = threading.Lock()
 
     def __call__(self, bytes_amount):
-        """
-        """
+        """ """
 
         # Import packages
         import sys
@@ -208,16 +205,15 @@ class ProgressPercentage(object):
 
 # DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    """
-    """
+    """ """
 
     # Init inputspec data attributes
-    base_directory = Directory(desc="Path to the base directory for storing data.")
+    base_directory = Str(desc="Path to the base directory for storing data.")
     container = Str(desc="Folder within base directory in which to store output")
     parameterization = traits.Bool(
         True, usedefault=True, desc="store output in parametrized structure"
     )
-    strip_dir = Directory(desc="path to strip out of filename")
+    strip_dir = Str(desc="path to strip out of filename")
     substitutions = InputMultiPath(
         traits.Tuple(Str, Str),
         desc=(
@@ -248,7 +244,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         "AWS_SECRET_ACCESS_KEY environment variables"
     )
     encrypt_bucket_keys = traits.Bool(
-        desc="Flag indicating whether to use S3 " "server-side AES-256 encryption"
+        desc="Flag indicating whether to use S3 server-side AES-256 encryption"
     )
     # Set this if user wishes to override the bucket with their own
     bucket = traits.Any(desc="Boto3 S3 bucket for manual override of bucket")
@@ -257,20 +253,18 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
-
         if key not in self.copyable_trait_names():
             if not isdefined(value):
-                super(DataSinkInputSpec, self).__setattr__(key, value)
+                super().__setattr__(key, value)
             self._outputs[key] = value
         else:
             if key in self._outputs:
                 self._outputs[key] = value
-            super(DataSinkInputSpec, self).__setattr__(key, value)
+            super().__setattr__(key, value)
 
 
 # DataSink outputs
 class DataSinkOutputSpec(TraitedSpec):
-
     # Init out file
     out_file = traits.Any(desc="datasink output")
 
@@ -351,7 +345,7 @@ class DataSink(IOBase):
             Indicates the input fields to be dynamically created
         """
 
-        super(DataSink, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         undefined_traits = {}
         # used for mandatory inputs check
         self._infields = infields
@@ -440,7 +434,6 @@ class DataSink(IOBase):
             is not a valid S3 path, defaults to '<N/A>'
         """
 
-        # Init variables
         s3_str = "s3://"
         bucket_name = "<N/A>"
         base_directory = self.inputs.base_directory
@@ -449,22 +442,10 @@ class DataSink(IOBase):
             s3_flag = False
             return s3_flag, bucket_name
 
-        # Explicitly lower-case the "s3"
-        if base_directory.lower().startswith(s3_str):
-            base_dir_sp = base_directory.split("/")
-            base_dir_sp[0] = base_dir_sp[0].lower()
-            base_directory = "/".join(base_dir_sp)
+        s3_flag = base_directory.lower().startswith(s3_str)
+        if s3_flag:
+            bucket_name = base_directory[len(s3_str) :].partition("/")[0]
 
-        # Check if 's3://' in base dir
-        if base_directory.startswith(s3_str):
-            # Expects bucket name to be 's3://bucket_name/base_dir/..'
-            bucket_name = base_directory.split(s3_str)[1].split("/")[0]
-            s3_flag = True
-        # Otherwise it's just a normal datasink
-        else:
-            s3_flag = False
-
-        # Return s3_flag
         return s3_flag, bucket_name
 
     # Function to return AWS secure environment variables
@@ -494,7 +475,7 @@ class DataSink(IOBase):
 
         # Check if creds exist
         if creds_path and os.path.exists(creds_path):
-            with open(creds_path, "r") as creds_in:
+            with open(creds_path) as creds_in:
                 # Grab csv rows
                 row1 = creds_in.readline()
                 row2 = creds_in.readline()
@@ -549,7 +530,7 @@ class DataSink(IOBase):
             import boto3
             import botocore
         except ImportError as exc:
-            err_msg = "Boto3 package is not installed - install boto3 and " "try again."
+            err_msg = "Boto3 package is not installed - install boto3 and try again."
             raise Exception(err_msg)
 
         # Init variables
@@ -591,7 +572,6 @@ class DataSink(IOBase):
         try:
             _get_head_bucket(s3_resource, bucket_name)
         except Exception as exc:
-
             # Try to connect anonymously
             s3_resource.meta.client.meta.events.register(
                 "choose-signer.s3.*", botocore.handlers.disable_signing
@@ -618,12 +598,11 @@ class DataSink(IOBase):
 
         from botocore.exceptions import ClientError
 
-        # Init variables
         s3_str = "s3://"
         s3_prefix = s3_str + bucket.name
 
         # Explicitly lower-case the "s3"
-        if dst[: len(s3_str)].lower() == s3_str:
+        if dst.lower().startswith(s3_str):
             dst = s3_str + dst[len(s3_str) :]
 
         # If src is a directory, collect files (this assumes dst is a dir too)
@@ -675,8 +654,7 @@ class DataSink(IOBase):
 
     # List outputs, main run routine
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
 
         # Init variables
         outputs = self.output_spec().get()
@@ -782,7 +760,7 @@ class DataSink(IOBase):
                     out_files.append(s3dst)
                 # Otherwise, copy locally src -> dst
                 if not s3_flag or isdefined(self.inputs.local_copy):
-                    # Create output directory if it doesnt exist
+                    # Create output directory if it doesn't exist
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
@@ -907,7 +885,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         """
         if not outfields:
             outfields = ["outfiles"]
-        super(S3DataGrabber, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         undefined_traits = {}
         # used for mandatory inputs check
         self._infields = infields
@@ -985,12 +963,12 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                     if re.match(template, fname):
                         filelist.append(fname)
                 if len(filelist) == 0:
-                    msg = "Output key: %s Template: %s returned no files" % (
+                    msg = "Output key: {} Template: {} returned no files".format(
                         key,
                         template,
                     )
                     if self.inputs.raise_on_empty:
-                        raise IOError(msg)
+                        raise OSError(msg)
                     else:
                         warn(msg)
                 else:
@@ -1025,21 +1003,20 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
                             raise TypeError(
-                                e.message
-                                + ": Template %s failed to convert with args %s"
-                                % (template, str(tuple(argtuple)))
+                                f"{e}: Template {template} failed to convert "
+                                f"with args {tuple(argtuple)}"
                             )
                     outfiles = []
                     for fname in bkt_files:
                         if re.match(filledtemplate, fname):
                             outfiles.append(fname)
                     if len(outfiles) == 0:
-                        msg = "Output key: %s Template: %s returned no files" % (
+                        msg = "Output key: {} Template: {} returned no files".format(
                             key,
                             filledtemplate,
                         )
                         if self.inputs.raise_on_empty:
-                            raise IOError(msg)
+                            raise OSError(msg)
                         else:
                             warn(msg)
                         outputs[key].append(None)
@@ -1193,7 +1170,7 @@ class DataGrabber(IOBase):
         """
         if not outfields:
             outfields = ["outfiles"]
-        super(DataGrabber, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         undefined_traits = {}
         # used for mandatory inputs check
         self._infields = infields
@@ -1261,12 +1238,12 @@ class DataGrabber(IOBase):
             if not args:
                 filelist = glob.glob(template)
                 if len(filelist) == 0:
-                    msg = "Output key: %s Template: %s returned no files" % (
+                    msg = "Output key: {} Template: {} returned no files".format(
                         key,
                         template,
                     )
                     if self.inputs.raise_on_empty:
-                        raise IOError(msg)
+                        raise OSError(msg)
                     else:
                         warn(msg)
                 else:
@@ -1301,18 +1278,17 @@ class DataGrabber(IOBase):
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
                             raise TypeError(
-                                e.message
-                                + ": Template %s failed to convert with args %s"
-                                % (template, str(tuple(argtuple)))
+                                f"{e}: Template {template} failed to convert "
+                                f"with args {tuple(argtuple)}"
                             )
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
-                        msg = "Output key: %s Template: %s returned no files" % (
+                        msg = "Output key: {} Template: {} returned no files".format(
                             key,
                             filledtemplate,
                         )
                         if self.inputs.raise_on_empty:
-                            raise IOError(msg)
+                            raise OSError(msg)
                         else:
                             warn(msg)
                         outputs[key].append(None)
@@ -1333,17 +1309,16 @@ class DataGrabber(IOBase):
 
 
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-
     base_directory = Directory(exists=True, desc="Root path common to templates.")
     sort_filelist = traits.Bool(
         True,
         usedefault=True,
-        desc="When matching mutliple files, return them" " in sorted order.",
+        desc="When matching multiple files, return them in sorted order.",
     )
     raise_on_empty = traits.Bool(
         True,
         usedefault=True,
-        desc="Raise an exception if a template pattern " "matches no files.",
+        desc="Raise an exception if a template pattern matches no files.",
     )
     force_lists = traits.Either(
         traits.Bool(),
@@ -1364,31 +1339,35 @@ class SelectFiles(IOBase):
     """
     Flexibly collect data from disk to feed into workflows.
 
-    This interface uses the {}-based string formatting syntax to plug
+    This interface uses Python's {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
-    templates and collect files from persistant storage. These templates
-    can also be combined with glob wildcards. The field names in the
-    formatting template (i.e. the terms in braces) will become inputs
-    fields on the interface, and the keys in the templates dictionary
-    will form the output fields.
+    templates and collect files from persistent storage. These templates can
+    also be combined with glob wildcards (``*``, ``?``) and character ranges (``[...]``).
+    The field names in the formatting template (i.e. the terms in braces) will
+    become inputs fields on the interface, and the keys in the templates
+    dictionary will form the output fields.
 
     Examples
     --------
     >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
-    ...            "epi": "{subject_id}/func/f[0, 1].nii"}
+    ...            "epi": "{subject_id}/func/f[0,1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> pprint.pprint(dg.outputs.get())  # doctest:
     {'T1': <undefined>, 'epi': <undefined>}
 
-    The same thing with dynamic grabbing of specific files:
+    Note that SelectFiles does not support lists as inputs for the dynamic
+    fields. Attempts to do so may lead to unexpected results because brackets
+    also express glob character ranges. For example,
 
-    >>> templates["epi"] = "{subject_id}/func/f{run!s}.nii"
+    >>> templates["epi"] = "{subject_id}/func/f{run}.nii"
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> dg.inputs.run = [2, 4]
+    >>> dg.inputs.run = [10, 11]
+
+    would match f0.nii or f1.nii, not f10.nii or f11.nii.
 
     """
 
@@ -1412,14 +1391,14 @@ class SelectFiles(IOBase):
             used to select files.
 
         """
-        super(SelectFiles, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         # Infer the infields and outfields from the template
         infields = []
         for name, template in list(templates.items()):
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None:
-                    field_name = re.match("\w+", field_name).group()
+                    field_name = re.match(r"\w+", field_name).group()
                     if field_name not in infields:
                         infields.append(field_name)
 
@@ -1441,13 +1420,9 @@ class SelectFiles(IOBase):
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
-        info = dict(
-            [
-                (k, v)
-                for k, v in list(self.inputs.__dict__.items())
-                if k in self._infields
-            ]
-        )
+        info = {
+            k: v for k, v in list(self.inputs.__dict__.items()) if k in self._infields
+        }
 
         force_lists = self.inputs.force_lists
         if isinstance(force_lists, bool):
@@ -1458,12 +1433,11 @@ class SelectFiles(IOBase):
             plural = "s" if len(bad_fields) > 1 else ""
             verb = "were" if len(bad_fields) > 1 else "was"
             msg = (
-                "The field%s '%s' %s set in 'force_lists' and not in " "'templates'."
+                "The field%s '%s' %s set in 'force_lists' and not in 'templates'."
             ) % (plural, bad_fields, verb)
             raise ValueError(msg)
 
         for field, template in list(self._templates.items()):
-
             find_dirs = template[-1] == os.sep
 
             # Build the full template path
@@ -1482,12 +1456,12 @@ class SelectFiles(IOBase):
 
             # Handle the case where nothing matched
             if not filelist:
-                msg = "No files were found matching %s template: %s" % (
+                msg = "No files were found matching {} template: {}".format(
                     field,
                     filled_template,
                 )
                 if self.inputs.raise_on_empty:
-                    raise IOError(msg)
+                    raise OSError(msg)
                 else:
                     warn(msg)
 
@@ -1505,7 +1479,7 @@ class SelectFiles(IOBase):
 
 
 class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    root_paths = traits.Either(traits.List(), Str(), mandatory=True,)
+    root_paths = traits.Either(traits.List(), Str(), mandatory=True)
     match_regex = Str(
         "(.+)", usedefault=True, desc=("Regular expression for matching paths.")
     )
@@ -1516,8 +1490,8 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             "ignored."
         )
     )
-    max_depth = traits.Int(desc="The maximum depth to search beneath " "the root_paths")
-    min_depth = traits.Int(desc="The minimum depth to search beneath " "the root paths")
+    max_depth = traits.Int(desc="The maximum depth to search beneath the root_paths")
+    min_depth = traits.Int(desc="The minimum depth to search beneath the root paths")
     unpack_single = traits.Bool(
         False, usedefault=True, desc="Unpack single results from list"
     )
@@ -1529,7 +1503,7 @@ class DataFinder(IOBase):
     Will recursively search any subdirectories by default. This can be limited
     with the min/max depth options.
     Matched paths are available in the output 'out_paths'. Any named groups of
-    captured text from the regular expression are also available as ouputs of
+    captured text from the regular expression are also available as outputs of
     the same name.
 
     Examples
@@ -1599,7 +1573,7 @@ class DataFinder(IOBase):
             ]
         self.result = None
         for root_path in self.inputs.root_paths:
-            # Handle tilda/env variables and remove extra seperators
+            # Handle tilda/env variables and remove extra separators
             root_path = os.path.normpath(
                 os.path.expandvars(os.path.expanduser(root_path))
             )
@@ -1628,7 +1602,7 @@ class DataFinder(IOBase):
             for key, vals in list(self.result.items()):
                 self.result[key] = vals[0]
         else:
-            # sort all keys acording to out_paths
+            # sort all keys according to out_paths
             for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
@@ -1699,7 +1673,7 @@ class FSSourceOutputSpec(TraitedSpec):
         File(exists=True), desc="Inflated surface meshes", loc="surf"
     )
     pial = OutputMultiPath(
-        File(exists=True), desc="Gray matter/pia mater surface meshes", loc="surf"
+        File(exists=True), desc="Gray matter/pia matter surface meshes", loc="surf"
     )
     area_pial = OutputMultiPath(
         File(exists=True),
@@ -1869,10 +1843,9 @@ class FreeSurferSource(IOBase):
 
 
 class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-
     query_template = Str(
         mandatory=True,
-        desc=("Layout used to get files. Relative to base " "directory if defined"),
+        desc="Layout used to get files. Relative to base directory if defined",
     )
 
     query_template_args = traits.Dict(
@@ -1942,7 +1915,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
         See class examples for usage
 
         """
-        super(XNATSource, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         undefined_traits = {}
         # used for mandatory inputs check
         self._infields = infields
@@ -2014,7 +1987,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
             if not args:
                 file_objects = xnat.select(template).get("obj")
                 if file_objects == []:
-                    raise IOError("Template %s returned no files" % template)
+                    raise OSError("Template %s returned no files" % template)
                 outputs[key] = simplify_list(
                     [
                         str(file_object.get())
@@ -2030,7 +2003,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
                             raise ValueError(
-                                "incompatible number " "of arguments for %s" % key
+                                "incompatible number of arguments for %s" % key
                             )
                         if len(arg) > maxlen:
                             maxlen = len(arg)
@@ -2049,7 +2022,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         file_objects = xnat.select(target).get("obj")
 
                         if file_objects == []:
-                            raise IOError("Template %s " "returned no files" % target)
+                            raise OSError("Template %s returned no files" % target)
 
                         outfiles = simplify_list(
                             [
@@ -2062,7 +2035,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         file_objects = xnat.select(template).get("obj")
 
                         if file_objects == []:
-                            raise IOError("Template %s " "returned no files" % template)
+                            raise OSError("Template %s returned no files" % template)
 
                         outfiles = simplify_list(
                             [
@@ -2081,7 +2054,6 @@ class XNATSource(LibraryBaseInterface, IOBase):
 
 
 class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-
     _outputs = traits.Dict(Str, value={}, usedefault=True)
 
     server = Str(mandatory=True, requires=["user", "pwd"], xor=["config"])
@@ -2099,7 +2071,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     assessor_id = Str(
         desc=(
-            "Option to customize ouputs representation in XNAT - "
+            "Option to customize outputs representation in XNAT - "
             "assessor level will be used with specified id"
         ),
         xor=["reconstruction_id"],
@@ -2107,7 +2079,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     reconstruction_id = Str(
         desc=(
-            "Option to customize ouputs representation in XNAT - "
+            "Option to customize outputs representation in XNAT - "
             "reconstruction level will be used with specified id"
         ),
         xor=["assessor_id"],
@@ -2127,21 +2099,20 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             self._outputs[key] = value
         else:
-            super(XNATSinkInputSpec, self).__setattr__(key, value)
+            super().__setattr__(key, value)
 
 
 class XNATSink(LibraryBaseInterface, IOBase):
-    """ Generic datasink module that takes a directory containing a
-        list of nifti files and provides a set of structured output
-        fields.
+    """Generic datasink module that takes a directory containing a
+    list of nifti files and provides a set of structured output
+    fields.
     """
 
     input_spec = XNATSinkInputSpec
     _pkg = "pyxnat"
 
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
         import pyxnat
 
         # setup XNAT connection
@@ -2171,14 +2142,13 @@ class XNATSink(LibraryBaseInterface, IOBase):
                 )
 
                 if not shared.exists():  # subject not in share project
-
                     share_project = xnat.select("/project/%s" % self.inputs.project_id)
 
                     if not share_project.exists():  # check project exists
                         share_project.insert()
 
                     subject = xnat.select(
-                        "/project/%(project)s" "/subject/%(subject_id)s" % result
+                        "/project/%(project)s/subject/%(subject_id)s" % result
                     )
 
                     subject.share(str(self.inputs.project_id))
@@ -2202,9 +2172,7 @@ class XNATSink(LibraryBaseInterface, IOBase):
 
         # gather outputs and upload them
         for key, files in list(self.inputs._outputs.items()):
-
             for name in ensure_list(files):
-
                 if isinstance(name, list):
                     for i, file_name in enumerate(name):
                         push_file(
@@ -2223,7 +2191,6 @@ def unquote_id(string):
 
 
 def push_file(self, xnat, file_name, out_key, uri_template_args):
-
     # grab info from output file names
     val_list = [
         unquote_id(val)
@@ -2260,7 +2227,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
             uri_template_args["container_id"] += "_results"
 
     # define resource level
-    uri_template_args["resource_label"] = "%s_%s" % (
+    uri_template_args["resource_label"] = "{}_{}".format(
         uri_template_args["container_id"],
         out_key.split(".")[0],
     )
@@ -2286,7 +2253,6 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
 
     # shares the experiment back to the original project if relevant
     if "original_project" in uri_template_args:
-
         experiment_template = (
             "/project/%(original_project)s"
             "/subject/%(subject_id)s/experiment/%(experiment_id)s"
@@ -2335,15 +2301,13 @@ class SQLiteSink(LibraryBaseInterface, IOBase):
     _pkg = "sqlite3"
 
     def __init__(self, input_names, **inputs):
-
-        super(SQLiteSink, self).__init__(**inputs)
+        super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
 
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
         import sqlite3
 
         conn = sqlite3.connect(self.inputs.database_file, check_same_thread=False)
@@ -2399,15 +2363,13 @@ class MySQLSink(IOBase):
     input_spec = MySQLSinkInputSpec
 
     def __init__(self, input_names, **inputs):
-
-        super(MySQLSink, self).__init__(**inputs)
+        super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
 
     def _list_outputs(self):
-        """Execute this module.
-        """
+        """Execute this module."""
         import MySQLdb
 
         if isdefined(self.inputs.config):
@@ -2542,10 +2504,10 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
         kwargs = kwargs.copy()
         kwargs["infields"] = infields
         kwargs["outfields"] = outfields
-        super(SSHDataGrabber, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         if None in (self.inputs.username, self.inputs.password):
             raise ValueError(
-                "either both username and password " "are provided or none of them"
+                "either both username and password are provided or none of them"
             )
 
         if (
@@ -2577,7 +2539,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
             # no files
             msg = "Output template: %s returned no files" % template
             if self.inputs.raise_on_empty:
-                raise IOError(msg)
+                raise OSError(msg)
             else:
                 warn(msg)
 
@@ -2608,7 +2570,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                 for f in files_to_download:
                     try:
                         sftp.get(os.path.join(template_dir, f), f)
-                    except IOError:
+                    except OSError:
                         iflogger.info("remote file %s not found" % f)
 
             # return value
@@ -2675,9 +2637,8 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                             filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
                             raise TypeError(
-                                e.message
-                                + ": Template %s failed to convert with args %s"
-                                % (template, str(tuple(argtuple)))
+                                f"{e}: Template {template} failed to convert "
+                                f"with args {tuple(argtuple)}"
                             )
 
                     outputs[key].append(self._get_files_over_ssh(filledtemplate))
@@ -2760,7 +2721,7 @@ class JSONFileGrabber(IOBase):
 
         outputs = {}
         if isdefined(self.inputs.in_file):
-            with open(self.inputs.in_file, "r") as f:
+            with open(self.inputs.in_file) as f:
                 data = simplejson.load(f)
 
             if not isinstance(data, dict):
@@ -2786,12 +2747,12 @@ class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
             if not isdefined(value):
-                super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+                super().__setattr__(key, value)
             self._outputs[key] = value
         else:
             if key in self._outputs:
                 self._outputs[key] = value
-            super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+            super().__setattr__(key, value)
 
 
 class JSONFileSinkOutputSpec(TraitedSpec):
@@ -2830,7 +2791,7 @@ class JSONFileSink(IOBase):
     output_spec = JSONFileSinkOutputSpec
 
     def __init__(self, infields=[], force_run=True, **inputs):
-        super(JSONFileSink, self).__init__(**inputs)
+        super().__init__(**inputs)
         self._input_names = infields
 
         undefined_traits = {}
@@ -2886,6 +2847,9 @@ class BIDSDataGrabberInputSpec(DynamicTraitedSpec):
     output_query = traits.Dict(
         key_trait=Str, value_trait=traits.Dict, desc="Queries for outfield outputs"
     )
+    load_layout = Directory(
+        exists=True, desc="Path to load already saved Bidslayout.", mandatory=False
+    )
     raise_on_empty = traits.Bool(
         True,
         usedefault=True,
@@ -2905,6 +2869,14 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
 
     Examples
     --------
+
+    .. setup::
+
+        >>> try:
+        ...     import bids
+        ... except ImportError:
+        ...     pytest.skip()
+
     By default, the BIDSDataGrabber fetches anatomical and functional images
     from a project, and makes BIDS entities (e.g. subject) available for
     filtering outputs.
@@ -2940,19 +2912,19 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         infields : list of str
             Indicates the input fields to be dynamically created
         """
-        super(BIDSDataGrabber, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         if not isdefined(self.inputs.output_query):
             self.inputs.output_query = {
                 "bold": {
                     "datatype": "func",
                     "suffix": "bold",
-                    "extensions": ["nii", ".nii.gz"],
+                    "extension": ["nii", ".nii.gz"],
                 },
                 "T1w": {
                     "datatype": "anat",
                     "suffix": "T1w",
-                    "extensions": ["nii", ".nii.gz"],
+                    "extension": ["nii", ".nii.gz"],
                 },
             }
 
@@ -2961,7 +2933,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
             from bids import layout as bidslayout
 
             bids_config = join(dirname(bidslayout.__file__), "config", "bids.json")
-            bids_config = json.load(open(bids_config, "r"))
+            bids_config = json.load(open(bids_config))
             infields = [i["name"] for i in bids_config["entities"]]
 
         self._infields = infields or []
@@ -2977,9 +2949,13 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
     def _list_outputs(self):
         from bids import BIDSLayout
 
-        layout = BIDSLayout(
-            self.inputs.base_dir, derivatives=self.inputs.index_derivatives
-        )
+        # if load_layout is given load layout which is on some datasets much faster
+        if isdefined(self.inputs.load_layout):
+            layout = BIDSLayout.load(self.inputs.load_layout)
+        else:
+            layout = BIDSLayout(
+                self.inputs.base_dir, derivatives=self.inputs.index_derivatives
+            )
 
         if isdefined(self.inputs.extra_derivatives):
             layout.add_derivatives(self.inputs.extra_derivatives)
@@ -2999,7 +2975,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
             if len(filelist) == 0:
                 msg = "Output key: %s returned no files" % key
                 if self.inputs.raise_on_empty:
-                    raise IOError(msg)
+                    raise OSError(msg)
                 else:
                     iflogger.warning(msg)
                     filelist = Undefined
@@ -3015,7 +2991,9 @@ class ExportFileInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc="Input file name")
     out_file = File(mandatory=True, desc="Output file name")
     check_extension = traits.Bool(
-        True, desc="Ensure that the input and output file extensions match"
+        True,
+        usedefault=True,
+        desc="Ensure that the input and output file extensions match",
     )
     clobber = traits.Bool(desc="Permit overwriting existing files")
 

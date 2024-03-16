@@ -1,3 +1,296 @@
+1.8.6 (April 05, 2023)
+======================
+
+Bug-fix release in the 1.8.x series.
+
+  * FIX: Update dcmstack interface for Py3 / newer pydicom (https://github.com/nipy/nipype/pull/3541)
+  * FIX: NiBabel 5, and NetworkX 3 and DIPY 1.6 compatibility (https://github.com/nipy/nipype/pull/3538)
+  * FIX: Check for non-mandatory output in DWIBiasCorrect (https://github.com/nipy/nipype/pull/3523)
+  * FIX: Removed leftover debug print statement in FEAT class (https://github.com/nipy/nipype/pull/3521)
+  * DOC: Fix a few more typos (https://github.com/nipy/nipype/pull/3516)
+  * DOC: Fix typos found by codespell (https://github.com/nipy/nipype/pull/3512)
+  * CI: Drop nipy tests until a fixed nipy is released (https://github.com/nipy/nipype/pull/3559)
+  * CI: Disable nipy tests generally, re-add with max numpy  (https://github.com/nipy/nipype/pull/3532)
+  * CI: GitHub Workflows security hardening  (https://github.com/nipy/nipype/pull/3519)
+  * CI: Allow tutorial test cancellation (https://github.com/nipy/nipype/pull/3514)
+
+
+1.8.5 (September 21, 2022)
+==========================
+
+Bug-fix release in the 1.8.x series.
+
+  * FIX: Use interpolation/method in numpy.percentile as available (https://github.com/nipy/nipype/pull/3506)
+  * FIX: Deployed Matlab applications must not call addpath() (https://github.com/nipy/nipype/pull/3509)
+  * FIX: Provide more runtime information when node execution fails (https://github.com/nipy/nipype/pull/3505)
+  * FIX: Fixed bug for work dirs longer than 255 characters, fixes #2061  (https://github.com/nipy/nipype/pull/3495)
+  * FIX: Update ApplyVDM to handle 4D inputs  (https://github.com/nipy/nipype/pull/3500)
+  * ENH: Explicitly specify write_text encoding format (https://github.com/nipy/nipype/pull/3508)
+  * DOC: Fix typos found by copdespell (https://github.com/nipy/nipype/pull/3510)
+  * MAINT: Add github action to trigger tutorials for release branches (https://github.com/nipy/nipype/pull/3504)
+  * CI: Set up build-test-deploy workflow on GHA (https://github.com/nipy/nipype/pull/3513)
+
+
+1.8.4 (September 01, 2022)
+==========================
+
+Bug-fix release in the 1.8.x series.
+
+This release sets a maximum traits version to avoid new, breaking changes.
+
+  * MNT: Pin traits < 6.4 (https://github.com/nipy/nipype/pull/3501)
+  * ENH: Add inputs to mrtrix3.DWIPreprocInputSpec and remove mandatory annotation for pe_dir (https://github.com/nipy/nipype/pull/3470)
+
+
+1.8.3 (July 14, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release includes compatibility fixes for nibabel 4.x and resolves a denial-of-service
+bug when the etelemetry server is down that resulted in excessive (blocking) network hits that
+would cause any tools using nipype interfaces to take a very long time.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.3?closed=1>`__)
+
+  * FIX: Argument order to ``numpy.save()`` (https://github.com/nipy/nipype/pull/3485)
+  * FIX: Add tolerance parameter to ComputeDVARS (https://github.com/nipy/nipype/pull/3489)
+  * FIX: Delay access of nibabel.trackvis until actually needed (https://github.com/nipy/nipype/pull/3488)
+  * FIX: Avoid excessive etelemetry pings (https://github.com/nipy/nipype/pull/3484)
+  * ENH: Added outputs' generation to DWIBiascorrect interface (https://github.com/nipy/nipype/pull/3476)
+
+
+1.8.2 (June 06, 2022)
+=====================
+
+Bug-fix release in the 1.8.x series.
+
+This release restores compatibility with networkx 2.8.3, which errors when
+graph nodes might conflict with pydot parsing.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.2?closed=1>`__)
+
+  * ENH: Enable compression with Gunzip interface (https://github.com/nipy/nipype/pull/3472)
+  * CI: Schedule weekly tests with cron (https://github.com/nipy/nipype/pull/3480)
+
+
+1.8.1 (May 16, 2022)
+====================
+
+Bug-fix release in the 1.8.x series.
+
+The previous release vendored ``distutils.version.LooseVersion``, and the vendored objects did not
+preserve compatibility with the ``distutils`` objects. This release switches to the
+``looseversion`` package that ensures compatibility.
+
+
+1.8.0 (May 10, 2022)
+====================
+
+New feature release in the 1.8.x series.
+
+The primary new features are a batch of PETSurfer interfaces.
+
+This release drops support for Python < 3.7 and Numpy < 1.17, triggering a minor version bump.
+Additionally, matplotlib < 2.1 will stop working with some interfaces, but more recent versions
+will start working.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.8.0?closed=1>`__)
+
+  * FIX: Change plt.hist() argument from deprecated 'normed' to 'density' (https://github.com/nipy/nipype/pull/3455)
+  * ENH: Add random seed option to ANTs registration (https://github.com/nipy/nipype/pull/3463)
+  * ENH: Add PETsurfer interfaces (https://github.com/nipy/nipype/pull/3437)
+  * ENH: Add Text2Vest and Vest2Text interfaces (https://github.com/nipy/nipype/pull/3447)
+  * REF: Optimize ICC_rep_anova with a memoized helper function (https://github.com/nipy/nipype/pull/3454)
+  * REF: Rearranging matmul order and using hermitian flag in ICC_rep_anova  (https://github.com/nipy/nipype/pull/3453)
+  * MNT: Drop distutils (https://github.com/nipy/nipype/pull/3458)
+  * CI: Cache test data (https://github.com/nipy/nipype/pull/3459)
+
+
+1.7.1 (April 05, 2022)
+======================
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.7.1?closed=1>`__)
+
+  * FIX: Allow ``ConvertScalarImageToRGBInputSpec.mask_file`` to be ``"none"`` (https://github.com/nipy/nipype/pull/3364)
+  * FIX: Use a more robust strategy for detecting ANTs version (https://github.com/nipy/nipype/pull/3444)
+  * FIX: Retry renaming pkl(z) files on failure (https://github.com/nipy/nipype/pull/3404)
+  * FIX: Escape metacharacters when parsing dcm2niix outputs (https://github.com/nipy/nipype/pull/3417)
+  * FIX: Import error for nipype.interfaces.dipy.base (https://github.com/nipy/nipype/pull/3414)
+  * FIX: ``ValueError`` when using ``ResourceMonitor`` (https://github.com/nipy/nipype/pull/3419)
+  * FIX: Improve error handling of ``CommandLine`` interfaces (https://github.com/nipy/nipype/pull/3395)
+  * FIX: Bugs in ApplyVDM interface (https://github.com/nipy/nipype/pull/3396)
+  * ENH: Add MRTrix3 interfaces (pared-down gh-3426) (https://github.com/nipy/nipype/pull/3445)
+  * ENH: Enable BidsDataGrabber to load saved layouts (https://github.com/nipy/nipype/pull/3421)
+  * ENH: ROBEX interface (https://github.com/nipy/nipype/pull/3443)
+  * ENH: Include several operations to ANTs's ImageMath interface, including ReplicateImage and ReplicateDisplacement (https://github.com/nipy/nipype/pull/3435)
+  * ENH: Add "GenericLabel" to antsRegistration interpolation option. (https://github.com/nipy/nipype/pull/3424)
+  * ENH: added Apply VDM functionality to FieldMap SPM interface (https://github.com/nipy/nipype/pull/3394)
+  * DOC: Side bar and main page fixes (https://github.com/nipy/nipype/pull/3397)
+  * TEST: Allow SVD columns to flip sign (https://github.com/nipy/nipype/pull/3405)
+  * MNT: rename dipy ``move_streamlines`` to ``transform_tracking_output`` (https://github.com/nipy/nipype/pull/3412)
+  * MNT: Test on Python 3.10 (https://github.com/nipy/nipype/pull/3438)
+  * MNT: Added ORCID iD (https://github.com/nipy/nipype/pull/3436)
+
+
+1.7.0 (October 20, 2021)
+========================
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.7.0?closed=1>`__)
+
+  * FIX: Make ants.LaplacianThickness output_image a string, not file (https://github.com/nipy/nipype/pull/3393)
+  * FIX: coord for mrconvert (https://github.com/nipy/nipype/pull/3369)
+  * FIX: ``antsRegistration`` allows the ``restrict_deformation`` to be float  (https://github.com/nipy/nipype/pull/3387)
+  * FIX: Also allow `errno.EBUSY` during `emptydirs` on NFS  (https://github.com/nipy/nipype/pull/3357)
+  * FIX: Removed exists=True from MathsOutput (https://github.com/nipy/nipype/pull/3385)
+  * FIX: Extension not extensions, after pybids v0.9 (https://github.com/nipy/nipype/pull/3380)
+  * ENH: Add CAT12 SANLM denoising filter (https://github.com/nipy/nipype/pull/3374)
+  * ENH: Add expected steps for FreeSurfer 7 recon-all  (https://github.com/nipy/nipype/pull/3389)
+  * ENH: Stop printing false positive differences when logging cached nodes  (https://github.com/nipy/nipype/pull/3376)
+  * ENH: Add new flags to MRtrix/preprocess.py (DWI2Tensor, MRtransform)  (https://github.com/nipy/nipype/pull/3365)
+  * ENH: ``verbose`` input should not be hashed in ``ants.Registration`` (https://github.com/nipy/nipype/pull/3377)
+  * REF: Clean-up the BaseInterface ``run()`` function using context (https://github.com/nipy/nipype/pull/3347)
+  * DOC: Fix typo in README  (https://github.com/nipy/nipype/pull/3386)
+  * STY: Make private member name consistent with the rest of them (https://github.com/nipy/nipype/pull/3346)
+  * MNT: Simplify interface execution and better error handling of ``Node`` (https://github.com/nipy/nipype/pull/3349)
+  * MNT: Add user name and email to Docker to appease git/annex/datalad (https://github.com/nipy/nipype/pull/3378)
+  * CI: Update CircleCI machine image  (https://github.com/nipy/nipype/pull/3391)
+
+1.6.1 (June 16, 2021)
+=====================
+
+Bug-fix release in the 1.6.x series.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.6.1?closed=1>`__)
+
+  * FIX: Set DistributedPluginBase.refidx type correctly (https://github.com/nipy/nipype/pull/3340)
+  * FIX: change fsl interface randomise --f_only to --fonly for #3322 (https://github.com/nipy/nipype/pull/3325)
+  * FIX: BET raising "No image files match: ..." with very long file names (https://github.com/nipy/nipype/pull/3309)
+  * FIX: Update SmoothEstimateOutputSpec resels description (https://github.com/nipy/nipype/pull/3316)
+  * ENH: Adds interfaces for MRtrix utils shconv and sh2amp (https://github.com/nipy/nipype/pull/3280)
+  * ENH: Interface for R (https://github.com/nipy/nipype/pull/3291)
+  * ENH: Add CAT12 interfaces (https://github.com/nipy/nipype/pull/3310)
+  * ENH: AFNI 3dNetCorr as afni.NetCorr (https://github.com/nipy/nipype/pull/3263)
+  * ENH: Skip newline before Python call in batch submission to facilitate containerized runs (https://github.com/nipy/nipype/pull/3297)
+  * ENH: Add new dwifslpreproc interface for MRtrix3 (https://github.com/nipy/nipype/pull/3278)
+  * REF: Cache nodes in workflow to speed up construction, other optimizations (https://github.com/nipy/nipype/pull/3331)
+  * DOC: Fixed Developer Setup Link in install.rst (https://github.com/nipy/nipype/pull/3330)
+  * MNT: Blacklist Dipy 1.4.1 (https://github.com/nipy/nipype/pull/3335)
+  * MNT: Drop support for numpy < 1.15.3 (https://github.com/nipy/nipype/pull/3284)
+  * CI: Build docker images with Python 3.8 (https://github.com/nipy/nipype/pull/3287)
+  * CI: Drop Circle doc builds (https://github.com/nipy/nipype/pull/3338)
+  * CI: Drop Travis (https://github.com/nipy/nipype/pull/3332)
+  * CI: Build docker images with Python 3.8 (https://github.com/nipy/nipype/pull/3287)
+  * CI: Add specs and style checks (https://github.com/nipy/nipype/pull/3321)
+  * CI: Move from Travis to GitHub actions (https://github.com/nipy/nipype/pull/3318)
+
+1.6.0 (November 28, 2020)
+=========================
+
+New feature release in the 1.6.x series.
+
+In addition to the usual bug fixes, significant reductions were made
+in workflow startup costs.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.6.0?closed=1>`__)
+
+  * FIX: Canonicalize environment dicts to strings in Windows (https://github.com/nipy/nipype/pull/3267)
+  * FIX: Purge deprecated exception content accesses (https://github.com/nipy/nipype/pull/3272)
+  * FIX: Handle changes in CLI structure of mrtrix3.DWIBiasCorrect (https://github.com/nipy/nipype/pull/3248)
+  * FIX: EpiReg changed to not list certain outputs when 'wmseg' input is specified (https://github.com/nipy/nipype/pull/3265)
+  * FIX: CI issues (https://github.com/nipy/nipype/pull/3262)
+  * FIX: SPM SliceTiming must accept either Int or float for ref_slice and sli… (https://github.com/nipy/nipype/pull/3255)
+  * FIX: Raise version error when using ``-g`` with ``antsAI`` < 2.3.0 (https://github.com/nipy/nipype/pull/3256)
+  * FIX: No longer depending on pydotplus (networkx >=2.0 update) (https://github.com/nipy/nipype/pull/3251)
+  * FIX: ANTs' utilities revision - bug fixes and add more operations to ``ants.ImageMath`` (https://github.com/nipy/nipype/pull/3236)
+  * ENH: Handle unavailable traits due to version differences (https://github.com/nipy/nipype/pull/3273)
+  * ENH: Optimize workflow.run performance (https://github.com/nipy/nipype/pull/3260)
+  * DOC: Remove myself (@mr-c) from the zenodo metadata (https://github.com/nipy/nipype/pull/3271)
+
+1.5.1 (August 16, 2020)
+=======================
+
+Bug-fix release in the 1.5.x series.
+
+This release includes small updates to ANTs utilities that lie somewhere
+between bug fixes and enhancements.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.5.1?closed=1>`__)
+
+  * FIX: Warn for min/max_ver traits when tool version can't be parsed (https://github.com/nipy/nipype/pull/3241)
+  * FIX: Serialize all interface arguments when exporting workflows (https://github.com/nipy/nipype/pull/3240)
+  * FIX: Permit identity transforms in list of transforms given to ants.ApplyTransforms (https://github.com/nipy/nipype/pull/3237)
+  * FIX: ANTs' utilities revision - bug fixes and add more operations to ``ants.ImageMath`` (https://github.com/nipy/nipype/pull/3236)
+  * DOC: Skip BIDSDataGrabber doctest if pybids is missing (https://github.com/nipy/nipype/pull/3224)
+
+1.5.0 (June 03, 2020)
+=====================
+
+New feature release in the 1.5.x series.
+
+In this release, the example scripts have been split out into their own package:
+`niflow-nipype1-examples <https://github.com/niflows/nipype1-examples>`__.
+
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.5.0?closed=1>`__)
+
+  * FIX: volterra_expansion_order documentation error (https://github.com/nipy/nipype/pull/3213)
+  * FIX: BET incorrect output paths (https://github.com/nipy/nipype/pull/3214)
+  * FIX: Terminal output in ``report.rst`` spreads one line per character (https://github.com/nipy/nipype/pull/3220)
+  * FIX: Allow parsing freesurfer 7 version string (https://github.com/nipy/nipype/pull/3216)
+  * FIX: Use PackageInfo to get NiftyReg version (https://github.com/nipy/nipype/pull/3194)
+  * FIX: Partial rollback of N4BiasFieldCorrection (https://github.com/nipy/nipype/pull/3188)
+  * FIX: ANTs' tools maintenance overhaul (https://github.com/nipy/nipype/pull/3180)
+  * FIX: load_resultfile crashes if open resultsfile from crashed job (https://github.com/nipy/nipype/pull/3182)
+  * FIX: FSL model.py make multiple F-tests (https://github.com/nipy/nipype/pull/3166)
+  * ENH: Restore ants.legacy interfaces (https://github.com/nipy/nipype/pull/3222)
+  * ENH: Add ``"TruncateImageIntensity"`` operation to ``ants.utils.Image.Math`` (https://github.com/nipy/nipype/pull/3210)
+  * ENH: SPM NewSegment multi-channel segmentation (https://github.com/nipy/nipype/pull/3162)
+  * ENH: Add reverse-ordered transform lists to ants.Registration outputs (https://github.com/nipy/nipype/pull/3192)
+  * ENH: Improve workflow connect performance (https://github.com/nipy/nipype/pull/3184)
+  * ENH: Add ``ConstrainedSphericalDeconvolution`` interface to replace ``EstimateFOD`` for MRtrix3's ``dwi2fod`` (https://github.com/nipy/nipype/pull/3176)
+  * ENH: Detect values for EulerNumber interface (https://github.com/nipy/nipype/pull/3173)
+  * ENH: Remove examples from repository (https://github.com/nipy/nipype/pull/3172)
+  * TEST: Clean up tests (https://github.com/nipy/nipype/pull/3195)
+  * TEST: Mock terminal output before testing changing default value (https://github.com/nipy/nipype/pull/3193)
+  * REF: make invocations of python and pytest consistent with the one used/desired python (https://github.com/nipy/nipype/pull/3208)
+  * REF: Prefer math.gcd to hand-rolled Euclid's algorithm (https://github.com/nipy/nipype/pull/3177)
+  * REF: Removed all uses of numpy_mmap (https://github.com/nipy/nipype/pull/3121)
+  * DOC: Sphinx 3 compatibility (https://github.com/nipy/nipype/pull/3206)
+  * DOC: Update links, typos in contributing guide (https://github.com/nipy/nipype/pull/3160)
+  * DOC: Update SelectFiles docstring to match actual behavior (https://github.com/nipy/nipype/pull/3041)
+  * DOC: Updated .zenodo.json file (https://github.com/nipy/nipype/pull/3167)
+  * DOC: Update .zenodo.json (https://github.com/nipy/nipype/pull/3165)
+  * MNT: Permit recent nilearns (https://github.com/nipy/nipype/pull/2841)
+  * MNT: Test Python 3.8 (https://github.com/nipy/nipype/pull/3154)
+  * MNT: Restore ReadTheDocs (https://github.com/nipy/nipype/pull/3207)
+  * MNT: Update Zenodo ordering based on commit count (https://github.com/nipy/nipype/pull/3169)
+
+1.4.2 (February 14, 2020)
+=========================
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.4.2?closed=1>`__)
+
+  * FIX: Allow ``fsl.MultipleRegressDesign`` to create multiple F-tests (https://github.com/nipy/nipype/pull/3166)
+  * FIX: Reliably parse SGE job IDs in the presence of warnings (https://github.com/nipy/nipype/pull/3168)
+  * FIX: Move TraitType import, handle API change for NoDefaultSpecified (https://github.com/nipy/nipype/pull/3159)
+
+1.4.1 (January 27, 2020)
+========================
+(`Full changelog <https://github.com/nipy/nipype/milestone/1.4.1?closed=1>`__)
+
+  * FIX: DataSink to S3 buckets (https://github.com/nipy/nipype/pull/3130)
+  * FIX: improve version checking for nodes of workflows (https://github.com/nipy/nipype/pull/3152)
+  * FIX: mapnode to generate result file when crashes in single node mode (https://github.com/nipy/nipype/pull/3143)
+  * FIX: Can't seem to import workflows from niflows in CircleCI (https://github.com/nipy/nipype/pull/3134)
+  * FIX: Repair aftermath of docs refactor (https://github.com/nipy/nipype/pull/3133)
+  * FIX: change ANTS number_of_time_steps from Float to Int (https://github.com/nipy/nipype/pull/3118)
+  * DOC: Revise generation of examples to work in RTD (https://github.com/nipy/nipype/pull/3132)
+  * DOC: Bring examples generation back to ``doc/conf.py`` (https://github.com/nipy/nipype/pull/3131)
+  * DOC: Documentation overhaul (https://github.com/nipy/nipype/pull/3124)
+  * DOC: Deep revision of documentation building (https://github.com/nipy/nipype/pull/3120)
+  * DOC: Deduplicate code for Sphinx's APIdoc generation (https://github.com/nipy/nipype/pull/3119)
+  * MNT: Update requirements.txt post-1.4 (https://github.com/nipy/nipype/pull/3153)
+
+
 1.4.0 (December 20, 2019)
 =========================
 (`Full changelog <https://github.com/nipy/nipype/milestone/37?closed=1>`__)
@@ -14,6 +307,7 @@
   * MNT: Set junit_family to suppress pytest warning (https://github.com/nipy/nipype/pull/3111)
   * MNT: Fix Dorota Jarecka ORCID (https://github.com/nipy/nipype/pull/3100)
   * MNT: Drop Python 2 support (https://github.com/nipy/nipype/pull/2654)
+
 
 1.3.1 (November 12, 2019)
 =========================
@@ -149,7 +443,7 @@ Python 1.2.3 will be the last version to support Python 3.4.
 
   * FIX: ANTS LaplacianThickness cmdline opts fixed up (https://github.com/nipy/nipype/pull/2846)
   * FIX: Resolve LinAlgError during SVD (https://github.com/nipy/nipype/pull/2838)
-  * ENH: Add interfaces wrapping DIPY worflows (https://github.com/nipy/nipype/pull/2830)
+  * ENH: Add interfaces wrapping DIPY workflows (https://github.com/nipy/nipype/pull/2830)
   * ENH: Update BIDSDataGrabber for pybids 0.7 (https://github.com/nipy/nipype/pull/2737)
   * ENH: Add FSL `eddy_quad` interface (https://github.com/nipy/nipype/pull/2825)
   * ENH: Support tckgen -select in MRtrix3 v3+ (https://github.com/nipy/nipype/pull/2823)

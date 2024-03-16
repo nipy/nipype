@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution
@@ -18,8 +17,7 @@ logger = logging.getLogger("nipype.workflow")
 
 
 def report_crash(node, traceback=None, hostname=None):
-    """Writes crash related information to a file
-    """
+    """Writes crash related information to a file"""
     name = node._id
     host = None
     traceback = traceback or format_exception(*sys.exc_info())
@@ -56,8 +54,8 @@ another exception occurred:\n\n{}.""".format(
     try:
         login_name = getpass.getuser()
     except KeyError:
-        login_name = "UID{:d}".format(os.getuid())
-    crashfile = "crash-%s-%s-%s-%s" % (timeofcrash, login_name, name, str(uuid.uuid4()))
+        login_name = f"UID{os.getuid():d}"
+    crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{str(uuid.uuid4())}"
     crashdir = node.config["execution"].get("crashdump_dir", os.getcwd())
 
     os.makedirs(crashdir, exist_ok=True)
@@ -94,19 +92,16 @@ def report_nodes_not_run(notrun):
             for subnode in info["dependents"]:
                 logger.debug(subnode._id)
         logger.info("***********************************")
-        raise RuntimeError(
-            ("Workflow did not execute cleanly. " "Check log for details")
-        )
 
 
 def create_pyscript(node, updatehash=False, store_exception=True):
     # pickle node
     timestamp = strftime("%Y%m%d_%H%M%S")
     if node._hierarchy:
-        suffix = "%s_%s_%s" % (timestamp, node._hierarchy, node._id)
+        suffix = f"{timestamp}_{node._hierarchy}_{node._id}"
         batch_dir = os.path.join(node.base_dir, node._hierarchy.split(".")[0], "batch")
     else:
-        suffix = "%s_%s" % (timestamp, node._id)
+        suffix = f"{timestamp}_{node._id}"
         batch_dir = os.path.join(node.base_dir, "batch")
     if not os.path.exists(batch_dir):
         os.makedirs(batch_dir)
@@ -125,7 +120,13 @@ except ImportError:
     can_import_matplotlib = False
     pass
 
+import os
+value = os.environ.get('NIPYPE_NO_ET', None)
+if value is None:
+    # disable ET for any submitted job
+    os.environ['NIPYPE_NO_ET'] = "1"
 from nipype import config, logging
+
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
 from traceback import format_exception
@@ -174,6 +175,6 @@ except Exception as e:
 """
     cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, "pyscript_%s.py" % suffix)
-    with open(pyscript, "wt") as fp:
+    with open(pyscript, "w") as fp:
         fp.writelines(cmdstr)
     return pyscript

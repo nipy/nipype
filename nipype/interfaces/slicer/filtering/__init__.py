@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .morphology import GrayscaleGrindPeakImageFilter, GrayscaleFillHoleImageFilter
 from .denoising import (
     GradientAnisotropicDiffusion,

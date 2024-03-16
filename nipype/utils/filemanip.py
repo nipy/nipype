@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions
@@ -26,37 +25,11 @@ from .misc import is_container
 
 fmlogger = logging.getLogger("nipype.utils")
 
-related_filetype_sets = [
-    (".hdr", ".img", ".mat"),
-    (".nii", ".mat"),
-    (".BRIK", ".HEAD"),
-]
+related_filetype_sets = [(".hdr", ".img", ".mat"), (".nii", ".mat"), (".BRIK", ".HEAD")]
 
 
-def _resolve_with_filenotfound(path, **kwargs):
-    """ Raise FileNotFoundError instead of OSError """
-    try:
-        return path.resolve(**kwargs)
-    except OSError as e:
-        if isinstance(e, FileNotFoundError):
-            raise
-        raise FileNotFoundError(str(path))
-
-
-def path_resolve(path, strict=False):
-    try:
-        return _resolve_with_filenotfound(path, strict=strict)
-    except TypeError:  # PY35
-        pass
-
-    path = path.absolute()
-    if strict or path.exists():
-        return _resolve_with_filenotfound(path)
-
-    # This is a hacky shortcut, using path.absolute() unmodified
-    # In cases where the existing part of the path contains a
-    # symlink, different results will be produced
-    return path
+# Previously a patch, not worth deprecating
+path_resolve = Path.resolve
 
 
 def split_filename(fname):
@@ -152,8 +125,7 @@ def fname_presuffix(fname, prefix="", suffix="", newpath=None, use_ext=True):
 
 
 def fnames_presuffix(fnames, prefix="", suffix="", newpath=None, use_ext=True):
-    """Calls fname_presuffix for a list of files.
-    """
+    """Calls fname_presuffix for a list of files."""
     f2 = []
     for fname in fnames:
         f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
@@ -215,7 +187,7 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5, raise_notfound=False)
 
 
 def hash_timestamp(afile):
-    """ Computes md5 hash of the timestamp of a file """
+    """Computes md5 hash of the timestamp of a file"""
     md5hex = None
     if op.isfile(afile):
         md5obj = md5()
@@ -439,7 +411,7 @@ def copyfile(
             fmlogger.debug("Copying File: %s->%s", newfile, originalfile)
             shutil.copyfile(originalfile, newfile)
         except shutil.Error as e:
-            fmlogger.warning(e.message)
+            fmlogger.warning(str(e))
 
     # Associated files
     if copy_related_files:
@@ -521,8 +493,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 
 
 def ensure_list(filename):
-    """Returns a list given either a string or a list
-    """
+    """Returns a list given either a string or a list"""
     if isinstance(filename, (str, bytes)):
         return [filename]
     elif isinstance(filename, list):
@@ -535,7 +506,7 @@ def ensure_list(filename):
 
 def simplify_list(filelist):
     """Returns a list if filelist is a list of length greater than 1,
-       otherwise returns the first element
+    otherwise returns the first element
     """
     if len(filelist) > 1:
         return filelist
@@ -589,7 +560,7 @@ def load_json(filename):
 
     """
 
-    with open(filename, "r") as fp:
+    with open(filename) as fp:
         data = json.load(fp)
     return data
 
@@ -614,15 +585,15 @@ def loadpkl(infile):
         if infile.exists():
             timed_out = False
             break
-        fmlogger.debug("'{}' missing; waiting 2s".format(infile))
+        fmlogger.debug(f"'{infile}' missing; waiting 2s")
         sleep(2)
     if timed_out:
         error_message = (
-            "Result file {0} expected, but "
-            "does not exist after ({1}) "
+            "Result file {} expected, but "
+            "does not exist after ({}) "
             "seconds.".format(infile, timeout)
         )
-        raise IOError(error_message)
+        raise OSError(error_message)
 
     with pklopen(str(infile), "rb") as pkl_file:
         pkl_contents = pkl_file.read()
@@ -678,14 +649,14 @@ the same Nipype version from the generated pkl."""
 
 
 def crash2txt(filename, record):
-    """ Write out plain text crash file """
+    """Write out plain text crash file"""
     with open(filename, "w") as fp:
         if "node" in record:
             node = record["node"]
-            fp.write("Node: {}\n".format(node.fullname))
-            fp.write("Working directory: {}\n".format(node.output_dir()))
+            fp.write(f"Node: {node.fullname}\n")
+            fp.write(f"Working directory: {node.output_dir()}\n")
             fp.write("\n")
-            fp.write("Node inputs:\n{}\n".format(node.inputs))
+            fp.write(f"Node inputs:\n{node.inputs}\n")
         fp.write("".join(record["traceback"]))
 
 
@@ -699,7 +670,7 @@ def read_stream(stream, logger=None, encoding=None):
 
 
     """
-    default_encoding = encoding or locale.getdefaultlocale()[1] or "UTF-8"
+    default_encoding = encoding or locale.getpreferredencoding(do_setlocale=False)
     logger = logger or fmlogger
     try:
         out = stream.decode(default_encoding)
@@ -716,7 +687,7 @@ def savepkl(filename, record, versioning=False):
         if versioning:
             metadata = json.dumps({"version": version})
             f.write(metadata.encode("utf-8"))
-            f.write("\n".encode("utf-8"))
+            f.write(b"\n")
         pickle.dump(record, f)
         content = f.getvalue()
 
@@ -724,7 +695,15 @@ def savepkl(filename, record, versioning=False):
     tmpfile = filename + ".tmp"
     with pkl_open(tmpfile, "wb") as pkl_file:
         pkl_file.write(content)
-    os.rename(tmpfile, filename)
+    for _ in range(5):
+        try:
+            os.rename(tmpfile, filename)
+            break
+        except FileNotFoundError as e:
+            fmlogger.debug(str(e))
+            sleep(2)
+    else:
+        raise e
 
 
 rst_levels = ["=", "-", "~", "+"]
@@ -736,15 +715,15 @@ def write_rst_header(header, level=0):
 
 def write_rst_list(items, prefix=""):
     out = []
-    for item in items:
-        out.append("{} {}".format(prefix, str(item)))
+    for item in ensure_list(items):
+        out.append(f"{prefix} {str(item)}")
     return "\n".join(out) + "\n\n"
 
 
 def write_rst_dict(info, prefix=""):
     out = []
     for key, value in sorted(info.items()):
-        out.append("{}* {} : {}".format(prefix, key, str(value)))
+        out.append(f"{prefix}* {key} : {str(value)}")
     return "\n".join(out) + "\n\n"
 
 
@@ -786,8 +765,13 @@ def emptydirs(path, noexist_ok=False):
     try:
         shutil.rmtree(path)
     except OSError as ex:
-        elcont = os.listdir(path)
-        if ex.errno == errno.ENOTEMPTY and not elcont:
+        elcont = [
+            Path(root) / file
+            for root, _, files in os.walk(path)
+            for file in files
+            if not file.startswith(".nfs")
+        ]
+        if ex.errno in [errno.ENOTEMPTY, errno.EBUSY] and not elcont:
             fmlogger.warning(
                 "An exception was raised trying to remove old %s, but the path"
                 " seems empty. Is it an NFS mount?. Passing the exception.",
@@ -799,7 +783,7 @@ def emptydirs(path, noexist_ok=False):
         else:
             raise ex
 
-    os.makedirs(path)
+    os.makedirs(path, exist_ok=True)
 
 
 def silentrm(filename):
@@ -870,15 +854,13 @@ def get_dependencies(name, environ):
         o, e = proc.communicate()
         deps = o.rstrip()
     except Exception as ex:
-        deps = '"%s" failed' % command
-        fmlogger.warning(
-            "Could not get dependencies of %s. Error:\n%s", name, ex.message
-        )
+        deps = f"{command!r} failed"
+        fmlogger.warning(f"Could not get dependencies of {name}s. Error:\n{ex}")
     return deps
 
 
 def canonicalize_env(env):
-    """Windows requires that environment be dicts with bytes as keys and values
+    """Windows requires that environment be dicts with str as keys and values
     This function converts any unicode entries for Windows only, returning the
     dictionary untouched in other environments.
 
@@ -890,7 +872,7 @@ def canonicalize_env(env):
     Returns
     -------
     env : dict
-        Windows: environment dictionary with bytes keys and values
+        Windows: environment dictionary with str keys and values
         Other: untouched input ``env``
     """
     if os.name != "nt":
@@ -898,10 +880,10 @@ def canonicalize_env(env):
 
     out_env = {}
     for key, val in env.items():
-        if not isinstance(key, bytes):
-            key = key.encode("utf-8")
-        if not isinstance(val, bytes):
-            val = val.encode("utf-8")
+        if not isinstance(key, str):
+            key = key.decode("utf-8")
+        if not isinstance(val, str):
+            val = val.decode("utf-8")
         out_env[key] = val
     return out_env
 
@@ -924,12 +906,10 @@ def relpath(path, start=None):
         unc_path, rest = op.splitunc(path)
         unc_start, rest = op.splitunc(start)
         if bool(unc_path) ^ bool(unc_start):
-            raise ValueError(
-                ("Cannot mix UNC and non-UNC paths " "(%s and %s)") % (path, start)
-            )
+            raise ValueError(f"Cannot mix UNC and non-UNC paths ({path} and {start})")
         else:
             raise ValueError(
-                "path is on drive %s, start on drive %s" % (path_list[0], start_list[0])
+                f"path is on drive {path_list[0]}, start on drive {start_list[0]}"
             )
     # Work out how much of the filepath is shared by start and path.
     for i in range(min(len(start_list), len(path_list))):

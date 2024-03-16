@@ -4,8 +4,13 @@ from ..image import Reorient
 
 def test_Reorient_inputs():
     input_map = dict(
-        in_file=dict(extensions=None, mandatory=True,),
-        orientation=dict(usedefault=True,),
+        in_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
+        orientation=dict(
+            usedefault=True,
+        ),
     )
     inputs = Reorient.input_spec()
 
@@ -16,7 +21,12 @@ def test_Reorient_inputs():
 
 def test_Reorient_outputs():
     output_map = dict(
-        out_file=dict(extensions=None,), transform=dict(extensions=None,),
+        out_file=dict(
+            extensions=None,
+        ),
+        transform=dict(
+            extensions=None,
+        ),
     )
     outputs = Reorient.output_spec()
 

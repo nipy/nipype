@@ -4,11 +4,24 @@ from ..utils import Unifize
 
 def test_Unifize_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        cl_frac=dict(argstr="-clfrac %f",),
-        environ=dict(nohash=True, usedefault=True,),
-        epi=dict(argstr="-EPI", requires=["no_duplo", "t2"], xor=["gm"],),
-        gm=dict(argstr="-GM",),
+        args=dict(
+            argstr="%s",
+        ),
+        cl_frac=dict(
+            argstr="-clfrac %f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        epi=dict(
+            argstr="-EPI",
+            requires=["no_duplo", "t2"],
+            xor=["gm"],
+        ),
+        gm=dict(
+            argstr="-GM",
+        ),
         in_file=dict(
             argstr="-input %s",
             copyfile=False,
@@ -16,8 +29,13 @@ def test_Unifize_inputs():
             mandatory=True,
             position=-1,
         ),
-        no_duplo=dict(argstr="-noduplo",),
-        num_threads=dict(nohash=True, usedefault=True,),
+        no_duplo=dict(
+            argstr="-noduplo",
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         out_file=dict(
             argstr="-prefix %s",
             extensions=None,
@@ -25,12 +43,25 @@ def test_Unifize_inputs():
             name_template="%s_unifized",
         ),
         outputtype=dict(),
-        quiet=dict(argstr="-quiet",),
-        rbt=dict(argstr="-rbt %f %f %f",),
-        scale_file=dict(argstr="-ssave %s", extensions=None,),
-        t2=dict(argstr="-T2",),
-        t2_up=dict(argstr="-T2up %f",),
-        urad=dict(argstr="-Urad %s",),
+        quiet=dict(
+            argstr="-quiet",
+        ),
+        rbt=dict(
+            argstr="-rbt %f %f %f",
+        ),
+        scale_file=dict(
+            argstr="-ssave %s",
+            extensions=None,
+        ),
+        t2=dict(
+            argstr="-T2",
+        ),
+        t2_up=dict(
+            argstr="-T2up %f",
+        ),
+        urad=dict(
+            argstr="-Urad %s",
+        ),
     )
     inputs = Unifize.input_spec()
 
@@ -41,7 +72,12 @@ def test_Unifize_inputs():
 
 def test_Unifize_outputs():
     output_map = dict(
-        out_file=dict(extensions=None,), scale_file=dict(extensions=None,),
+        out_file=dict(
+            extensions=None,
+        ),
+        scale_file=dict(
+            extensions=None,
+        ),
     )
     outputs = Unifize.output_spec()
 

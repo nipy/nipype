@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
 
@@ -15,13 +14,12 @@ except:
 
 
 class SomaFlowPlugin(GraphPluginBase):
-    """Execute using Soma workflow
-    """
+    """Execute using Soma workflow"""
 
     def __init__(self, plugin_args=None):
         if soma_not_loaded:
             raise ImportError("SomaFlow could not be imported")
-        super(SomaFlowPlugin, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         jobs = []

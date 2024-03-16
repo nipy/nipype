@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -26,7 +25,7 @@ def no_nifty_tool(cmd=None):
     reason="niftyreg is not installed. reg_resample not found.",
 )
 def test_reg_resample_res():
-    """ tests for reg_resample interface """
+    """tests for reg_resample interface"""
     # Create a reg_resample object
     nr_resample = RegResample()
 
@@ -88,7 +87,7 @@ def test_reg_resample_res():
     reason="niftyreg is not installed. reg_jacobian not found.",
 )
 def test_reg_jacobian_jac():
-    """ Test interface for RegJacobian """
+    """Test interface for RegJacobian"""
     # Create a reg_jacobian object
     nr_jacobian = RegJacobian()
 
@@ -156,7 +155,7 @@ def test_reg_jacobian_jac():
     reason="niftyreg is not installed. reg_tools not found.",
 )
 def test_reg_tools_mul():
-    """ tests for reg_tools interface """
+    """tests for reg_tools interface"""
     # Create a reg_tools object
     nr_tools = RegTools()
 
@@ -198,7 +197,7 @@ def test_reg_tools_mul():
     reason="niftyreg is not installed. reg_average not found.",
 )
 def test_reg_average():
-    """ tests for reg_average interface """
+    """tests for reg_average interface"""
     # Create a reg_average object
     nr_average = RegAverage()
 
@@ -219,7 +218,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg %s %s %s -omp 1" % (
+    expected_argv = "{} {} -avg {} {} {} -omp 1".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.nii.gz"),
         one_file,
@@ -230,7 +229,7 @@ def test_reg_average():
     assert argv.decode("utf-8") == expected_argv
 
     # Test command line with text file
-    expected_cmd = "%s --cmd_file %s" % (
+    expected_cmd = "{} --cmd_file {}".format(
         get_custom_path("reg_average"),
         reg_average_cmd,
     )
@@ -252,7 +251,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg %s %s %s -omp 1" % (
+    expected_argv = "{} {} -avg {} {} {} -omp 1".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.txt"),
         one_file,
@@ -277,7 +276,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg_lts %s %s %s -omp 1" % (
+    expected_argv = "{} {} -avg_lts {} {} {} -omp 1".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.txt"),
         one_file,
@@ -314,7 +313,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -avg_tran %s -omp 1 %s %s %s %s %s %s" % (
+    expected_argv = "{} {} -avg_tran {} -omp 1 {} {} {} {} {} {}".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.nii.gz"),
         ref_file,
@@ -361,7 +360,7 @@ def test_reg_average():
         argv = f_obj.read()
     os.remove(reg_average_cmd)
 
-    expected_argv = "%s %s -demean3 %s -omp 1 %s %s %s %s %s %s %s %s %s" % (
+    expected_argv = "{} {} -demean3 {} -omp 1 {} {} {} {} {} {} {} {} {}".format(
         get_custom_path("reg_average"),
         os.path.join(os.getcwd(), "avg_out.nii.gz"),
         ref_file,
@@ -384,7 +383,7 @@ def test_reg_average():
     reason="niftyreg is not installed. reg_transform not found.",
 )
 def test_reg_transform_def():
-    """ tests for reg_transform interface """
+    """tests for reg_transform interface"""
     # Create a reg_transform object
     nr_transform = RegTransform()
 
@@ -500,7 +499,7 @@ def test_reg_transform_def():
     reason="niftyreg is not installed. reg_measure not found.",
 )
 def test_reg_measure():
-    """ tests for reg_measure interface """
+    """tests for reg_measure interface"""
     # Create a reg_measure object
     nr_measure = RegMeasure()
 

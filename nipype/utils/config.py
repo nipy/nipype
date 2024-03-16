@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -14,7 +13,7 @@ import sys
 import errno
 import atexit
 from warnings import warn
-from distutils.version import LooseVersion
+from looseversion import LooseVersion
 import configparser
 import numpy as np
 
@@ -83,7 +82,7 @@ def mkdir_p(path):
             raise
 
 
-class NipypeConfig(object):
+class NipypeConfig:
     """Base nipype config class"""
 
     def __init__(self, *args, **kwargs):
@@ -207,25 +206,25 @@ class NipypeConfig(object):
         if not os.path.exists(self.data_file):
             return None
         with SoftFileLock("%s.lock" % self.data_file):
-            with open(self.data_file, "rt") as file:
+            with open(self.data_file) as file:
                 datadict = load(file)
         if key in datadict:
             return datadict[key]
         return None
 
     def save_data(self, key, value):
-        """Store config flie"""
+        """Store config file"""
         datadict = {}
         if os.path.exists(self.data_file):
             with SoftFileLock("%s.lock" % self.data_file):
-                with open(self.data_file, "rt") as file:
+                with open(self.data_file) as file:
                     datadict = load(file)
         else:
             dirname = os.path.dirname(self.data_file)
             if not os.path.exists(dirname):
                 mkdir_p(dirname)
         with SoftFileLock("%s.lock" % self.data_file):
-            with open(self.data_file, "wt") as file:
+            with open(self.data_file, "w") as file:
                 datadict[key] = value
                 dump(datadict, file)
 

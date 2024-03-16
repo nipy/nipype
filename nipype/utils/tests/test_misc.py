@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -6,7 +5,13 @@ from shutil import rmtree
 
 import pytest
 
-from nipype.utils.misc import container_to_string, str2bool, flatten, unflatten
+from nipype.utils.misc import (
+    container_to_string,
+    str2bool,
+    flatten,
+    unflatten,
+    dict_diff,
+)
 
 
 def test_cont_to_str():
@@ -95,3 +100,43 @@ def test_rgetcwd(monkeypatch, tmpdir):
     monkeypatch.delenv("PWD")
     with pytest.raises(OSError):
         rgetcwd(error=False)
+
+
+def test_dict_diff():
+    abtuple = [("a", "b")]
+    abdict = dict(abtuple)
+
+    # Unchanged
+    assert dict_diff(abdict, abdict) == ""
+    assert dict_diff(abdict, abtuple) == ""
+    assert dict_diff(abtuple, abdict) == ""
+    assert dict_diff(abtuple, abtuple) == ""
+
+    # Changed keys
+    diff = dict_diff({"a": "b"}, {"b": "a"})
+    assert "Dictionaries had differing keys" in diff
+    assert "keys not previously seen: {'b'}" in diff
+    assert "keys not presently seen: {'a'}" in diff
+
+    # Trigger recursive uniformization
+    complicated_val1 = [{"a": ["b"], "c": ("d", "e")}]
+    complicated_val2 = [{"a": ["x"], "c": ("d", "e")}]
+    uniformized_val1 = ({"a": ("b",), "c": ("d", "e")},)
+    uniformized_val2 = ({"a": ("x",), "c": ("d", "e")},)
+
+    diff = dict_diff({"a": complicated_val1}, {"a": complicated_val2})
+    assert "Some dictionary entries had differing values:" in diff
+    assert f"a: {uniformized_val2!r} != {uniformized_val1!r}" in diff
+
+    # Trigger shortening
+    diff = dict_diff({"a": "b" * 60}, {"a": "c" * 70})
+    assert "Some dictionary entries had differing values:" in diff
+    assert "a: 'cccccccccc...cccccccccc' != 'bbbbbbbbbb...bbbbbbbbbb'" in diff
+
+    # Fail the dict conversion
+    diff = dict_diff({}, "not a dict")
+    assert diff == (
+        "Diff between nipype inputs failed:\n"
+        "* Cached inputs: {}\n"
+        "* New inputs: not a dict"
+    )

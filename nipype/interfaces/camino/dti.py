@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 
 from ...utils.filemanip import split_filename
@@ -621,7 +619,7 @@ Specifies the PDF to use. There are three choices:
         units="NA",
         desc="The maximum number of PDs in a voxel (default 3) for PD data."
         "This option determines the size of the input and output voxels."
-        "This means that the data file may be large enough to accomodate three or more PDs,"
+        "This means that the data file may be large enough to accommodate three or more PDs,"
         "but does not mean that any of the voxels are classified as containing three or more PDs.",
     )
 
@@ -740,7 +738,7 @@ class TrackInputSpec(CommandLineInputSpec):
     stepsize = traits.Float(
         argstr="-stepsize %f",
         requires=["tracker"],
-        desc=("Step size for EULER and RK4 tracking. " "The default is 1mm."),
+        desc=("Step size for EULER and RK4 tracking. The default is 1mm."),
     )
 
     inputdatatype = traits.Enum(
@@ -938,7 +936,7 @@ class TrackDT(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "dt"
-        return super(TrackDT, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackPICoInputSpec(TrackInputSpec):
@@ -975,7 +973,7 @@ class TrackPICo(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "pico"
-        return super(TrackPICo, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBedpostxDeterInputSpec(TrackInputSpec):
@@ -1025,7 +1023,7 @@ class TrackBedpostxDeter(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bedpostx_dyad"
-        return super(TrackBedpostxDeter, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBedpostxProbaInputSpec(TrackInputSpec):
@@ -1086,7 +1084,7 @@ class TrackBedpostxProba(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bedpostx"
-        return super(TrackBedpostxProba, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBayesDiracInputSpec(TrackInputSpec):
@@ -1094,7 +1092,7 @@ class TrackBayesDiracInputSpec(TrackInputSpec):
         argstr="-schemefile %s",
         mandatory=True,
         exists=True,
-        desc=("The scheme file corresponding to the data being " "processed."),
+        desc=("The scheme file corresponding to the data being processed."),
     )
 
     iterations = traits.Int(
@@ -1187,7 +1185,7 @@ class TrackBayesDirac(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "bayesdirac"
-        return super(TrackBayesDirac, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBallStick(Track):
@@ -1206,7 +1204,7 @@ class TrackBallStick(Track):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "ballstick"
-        return super(TrackBallStick, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class TrackBootstrapInputSpec(TrackInputSpec):
@@ -1251,7 +1249,7 @@ The mask file contains zero in background voxels and non-zero in foreground.""",
 
 class TrackBootstrap(Track):
     """
-    Performs bootstrap streamline tractography using mulitple scans of the same subject
+    Performs bootstrap streamline tractography using multiple scans of the same subject
 
     Example
     -------
@@ -1268,7 +1266,7 @@ class TrackBootstrap(Track):
     input_spec = TrackBootstrapInputSpec
 
     def __init__(self, command=None, **inputs):
-        return super(TrackBootstrap, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):

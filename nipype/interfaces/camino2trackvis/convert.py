@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Provides interfaces to various commands provided by Camino-Trackvis."""
 
 import os
@@ -81,7 +80,7 @@ class Camino2TrackvisOutputSpec(TraitedSpec):
 
 
 class Camino2Trackvis(CommandLine):
-    """ Wraps camino_to_trackvis from Camino-Trackvis
+    """Wraps camino_to_trackvis from Camino-Trackvis
 
     Convert files from camino .Bfloat format to trackvis .trk format.
 
@@ -120,7 +119,7 @@ class Camino2Trackvis(CommandLine):
 
 
 class Trackvis2CaminoInputSpec(CommandLineInputSpec):
-    """ Wraps trackvis_to_camino from Camino-Trackvis
+    """Wraps trackvis_to_camino from Camino-Trackvis
 
     Convert files from camino .Bfloat format to trackvis .trk format.
 

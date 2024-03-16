@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 """This script generates Slicer Interfaces based on the CLI modules XML. CLI
 modules are selected from the hardcoded list below and generated code is placed
 in the cli_modules.py file (and imported in __init__.py). For this to work
-correctly you must have your CLI executabes in $PATH"""
+correctly you must have your CLI executables in $PATH"""
+
 import xml.dom.minidom
 import subprocess
 import os
@@ -16,7 +16,7 @@ python_keywords = (
 
 
 def force_to_valid_python_variable_name(old_name):
-    """  Valid c++ names are not always valid in python, so
+    """Valid c++ names are not always valid in python, so
     provide alternate naming
 
     >>> force_to_valid_python_variable_name('lambda')
@@ -46,7 +46,7 @@ from ..base import (CommandLine, CommandLineInputSpec, SEMLikeCommandLine, Trait
 import os\n\n\n"""
     f_m.write(imports)
     f_m.write("\n\n".join(class_codes))
-    f_i.write("from %s import %s\n" % (module_name, ", ".join(class_names)))
+    f_i.write("from {} import {}\n".format(module_name, ", ".join(class_names)))
     f_m.close()
     f_i.close()
 
@@ -120,14 +120,14 @@ if __name__ == '__main__':
 def generate_all_classes(
     modules_list=[], launcher=[], redirect_x=False, mipav_hacks=False
 ):
-    """ modules_list contains all the SEM compliant tools that should have wrappers created for them.
-        launcher containtains the command line prefix wrapper arugments needed to prepare
-        a proper environment for each of the modules.
+    """modules_list contains all the SEM compliant tools that should have wrappers created for them.
+    launcher containtains the command line prefix wrapper arguments needed to prepare
+    a proper environment for each of the modules.
     """
     all_code = {}
     for module in modules_list:
         print("=" * 80)
-        print("Generating Definition for module {0}".format(module))
+        print(f"Generating Definition for module {module}")
         print("^" * 80)
         package, code, module = generate_class(
             module, launcher, redirect_x=redirect_x, mipav_hacks=mipav_hacks
@@ -196,7 +196,7 @@ def generate_class(
             if longFlagNode:
                 # Prefer to use longFlag as name if it is given, rather than the parameter name
                 longFlagName = longFlagNode[0].firstChild.nodeValue
-                # SEM automatically strips prefixed "--" or "-" from from xml before processing
+                # SEM automatically strips prefixed "--" or "-" from xml before processing
                 # we need to replicate that behavior here The following
                 # two nodes in xml have the same behavior in the program
                 # <longflag>--test</longflag>
@@ -331,7 +331,7 @@ def generate_class(
             ]:
                 if not param.getElementsByTagName("channel"):
                     raise RuntimeError(
-                        "Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field.\n{0}".format(
+                        "Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field.\n{}".format(
                             traitsParams
                         )
                     )
@@ -382,7 +382,7 @@ def generate_class(
                     )
                 else:
                     raise RuntimeError(
-                        "Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field to be in ['input','output'].\n{0}".format(
+                        "Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field to be in ['input','output'].\n{}".format(
                             traitsParams
                         )
                     )
@@ -417,7 +417,7 @@ def generate_class(
 
     output_filenames_code = "_outputs_filenames = {"
     output_filenames_code += ",".join(
-        ["'%s':'%s'" % (key, value) for key, value in outputs_filenames.items()]
+        [f"'{key}':'{value}'" for key, value in outputs_filenames.items()]
     )
     output_filenames_code += "}"
 
@@ -431,7 +431,7 @@ def generate_class(
     output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
-    template += "    _redirect_x = {0}\n".format(str(redirect_x))
+    template += f"    _redirect_x = {str(redirect_x)}\n"
 
     main_class = (
         template.replace("%class_str%", class_string)
@@ -494,9 +494,9 @@ def parse_params(params):
     list = []
     for key, value in params.items():
         if isinstance(value, (str, bytes)):
-            list.append('%s="%s"' % (key, value.replace('"', "'")))
+            list.append('{}="{}"'.format(key, value.replace('"', "'")))
         else:
-            list.append("%s=%s" % (key, value))
+            list.append(f"{key}={value}")
 
     return ", ".join(list)
 

@@ -11,7 +11,7 @@ from .. import UnaryStats, BinaryStats
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_stats"), reason="niftyseg is not installed")
 def test_unary_stats():
-    """ Test for the seg_stats interfaces """
+    """Test for the seg_stats interfaces"""
     # Create a node object
     unarys = UnaryStats()
 
@@ -28,14 +28,14 @@ def test_unary_stats():
     unarys.inputs.in_file = in_file
     unarys.inputs.operation = "a"
 
-    expected_cmd = "{cmd} {in_file} -a".format(cmd=cmd, in_file=in_file)
+    expected_cmd = f"{cmd} {in_file} -a"
 
     assert unarys.cmdline == expected_cmd
 
 
 @pytest.mark.skipif(no_nifty_tool(cmd="seg_stats"), reason="niftyseg is not installed")
 def test_binary_stats():
-    """ Test for the seg_stats interfaces """
+    """Test for the seg_stats interfaces"""
     # Create a node object
     binarys = BinaryStats()
 
@@ -53,6 +53,6 @@ def test_binary_stats():
     binarys.inputs.operand_value = 2
     binarys.inputs.operation = "sa"
 
-    expected_cmd = "{cmd} {in_file} -sa 2.00000000".format(cmd=cmd, in_file=in_file)
+    expected_cmd = f"{cmd} {in_file} -sa 2.00000000"
 
     assert binarys.cmdline == expected_cmd

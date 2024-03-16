@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 
 from ...utils.filemanip import split_filename
@@ -152,9 +150,7 @@ class LinReconInputSpec(StdOutCommandLineInputSpec):
     )
     log = traits.Bool(
         argstr="-log",
-        desc=(
-            "Transform the log measurements rather than the " "measurements themselves"
-        ),
+        desc=("Transform the log measurements rather than the measurements themselves"),
     )
     bgmask = File(exists=True, argstr="-bgmask %s", desc="background mask")
 
@@ -170,7 +166,7 @@ class LinRecon(StdOutCommandLine):
     Reads  a  linear  transformation from the matrix file assuming the
     imaging scheme specified in the scheme file. Performs the linear
     transformation on the data in every voxel and outputs the result to
-    the standard output. The ouput in every voxel is actually: ::
+    the standard output. The output in every voxel is actually: ::
 
         [exit code, ln(S(0)), p1, ..., pR]
 

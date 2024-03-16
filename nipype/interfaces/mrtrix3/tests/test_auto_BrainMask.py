@@ -4,17 +4,55 @@ from ..utils import BrainMask
 
 def test_BrainMask_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        bval_scale=dict(argstr="-bvalue_scaling %s",),
-        environ=dict(nohash=True, usedefault=True,),
-        grad_file=dict(argstr="-grad %s", extensions=None, xor=["grad_fsl"],),
-        grad_fsl=dict(argstr="-fslgrad %s %s", xor=["grad_file"],),
-        in_bval=dict(extensions=None,),
-        in_bvec=dict(argstr="-fslgrad %s %s", extensions=None,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
-        nthreads=dict(argstr="-nthreads %d", nohash=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        bval_scale=dict(
+            argstr="-bvalue_scaling %s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        grad_file=dict(
+            argstr="-grad %s",
+            extensions=None,
+            xor=["grad_fsl"],
+        ),
+        grad_fsl=dict(
+            argstr="-fslgrad %s %s",
+            xor=["grad_file"],
+        ),
+        in_bval=dict(
+            extensions=None,
+        ),
+        in_bvec=dict(
+            argstr="-fslgrad %s %s",
+            extensions=None,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        nthreads=dict(
+            argstr="-nthreads %d",
+            nohash=True,
+        ),
+        out_bval=dict(
+            extensions=None,
+        ),
+        out_bvec=dict(
+            argstr="-export_grad_fsl %s %s",
+            extensions=None,
+        ),
         out_file=dict(
-            argstr="%s", extensions=None, mandatory=True, position=-1, usedefault=True,
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-1,
+            usedefault=True,
         ),
     )
     inputs = BrainMask.input_spec()
@@ -25,7 +63,11 @@ def test_BrainMask_inputs():
 
 
 def test_BrainMask_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = BrainMask.output_spec()
 
     for key, metadata in list(output_map.items()):

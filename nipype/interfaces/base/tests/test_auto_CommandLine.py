@@ -4,7 +4,13 @@ from ..core import CommandLine
 
 def test_CommandLine_inputs():
     input_map = dict(
-        args=dict(argstr="%s",), environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
     )
     inputs = CommandLine.input_spec()
 

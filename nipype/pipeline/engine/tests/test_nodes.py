@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -7,6 +6,7 @@ import pytest
 
 from .... import config
 from ....interfaces import utility as niu
+from ....interfaces import base as nib
 from ... import engine as pe
 from ..utils import merge_dict
 from .test_base import EngineTestInterface
@@ -258,9 +258,9 @@ def test_outputs_removal(tmpdir):
 
         file1 = os.path.join(os.getcwd(), "file1.txt")
         file2 = os.path.join(os.getcwd(), "file2.txt")
-        with open(file1, "wt") as fp:
+        with open(file1, "w") as fp:
             fp.write("%d" % arg1)
-        with open(file2, "wt") as fp:
+        with open(file2, "w") as fp:
             fp.write("%d" % arg1)
         return file1, file2
 
@@ -314,3 +314,68 @@ def test_outputmultipath_collapse(tmpdir):
     assert ifres.outputs.out == [4]
     assert ndres.outputs.out == [4]
     assert select_nd.result.outputs.out == [4]
+
+
+@pytest.mark.timeout(30)
+def test_mapnode_single(tmpdir):
+    tmpdir.chdir()
+
+    def _producer(num=1, deadly_num=7):
+        if num == deadly_num:
+            raise RuntimeError("Got the deadly num (%d)." % num)
+        return num + 1
+
+    pnode = pe.MapNode(
+        niu.Function(function=_producer), name="ProducerNode", iterfield=["num"]
+    )
+    pnode.inputs.num = [7]
+    wf = pe.Workflow(name="PC_Workflow")
+    wf.add_nodes([pnode])
+    wf.base_dir = os.path.abspath("./test_output")
+    with pytest.raises(RuntimeError):
+        wf.run(plugin="MultiProc")
+
+
+class FailCommandLine(nib.CommandLine):
+    input_spec = nib.CommandLineInputSpec
+    output_spec = nib.TraitedSpec
+    _cmd = 'nipype-node-execution-fail'
+
+
+def test_NodeExecutionError(tmp_path, monkeypatch):
+    import stat
+
+    monkeypatch.chdir(tmp_path)
+
+    # create basic executable and add to PATH
+    exebin = tmp_path / 'bin'
+    exebin.mkdir()
+    exe = exebin / 'nipype-node-execution-fail'
+    exe.write_text(
+        '#!/bin/bash\necho "Running"\necho "This should fail" >&2\nexit 1',
+        encoding='utf-8',
+    )
+    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
+    monkeypatch.setenv("PATH", str(exe.parent.absolute()), prepend=os.pathsep)
+
+    # Test with cmdline interface
+    cmd = pe.Node(FailCommandLine(), name="cmd-fail", base_dir='cmd')
+    with pytest.raises(pe.nodes.NodeExecutionError) as exc:
+        cmd.run()
+    error_msg = str(exc.value)
+
+    for attr in ("Cmdline:", "Stdout:", "Stderr:", "Traceback:"):
+        assert attr in error_msg
+    assert "This should fail" in error_msg
+
+    # Test with function interface
+    def fail():
+        raise Exception("Functions can fail too")
+
+    func = pe.Node(niu.Function(function=fail), name='func-fail', base_dir='func')
+    with pytest.raises(pe.nodes.NodeExecutionError) as exc:
+        func.run()
+    error_msg = str(exc.value)
+    assert "Traceback:" in error_msg
+    assert "Cmdline:" not in error_msg
+    assert "Functions can fail too" in error_msg

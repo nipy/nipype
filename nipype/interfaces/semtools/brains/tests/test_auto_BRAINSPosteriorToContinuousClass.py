@@ -4,16 +4,45 @@ from ..classify import BRAINSPosteriorToContinuousClass
 
 def test_BRAINSPosteriorToContinuousClass_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputBasalGmVolume=dict(argstr="--inputBasalGmVolume %s", extensions=None,),
-        inputCrblGmVolume=dict(argstr="--inputCrblGmVolume %s", extensions=None,),
-        inputCrblWmVolume=dict(argstr="--inputCrblWmVolume %s", extensions=None,),
-        inputCsfVolume=dict(argstr="--inputCsfVolume %s", extensions=None,),
-        inputSurfaceGmVolume=dict(argstr="--inputSurfaceGmVolume %s", extensions=None,),
-        inputVbVolume=dict(argstr="--inputVbVolume %s", extensions=None,),
-        inputWhiteVolume=dict(argstr="--inputWhiteVolume %s", extensions=None,),
-        outputVolume=dict(argstr="--outputVolume %s", hash_files=False,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputBasalGmVolume=dict(
+            argstr="--inputBasalGmVolume %s",
+            extensions=None,
+        ),
+        inputCrblGmVolume=dict(
+            argstr="--inputCrblGmVolume %s",
+            extensions=None,
+        ),
+        inputCrblWmVolume=dict(
+            argstr="--inputCrblWmVolume %s",
+            extensions=None,
+        ),
+        inputCsfVolume=dict(
+            argstr="--inputCsfVolume %s",
+            extensions=None,
+        ),
+        inputSurfaceGmVolume=dict(
+            argstr="--inputSurfaceGmVolume %s",
+            extensions=None,
+        ),
+        inputVbVolume=dict(
+            argstr="--inputVbVolume %s",
+            extensions=None,
+        ),
+        inputWhiteVolume=dict(
+            argstr="--inputWhiteVolume %s",
+            extensions=None,
+        ),
+        outputVolume=dict(
+            argstr="--outputVolume %s",
+            hash_files=False,
+        ),
     )
     inputs = BRAINSPosteriorToContinuousClass.input_spec()
 
@@ -23,7 +52,11 @@ def test_BRAINSPosteriorToContinuousClass_inputs():
 
 
 def test_BRAINSPosteriorToContinuousClass_outputs():
-    output_map = dict(outputVolume=dict(extensions=None,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+        ),
+    )
     outputs = BRAINSPosteriorToContinuousClass.output_spec()
 
     for key, metadata in list(output_map.items()):

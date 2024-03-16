@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 
 import nibabel as nb
@@ -61,7 +60,7 @@ class ComputeMask(NipyBaseInterface):
 
         brain_mask = compute_mask(**args)
         _, name, ext = split_filename(self.inputs.mean_volume)
-        self._brain_mask_path = os.path.abspath("%s_mask.%s" % (name, ext))
+        self._brain_mask_path = os.path.abspath(f"{name}_mask.{ext}")
         nb.save(
             nb.Nifti1Image(brain_mask.astype(np.uint8), nii.affine),
             self._brain_mask_path,
@@ -120,7 +119,7 @@ class SpaceTimeRealignerOutputSpec(TraitedSpec):
     out_file = OutputMultiPath(File(exists=True), desc="Realigned files")
     par_file = OutputMultiPath(
         File(exists=True),
-        desc=("Motion parameter files. Angles are not " "euler angles"),
+        desc=("Motion parameter files. Angles are not euler angles"),
     )
 
 
@@ -240,7 +239,7 @@ class TrimOutputSpec(TraitedSpec):
 
 
 class Trim(NipyBaseInterface):
-    """ Simple interface to trim a few volumes from a 4d fmri nifti file
+    """Simple interface to trim a few volumes from a 4d fmri nifti file
 
     Examples
     --------

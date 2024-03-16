@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various longitudinal commands provided by freesurfer
@@ -7,8 +6,25 @@
 import os
 
 from ... import logging
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
-from .base import FSCommand, FSTraitedSpec, FSCommandOpenMP, FSTraitedSpecOpenMP
+from ..base import (
+    TraitedSpec,
+    File,
+    traits,
+    InputMultiPath,
+    OutputMultiPath,
+    isdefined,
+    InputMultiObject,
+    Directory,
+)
+from .base import (
+    FSCommand,
+    FSTraitedSpec,
+    FSCommandOpenMP,
+    FSTraitedSpecOpenMP,
+    CommandLine,
+)
+from .preprocess import ReconAllInputSpec
+from ..io import FreeSurferSource
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
@@ -20,7 +36,7 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
         File(exists=True),
         mandatory=True,
         argstr="--mov %s",
-        desc="input movable volumes to be aligned to common mean/median " "template",
+        desc="input movable volumes to be aligned to common mean/median template",
     )
     out_file = File(
         "mri_robust_template_out.mgz",
@@ -73,12 +89,12 @@ class RobustTemplateInputSpec(FSTraitedSpecOpenMP):
     )
     initial_timepoint = traits.Int(
         argstr="--inittp %d",
-        desc="use TP# for spacial init (default random), 0: no init",
+        desc="use TP# for special init (default random), 0: no init",
     )
     fixed_timepoint = traits.Bool(
         default_value=False,
         argstr="--fixtp",
-        desc="map everthing to init TP# (init TP is not resampled)",
+        desc="map everything to init TP# (init TP is not resampled)",
     )
     no_iteration = traits.Bool(
         default_value=False,
@@ -108,7 +124,7 @@ class RobustTemplateOutputSpec(TraitedSpec):
 
 
 class RobustTemplate(FSCommandOpenMP):
-    """ construct an unbiased robust template for longitudinal volumes
+    """construct an unbiased robust template for longitudinal volumes
 
     Examples
     --------
@@ -157,7 +173,7 @@ class RobustTemplate(FSCommandOpenMP):
             return spec.argstr % {"mean": 0, "median": 1}[value]
         if name in ("transform_outputs", "scaled_intensity_outputs"):
             value = self._list_outputs()[name]
-        return super(RobustTemplate, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -221,7 +237,7 @@ class FuseSegmentationsOutputSpec(TraitedSpec):
 
 
 class FuseSegmentations(FSCommand):
-    """ fuse segmentations together from multiple timepoints
+    """fuse segmentations together from multiple timepoints
 
     Examples
     --------
@@ -245,7 +261,7 @@ class FuseSegmentations(FSCommand):
         if name in ("in_segmentations", "in_segmentations_noCC", "in_norms"):
             # return enumeration value
             return spec.argstr % os.path.basename(value[0])
-        return super(FuseSegmentations, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

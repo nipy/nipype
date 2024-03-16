@@ -4,8 +4,8 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
 
 # nipype version information
-# Remove -dev for release
-__version__ = "1.5.0-dev"
+# Remove .dev0 for release
+__version__ = "1.8.7.dev0"
 
 
 def get_nipype_gitversion():
@@ -45,7 +45,7 @@ def get_nipype_gitversion():
 if __version__.endswith("-dev"):
     gitversion = get_nipype_gitversion()
     if gitversion:
-        __version__ = "{}+{}".format(__version__, gitversion)
+        __version__ = f"{__version__}+{gitversion}"
 
 CLASSIFIERS = [
     "Development Status :: 5 - Production/Stable",
@@ -54,12 +54,13 @@ CLASSIFIERS = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
 ]
-PYTHON_REQUIRES = ">= 3.5"
+PYTHON_REQUIRES = ">= 3.8"
 
 description = "Neuroimaging in Python: Pipelines and Interfaces"
 
@@ -99,17 +100,15 @@ existing pipeline systems.
 
 # versions
 NIBABEL_MIN_VERSION = "2.1.0"
-NETWORKX_MIN_VERSION = "1.9"
-NUMPY_MIN_VERSION = "1.12"
-# Numpy bug in python 3.7:
-# https://www.opensourceanswers.com/blog/you-shouldnt-use-python-37-for-data-science-right-now.html
-NUMPY_MIN_VERSION_37 = "1.15.3"
+NETWORKX_MIN_VERSION = "2.0"
+NUMPY_MIN_VERSION = "1.17"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
+TRAITS_MAX_VERSION = "6.4"
 DATEUTIL_MIN_VERSION = "2.2"
-FUTURE_MIN_VERSION = "0.16.0"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
-PROV_VERSION = "1.5.2"
+PROV_MIN_VERSION = "1.5.2"
+RDFLIB_MIN_VERSION = "5.0.0"
 CLICK_MIN_VERSION = "6.6.0"
 PYDOT_MIN_VERSION = "1.2.3"
 
@@ -137,25 +136,30 @@ REQUIRES = [
     "click>=%s" % CLICK_MIN_VERSION,
     "networkx>=%s" % NETWORKX_MIN_VERSION,
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
-    'numpy>=%s ; python_version < "3.7"' % NUMPY_MIN_VERSION,
-    'numpy>=%s ; python_version >= "3.7"' % NUMPY_MIN_VERSION_37,
+    "numpy>=%s" % NUMPY_MIN_VERSION,
     "packaging",
-    "prov>=%s" % PROV_VERSION,
+    "prov>=%s" % PROV_MIN_VERSION,
     "pydot>=%s" % PYDOT_MIN_VERSION,
-    "pydotplus",
     "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
+    "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
+    "traits>=%s,<%s,!=5.0" % (TRAITS_MIN_VERSION, TRAITS_MAX_VERSION),
     "filelock>=3.0.0",
-    "etelemetry",
+    "etelemetry>=0.2.0",
+    "looseversion!=1.2",
 ]
 
-# neurdflib has to come after prov
-# https://github.com/nipy/nipype/pull/2961#issuecomment-512035484
-REQUIRES += ["neurdflib"]
-
-TESTS_REQUIRES = ["codecov", "coverage<5", "mock", "pytest", "pytest-cov", "pytest-env"]
+TESTS_REQUIRES = [
+    "codecov",
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-timeout",
+    "pytest-doctestplus",
+    "sphinx",
+]
 
 EXTRA_REQUIRES = {
     "data": ["datalad"],
@@ -167,10 +171,10 @@ EXTRA_REQUIRES = {
         "sphinx-argparse",
         "sphinx>=2.1.2",
         "sphinxcontrib-apidoc",
-        "sphinxcontrib-napoleon",
     ],
     "duecredit": ["duecredit"],
-    "nipy": ["nitime", "nilearn<0.5.0", "dipy", "nipy", "matplotlib"],
+    "maint": ["GitPython", "fuzzywuzzy"],
+    "nipy": ["nitime", "nilearn", "dipy", "nipy", "matplotlib"],
     "profiler": ["psutil>=5.0"],
     "pybids": ["pybids>=0.7.0"],
     "specs": ["black"],

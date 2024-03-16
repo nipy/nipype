@@ -25,7 +25,7 @@ class BuildConnectomeInputSpec(CommandLineInputSpec):
 
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 
@@ -62,19 +62,19 @@ class BuildConnectomeInputSpec(CommandLineInputSpec):
         "mean_scalar",
         "invlength_invnodevolume",
         argstr="-metric %s",
-        desc="specify the edge" " weight metric",
+        desc="specify the edge weight metric",
     )
 
     in_scalar = File(
         exists=True,
         argstr="-image %s",
-        desc="provide the associated image " "for the mean_scalar metric",
+        desc="provide the associated image for the mean_scalar metric",
     )
 
     in_weights = File(
         exists=True,
         argstr="-tck_weights_in %s",
-        desc="specify a text scalar " "file containing the streamline weights",
+        desc="specify a text scalar file containing the streamline weights",
     )
 
     keep_unassigned = traits.Bool(
@@ -174,7 +174,7 @@ class LabelConfigInputSpec(CommandLineInputSpec):
     )
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 
@@ -208,9 +208,9 @@ class LabelConfig(MRTrix3Base):
             skip = []
 
         if not isdefined(self.inputs.in_config):
-            from distutils.spawn import find_executable
+            from shutil import which
 
-            path = find_executable(self._cmd)
+            path = which(self._cmd)
             if path is None:
                 path = os.getenv(MRTRIX3_HOME, "/opt/mrtrix3")
             else:
@@ -218,10 +218,10 @@ class LabelConfig(MRTrix3Base):
 
             self.inputs.in_config = op.join(
                 path,
-                "src/dwi/tractography/connectomics/" "example_configs/fs_default.txt",
+                "src/dwi/tractography/connectomics/example_configs/fs_default.txt",
             )
 
-        return super(LabelConfig, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -265,7 +265,7 @@ class LabelConvertInputSpec(CommandLineInputSpec):
     )
     num_threads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
 
@@ -310,10 +310,10 @@ class LabelConvert(MRTrix3Base):
 
             self.inputs.in_config = op.join(
                 path,
-                "src/dwi/tractography/connectomics/" "example_configs/fs_default.txt",
+                "src/dwi/tractography/connectomics/example_configs/fs_default.txt",
             )
 
-        return super(LabelConvert, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

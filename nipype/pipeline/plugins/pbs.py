@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via PBS/Torque
 """
+
 import os
 from time import sleep
 
@@ -24,7 +24,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
 
     """
 
-    # Addtional class variables
+    # Additional class variables
     _max_jobname_len = 15
 
     def __init__(self, **kwargs):
@@ -41,11 +41,11 @@ class PBSPlugin(SGELikeBatchManagerBase):
                 self._max_tries = kwargs["plugin_args"]["max_tries"]
             if "max_jobname_len" in kwargs["plugin_args"]:
                 self._max_jobname_len = kwargs["plugin_args"]["max_jobname_len"]
-        super(PBSPlugin, self).__init__(template, **kwargs)
+        super().__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
         result = CommandLine(
-            "qstat -f {}".format(taskid),
+            f"qstat -f {taskid}",
             environ=dict(os.environ),
             terminal_output="file_split",
             resource_monitor=False,
@@ -78,9 +78,9 @@ class PBSPlugin(SGELikeBatchManagerBase):
             else:
                 qsubargs += " " + node.plugin_args["qsub_args"]
         if "-o" not in qsubargs:
-            qsubargs = "%s -o %s" % (qsubargs, path)
+            qsubargs = f"{qsubargs} -o {path}"
         if "-e" not in qsubargs:
-            qsubargs = "%s -e %s" % (qsubargs, path)
+            qsubargs = f"{qsubargs} -e {path}"
         if node._hierarchy:
             jobname = ".".join((dict(os.environ)["LOGNAME"], node._hierarchy, node._id))
         else:
@@ -89,7 +89,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         jobnameitems.reverse()
         jobname = ".".join(jobnameitems)
         jobname = jobname[0 : self._max_jobname_len]
-        cmd.inputs.args = "%s -N %s %s" % (qsubargs, jobname, scriptfile)
+        cmd.inputs.args = f"{qsubargs} -N {jobname} {scriptfile}"
 
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName("CRITICAL"))
@@ -105,7 +105,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
                 else:
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError(
-                        "Could not submit pbs task for node {}\n{}".format(node._id, e)
+                        f"Could not submit pbs task for node {node._id}\n{e}"
                     )
             else:
                 break
@@ -113,6 +113,6 @@ class PBSPlugin(SGELikeBatchManagerBase):
         # retrieve pbs taskid
         taskid = result.runtime.stdout.split(".")[0]
         self._pending[taskid] = node.output_dir()
-        logger.debug("submitted pbs task: {} for node {}".format(taskid, node._id))
+        logger.debug(f"submitted pbs task: {taskid} for node {node._id}")
 
         return taskid

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -105,7 +104,7 @@ def test_modelgen1(tmpdir):
         np.array([6.0, 6.0]),
     )
     npt.assert_almost_equal(
-        np.array(res.outputs.session_info[0]["cond"][1]["duration"]), np.array([6.0,])
+        np.array(res.outputs.session_info[0]["cond"][1]["duration"]), np.array([6.0])
     )
     npt.assert_almost_equal(
         np.array(res.outputs.session_info[1]["cond"][1]["duration"]),
@@ -191,14 +190,14 @@ def test_modelgen_spm_concat(tmpdir):
         np.array([1.0, 1.0]),
     )
     npt.assert_almost_equal(
-        np.array(res.outputs.session_info[0]["cond"][1]["duration"]), np.array([1.0,])
+        np.array(res.outputs.session_info[0]["cond"][1]["duration"]), np.array([1.0])
     )
     npt.assert_almost_equal(
         np.array(res.outputs.session_info[1]["cond"][1]["duration"]),
         np.array([1.0, 1.0]),
     )
     npt.assert_almost_equal(
-        np.array(res.outputs.session_info[2]["cond"][1]["duration"]), np.array([1.0,])
+        np.array(res.outputs.session_info[2]["cond"][1]["duration"]), np.array([1.0])
     )
 
     # Test case for variable number of events in concatenated runs, sometimes unique.

@@ -7,18 +7,16 @@ from .. import misc
 
 import pytest
 import numpy.testing as npt
-import mock
+from unittest import mock
 import nibabel as nb
 import numpy as np
 import os
 
 
 class TestTSNR:
-    """ Note: Tests currently do a poor job of testing functionality """
+    """Note: Tests currently do a poor job of testing functionality"""
 
-    in_filenames = {
-        "in_file": "tsnrinfile.nii",
-    }
+    in_filenames = {"in_file": "tsnrinfile.nii"}
 
     out_filenames = {  # default output file names
         "detrended_file": "detrend.nii.gz",
@@ -95,8 +93,8 @@ class TestTSNR:
 
     @mock.patch("warnings.warn")
     def test_warning(self, mock_warn):
-        """ test that usage of misc.TSNR trips a warning to use
-        confounds.TSNR instead """
+        """test that usage of misc.TSNR trips a warning to use
+        confounds.TSNR instead"""
         # run
         misc.TSNR(in_file=self.in_filenames["in_file"])
 
@@ -133,5 +131,6 @@ class TestTSNR:
         [
             [[[2, 4, 3, 9, 1], [3, 6, 4, 7, 4]], [[8, 3, 4, 6, 2], [4, 0, 4, 4, 2]]],
             [[[9, 7, 5, 5, 7], [7, 8, 4, 8, 4]], [[0, 4, 7, 1, 7], [6, 8, 8, 8, 7]]],
-        ]
+        ],
+        dtype=np.int16,
     )

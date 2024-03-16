@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
@@ -10,6 +9,7 @@ import errno
 import select
 import locale
 import datetime
+from pathlib import Path
 from subprocess import Popen, STDOUT, PIPE
 from .filemanip import canonicalize_env, read_stream
 
@@ -18,7 +18,7 @@ from .. import logging
 iflogger = logging.getLogger("nipype.interface")
 
 
-class Stream(object):
+class Stream:
     """Function to capture stdout and stderr streams with timestamps
 
     stackoverflow.com/questions/4984549/merge-and-sync-stdout-and-stderr/5188359
@@ -30,7 +30,7 @@ class Stream(object):
         self._buf = ""
         self._rows = []
         self._lastidx = 0
-        self.default_encoding = locale.getdefaultlocale()[1] or "UTF-8"
+        self.default_encoding = locale.getpreferredencoding(do_setlocale=False)
 
     def fileno(self):
         "Pass-through for file descriptor."
@@ -63,13 +63,13 @@ class Stream(object):
         self._buf = rest
         now = datetime.datetime.now().isoformat()
         rows = tmp.split("\n")
-        self._rows += [(now, "%s %s:%s" % (self._name, now, r), r) for r in rows]
+        self._rows += [(now, f"{self._name} {now}:{r}", r) for r in rows]
         for idx in range(self._lastidx, len(self._rows)):
             iflogger.info(self._rows[idx][1])
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, output=None, timeout=0.01):
+def run_command(runtime, output=None, timeout=0.01, write_cmdline=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
@@ -100,6 +100,9 @@ def run_command(runtime, output=None, timeout=0.01):
         errfile = os.path.join(runtime.cwd, "stderr.nipype")
         stderr = open(errfile, "wb")
 
+    if write_cmdline:
+        (Path(runtime.cwd) / "command.txt").write_text(cmdline, encoding='utf-8')
+
     proc = Popen(
         cmdline,
         stdout=stdout,
@@ -122,9 +125,9 @@ def run_command(runtime, output=None, timeout=0.01):
         def _process(drain=0):
             try:
                 res = select.select(streams, [], [], timeout)
-            except select.error as e:
+            except OSError as e:
                 iflogger.info(e)
-                if e[0] == errno.EINTR:
+                if e.errno == errno.EINTR:
                     return
                 else:
                     raise

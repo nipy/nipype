@@ -4,19 +4,69 @@ from ..visualization import ConvertScalarImageToRGB
 
 def test_ConvertScalarImageToRGB_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        colormap=dict(argstr="%s", mandatory=True, position=4,),
-        custom_color_map_file=dict(argstr="%s", position=5, usedefault=True,),
-        dimension=dict(argstr="%d", mandatory=True, position=0, usedefault=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        input_image=dict(argstr="%s", extensions=None, mandatory=True, position=1,),
-        mask_image=dict(argstr="%s", extensions=None, position=3, usedefault=True,),
-        maximum_RGB_output=dict(argstr="%d", position=9, usedefault=True,),
-        maximum_input=dict(argstr="%d", mandatory=True, position=7,),
-        minimum_RGB_output=dict(argstr="%d", position=8, usedefault=True,),
-        minimum_input=dict(argstr="%d", mandatory=True, position=6,),
-        num_threads=dict(nohash=True, usedefault=True,),
-        output_image=dict(argstr="%s", position=2, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        colormap=dict(
+            argstr="%s",
+            mandatory=True,
+            position=4,
+        ),
+        custom_color_map_file=dict(
+            argstr="%s",
+            position=5,
+            usedefault=True,
+        ),
+        dimension=dict(
+            argstr="%d",
+            mandatory=True,
+            position=0,
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_image=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        mask_image=dict(
+            argstr="%s",
+            position=3,
+            usedefault=True,
+        ),
+        maximum_RGB_output=dict(
+            argstr="%d",
+            position=9,
+            usedefault=True,
+        ),
+        maximum_input=dict(
+            argstr="%d",
+            mandatory=True,
+            position=7,
+        ),
+        minimum_RGB_output=dict(
+            argstr="%d",
+            position=8,
+            usedefault=True,
+        ),
+        minimum_input=dict(
+            argstr="%d",
+            mandatory=True,
+            position=6,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        output_image=dict(
+            argstr="%s",
+            position=2,
+            usedefault=True,
+        ),
     )
     inputs = ConvertScalarImageToRGB.input_spec()
 
@@ -26,7 +76,11 @@ def test_ConvertScalarImageToRGB_inputs():
 
 
 def test_ConvertScalarImageToRGB_outputs():
-    output_map = dict(output_image=dict(extensions=None,),)
+    output_map = dict(
+        output_image=dict(
+            extensions=None,
+        ),
+    )
     outputs = ConvertScalarImageToRGB.output_spec()
 
     for key, metadata in list(output_map.items()):

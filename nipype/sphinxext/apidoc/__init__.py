@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Settings for sphinxext.interfaces and connection to sphinx-apidoc."""
 import re
-from sphinxcontrib.napoleon import (
+from sphinx.ext.napoleon import (
     Config as NapoleonConfig,
     _patch_python_domain,
     _skip_member as _napoleon_skip_member,
@@ -38,9 +38,10 @@ class Config(NapoleonConfig):
         (requires duecredit to be installed).
 
     """
+
     _config_values = {
         "nipype_skip_classes": (
-            ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester",],
+            ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester"],
             "env",
         ),
         **NapoleonConfig._config_values,

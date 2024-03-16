@@ -1,9 +1,10 @@
-# -*- coding: utf-8 -*-
 """dcm2nii converts images from the proprietary scanner DICOM format to NIfTI."""
+
 import os
 import re
 from copy import deepcopy
 import itertools as it
+import glob
 from glob import iglob
 
 from ..utils.filemanip import split_filename
@@ -119,7 +120,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline  # doctest: +ELLIPSIS
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
-"""
+    """
 
     input_spec = Dcm2niiInputSpec
     output_spec = Dcm2niiOutputSpec
@@ -149,11 +150,11 @@ class Dcm2nii(CommandLine):
                 val = True
         if opt == "source_names":
             return spec.argstr % val[0]
-        return super(Dcm2nii, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         self._config_created = False
-        new_runtime = super(Dcm2nii, self)._run_interface(runtime)
+        new_runtime = super()._run_interface(runtime)
         (
             self.output_files,
             self.reoriented_files,
@@ -201,7 +202,7 @@ class Dcm2nii(CommandLine):
                     # just above
                     for l in (bvecs, bvals):
                         l[-1] = os.path.join(
-                            os.path.dirname(l[-1]), "x%s" % (os.path.basename(l[-1]),)
+                            os.path.dirname(l[-1]), f"x{os.path.basename(l[-1])}"
                         )
                 elif re.search(".*->(.*)", line):
                     val = re.search(".*->(.*)", line)
@@ -327,8 +328,14 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
         usedefault=True,
         desc="Gzip compress images - [y=pigz, i=internal, n=no, 3=no,3D]",
     )
-    merge_imgs = traits.Bool(
-        False, argstr="-m", usedefault=True, desc="merge 2D slices from same series"
+    merge_imgs = traits.Enum(
+        0,
+        1,
+        2,
+        default=0,
+        usedefault=True,
+        argstr="-m %d",
+        desc="merge 2D slices from same series regardless of echo, exposure, etc. - [0=no, 1=yes, 2=auto]",
     )
     single_file = traits.Bool(
         False, argstr="-s", usedefault=True, desc="Single file mode"
@@ -374,6 +381,7 @@ class Dcm2niixInputSpec(CommandLineInputSpec):
 class Dcm2niixOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
     bvecs = OutputMultiPath(File(exists=True))
+    mvecs = OutputMultiPath(File(exists=True))
     bvals = OutputMultiPath(File(exists=True))
     bids = OutputMultiPath(File(exists=True))
 
@@ -390,7 +398,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compression = 5
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
-    'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n dicomdir'
+    'dcm2niix -b y -z y -5 -x n -t n -m 0 -o ds005 -s n -v n dicomdir'
     >>> converter.run() # doctest: +SKIP
 
     In the example below, we note that the current version of dcm2niix
@@ -403,7 +411,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compression = 5
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
-    'dcm2niix -b y -z y -5 -x n -t n -m n -o ds005 -s n -v n .'
+    'dcm2niix -b y -z y -5 -x n -t n -m 0 -o ds005 -s n -v n .'
     >>> converter.run() # doctest: +SKIP
     """
 
@@ -418,7 +426,6 @@ class Dcm2niix(CommandLine):
     def _format_arg(self, opt, spec, val):
         bools = [
             "bids_format",
-            "merge_imgs",
             "single_file",
             "verbose",
             "crop",
@@ -437,13 +444,11 @@ class Dcm2niix(CommandLine):
                 val = True
         if opt == "source_names":
             return spec.argstr % (os.path.dirname(val[0]) or ".")
-        return super(Dcm2niix, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         # may use return code 1 despite conversion
-        runtime = super(Dcm2niix, self)._run_interface(
-            runtime, correct_return_codes=(0, 1,)
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes=(0, 1))
         self._parse_files(self._parse_stdout(runtime.stdout))
         return runtime
 
@@ -456,8 +461,8 @@ class Dcm2niix(CommandLine):
         return filenames
 
     def _parse_files(self, filenames):
-        outfiles, bvals, bvecs, bids = [], [], [], []
-        outtypes = [".bval", ".bvec", ".json", ".txt"]
+        outfiles, bvals, bvecs, mvecs, bids = [], [], [], [], []
+        outtypes = [".bval", ".bvec", ".mvec", ".json", ".txt"]
         if self.inputs.to_nrrd:
             outtypes += [".nrrd", ".nhdr", ".raw.gz"]
         else:
@@ -477,10 +482,13 @@ class Dcm2niix(CommandLine):
                     bvals.append(fl)
                 elif fl.endswith(".bvec"):
                     bvecs.append(fl)
+                elif fl.endswith(".mvec"):
+                    mvecs.append(fl)
                 elif fl.endswith(".json") or fl.endswith(".txt"):
                     bids.append(fl)
         self.output_files = outfiles
         self.bvecs = bvecs
+        self.mvecs = mvecs
         self.bvals = bvals
         self.bids = bids
 
@@ -489,10 +497,13 @@ class Dcm2niix(CommandLine):
         outputs["converted_files"] = self.output_files
         outputs["bvecs"] = self.bvecs
         outputs["bvals"] = self.bvals
+        outputs["mvecs"] = self.mvecs
         outputs["bids"] = self.bids
         return outputs
 
 
 # https://stackoverflow.com/a/4829130
 def search_files(prefix, outtypes):
-    return it.chain.from_iterable(iglob(prefix + outtype) for outtype in outtypes)
+    return it.chain.from_iterable(
+        iglob(glob.escape(prefix + outtype)) for outtype in outtypes
+    )

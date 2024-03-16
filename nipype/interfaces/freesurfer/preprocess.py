@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by FreeSurfer
@@ -7,11 +6,13 @@ import os
 import os.path as op
 from glob import glob
 import shutil
+import sys
 
+from looseversion import LooseVersion
 import numpy as np
 from nibabel import load
 
-from ... import logging, LooseVersion
+from ... import logging
 from ...utils.filemanip import fname_presuffix, check_depends
 from ..io import FreeSurferSource
 from ..base import (
@@ -24,6 +25,7 @@ from ..base import (
     CommandLine,
     CommandLineInputSpec,
     isdefined,
+    InputMultiObject,
 )
 from .base import FSCommand, FSTraitedSpec, FSTraitedSpecOpenMP, FSCommandOpenMP, Info
 from .utils import copy2subjdir
@@ -73,7 +75,7 @@ class ParseDICOMDir(FSCommand):
     >>> dcminfo.cmdline
     'mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize'
 
-   """
+    """
 
     _cmd = "mri_parse_sdcmdir"
     input_spec = ParseDICOMDirInputSpec
@@ -134,7 +136,7 @@ class UnpackSDICOMDirInputSpec(FSTraitedSpec):
         argstr="-scanonly %s",
         desc="only scan the directory and put result in file",
     )
-    log_file = File(exists=True, argstr="-log %s", desc="explicilty set log file")
+    log_file = File(exists=True, argstr="-log %s", desc="explicitly set log file")
     spm_zeropad = traits.Int(
         argstr="-nspmzeropad %d", desc="set frame number zero padding width for SPM"
     )
@@ -544,7 +546,7 @@ class MRIConvert(FSCommand):
         if name in ["in_type", "out_type", "template_type"]:
             if value == "niigz":
                 return spec.argstr % "nii"
-        return super(MRIConvert, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _get_outfilename(self):
         outfile = self.inputs.out_file
@@ -720,22 +722,25 @@ class DICOMConvert(FSCommand):
 
     @property
     def cmdline(self):
-        """ `command` plus any arguments (args)
+        """`command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
         outdir = self._get_outdir()
         cmd = []
         if not os.path.exists(outdir):
-            cmdstr = "python -c \"import os; os.makedirs('%s')\"" % outdir
+            cmdstr = "{} -c \"import os; os.makedirs('{}')\"".format(
+                op.basename(sys.executable),
+                outdir,
+            )
             cmd.extend([cmdstr])
         infofile = os.path.join(outdir, "shortinfo.txt")
         if not os.path.exists(infofile):
-            cmdstr = "dcmdir-info-mgh %s > %s" % (self.inputs.dicom_dir, infofile)
+            cmdstr = f"dcmdir-info-mgh {self.inputs.dicom_dir} > {infofile}"
             cmd.extend([cmdstr])
         files = self._get_filelist(outdir)
         for infile, outfile in files:
             if not os.path.exists(outfile):
-                single_cmd = "%s%s %s %s" % (
+                single_cmd = "{}{} {} {}".format(
                     self._cmd_prefix,
                     self.cmd,
                     infile,
@@ -812,7 +817,10 @@ class Resample(FSCommand):
 
 class ReconAllInputSpec(CommandLineInputSpec):
     subject_id = traits.Str(
-        "recon_all", argstr="-subjid %s", desc="subject name", usedefault=True
+        "recon_all",
+        argstr="-subjid %s",
+        desc="subject name",
+        xor=["base_template_id", "longitudinal_timepoint_id"],
     )
     directive = traits.Enum(
         "all",
@@ -838,21 +846,32 @@ class ReconAllInputSpec(CommandLineInputSpec):
         usedefault=True,
         position=0,
     )
-    hemi = traits.Enum("lh", "rh", desc="hemisphere to process", argstr="-hemi %s")
+    hemi = traits.Enum(
+        "lh",
+        "rh",
+        desc="hemisphere to process",
+        argstr="-hemi %s",
+        requires=["subject_id"],
+    )
     T1_files = InputMultiPath(
-        File(exists=True), argstr="-i %s...", desc="name of T1 file to process"
+        File(exists=True),
+        argstr="-i %s...",
+        desc="name of T1 file to process",
+        requires=["subject_id"],
     )
     T2_file = File(
         exists=True,
         argstr="-T2 %s",
         min_ver="5.3.0",
         desc="Convert T2 image to orig directory",
+        requires=["subject_id"],
     )
     FLAIR_file = File(
         exists=True,
         argstr="-FLAIR %s",
         min_ver="5.3.0",
         desc="Convert FLAIR image to orig directory",
+        requires=["subject_id"],
     )
     use_T2 = traits.Bool(
         argstr="-T2pial",
@@ -881,18 +900,22 @@ class ReconAllInputSpec(CommandLineInputSpec):
             "Assume scan parameters are MGH MP-RAGE "
             "protocol, which produces darker gray matter"
         ),
+        requires=["subject_id"],
     )
     big_ventricles = traits.Bool(
         argstr="-bigventricles",
-        desc=("For use in subjects with enlarged " "ventricles"),
+        desc=("For use in subjects with enlarged ventricles"),
     )
     brainstem = traits.Bool(
-        argstr="-brainstem-structures", desc="Segment brainstem structures"
+        argstr="-brainstem-structures",
+        desc="Segment brainstem structures",
+        requires=["subject_id"],
     )
     hippocampal_subfields_T1 = traits.Bool(
         argstr="-hippocampal-subfields-T1",
         min_ver="6.0.0",
         desc="segment hippocampal subfields using input T1 scan",
+        requires=["subject_id"],
     )
     hippocampal_subfields_T2 = traits.Tuple(
         File(exists=True),
@@ -903,6 +926,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
             "segment hippocampal subfields using T2 scan, identified by "
             "ID (may be combined with hippocampal_subfields_T1)"
         ),
+        requires=["subject_id"],
     )
     expert = File(
         exists=True, argstr="-expert %s", desc="Set parameters using expert file"
@@ -922,6 +946,29 @@ class ReconAllInputSpec(CommandLineInputSpec):
         genfile=True,
     )
     flags = InputMultiPath(traits.Str, argstr="%s", desc="additional parameters")
+
+    # Longitudinal runs
+    base_template_id = traits.Str(
+        argstr="-base %s",
+        desc="base template id",
+        xor=["subject_id", "longitudinal_timepoint_id"],
+        requires=["base_timepoint_ids"],
+    )
+    base_timepoint_ids = InputMultiObject(
+        traits.Str(),
+        argstr="-base-tp %s...",
+        desc="processed timepoint to use in template",
+    )
+    longitudinal_timepoint_id = traits.Str(
+        argstr="-long %s",
+        desc="longitudinal session/timepoint id",
+        xor=["subject_id", "base_template_id"],
+        requires=["longitudinal_template_id"],
+        position=1,
+    )
+    longitudinal_template_id = traits.Str(
+        argstr="%s", desc="longitudinal base template id", position=2
+    )
 
     # Expert options
     talairach = traits.Str(desc="Flags to pass to talairach commands", xor=["expert"])
@@ -1015,7 +1062,7 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.subject_id = 'foo'
     >>> reconall.inputs.directive = 'all'
     >>> reconall.inputs.subjects_dir = '.'
-    >>> reconall.inputs.T1_files = 'structural.nii'
+    >>> reconall.inputs.T1_files = ['structural.nii']
     >>> reconall.cmdline
     'recon-all -all -i structural.nii -subjid foo -sd .'
     >>> reconall.inputs.flags = "-qcache"
@@ -1045,7 +1092,7 @@ class ReconAll(CommandLine):
     >>> reconall_subfields.inputs.subject_id = 'foo'
     >>> reconall_subfields.inputs.directive = 'all'
     >>> reconall_subfields.inputs.subjects_dir = '.'
-    >>> reconall_subfields.inputs.T1_files = 'structural.nii'
+    >>> reconall_subfields.inputs.T1_files = ['structural.nii']
     >>> reconall_subfields.inputs.hippocampal_subfields_T1 = True
     >>> reconall_subfields.cmdline
     'recon-all -all -i structural.nii -hippocampal-subfields-T1 -subjid foo -sd .'
@@ -1056,6 +1103,24 @@ class ReconAll(CommandLine):
     >>> reconall_subfields.inputs.hippocampal_subfields_T1 = False
     >>> reconall_subfields.cmdline
     'recon-all -all -i structural.nii -hippocampal-subfields-T2 structural.nii test -subjid foo -sd .'
+
+    Base template creation for longitudinal pipeline:
+    >>> baserecon = ReconAll()
+    >>> baserecon.inputs.base_template_id = 'sub-template'
+    >>> baserecon.inputs.base_timepoint_ids = ['ses-1','ses-2']
+    >>> baserecon.inputs.directive = 'all'
+    >>> baserecon.inputs.subjects_dir = '.'
+    >>> baserecon.cmdline
+    'recon-all -all -base sub-template -base-tp ses-1 -base-tp ses-2 -sd .'
+
+    Longitudinal timepoint run:
+    >>> longrecon = ReconAll()
+    >>> longrecon.inputs.longitudinal_timepoint_id = 'ses-1'
+    >>> longrecon.inputs.longitudinal_template_id = 'sub-template'
+    >>> longrecon.inputs.directive = 'all'
+    >>> longrecon.inputs.subjects_dir = '.'
+    >>> longrecon.cmdline
+    'recon-all -all -long ses-1 sub-template -sd .'
     """
 
     _cmd = "recon-all"
@@ -1077,6 +1142,7 @@ class ReconAll(CommandLine):
     #
     # [0] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV5.3
     # [1] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV6.0
+    # [2] https://surfer.nmr.mgh.harvard.edu/fswiki/ReconAllTableStableV6.0#ReconAllTableStable7.1.1
     _autorecon1_steps = [
         ("motioncor", ["mri/rawavg.mgz", "mri/orig.mgz"], []),
         (
@@ -1206,7 +1272,7 @@ class ReconAll(CommandLine):
             ("wmparc", ["mri/wmparc.mgz", "stats/wmparc.stats"], []),
             ("balabels", ["label/BA.ctab", "label/BA.thresh.ctab"], []),
         ]
-    else:
+    elif Info.looseversion() < LooseVersion("7.0.0"):
         _autorecon2_volonly_steps = [
             ("gcareg", ["mri/transforms/talairach.lta"], []),
             ("canorm", ["mri/norm.mgz"], []),
@@ -1318,6 +1384,124 @@ class ReconAll(CommandLine):
                 [],
             ),
         ]
+    else:
+        _autorecon2_volonly_steps = [
+            ("gcareg", ["mri/transforms/talairach.lta"], []),
+            ("canorm", ["mri/norm.mgz"], []),
+            ("careg", ["mri/transforms/talairach.m3z"], []),
+            (
+                "calabel",
+                [
+                    "mri/aseg.auto_noCCseg.mgz",
+                    "mri/aseg.auto.mgz",
+                    "mri/aseg.presurf.mgz",
+                ],
+                [],
+            ),
+            ("normalization2", ["mri/brain.mgz"], []),
+            ("maskbfs", ["mri/brain.finalsurfs.mgz"], []),
+            (
+                "segmentation",
+                ["mri/wm.seg.mgz", "mri/wm.asegedit.mgz", "mri/wm.mgz"],
+                [],
+            ),
+            (
+                "fill",
+                [
+                    "mri/filled.mgz",
+                    # 'scripts/ponscc.cut.log',
+                ],
+                [],
+            ),
+        ]
+        _autorecon2_lh_steps = [
+            ("tessellate", ["surf/lh.orig.nofix"], []),
+            ("smooth1", ["surf/lh.smoothwm.nofix"], []),
+            ("inflate1", ["surf/lh.inflated.nofix"], []),
+            ("qsphere", ["surf/lh.qsphere.nofix"], []),
+            ("fix", ["surf/lh.inflated", "surf/lh.orig"], []),
+            (
+                "white",
+                [
+                    "surf/lh.white.preaparc",
+                    "surf/lh.curv",
+                    "surf/lh.area",
+                    "label/lh.cortex.label",
+                ],
+                [],
+            ),
+            ("smooth2", ["surf/lh.smoothwm"], []),
+            ("inflate2", ["surf/lh.inflated", "surf/lh.sulc"], []),
+            (
+                "curvHK",
+                [
+                    "surf/lh.white.H",
+                    "surf/lh.white.K",
+                    "surf/lh.inflated.H",
+                    "surf/lh.inflated.K",
+                ],
+                [],
+            ),
+            ("curvstats", ["stats/lh.curv.stats"], []),
+        ]
+        _autorecon3_lh_steps = [
+            ("sphere", ["surf/lh.sphere"], []),
+            ("surfreg", ["surf/lh.sphere.reg"], []),
+            ("jacobian_white", ["surf/lh.jacobian_white"], []),
+            ("avgcurv", ["surf/lh.avg_curv"], []),
+            ("cortparc", ["label/lh.aparc.annot"], []),
+            (
+                "pial",
+                [
+                    "surf/lh.pial",
+                    "surf/lh.curv.pial",
+                    "surf/lh.area.pial",
+                    "surf/lh.thickness",
+                    "surf/lh.white",
+                ],
+                [],
+            ),
+            ("parcstats", ["stats/lh.aparc.stats"], []),
+            ("cortparc2", ["label/lh.aparc.a2009s.annot"], []),
+            ("parcstats2", ["stats/lh.aparc.a2009s.stats"], []),
+            ("cortparc3", ["label/lh.aparc.DKTatlas.annot"], []),
+            ("parcstats3", ["stats/lh.aparc.DKTatlas.stats"], []),
+            ("pctsurfcon", ["surf/lh.w-g.pct.mgh", "stats/lh.w-g.pct.stats"], []),
+        ]
+        _autorecon3_added_steps = [
+            (
+                "cortribbon",
+                ["mri/lh.ribbon.mgz", "mri/rh.ribbon.mgz", "mri/ribbon.mgz"],
+                [],
+            ),
+            ("hyporelabel", ["mri/aseg.presurf.hypos.mgz"], []),
+            (
+                "aparc2aseg",
+                [
+                    "mri/aparc+aseg.mgz",
+                    "mri/aparc.a2009s+aseg.mgz",
+                    "mri/aparc.DKTatlas+aseg.mgz",
+                ],
+                [],
+            ),
+            ("apas2aseg", ["mri/aseg.mgz"], ["mri/aparc+aseg.mgz"]),
+            ("segstats", ["stats/aseg.stats"], []),
+            ("wmparc", ["mri/wmparc.mgz", "stats/wmparc.stats"], []),
+            # Note that this is a very incomplete list; however the ctab
+            # files are last to be touched, so this should be reasonable
+            (
+                "balabels",
+                [
+                    "label/BA_exvivo.ctab",
+                    "label/BA_exvivo.thresh.ctab",
+                    "label/lh.entorhinal_exvivo.label",
+                    "label/rh.entorhinal_exvivo.label",
+                    "label/lh.perirhinal_exvivo.label",
+                    "label/rh.perirhinal_exvivo.label",
+                ],
+                [],
+            ),
+        ]
 
     # Fill out autorecon2 steps
     _autorecon2_rh_steps = [
@@ -1400,12 +1584,35 @@ class ReconAll(CommandLine):
 
         outputs = self._outputs().get()
 
-        outputs.update(
-            FreeSurferSource(
-                subject_id=self.inputs.subject_id, subjects_dir=subjects_dir, hemi=hemi
-            )._list_outputs()
-        )
-        outputs["subject_id"] = self.inputs.subject_id
+        # If using longitudinal pipeline, update subject id accordingly,
+        # otherwise use original/default subject_id
+        if isdefined(self.inputs.base_template_id):
+            outputs.update(
+                FreeSurferSource(
+                    subject_id=self.inputs.base_template_id,
+                    subjects_dir=subjects_dir,
+                    hemi=hemi,
+                )._list_outputs()
+            )
+            outputs["subject_id"] = self.inputs.base_template_id
+        elif isdefined(self.inputs.longitudinal_timepoint_id):
+            subject_id = f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}"
+            outputs.update(
+                FreeSurferSource(
+                    subject_id=subject_id, subjects_dir=subjects_dir, hemi=hemi
+                )._list_outputs()
+            )
+            outputs["subject_id"] = subject_id
+        else:
+            outputs.update(
+                FreeSurferSource(
+                    subject_id=self.inputs.subject_id,
+                    subjects_dir=subjects_dir,
+                    hemi=hemi,
+                )._list_outputs()
+            )
+            outputs["subject_id"] = self.inputs.subject_id
+
         outputs["subjects_dir"] = subjects_dir
         return outputs
 
@@ -1413,8 +1620,26 @@ class ReconAll(CommandLine):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
-        if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id, "mri")):
-            return True
+
+        # Check for longitudinal pipeline
+        if not isdefined(self.inputs.subject_id):
+            if isdefined(self.inputs.base_template_id):
+                if os.path.isdir(
+                    os.path.join(subjects_dir, self.inputs.base_template_id, "mri")
+                ):
+                    return True
+            elif isdefined(self.inputs.longitudinal_template_id):
+                if os.path.isdir(
+                    os.path.join(
+                        subjects_dir,
+                        f"{self.inputs.longitudinal_timepoint_id}.long.{self.inputs.longitudinal_template_id}",
+                        "mri",
+                    )
+                ):
+                    return True
+        else:
+            if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id, "mri")):
+                return True
         return False
 
     def _format_arg(self, name, trait_spec, value):
@@ -1437,7 +1662,7 @@ class ReconAll(CommandLine):
         if name == "directive" and value == "autorecon-hemi":
             if not isdefined(self.inputs.hemi):
                 raise ValueError(
-                    "Directive 'autorecon-hemi' requires hemi " "input to be set"
+                    "Directive 'autorecon-hemi' requires hemi input to be set"
                 )
             value += " " + self.inputs.hemi
         if all(
@@ -1448,11 +1673,11 @@ class ReconAll(CommandLine):
             )
         ):
             return None
-        return super(ReconAll, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     @property
     def cmdline(self):
-        cmd = super(ReconAll, self).cmdline
+        cmd = super().cmdline
 
         # Adds '-expert' flag if expert flags are passed
         # Mutually exclusive with 'expert' input parameter
@@ -1495,8 +1720,8 @@ class ReconAll(CommandLine):
         no_run = True
         flags = []
         for step, outfiles, infiles in steps:
-            flag = "-{}".format(step)
-            noflag = "-no{}".format(step)
+            flag = f"-{step}"
+            noflag = f"-no{step}"
             if noflag in cmd:
                 continue
             elif flag in cmd:
@@ -1528,7 +1753,7 @@ class ReconAll(CommandLine):
         for binary in self._binaries:
             args = getattr(self.inputs, binary)
             if isdefined(args):
-                lines.append("{} {}\n".format(binary, args))
+                lines.append(f"{binary} {args}\n")
 
         if lines == []:
             return ""
@@ -1540,7 +1765,7 @@ class ReconAll(CommandLine):
         expert_fname = os.path.abspath("expert.opts")
         with open(expert_fname, "w") as fobj:
             fobj.write(contents)
-        return " -expert {}".format(expert_fname)
+        return f" -expert {expert_fname}"
 
     def _get_expert_file(self):
         # Read pre-existing options file, if it exists
@@ -1554,7 +1779,7 @@ class ReconAll(CommandLine):
         )
         if not os.path.exists(xopts_file):
             return ""
-        with open(xopts_file, "r") as fobj:
+        with open(xopts_file) as fobj:
             return fobj.read()
 
     @property
@@ -1710,7 +1935,6 @@ class BBRegister(FSCommand):
     output_spec = BBRegisterOutputSpec
 
     def _list_outputs(self):
-
         outputs = self.output_spec().get()
         _in = self.inputs
 
@@ -1767,10 +1991,9 @@ class BBRegister(FSCommand):
             "init_cost_file",
         ) and isinstance(value, bool):
             value = self._list_outputs()[name]
-        return super(BBRegister, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
-
         if name == "out_reg_file":
             return self._list_outputs()[name]
         return None
@@ -2057,7 +2280,6 @@ class Smooth(FSCommand):
 
 
 class RobustRegisterInputSpec(FSTraitedSpec):
-
     source_file = File(
         exists=True, mandatory=True, argstr="--mov %s", desc="volume to be registered"
     )
@@ -2179,7 +2401,6 @@ class RobustRegisterInputSpec(FSTraitedSpec):
 
 
 class RobustRegisterOutputSpec(TraitedSpec):
-
     out_reg_file = File(exists=True, desc="output registration file")
     registered_file = File(exists=True, desc="output image with registration applied")
     weights_file = File(exists=True, desc="image of weights used")
@@ -2233,13 +2454,13 @@ class RobustRegister(FSCommand):
         )
         if name in options and isinstance(value, bool):
             value = self._list_outputs()[name]
-        return super(RobustRegister, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         cwd = os.getcwd()
-        prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
-        suffices = dict(
+        prefixes = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
+        suffixes = dict(
             out_reg_file=("src", "_robustreg.lta", False),
             registered_file=("src", "_robustreg", True),
             weights_file=("src", "_robustweights", True),
@@ -2249,12 +2470,12 @@ class RobustRegister(FSCommand):
             half_source_xfm=("src", "_robustxfm.lta", False),
             half_targ_xfm=("trg", "_robustxfm.lta", False),
         )
-        for name, sufftup in list(suffices.items()):
+        for name, sufftup in list(suffixes.items()):
             value = getattr(self.inputs, name)
             if value:
                 if value is True:
                     outputs[name] = fname_presuffix(
-                        prefices[sufftup[0]],
+                        prefixes[sufftup[0]],
                         suffix=sufftup[1],
                         newpath=cwd,
                         use_ext=sufftup[2],
@@ -2265,7 +2486,6 @@ class RobustRegister(FSCommand):
 
 
 class FitMSParamsInputSpec(FSTraitedSpec):
-
     in_files = traits.List(
         File(exists=True),
         argstr="%s",
@@ -2285,14 +2505,13 @@ class FitMSParamsInputSpec(FSTraitedSpec):
 
 
 class FitMSParamsOutputSpec(TraitedSpec):
-
     t1_image = File(exists=True, desc="image of estimated T1 relaxation values")
     pd_image = File(exists=True, desc="image of estimated proton density values")
     t2star_image = File(exists=True, desc="image of estimated T2* values")
 
 
 class FitMSParams(FSCommand):
-    """Estimate tissue paramaters from a set of FLASH images.
+    """Estimate tissue parameters from a set of FLASH images.
 
     Examples
     --------
@@ -2323,7 +2542,7 @@ class FitMSParams(FSCommand):
                     cmd = " ".join((cmd, "-at %s" % self.inputs.xfm_list[i]))
                 cmd = " ".join((cmd, file))
             return cmd
-        return super(FitMSParams, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -2343,7 +2562,6 @@ class FitMSParams(FSCommand):
 
 
 class SynthesizeFLASHInputSpec(FSTraitedSpec):
-
     fixed_weighting = traits.Bool(
         position=1,
         argstr="-w",
@@ -2372,7 +2590,6 @@ class SynthesizeFLASHInputSpec(FSTraitedSpec):
 
 
 class SynthesizeFLASHOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="synthesized FLASH acquisition")
 
 
@@ -2471,7 +2688,7 @@ class MNIBiasCorrectionOutputSpec(TraitedSpec):
 
 
 class MNIBiasCorrection(FSCommand):
-    """ Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI)
+    """Wrapper for nu_correct, a program from the Montreal Neurological Institute (MNI)
     used for correcting intensity non-uniformity (ie, bias fields). You must have the
     MNI software installed on your system to run this. See [www.bic.mni.mcgill.ca/software/N3]
     for more info.
@@ -2529,10 +2746,10 @@ class WatershedSkullStripOutputSpec(TraitedSpec):
 
 
 class WatershedSkullStrip(FSCommand):
-    """ This program strips skull and other outer non-brain tissue and
+    """This program strips skull and other outer non-brain tissue and
     produces the brain volume from T1 volume or the scanned volume.
 
-    The "watershed" segmentation algorithm was used to dertermine the
+    The "watershed" segmentation algorithm was used to determine the
     intensity values for white matter, grey matter, and CSF.
     A force field was then used to fit a spherical surface to the brain.
     The shape of the surface fit was then evaluated against a previously
@@ -2593,7 +2810,7 @@ class NormalizeInputSpec(FSTraitedSpec):
         argstr="-aseg %s", exists=True, desc="The input segmentation for Normalize"
     )
     transform = File(
-        exists=True, desc="Tranform file from the header of the input file"
+        exists=True, desc="Transform file from the header of the input file"
     )
 
 
@@ -2656,7 +2873,7 @@ class CANormalizeInputSpec(FSTraitedSpec):
         exists=True,
         mandatory=True,
         position=-2,
-        desc="The tranform file in lta format",
+        desc="The transform file in lta format",
     )
     # optional
     mask = File(argstr="-mask %s", exists=True, desc="Specifies volume to use as mask")
@@ -2778,7 +2995,7 @@ class CARegister(FSCommandOpenMP):
     def _format_arg(self, name, spec, value):
         if name == "l_files" and len(value) == 1:
             value.append("identity.nofile")
-        return super(CARegister, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _gen_fname(self, name):
         if name == "out_file":
@@ -2999,19 +3216,19 @@ class MRIsCALabel(FSCommandOpenMP):
                 self,
                 self.inputs.smoothwm,
                 folder="surf",
-                basename="{0}.smoothwm".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.smoothwm",
             )
             copy2subjdir(
                 self,
                 self.inputs.curv,
                 folder="surf",
-                basename="{0}.curv".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.curv",
             )
             copy2subjdir(
                 self,
                 self.inputs.sulc,
                 folder="surf",
-                basename="{0}.sulc".format(self.inputs.hemisphere),
+                basename=f"{self.inputs.hemisphere}.sulc",
             )
 
         # The label directory must exist in order for an output to be written
@@ -3021,7 +3238,7 @@ class MRIsCALabel(FSCommandOpenMP):
         if not os.path.isdir(label_dir):
             os.makedirs(label_dir)
 
-        return super(MRIsCALabel, self).run(**inputs)
+        return super().run(**inputs)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3075,7 +3292,7 @@ class SegmentCCInputSpec(FSTraitedSpec):
 
 
 class SegmentCCOutputSpec(TraitedSpec):
-    out_file = File(exists=False, desc="Output segmentation uncluding corpus collosum")
+    out_file = File(exists=False, desc="Output segmentation including corpus collosum")
     out_rotation = File(exists=False, desc="Output lta rotation file")
 
 
@@ -3115,7 +3332,7 @@ class SegmentCC(FSCommand):
             # mri_cc can't use abspaths just the basename
             basename = os.path.basename(value)
             return spec.argstr % basename
-        return super(SegmentCC, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3130,11 +3347,11 @@ class SegmentCC(FSCommand):
                 inputs["subjects_dir"] = self.inputs.subjects_dir
             for originalfile in [self.inputs.in_file, self.inputs.in_norm]:
                 copy2subjdir(self, originalfile, folder="mri")
-        return super(SegmentCC, self).run(**inputs)
+        return super().run(**inputs)
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         # it is necessary to find the output files and move
-        # them to the correct loacation
+        # them to the correct location
         predicted_outputs = self._list_outputs()
         for name in ["out_file", "out_rotation"]:
             out_file = predicted_outputs[name]
@@ -3157,7 +3374,7 @@ class SegmentCC(FSCommand):
                     if not os.path.isdir(os.path.dirname(out_tmp)):
                         os.makedirs(os.path.dirname(out_tmp))
                     shutil.move(out_tmp, out_file)
-        return super(SegmentCC, self).aggregate_outputs(runtime, needed_outputs)
+        return super().aggregate_outputs(runtime, needed_outputs)
 
 
 class SegmentWMInputSpec(FSTraitedSpec):
@@ -3335,7 +3552,7 @@ class ConcatenateLTAOutputSpec(TraitedSpec):
 
 
 class ConcatenateLTA(FSCommand):
-    """ Concatenates two consecutive LTA transformations into one overall
+    """Concatenates two consecutive LTA transformations into one overall
     transformation
 
     Out = LTA2*LTA1
@@ -3371,4 +3588,4 @@ class ConcatenateLTA(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == "out_type":
             value = {"VOX2VOX": 0, "RAS2RAS": 1}[value]
-        return super(ConcatenateLTA, self)._format_arg(name, spec, value)
+        return super()._format_arg(name, spec, value)

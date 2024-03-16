@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
 import pytest
 from nipype.utils.functions import getsource, create_function_from_source
 
 
 def _func1(x):
-    return x ** 3
+    return x**3
 
 
 def test_func_to_str():
     def func1(x):
-        return x ** 2
+        return x**2
 
     # Should be ok with both functions!
     for f in _func1, func1:

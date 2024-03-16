@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Debug plugin
@@ -9,11 +8,10 @@ from .base import PluginBase, logger
 
 
 class DebugPlugin(PluginBase):
-    """Execute workflow in series
-    """
+    """Execute workflow in series"""
 
     def __init__(self, plugin_args=None):
-        super(DebugPlugin, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         if (
             plugin_args
             and "callable" in plugin_args

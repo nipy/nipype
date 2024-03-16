@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -17,7 +16,7 @@ display_available = "DISPLAY" in os.environ and os.environ["DISPLAY"]
 @pytest.mark.skipif(no_nitime, reason="nitime is not installed")
 def test_read_csv():
     """Test that reading the data from csv file gives you back a reasonable
-    time-series object """
+    time-series object"""
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89  # bogus value just to pass traits test
     CA.inputs.in_file = example_data("fmri_timeseries_nolabels.csv")
@@ -32,7 +31,7 @@ def test_read_csv():
 
 @pytest.mark.skipif(no_nitime, reason="nitime is not installed")
 def test_coherence_analysis(tmpdir):
-    """Test that the coherence analyzer works """
+    """Test that the coherence analyzer works"""
     import nitime.analysis as nta
     import nitime.timeseries as ts
 

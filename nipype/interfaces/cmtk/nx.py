@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os.path as op
@@ -24,11 +23,16 @@ from .base import have_cmp
 iflogger = logging.getLogger("nipype.interface")
 
 
+def _read_pickle(fname):
+    with open(fname, 'rb') as f:
+        return pickle.load(f)
+
+
 def read_unknown_ntwk(ntwk):
     if not isinstance(ntwk, nx.classes.graph.Graph):
         _, _, ext = split_filename(ntwk)
         if ext == ".pck":
-            ntwk = nx.read_gpickle(ntwk)
+            ntwk = _read_pickle(ntwk)
         elif ext == ".graphml":
             ntwk = nx.read_graphml(ntwk)
     return ntwk
@@ -121,7 +125,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         counting_ntwk = ntwk.copy()
         # Sums all the relevant variables
         for index, subject in enumerate(in_files):
-            tmp = nx.read_gpickle(subject)
+            tmp = _read_pickle(subject)
             iflogger.info("File %s has %i edges", subject, tmp.number_of_edges())
             edges = list(tmp.edges())
             for edge in edges:
@@ -200,7 +204,8 @@ def average_networks(in_files, ntwk_res_file, group_id):
 
     # Writes the networks and returns the name
     network_name = group_id + "_average.pck"
-    nx.write_gpickle(avg_ntwk, op.abspath(network_name))
+    with open(op.abspath(network_name), 'wb') as f:
+        pickle.dump(avg_ntwk, f, pickle.HIGHEST_PROTOCOL)
     iflogger.info("Saving average network as %s", op.abspath(network_name))
     avg_ntwk = fix_keys_for_gexf(avg_ntwk)
     network_name = group_id + "_average.gexf"
@@ -289,15 +294,9 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     iflogger.info("Computing single valued measures:")
     measures = {}
     iflogger.info("...Computing degree assortativity (pearson number) ...")
-    try:
-        measures["degree_pearsonr"] = nx.degree_pearsonr(ntwk)
-    except AttributeError:  # For NetworkX 1.6
-        measures["degree_pearsonr"] = nx.degree_pearson_correlation_coefficient(ntwk)
+    measures["degree_pearsonr"] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info("...Computing degree assortativity...")
-    try:
-        measures["degree_assortativity"] = nx.degree_assortativity(ntwk)
-    except AttributeError:
-        measures["degree_assortativity"] = nx.degree_assortativity_coefficient(ntwk)
+    measures["degree_assortativity"] = nx.degree_assortativity_coefficient(ntwk)
     iflogger.info("...Computing transitivity...")
     measures["transitivity"] = nx.transitivity(ntwk)
     iflogger.info("...Computing number of connected_components...")
@@ -466,7 +465,7 @@ class NetworkXMetrics(BaseInterface):
         edgentwks = list()
         kntwks = list()
         matlab = list()
-        ntwk = nx.read_gpickle(self.inputs.in_file)
+        ntwk = _read_pickle(self.inputs.in_file)
 
         # Each block computes, writes, and saves a measure
         # The names are then added to the output .pck file list
@@ -489,7 +488,8 @@ class NetworkXMetrics(BaseInterface):
         for key in list(node_measures.keys()):
             newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            nx.write_gpickle(newntwk, out_file)
+            with open(out_file, 'wb') as f:
+                pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             nodentwks.append(out_file)
         if isdefined(self.inputs.out_node_metrics_matlab):
             node_out_file = op.abspath(self.inputs.out_node_metrics_matlab)
@@ -503,7 +503,8 @@ class NetworkXMetrics(BaseInterface):
         for key in list(edge_measures.keys()):
             newntwk = add_edge_data(edge_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            nx.write_gpickle(newntwk, out_file)
+            with open(out_file, 'wb') as f:
+                pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             edgentwks.append(out_file)
         if isdefined(self.inputs.out_edge_metrics_matlab):
             edge_out_file = op.abspath(self.inputs.out_edge_metrics_matlab)
@@ -527,7 +528,8 @@ class NetworkXMetrics(BaseInterface):
                 out_file = op.abspath(
                     self._gen_outfilename(self.inputs.out_k_crust, "pck")
                 )
-            nx.write_gpickle(ntwk_measures[key], out_file)
+            with open(out_file, 'wb') as f:
+                pickle.dump(ntwk_measures[key], f, pickle.HIGHEST_PROTOCOL)
             kntwks.append(out_file)
         gpickled.extend(kntwks)
 
@@ -539,8 +541,8 @@ class NetworkXMetrics(BaseInterface):
             "Saving extra measure file to %s in Pickle format",
             op.abspath(out_pickled_extra_measures),
         )
-        with open(out_pickled_extra_measures, "w") as fo:
-            pickle.dump(dict_measures, fo)
+        with open(out_pickled_extra_measures, "w") as f:
+            pickle.dump(dict_measures, f)
 
         iflogger.info("Saving MATLAB measures as %s", matlab)
 

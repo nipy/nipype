@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution."""
@@ -21,7 +20,19 @@ from .tools import report_crash, report_nodes_not_run, create_pyscript
 logger = logging.getLogger("nipype.workflow")
 
 
-class PluginBase(object):
+def _graph_to_lil_matrix(graph, nodelist):
+    """Provide a sparse linked list matrix across various NetworkX versions"""
+    import scipy.sparse as ssp
+
+    try:
+        from networkx import to_scipy_sparse_array
+    except ImportError:  # NetworkX < 2.7
+        from networkx import to_scipy_sparse_matrix as to_scipy_sparse_array
+
+    return ssp.lil_matrix(to_scipy_sparse_array(graph, nodelist=nodelist, format="lil"))
+
+
+class PluginBase:
     """Base class for plugins."""
 
     def __init__(self, plugin_args=None):
@@ -81,7 +92,7 @@ class DistributedPluginBase(PluginBase):
         a boolean numpy array (N,) signifying whether a
         process is currently running.
     depidx : :obj:`numpy.matrix`
-        a boolean matrix (NxN) storing the dependency structure accross
+        a boolean matrix (NxN) storing the dependency structure across
         processes. Process dependencies are derived from each column.
 
     """
@@ -91,7 +102,7 @@ class DistributedPluginBase(PluginBase):
         Initialize runtime attributes to none
 
         """
-        super(DistributedPluginBase, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self.procs = None
         self.depidx = None
         self.refidx = None
@@ -123,6 +134,7 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
+        errors = []
 
         old_progress_stats = None
         old_presub_stats = None
@@ -146,7 +158,7 @@ class DistributedPluginBase(PluginBase):
                     "Progress: %d jobs, %d/%d/%d "
                     "(done/running/ready), %d/%d "
                     "(pending_tasks/waiting).",
-                    *progress_stats
+                    *progress_stats,
                 )
                 old_progress_stats = progress_stats
             toappend = []
@@ -155,14 +167,16 @@ class DistributedPluginBase(PluginBase):
                 taskid, jobid = self.pending_tasks.pop()
                 try:
                     result = self._get_result(taskid)
-                except Exception:
+                except Exception as exc:
                     notrun.append(self._clean_queue(jobid, graph))
+                    errors.append(exc)
                 else:
                     if result:
                         if result["traceback"]:
                             notrun.append(
                                 self._clean_queue(jobid, graph, result=result)
                             )
+                            errors.append("".join(result["traceback"]))
                         else:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
@@ -193,6 +207,20 @@ class DistributedPluginBase(PluginBase):
 
         # close any open resources
         self._postrun_check()
+
+        if errors:
+            # If one or more nodes failed, re-rise first of them
+            error, cause = errors[0], None
+            if isinstance(error, str):
+                error = RuntimeError(error)
+
+            if len(errors) > 1:
+                error, cause = (
+                    RuntimeError(f"{len(errors)} raised. Re-raising first."),
+                    error,
+                )
+
+            raise error from cause
 
     def _get_result(self, taskid):
         raise NotImplementedError
@@ -392,7 +420,7 @@ class DistributedPluginBase(PluginBase):
         return False
 
     def _task_finished_cb(self, jobid, cached=False):
-        """ Extract outputs and assign to inputs of dependent tasks
+        """Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
         """
@@ -413,19 +441,10 @@ class DistributedPluginBase(PluginBase):
             self.refidx[self.refidx[:, jobid].nonzero()[0], jobid] = 0
 
     def _generate_dependency_list(self, graph):
-        """ Generates a dependency list for a list of graphs.
-        """
-        import networkx as nx
-
+        """Generates a dependency list for a list of graphs."""
         self.procs, _ = topological_sort(graph)
-        try:
-            self.depidx = nx.to_scipy_sparse_matrix(
-                graph, nodelist=self.procs, format="lil"
-            )
-        except:
-            self.depidx = nx.to_scipy_sparse_matrix(graph, nodelist=self.procs)
-        self.refidx = deepcopy(self.depidx)
-        self.refidx.astype = np.int
+        self.depidx = _graph_to_lil_matrix(graph, nodelist=self.procs)
+        self.refidx = self.depidx.astype(int)
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
         self.proc_pending = np.zeros(len(self.procs), dtype=bool)
 
@@ -444,8 +463,7 @@ class DistributedPluginBase(PluginBase):
         return dict(node=self.procs[jobid], dependents=subnodes, crashfile=crashfile)
 
     def _remove_node_dirs(self):
-        """Removes directories whose outputs have already been used up
-        """
+        """Removes directories whose outputs have already been used up"""
         if str2bool(self._config["execution"]["remove_node_directories"]):
             indices = np.nonzero((self.refidx.sum(axis=1) == 0).__array__())[0]
             for idx in indices:
@@ -465,11 +483,10 @@ class DistributedPluginBase(PluginBase):
 
 
 class SGELikeBatchManagerBase(DistributedPluginBase):
-    """Execute workflow with SGE/OGE/PBS like batch system
-    """
+    """Execute workflow with SGE/OGE/PBS like batch system"""
 
     def __init__(self, template, plugin_args=None):
-        super(SGELikeBatchManagerBase, self).__init__(plugin_args=plugin_args)
+        super().__init__(plugin_args=plugin_args)
         self._template = template
         self._qsub_args = None
         if plugin_args:
@@ -483,13 +500,11 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         self._pending = {}
 
     def _is_pending(self, taskid):
-        """Check if a task is pending in the batch system
-        """
+        """Check if a task is pending in the batch system"""
         raise NotImplementedError
 
     def _submit_batchtask(self, scriptfile, node):
-        """Submit a task to the batch system
-        """
+        """Submit a task to the batch system"""
         raise NotImplementedError
 
     def _get_result(self, taskid):
@@ -519,14 +534,14 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             results_file = None
             try:
                 error_message = (
-                    "Job id ({0}) finished or terminated, but "
-                    "results file does not exist after ({1}) "
+                    "Job id ({}) finished or terminated, but "
+                    "results file does not exist after ({}) "
                     "seconds. Batch dir contains crashdump file "
                     "if node raised an exception.\n"
-                    "Node working directory: ({2}) ".format(taskid, timeout, node_dir)
+                    "Node working directory: ({}) ".format(taskid, timeout, node_dir)
                 )
-                raise IOError(error_message)
-            except IOError as e:
+                raise OSError(error_message)
+            except OSError as e:
                 result_data["traceback"] = "\n".join(format_exception(*sys.exc_info()))
         else:
             results_file = glob(os.path.join(node_dir, "result_*.pklz"))[0]
@@ -544,14 +559,15 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         return result_out
 
     def _submit_job(self, node, updatehash=False):
-        """submit job and return taskid
-        """
+        """submit job and return taskid"""
         pyscript = create_pyscript(node, updatehash=updatehash)
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
-        batchscript = "\n".join((self._template, "%s %s" % (sys.executable, pyscript)))
+        batchscript = "\n".join(
+            (self._template.rstrip("\n"), f"{sys.executable} {pyscript}")
+        )
         batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
-        with open(batchscriptfile, "wt") as fp:
+        with open(batchscriptfile, "w") as fp:
             fp.writelines(batchscript)
         return self._submit_batchtask(batchscriptfile, node)
 
@@ -560,15 +576,12 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
 
 
 class GraphPluginBase(PluginBase):
-    """Base class for plugins that distribute graphs to workflows
-    """
+    """Base class for plugins that distribute graphs to workflows"""
 
     def __init__(self, plugin_args=None):
         if plugin_args and plugin_args.get("status_callback"):
-            logger.warning(
-                "status_callback not supported for Graph submission" " plugins"
-            )
-        super(GraphPluginBase, self).__init__(plugin_args=plugin_args)
+            logger.warning("status_callback not supported for Graph submission plugins")
+        super().__init__(plugin_args=plugin_args)
 
     def run(self, graph, config, updatehash=False):
         import networkx as nx

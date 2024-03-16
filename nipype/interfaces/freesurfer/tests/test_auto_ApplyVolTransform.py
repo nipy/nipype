@@ -4,8 +4,13 @@ from ..preprocess import ApplyVolTransform
 
 def test_ApplyVolTransform_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         fs_target=dict(
             argstr="--fstarg",
             mandatory=True,
@@ -27,9 +32,16 @@ def test_ApplyVolTransform_inputs():
                 "subject",
             ),
         ),
-        interp=dict(argstr="--interp %s",),
-        inverse=dict(argstr="--inv",),
-        invert_morph=dict(argstr="--inv-morph", requires=["m3z_file"],),
+        interp=dict(
+            argstr="--interp %s",
+        ),
+        inverse=dict(
+            argstr="--inv",
+        ),
+        invert_morph=dict(
+            argstr="--inv-morph",
+            requires=["m3z_file"],
+        ),
         lta_file=dict(
             argstr="--lta %s",
             extensions=None,
@@ -60,7 +72,10 @@ def test_ApplyVolTransform_inputs():
                 "subject",
             ),
         ),
-        m3z_file=dict(argstr="--m3z %s", extensions=None,),
+        m3z_file=dict(
+            argstr="--m3z %s",
+            extensions=None,
+        ),
         mni_152_reg=dict(
             argstr="--regheader",
             mandatory=True,
@@ -75,8 +90,13 @@ def test_ApplyVolTransform_inputs():
                 "subject",
             ),
         ),
-        no_ded_m3z_path=dict(argstr="--noDefM3zPath", requires=["m3z_file"],),
-        no_resample=dict(argstr="--no-resample",),
+        no_ded_m3z_path=dict(
+            argstr="--noDefM3zPath",
+            requires=["m3z_file"],
+        ),
+        no_resample=dict(
+            argstr="--no-resample",
+        ),
         reg_file=dict(
             argstr="--reg %s",
             extensions=None,
@@ -107,7 +127,10 @@ def test_ApplyVolTransform_inputs():
             ),
         ),
         source_file=dict(
-            argstr="--mov %s", copyfile=False, extensions=None, mandatory=True,
+            argstr="--mov %s",
+            copyfile=False,
+            extensions=None,
+            mandatory=True,
         ),
         subject=dict(
             argstr="--s %s",
@@ -125,16 +148,24 @@ def test_ApplyVolTransform_inputs():
         ),
         subjects_dir=dict(),
         tal=dict(
-            argstr="--tal", mandatory=True, xor=("target_file", "tal", "fs_target"),
+            argstr="--tal",
+            mandatory=True,
+            xor=("target_file", "tal", "fs_target"),
         ),
-        tal_resolution=dict(argstr="--talres %.10f",),
+        tal_resolution=dict(
+            argstr="--talres %.10f",
+        ),
         target_file=dict(
             argstr="--targ %s",
             extensions=None,
             mandatory=True,
             xor=("target_file", "tal", "fs_target"),
         ),
-        transformed_file=dict(argstr="--o %s", extensions=None, genfile=True,),
+        transformed_file=dict(
+            argstr="--o %s",
+            extensions=None,
+            genfile=True,
+        ),
         xfm_reg_file=dict(
             argstr="--xfm %s",
             extensions=None,
@@ -159,7 +190,11 @@ def test_ApplyVolTransform_inputs():
 
 
 def test_ApplyVolTransform_outputs():
-    output_map = dict(transformed_file=dict(extensions=None,),)
+    output_map = dict(
+        transformed_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = ApplyVolTransform.output_spec()
 
     for key, metadata in list(output_map.items()):

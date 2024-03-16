@@ -4,16 +4,44 @@ from ..brainsuite import Pvc
 
 def test_Pvc_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputMRIFile=dict(argstr="-i %s", extensions=None, mandatory=True,),
-        inputMaskFile=dict(argstr="-m %s", extensions=None,),
-        outputLabelFile=dict(argstr="-o %s", extensions=None, genfile=True,),
-        outputTissueFractionFile=dict(argstr="-f %s", extensions=None, genfile=True,),
-        spatialPrior=dict(argstr="-l %f",),
-        threeClassFlag=dict(argstr="-3",),
-        timer=dict(argstr="--timer",),
-        verbosity=dict(argstr="-v %d",),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputMRIFile=dict(
+            argstr="-i %s",
+            extensions=None,
+            mandatory=True,
+        ),
+        inputMaskFile=dict(
+            argstr="-m %s",
+            extensions=None,
+        ),
+        outputLabelFile=dict(
+            argstr="-o %s",
+            extensions=None,
+            genfile=True,
+        ),
+        outputTissueFractionFile=dict(
+            argstr="-f %s",
+            extensions=None,
+            genfile=True,
+        ),
+        spatialPrior=dict(
+            argstr="-l %f",
+        ),
+        threeClassFlag=dict(
+            argstr="-3",
+        ),
+        timer=dict(
+            argstr="--timer",
+        ),
+        verbosity=dict(
+            argstr="-v %d",
+        ),
     )
     inputs = Pvc.input_spec()
 
@@ -24,8 +52,12 @@ def test_Pvc_inputs():
 
 def test_Pvc_outputs():
     output_map = dict(
-        outputLabelFile=dict(extensions=None,),
-        outputTissueFractionFile=dict(extensions=None,),
+        outputLabelFile=dict(
+            extensions=None,
+        ),
+        outputTissueFractionFile=dict(
+            extensions=None,
+        ),
     )
     outputs = Pvc.output_spec()
 

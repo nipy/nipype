@@ -20,7 +20,7 @@ from setuptools.command.build_py import build_py
 
 
 class BuildWithCommitInfoCommand(build_py):
-    """ Return extended build command class for recording commit
+    """Return extended build command class for recording commit
 
     The extended command tries to run git to find the current commit, getting
     the empty string if it fails.  It then writes the commit hash into a file
@@ -74,7 +74,7 @@ class BuildWithCommitInfoCommand(build_py):
         cfg_parser.read(pjoin("nipype", "COMMIT_INFO.txt"))
         cfg_parser.set("commit hash", "install_hash", repo_commit.strip())
         out_pth = pjoin(self.build_lib, "nipype", "COMMIT_INFO.txt")
-        cfg_parser.write(open(out_pth, "wt"))
+        cfg_parser.write(open(out_pth, "w"))
 
 
 def main():
@@ -119,6 +119,7 @@ def main():
         maintainer_email=ldict["MAINTAINER_EMAIL"],
         description=ldict["DESCRIPTION"],
         long_description=ldict["LONG_DESCRIPTION"],
+        long_description_content_type="text/x-rst",
         url=ldict["URL"],
         download_url=ldict["DOWNLOAD_URL"],
         license=ldict["LICENSE"],

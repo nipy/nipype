@@ -4,12 +4,27 @@ from ..maxcurvature import maxcurvature
 
 def test_maxcurvature_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        image=dict(argstr="--image %s", extensions=None,),
-        output=dict(argstr="--output %s", hash_files=False,),
-        sigma=dict(argstr="--sigma %f",),
-        verbose=dict(argstr="--verbose ",),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        image=dict(
+            argstr="--image %s",
+            extensions=None,
+        ),
+        output=dict(
+            argstr="--output %s",
+            hash_files=False,
+        ),
+        sigma=dict(
+            argstr="--sigma %f",
+        ),
+        verbose=dict(
+            argstr="--verbose ",
+        ),
     )
     inputs = maxcurvature.input_spec()
 
@@ -19,7 +34,11 @@ def test_maxcurvature_inputs():
 
 
 def test_maxcurvature_outputs():
-    output_map = dict(output=dict(extensions=None,),)
+    output_map = dict(
+        output=dict(
+            extensions=None,
+        ),
+    )
     outputs = maxcurvature.output_spec()
 
     for key, metadata in list(output_map.items()):

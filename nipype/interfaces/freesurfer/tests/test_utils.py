@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -17,7 +16,6 @@ from nipype.interfaces.io import FreeSurferSource
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_sample2surf(create_files_in_directory_plus_dummy_file):
-
     s2s = fs.SampleToSurface()
     # Test underlying command
     assert s2s.cmd == "mri_vol2surf"
@@ -65,7 +63,6 @@ def test_sample2surf(create_files_in_directory_plus_dummy_file):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_surfsmooth(create_surf_file_in_directory):
-
     smooth = fs.SurfaceSmooth()
 
     # Test underlying command
@@ -104,7 +101,6 @@ def test_surfsmooth(create_surf_file_in_directory):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_surfxfm(create_surf_file_in_directory):
-
     xfm = fs.SurfaceTransform()
 
     # Test underlying command
@@ -141,7 +137,6 @@ def test_surfxfm(create_surf_file_in_directory):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_surfshots(create_files_in_directory_plus_dummy_file):
-
     fotos = fs.SurfaceSnapshots()
 
     # Test underlying command
@@ -154,7 +149,7 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
     # Create testing files
     files, cwd = create_files_in_directory_plus_dummy_file
 
-    # Test input settins
+    # Test input settings
     fotos.inputs.subject_id = "fsaverage"
     fotos.inputs.hemi = "lh"
     fotos.inputs.surface = "pial"
@@ -230,3 +225,19 @@ def test_mrisexpand(tmpdir):
     assert op.dirname(if_out_file) == op.dirname(fsavginfo["smoothwm"])
     # Node places output in working directory
     assert op.dirname(nd_out_file) == nd_res.runtime.cwd
+
+
+@pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
+def test_eulernumber(tmpdir):
+    # grab a surface from fsaverage
+    fssrc = FreeSurferSource(
+        subjects_dir=fs.Info.subjectsdir(), subject_id="fsaverage", hemi="lh"
+    )
+    pial = fssrc.run().outputs.pial
+    assert isinstance(pial, str), "Problem when fetching surface file"
+
+    eu = fs.EulerNumber()
+    eu.inputs.in_file = pial
+    res = eu.run()
+    assert res.outputs.defects == 0
+    assert res.outputs.euler == 2

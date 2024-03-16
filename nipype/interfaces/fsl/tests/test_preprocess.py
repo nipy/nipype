@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -14,8 +13,7 @@ from nipype.interfaces.fsl import no_fsl
 
 
 def fsl_name(obj, fname):
-    """Create valid fsl name, including file extension for output type.
-    """
+    """Create valid fsl name, including file extension for output type."""
     ext = Info.output_type_to_ext(obj.inputs.output_type)
     return fname + ext
 
@@ -31,6 +29,9 @@ def setup_infile(tmpdir):
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_bet(setup_infile):
     tmp_infile, tp_dir = setup_infile
+    # BET converts the in_file path to be relative to prevent
+    # failure with long paths.
+    tmp_infile = os.path.relpath(tmp_infile, start=os.getcwd())
     better = fsl.BET()
     assert better.cmd == "bet"
 
@@ -41,13 +42,12 @@ def test_bet(setup_infile):
     # Test generated outfile name
     better.inputs.in_file = tmp_infile
     outfile = fsl_name(better, "foo_brain")
-    outpath = os.path.join(os.getcwd(), outfile)
-    realcmd = "bet %s %s" % (tmp_infile, outpath)
+    realcmd = f"bet {tmp_infile} {outfile}"
     assert better.cmdline == realcmd
     # Test specified outfile name
     outfile = fsl_name(better, "/newdata/bar")
     better.inputs.out_file = outfile
-    realcmd = "bet %s %s" % (tmp_infile, outfile)
+    realcmd = f"bet {tmp_infile} {outfile}"
     assert better.cmdline == realcmd
 
     # infile foo.nii doesn't exist
@@ -70,7 +70,7 @@ def test_bet(setup_infile):
         "center": ("-c 54 75 80", [54, 75, 80]),
         "threshold": ("-t", True),
         "mesh": ("-e", True),
-        "surfaces": ("-A", True)
+        "surfaces": ("-A", True),
         # 'verbose': ('-v', True),
         # 'flags': ('--i-made-this-up', '--i-made-this-up'),
     }
@@ -79,12 +79,11 @@ def test_bet(setup_infile):
     # test each of our arguments
     better = fsl.BET()
     outfile = fsl_name(better, "foo_brain")
-    outpath = os.path.join(os.getcwd(), outfile)
     for name, settings in list(opt_map.items()):
         better = fsl.BET(**{name: settings[1]})
         # Add mandatory input
         better.inputs.in_file = tmp_infile
-        realcmd = " ".join([better.cmd, tmp_infile, outpath, settings[0]])
+        realcmd = " ".join([better.cmd, tmp_infile, outfile, settings[0]])
         assert better.cmdline == realcmd
 
 
@@ -104,13 +103,13 @@ def test_fast(setup_infile):
     assert faster.inputs.manual_seg == Undefined
     assert faster.inputs != fasted.inputs
     assert fasted.cmdline == "fast -v -S 1 %s" % (tmp_infile)
-    assert fasted2.cmdline == "fast -v -S 2 %s %s" % (tmp_infile, tmp_infile)
+    assert fasted2.cmdline == f"fast -v -S 2 {tmp_infile} {tmp_infile}"
 
     faster = fsl.FAST()
     faster.inputs.in_files = tmp_infile
     assert faster.cmdline == "fast -S 1 %s" % (tmp_infile)
     faster.inputs.in_files = [tmp_infile, tmp_infile]
-    assert faster.cmdline == "fast -S 2 %s %s" % (tmp_infile, tmp_infile)
+    assert faster.cmdline == f"fast -S 2 {tmp_infile} {tmp_infile}"
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -123,7 +122,7 @@ def test_fast(setup_infile):
         "segments": ("-g", True),
         "init_transform": ("-a %s" % (tmp_infile), "%s" % (tmp_infile)),
         "other_priors": (
-            "-A %s %s %s" % (tmp_infile, tmp_infile, tmp_infile),
+            f"-A {tmp_infile} {tmp_infile} {tmp_infile}",
             (["%s" % (tmp_infile), "%s" % (tmp_infile), "%s" % (tmp_infile)]),
         ),
         "no_pve": ("--nopve", True),
@@ -151,9 +150,9 @@ def test_fast(setup_infile):
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fast_list_outputs(setup_infile, tmpdir):
-    """ By default (no -o), FSL's fast command outputs files into the same
+    """By default (no -o), FSL's fast command outputs files into the same
     directory as the input files. If the flag -o is set, it outputs files into
-    the cwd """
+    the cwd"""
 
     def _run_and_test(opts, output_base):
         outputs = fsl.FAST(**opts)._list_outputs()
@@ -242,7 +241,7 @@ def test_flirt(setup_flirt):
     pth, fname, ext = split_filename(infile)
     outfile = fsl_name(flirter, "%s_flirt" % fname)
     outmat = "%s_flirt.mat" % fname
-    realcmd = "flirt -in %s -ref %s -out %s -omat %s" % (
+    realcmd = "flirt -in {} -ref {} -out {} -omat {}".format(
         infile,
         reffile,
         outfile,
@@ -303,7 +302,7 @@ def test_flirt(setup_flirt):
         else:
             value = trait_spec.default
             param = trait_spec.argstr % value
-        cmdline = "flirt -in %s -ref %s" % (infile, reffile)
+        cmdline = f"flirt -in {infile} -ref {reffile}"
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
         outfile = fsl_name(fsl.FLIRT(), "%s_flirt" % fname)
@@ -402,7 +401,6 @@ def test_mcflirt_noinput():
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fnirt(setup_flirt):
-
     tmpdir, infile, reffile = setup_flirt
     tmpdir.chdir()
     fnirt = fsl.FNIRT()
@@ -436,7 +434,7 @@ def test_fnirt(setup_flirt):
                 " --iout=%s" % (infile, log, flag, strval, reffile, iout)
             )
         elif item in ("in_fwhm", "intensity_mapping_model"):
-            cmd = "fnirt --in=%s %s=%s --logout=%s " "--ref=%s --iout=%s" % (
+            cmd = "fnirt --in={} {}={} --logout={} --ref={} --iout={}".format(
                 infile,
                 flag,
                 strval,
@@ -497,7 +495,7 @@ def test_fnirt(setup_flirt):
         ("log_file", "--logout=%s" % infile, infile),
     ]
 
-    for (name, settings, arg) in opt_map:
+    for name, settings, arg in opt_map:
         fnirt = fsl.FNIRT(in_file=infile, ref_file=reffile, **{name: arg})
 
         if name in ("config_file", "affine_file", "field_file", "fieldcoeff_file"):

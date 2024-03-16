@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -23,14 +22,14 @@ IFLOGGER = logging.getLogger("nipype.interface")
 
 
 class TVTKBaseInterface(BaseInterface):
-    """ A base class for interfaces using VTK """
+    """A base class for interfaces using VTK"""
 
     _redirect_x = True
 
     def __init__(self, **inputs):
         if VTKInfo.no_tvtk():
             raise ImportError("This interface requires tvtk to run.")
-        super(TVTKBaseInterface, self).__init__(**inputs)
+        super().__init__(**inputs)
 
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
@@ -92,7 +91,7 @@ class WarpPoints(TVTKBaseInterface):
 
         if ext[0] == ".":
             ext = ext[1:]
-        return op.abspath("%s_%s.%s" % (fname, suffix, ext))
+        return op.abspath(f"{fname}_{suffix}.{ext}")
 
     def _run_interface(self, runtime):
         import nibabel as nb
@@ -142,12 +141,12 @@ class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
     surface1 = File(
         exists=True,
         mandatory=True,
-        desc=("Reference surface (vtk format) to which compute " "distance."),
+        desc=("Reference surface (vtk format) to which compute distance."),
     )
     surface2 = File(
         exists=True,
         mandatory=True,
-        desc=("Test surface (vtk format) from which compute " "distance."),
+        desc=("Test surface (vtk format) from which compute distance."),
     )
     metric = traits.Enum(
         "euclidean", "sqeuclidean", usedefault=True, desc="norm used to report distance"
@@ -164,7 +163,7 @@ class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
     out_warp = File(
         "surfwarp.vtk",
         usedefault=True,
-        desc="vtk file based on surface1 and warpings mapping it " "to surface2",
+        desc="vtk file based on surface1 and warpings mapping it to surface2",
     )
     out_file = File(
         "distance.npy",
@@ -177,7 +176,7 @@ class ComputeMeshWarpOutputSpec(TraitedSpec):
     distance = traits.Float(desc="computed distance")
     out_warp = File(
         exists=True,
-        desc=("vtk file with the vertex-wise " "mapping of surface1 to surface2"),
+        desc=("vtk file with the vertex-wise mapping of surface1 to surface2"),
     )
     out_file = File(
         exists=True, desc="numpy file keeping computed distances and weights"
@@ -309,7 +308,7 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
     out_warp = File(
         "warp_maths.vtk",
         usedefault=True,
-        desc="vtk file based on in_surf and warpings mapping it " "to out_file",
+        desc="vtk file based on in_surf and warpings mapping it to out_file",
     )
     out_file = File("warped_surf.vtk", usedefault=True, desc="vtk with surface warped")
 
@@ -317,7 +316,7 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
 class MeshWarpMathsOutputSpec(TraitedSpec):
     out_warp = File(
         exists=True,
-        desc=("vtk file with the vertex-wise " "mapping of surface1 to surface2"),
+        desc=("vtk file with the vertex-wise mapping of surface1 to surface2"),
     )
     out_file = File(exists=True, desc="vtk with surface warped")
 
@@ -423,7 +422,7 @@ class P2PDistance(ComputeMeshWarp):
     """
 
     def __init__(self, **inputs):
-        super(P2PDistance, self).__init__(**inputs)
+        super().__init__(**inputs)
         IFLOGGER.warning(
             "This interface has been deprecated since 1.0, please "
             "use ComputeMeshWarp"

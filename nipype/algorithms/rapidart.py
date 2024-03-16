@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -38,7 +37,7 @@ iflogger = logging.getLogger("nipype.interface")
 def _get_affine_matrix(params, source):
     """Return affine matrix given a set of translation and rotation parameters
 
-    params : np.array (upto 12 long) in native package format
+    params : np.array (up to 12 long) in native package format
     source : the package that generated the parameters
              supports SPM, AFNI, FSFAST, FSL, NIPY
     """
@@ -169,7 +168,7 @@ def _calc_norm_affine(affines, use_differences, brain_pts=None):
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(
         File(exists=True),
-        desc=("Names of realigned functional data " "files"),
+        desc=("Names of realigned functional data files"),
         mandatory=True,
     )
     realignment_parameters = InputMultiPath(
@@ -225,12 +224,12 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     rotation_threshold = traits.Float(
         mandatory=True,
         xor=["norm_threshold"],
-        desc=("Threshold (in radians) to use to " "detect rotation-related outliers"),
+        desc=("Threshold (in radians) to use to detect rotation-related outliers"),
     )
     translation_threshold = traits.Float(
         mandatory=True,
         xor=["norm_threshold"],
-        desc=("Threshold (in mm) to use to " "detect translation-related " "outliers"),
+        desc=("Threshold (in mm) to use to detect translation-related outliers"),
     )
     zintensity_threshold = traits.Float(
         mandatory=True,
@@ -258,12 +257,12 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     )
     mask_file = File(exists=True, desc="Mask file to be used if mask_type is 'file'.")
     mask_threshold = traits.Float(
-        desc=("Mask threshold to be used if mask_type" " is 'thresh'.")
+        desc=("Mask threshold to be used if mask_type is 'thresh'.")
     )
     intersect_mask = traits.Bool(
         True,
         usedefault=True,
-        desc=("Intersect the masks when computed from " "spm_global."),
+        desc=("Intersect the masks when computed from spm_global."),
     )
     save_plot = traits.Bool(
         True, desc="save plots containing outliers", usedefault=True
@@ -289,7 +288,7 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     )
     global_threshold = traits.Float(
         8.0,
-        desc=("use this threshold when mask " "type equal's spm_global"),
+        desc=("use this threshold when mask type equal's spm_global"),
         usedefault=True,
     )
 
@@ -313,7 +312,7 @@ class ArtifactDetectOutputSpec(TraitedSpec):
         ),
     )
     norm_files = OutputMultiPath(
-        File, desc=("One file for each functional run " "containing the composite norm")
+        File, desc=("One file for each functional run containing the composite norm")
     )
     statistic_files = OutputMultiPath(
         File(exists=True),
@@ -330,7 +329,7 @@ class ArtifactDetectOutputSpec(TraitedSpec):
     plot_files = OutputMultiPath(
         File,
         desc=(
-            "One image file for each functional run " "containing the detected outliers"
+            "One image file for each functional run containing the detected outliers"
         ),
     )
     mask_files = OutputMultiPath(
@@ -378,7 +377,7 @@ class ArtifactDetect(BaseInterface):
     output_spec = ArtifactDetectOutputSpec
 
     def __init__(self, **inputs):
-        super(ArtifactDetect, self).__init__(**inputs)
+        super().__init__(**inputs)
 
     def _get_output_filenames(self, motionfile, output_dir):
         """Generate output files based on motion filenames
@@ -583,11 +582,11 @@ class ArtifactDetect(BaseInterface):
             tidx = find_indices(normval > self.inputs.norm_threshold)
             ridx = find_indices(normval < 0)
             if displacement is not None:
-                dmap = np.zeros((x, y, z, timepoints), dtype=np.float)
+                dmap = np.zeros((x, y, z, timepoints), dtype=np.float64)
                 for i in range(timepoints):
-                    dmap[
-                        voxel_coords[0], voxel_coords[1], voxel_coords[2], i
-                    ] = displacement[i, :]
+                    dmap[voxel_coords[0], voxel_coords[1], voxel_coords[2], i] = (
+                        displacement[i, :]
+                    )
                 dimg = Nifti1Image(dmap, affine)
                 dimg.to_filename(displacementfile)
         else:
@@ -686,8 +685,7 @@ class ArtifactDetect(BaseInterface):
         save_json(statsfile, stats)
 
     def _run_interface(self, runtime):
-        """Execute this module.
-        """
+        """Execute this module."""
         funcfilelist = ensure_list(self.inputs.realigned_files)
         motparamlist = ensure_list(self.inputs.realignment_parameters)
         for i, imgf in enumerate(funcfilelist):
@@ -700,28 +698,27 @@ class StimCorrInputSpec(BaseInterfaceInputSpec):
         File(exists=True),
         mandatory=True,
         desc=(
-            "Names of realignment "
-            "parameters corresponding to "
+            "Names of realignment parameters corresponding to "
             "the functional data files"
         ),
     )
     intensity_values = InputMultiPath(
         File(exists=True),
         mandatory=True,
-        desc=("Name of file containing intensity " "values"),
+        desc=("Name of file containing intensity values"),
     )
     spm_mat_file = File(
         exists=True, mandatory=True, desc="SPM mat file (use pre-estimate SPM.mat file)"
     )
     concatenated_design = traits.Bool(
         mandatory=True,
-        desc=("state if the design matrix " "contains concatenated sessions"),
+        desc=("state if the design matrix contains concatenated sessions"),
     )
 
 
 class StimCorrOutputSpec(TraitedSpec):
     stimcorr_files = OutputMultiPath(
-        File(exists=True), desc=("List of files containing " "correlation values")
+        File(exists=True), desc=("List of files containing correlation values")
     )
 
 
@@ -814,8 +811,7 @@ class StimulusCorrelation(BaseInterface):
         return outmatrix
 
     def _run_interface(self, runtime):
-        """Execute this module.
-        """
+        """Execute this module."""
         import scipy.io as sio
 
         motparamlist = self.inputs.realignment_parameters

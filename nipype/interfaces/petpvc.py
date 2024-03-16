@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """PETPVC is a toolbox for partial volume correction in positron emission tomography."""
@@ -38,6 +37,7 @@ pvc_methods = [
     "RBV+VC",
     "RL",
     "VC",
+    "STC",
 ]
 
 
@@ -76,6 +76,7 @@ Desired PVC method:
     * Muller Gartner -- ``MG``
     * Muller Gartner with Van-Cittert -- ``MG+VC``
     * Muller Gartner with Richardson-Lucy -- ``MG+RL``
+    * Single-target correction -- ``STC``
 
 """,
     )
@@ -155,7 +156,7 @@ class PETPVC(CommandLine):
     output_spec = PETPVCOutputSpec
     _cmd = "petpvc"
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{0031-9155-61-22-7975,"
@@ -183,7 +184,7 @@ class PETPVC(CommandLine):
         if not isdefined(outputs["out_file"]):
             method_name = self.inputs.pvc.lower()
             outputs["out_file"] = self._gen_fname(
-                self.inputs.in_file, suffix="_{}_pvc".format(method_name)
+                self.inputs.in_file, suffix=f"_{method_name}_pvc"
             )
 
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
@@ -195,8 +196,8 @@ class PETPVC(CommandLine):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extentions specified in
-        <instance>intputs.output_type.
+        If change_ext is True, it will use the extensions specified in
+        <instance>inputs.output_type.
 
         Parameters
         ----------

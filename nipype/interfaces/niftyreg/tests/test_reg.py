@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -14,7 +13,7 @@ from .test_regutils import no_nifty_tool
     reason="niftyreg is not installed. reg_aladin not found.",
 )
 def test_reg_aladin():
-    """ tests for reg_aladin interface"""
+    """tests for reg_aladin interface"""
     # Create a reg_aladin object
     nr_aladin = RegAladin()
 
@@ -53,7 +52,7 @@ def test_reg_aladin():
     no_nifty_tool(cmd="reg_f3d"), reason="niftyreg is not installed. reg_f3d not found."
 )
 def test_reg_f3d():
-    """ tests for reg_f3d interface"""
+    """tests for reg_f3d interface"""
     # Create a reg_f3d object
     nr_f3d = RegF3D()
 

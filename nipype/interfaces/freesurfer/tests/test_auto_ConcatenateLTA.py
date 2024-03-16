@@ -4,13 +4,33 @@ from ..preprocess import ConcatenateLTA
 
 def test_ConcatenateLTA_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_lta1=dict(argstr="%s", extensions=None, mandatory=True, position=-3,),
-        in_lta2=dict(argstr="%s", mandatory=True, position=-2,),
-        invert_1=dict(argstr="-invert1",),
-        invert_2=dict(argstr="-invert2",),
-        invert_out=dict(argstr="-invertout",),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_lta1=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-3,
+        ),
+        in_lta2=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-2,
+        ),
+        invert_1=dict(
+            argstr="-invert1",
+        ),
+        invert_2=dict(
+            argstr="-invert2",
+        ),
+        invert_out=dict(
+            argstr="-invertout",
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -20,8 +40,12 @@ def test_ConcatenateLTA_inputs():
             name_template="%s_concat",
             position=-1,
         ),
-        out_type=dict(argstr="-out_type %d",),
-        subject=dict(argstr="-subject %s",),
+        out_type=dict(
+            argstr="-out_type %d",
+        ),
+        subject=dict(
+            argstr="-subject %s",
+        ),
         subjects_dir=dict(),
         tal_source_file=dict(
             argstr="-tal %s",
@@ -30,7 +54,10 @@ def test_ConcatenateLTA_inputs():
             requires=["tal_template_file"],
         ),
         tal_template_file=dict(
-            argstr="%s", extensions=None, position=-4, requires=["tal_source_file"],
+            argstr="%s",
+            extensions=None,
+            position=-4,
+            requires=["tal_source_file"],
         ),
     )
     inputs = ConcatenateLTA.input_spec()
@@ -41,7 +68,11 @@ def test_ConcatenateLTA_inputs():
 
 
 def test_ConcatenateLTA_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = ConcatenateLTA.output_spec()
 
     for key, metadata in list(output_map.items()):

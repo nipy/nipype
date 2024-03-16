@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Nilearn is a Python library for fast and easy statistical learning on NeuroImaging data."""
@@ -45,7 +44,7 @@ class SignalExtractionInputSpec(BaseInterfaceInputSpec):
         "signals.tsv",
         usedefault=True,
         exists=False,
-        desc="The name of the file to output to. " "signals.tsv by default",
+        desc="The name of the file to output to. signals.tsv by default",
     )
     incl_shared_variance = traits.Bool(
         True,
@@ -112,7 +111,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         return runtime
 
     def _process_inputs(self):
-        """ validate and  process inputs into useful form.
+        """validate and  process inputs into useful form.
         Returns a list of nilearn maskers and the list of corresponding label
         names."""
         import nilearn.input_data as nl
@@ -155,7 +154,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         if self.inputs.include_global:
             global_label_data = label_data.dataobj.sum(axis=3)  # sum across all regions
             global_label_data = (
-                np.rint(global_label_data).astype(int).clip(0, 1)
+                np.rint(global_label_data).clip(0, 1).astype('u1')
             )  # binarize
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = nl.NiftiLabelsMasker(
@@ -170,6 +169,6 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         return maskers
 
     def _4d(self, array, affine):
-        """ takes a 3-dimensional numpy array and an affine,
-        returns the equivalent 4th dimensional nifti file """
+        """takes a 3-dimensional numpy array and an affine,
+        returns the equivalent 4th dimensional nifti file"""
         return nb.Nifti1Image(array[:, :, :, np.newaxis], affine)

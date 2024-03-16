@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Useful Functions for working with matlab"""
@@ -13,7 +12,7 @@ import numpy as np
 
 
 def fltcols(vals):
-    """ Trivial little function to make 1xN float vector """
+    """Trivial little function to make 1xN float vector"""
     return np.atleast_2d(np.array(vals, dtype=float))
 
 

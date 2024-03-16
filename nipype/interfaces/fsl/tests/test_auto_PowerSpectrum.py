@@ -4,11 +4,25 @@ from ..utils import PowerSpectrum
 
 def test_PowerSpectrum_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=0,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
         out_file=dict(
-            argstr="%s", extensions=None, genfile=True, hash_files=False, position=1,
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            hash_files=False,
+            position=1,
         ),
         output_type=dict(),
     )
@@ -20,7 +34,11 @@ def test_PowerSpectrum_inputs():
 
 
 def test_PowerSpectrum_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = PowerSpectrum.output_spec()
 
     for key, metadata in list(output_map.items()):

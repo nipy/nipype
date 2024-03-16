@@ -4,12 +4,29 @@ from ..brains import landmarksConstellationWeights
 
 def test_landmarksConstellationWeights_inputs():
     input_map = dict(
-        LLSModel=dict(argstr="--LLSModel %s", extensions=None,),
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputTemplateModel=dict(argstr="--inputTemplateModel %s", extensions=None,),
-        inputTrainingList=dict(argstr="--inputTrainingList %s", extensions=None,),
-        outputWeightsList=dict(argstr="--outputWeightsList %s", hash_files=False,),
+        LLSModel=dict(
+            argstr="--LLSModel %s",
+            extensions=None,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputTemplateModel=dict(
+            argstr="--inputTemplateModel %s",
+            extensions=None,
+        ),
+        inputTrainingList=dict(
+            argstr="--inputTrainingList %s",
+            extensions=None,
+        ),
+        outputWeightsList=dict(
+            argstr="--outputWeightsList %s",
+            hash_files=False,
+        ),
     )
     inputs = landmarksConstellationWeights.input_spec()
 
@@ -19,7 +36,11 @@ def test_landmarksConstellationWeights_inputs():
 
 
 def test_landmarksConstellationWeights_outputs():
-    output_map = dict(outputWeightsList=dict(extensions=None,),)
+    output_map = dict(
+        outputWeightsList=dict(
+            extensions=None,
+        ),
+    )
     outputs = landmarksConstellationWeights.output_spec()
 
     for key, metadata in list(output_map.items()):

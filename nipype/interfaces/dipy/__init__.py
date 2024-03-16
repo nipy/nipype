@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 """DIPY is a computational neuroimaging tool for diffusion MRI."""
+
 from .tracks import StreamlineTractography, TrackDensityMap
 from .tensors import TensorMode, DTI
 from .preprocess import Resample, Denoise

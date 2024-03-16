@@ -4,16 +4,41 @@ from ..surface import GrayscaleModelMaker
 
 def test_GrayscaleModelMaker_inputs():
     input_map = dict(
-        InputVolume=dict(argstr="%s", extensions=None, position=-2,),
-        OutputGeometry=dict(argstr="%s", hash_files=False, position=-1,),
-        args=dict(argstr="%s",),
-        decimate=dict(argstr="--decimate %f",),
-        environ=dict(nohash=True, usedefault=True,),
-        name=dict(argstr="--name %s",),
-        pointnormals=dict(argstr="--pointnormals ",),
-        smooth=dict(argstr="--smooth %d",),
-        splitnormals=dict(argstr="--splitnormals ",),
-        threshold=dict(argstr="--threshold %f",),
+        InputVolume=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        OutputGeometry=dict(
+            argstr="%s",
+            hash_files=False,
+            position=-1,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        decimate=dict(
+            argstr="--decimate %f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        name=dict(
+            argstr="--name %s",
+        ),
+        pointnormals=dict(
+            argstr="--pointnormals ",
+        ),
+        smooth=dict(
+            argstr="--smooth %d",
+        ),
+        splitnormals=dict(
+            argstr="--splitnormals ",
+        ),
+        threshold=dict(
+            argstr="--threshold %f",
+        ),
     )
     inputs = GrayscaleModelMaker.input_spec()
 
@@ -23,7 +48,12 @@ def test_GrayscaleModelMaker_inputs():
 
 
 def test_GrayscaleModelMaker_outputs():
-    output_map = dict(OutputGeometry=dict(extensions=None, position=-1,),)
+    output_map = dict(
+        OutputGeometry=dict(
+            extensions=None,
+            position=-1,
+        ),
+    )
     outputs = GrayscaleModelMaker.output_spec()
 
     for key, metadata in list(output_map.items()):

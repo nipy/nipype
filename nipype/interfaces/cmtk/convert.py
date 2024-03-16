@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import os.path as op
 import datetime
@@ -16,6 +14,13 @@ from ..base import (
     isdefined,
 )
 from .base import CFFBaseInterface, have_cfflib
+
+
+def _read_pickle(fname):
+    import pickle
+
+    with open(fname, 'rb') as f:
+        return pickle.load(f)
 
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
@@ -127,7 +132,7 @@ class CFFConverter(CFFBaseInterface):
             for ntwk in self.inputs.graphml_networks:
                 # There must be a better way to deal with the unique name problem
                 # (i.e. tracks and networks can't use the same name, and previously we were pulling them both from the input files)
-                ntwk_name = "Network {cnt}".format(cnt=count)
+                ntwk_name = f"Network {count}"
                 a.add_connectome_network_from_graphml(ntwk_name, ntwk)
                 count += 1
 
@@ -135,7 +140,7 @@ class CFFConverter(CFFBaseInterface):
             unpickled = []
             for ntwk in self.inputs.gpickled_networks:
                 _, ntwk_name, _ = split_filename(ntwk)
-                unpickled = nx.read_gpickle(ntwk)
+                unpickled = _read_pickle(ntwk)
                 cnet = cf.CNetwork(name=ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
                 a.add_connectome_network(cnet)
@@ -234,7 +239,7 @@ class MergeCNetworksOutputSpec(TraitedSpec):
 
 
 class MergeCNetworks(CFFBaseInterface):
-    """ Merges networks from multiple CFF files into one new CFF file.
+    """Merges networks from multiple CFF files into one new CFF file.
 
     Example
     -------

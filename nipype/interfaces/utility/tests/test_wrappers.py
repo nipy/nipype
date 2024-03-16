@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -73,7 +72,7 @@ def should_fail(tmp):
 
 
 def test_should_fail(tmpdir):
-    with pytest.raises(NameError):
+    with pytest.raises(pe.nodes.NodeExecutionError):
         should_fail(tmpdir)
 
 
@@ -95,7 +94,7 @@ def test_function_with_imports(tmpdir):
 
 
 def test_aux_connect_function(tmpdir):
-    """ This tests excution nodes with multiple inputs and auxiliary
+    """This tests execution nodes with multiple inputs and auxiliary
     function inside the Workflow connect function.
     """
     tmpdir.chdir()
@@ -103,7 +102,7 @@ def test_aux_connect_function(tmpdir):
     wf = pe.Workflow(name="test_workflow")
 
     def _gen_tuple(size):
-        return [1,] * size
+        return [1] * size
 
     def _sum_and_sub_mul(a, b, c):
         return (a + b) * c, (a - b) * c
@@ -138,7 +137,7 @@ def test_aux_connect_function(tmpdir):
             (params, gen_tuple, [(("size", _inc), "size")]),
             (params, ssm, [(("num", _inc), "c")]),
             (gen_tuple, split, [("tuple", "inlist")]),
-            (split, ssm, [(("out1", _inc), "a"), ("out2", "b"),]),
+            (split, ssm, [(("out1", _inc), "a"), ("out2", "b")]),
         ]
     )
 

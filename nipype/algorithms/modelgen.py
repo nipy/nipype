@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -30,25 +29,6 @@ from .. import config, logging
 iflogger = logging.getLogger("nipype.interface")
 
 
-def gcd(a, b):
-    """
-    Return the greatest common divisor of two integers (uses Euclid's algorithm).
-
-    Examples
-    --------
-    >>> gcd(4, 5)
-    1
-    >>> gcd(4, 8)
-    4
-    >>> gcd(22, 55)
-    11
-
-    """
-    while b > 0:
-        a, b = b, a % b
-    return a
-
-
 def spm_hrf(RT, P=None, fMRI_T=16):
     """
     python implementation of spm_hrf
@@ -59,13 +39,13 @@ def spm_hrf(RT, P=None, fMRI_T=16):
       % p    - parameters of the response function (two gamma
       % functions)
       % defaults  (seconds)
-      %	p(0) - delay of response (relative to onset)	   6
-      %	p(1) - delay of undershoot (relative to onset)    16
-      %	p(2) - dispersion of response			   1
-      %	p(3) - dispersion of undershoot			   1
-      %	p(4) - ratio of response to undershoot		   6
-      %	p(5) - onset (seconds)				   0
-      %	p(6) - length of kernel (seconds)		  32
+      % p(0) - delay of response (relative to onset)       6
+      % p(1) - delay of undershoot (relative to onset)    16
+      % p(2) - dispersion of response                      1
+      % p(3) - dispersion of undershoot                    1
+      % p(4) - ratio of response to undershoot             6
+      % p(5) - onset (seconds)                             0
+      % p(6) - length of kernel (seconds)                 32
       %
       % hrf  - hemodynamic response function
       % p    - parameters of the response function
@@ -154,7 +134,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
 
 
 def bids_gen_info(
-    bids_event_files, condition_column="", amplitude_column=None, time_repetition=False,
+    bids_event_files, condition_column="", amplitude_column=None, time_repetition=False
 ):
     """
     Generate a subject_info structure from a list of BIDS .tsv event files.
@@ -186,7 +166,7 @@ def bids_gen_info(
             condition_column = "_trial_type"
             for i in events:
                 i.update({condition_column: "ev0"})
-        conditions = sorted(set([i[condition_column] for i in events]))
+        conditions = sorted({i[condition_column] for i in events})
         runinfo = Bunch(conditions=[], onsets=[], durations=[], amplitudes=[])
         for condition in conditions:
             selected_events = [i for i in events if i[condition_column] == condition]
@@ -402,7 +382,7 @@ None])
         for i, info in enumerate(infolist):
             sessinfo.insert(i, dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
-                sessinfo[i]["hpf"] = np.float(self.inputs.high_pass_filter_cutoff)
+                sessinfo[i]["hpf"] = float(self.inputs.high_pass_filter_cutoff)
 
             if hasattr(info, "conditions") and info.conditions is not None:
                 for cid, cond in enumerate(info.conditions):
@@ -437,9 +417,9 @@ None])
                                 sessinfo[i]["cond"][cid]["pmod"][j]["poly"] = info.pmod[
                                     cid
                                 ].poly[j]
-                                sessinfo[i]["cond"][cid]["pmod"][j][
-                                    "param"
-                                ] = info.pmod[cid].param[j]
+                                sessinfo[i]["cond"][cid]["pmod"][j]["param"] = (
+                                    info.pmod[cid].param[j]
+                                )
 
             sessinfo[i]["regress"] = []
             if hasattr(info, "regressors") and info.regressors is not None:
@@ -490,8 +470,7 @@ None])
         return sessinfo
 
     def _generate_design(self, infolist=None):
-        """Generate design specification for a typical fmri paradigm
-        """
+        """Generate design specification for a typical fmri paradigm"""
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
             for parfile in self.inputs.realignment_parameters:
@@ -508,7 +487,7 @@ None])
             for filename in self.inputs.outlier_files:
                 try:
                     outindices = np.loadtxt(filename, dtype=int)
-                except IOError:
+                except OSError:
                     outliers.append([])
                 else:
                     if outindices.size == 1:
@@ -536,8 +515,7 @@ None])
         )
 
     def _run_interface(self, runtime):
-        """
-        """
+        """ """
         self._sessioninfo = None
         self._generate_design()
         return runtime
@@ -636,11 +614,8 @@ class SpecifySPMModel(SpecifyModel):
                         infoout.durations[j].extend(info.durations[j])
                     else:
                         raise ValueError(
-                            "Mismatch in number of onsets and \
-                                          durations for run {0}, condition \
-                                          {1}".format(
-                                i + 2, j + 1
-                            )
+                            f"Mismatch in number of onsets and durations for run {i + 2}, "
+                            f"condition {j + 1}"
                         )
 
                 if hasattr(info, "amplitudes") and info.amplitudes:
@@ -672,7 +647,7 @@ class SpecifySPMModel(SpecifyModel):
             not isdefined(self.inputs.concatenate_runs)
             or not self.inputs.concatenate_runs
         ):
-            super(SpecifySPMModel, self)._generate_design(infolist=infolist)
+            super()._generate_design(infolist=infolist)
             return
 
         if isdefined(self.inputs.subject_info):
@@ -703,7 +678,7 @@ class SpecifySPMModel(SpecifyModel):
             for i, filename in enumerate(self.inputs.outlier_files):
                 try:
                     out = np.loadtxt(filename)
-                except IOError:
+                except OSError:
                     iflogger.warning("Error reading outliers file %s", filename)
                     out = np.array([])
 
@@ -758,7 +733,7 @@ class SpecifySparseModelOutputSpec(SpecifyModelOutputSpec):
 
 
 class SpecifySparseModel(SpecifyModel):
-    """ Specify a sparse model that is compatible with SPM/FSL designers [1]_.
+    """Specify a sparse model that is compatible with SPM/FSL designers [1]_.
 
     Examples
     --------
@@ -789,8 +764,7 @@ class SpecifySparseModel(SpecifyModel):
     output_spec = SpecifySparseModelOutputSpec
 
     def _gen_regress(self, i_onsets, i_durations, i_amplitudes, nscans):
-        """Generates a regressor for a sparse/clustered-sparse acquisition
-        """
+        """Generates a regressor for a sparse/clustered-sparse acquisition"""
         bplot = False
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             bplot = True
@@ -799,9 +773,9 @@ class SpecifySparseModel(SpecifyModel):
             matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
 
-        TR = np.round(self.inputs.time_repetition * 1000)  # in ms
+        TR = int(np.round(self.inputs.time_repetition * 1000))  # in ms
         if self.inputs.time_acquisition:
-            TA = np.round(self.inputs.time_acquisition * 1000)  # in ms
+            TA = int(np.round(self.inputs.time_acquisition * 1000))  # in ms
         else:
             TA = TR  # in ms
         nvol = self.inputs.volumes_in_cluster
@@ -811,20 +785,20 @@ class SpecifySparseModel(SpecifyModel):
         dt = TA / 10.0
         durations = np.round(np.array(i_durations) * 1000)
         if len(durations) == 1:
-            durations = durations * np.ones((len(i_onsets)))
+            durations = durations * np.ones(len(i_onsets))
         onsets = np.round(np.array(i_onsets) * 1000)
-        dttemp = gcd(TA, gcd(SILENCE, TR))
+        dttemp = math.gcd(TA, math.gcd(SILENCE, TR))
         if dt < dttemp:
             if dttemp % dt != 0:
-                dt = float(gcd(dttemp, dt))
+                dt = float(math.gcd(dttemp, int(dt)))
 
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
         iflogger.info("Setting dt = %d ms\n", dt)
         npts = int(np.ceil(total_time / dt))
         times = np.arange(0, total_time, dt) * 1e-3
-        timeline = np.zeros((npts))
-        timeline2 = np.zeros((npts))
+        timeline = np.zeros(npts)
+        timeline2 = np.zeros(npts)
         if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
             hrf = spm_hrf(dt * 1e-3)
         reg_scale = 1.0
@@ -861,7 +835,7 @@ class SpecifySparseModel(SpecifyModel):
             if not self.inputs.stimuli_as_impulses:
                 if durations[i] == 0:
                     durations[i] = TA * nvol
-                stimdur = np.ones((int(durations[i] / dt)))
+                stimdur = np.ones(int(durations[i] / dt))
                 timeline2 = np.convolve(timeline2, stimdur)[0 : len(timeline2)]
             timeline += timeline2
             timeline2[:] = 0
@@ -888,7 +862,7 @@ class SpecifySparseModel(SpecifyModel):
             ):
                 plt.plot(times, timederiv)
         # sample timeline
-        timeline2 = np.zeros((npts))
+        timeline2 = np.zeros(npts)
         reg = []
         regderiv = []
         for i, trial in enumerate(np.arange(nscans) / nvol):
@@ -920,8 +894,7 @@ class SpecifySparseModel(SpecifyModel):
             return reg
 
     def _cond_to_regress(self, info, nscans):
-        """Converts condition information to full regressors
-        """
+        """Converts condition information to full regressors"""
         reg = []
         regnames = []
         for i, cond in enumerate(info.conditions):
@@ -1000,7 +973,7 @@ class SpecifySparseModel(SpecifyModel):
         else:
             infolist = gen_info(self.inputs.event_files)
         sparselist = self._generate_clustered_design(infolist)
-        super(SpecifySparseModel, self)._generate_design(infolist=sparselist)
+        super()._generate_design(infolist=sparselist)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

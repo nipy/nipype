@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for join expansion
@@ -40,7 +39,7 @@ class IncrementInputSpec(nib.TraitedSpec):
 
 
 class IncrementOutputSpec(nib.TraitedSpec):
-    output1 = nib.traits.Int(desc="ouput")
+    output1 = nib.traits.Int(desc="output")
 
 
 class IncrementInterface(nib.SimpleInterface):
@@ -63,7 +62,7 @@ class SumInputSpec(nib.TraitedSpec):
 
 
 class SumOutputSpec(nib.TraitedSpec):
-    output1 = nib.traits.Int(desc="ouput")
+    output1 = nib.traits.Int(desc="output")
     operands = nib.traits.List(nib.traits.Int, desc="operands")
 
 
@@ -91,7 +90,7 @@ class SetInputSpec(nib.TraitedSpec):
 
 
 class SetOutputSpec(nib.TraitedSpec):
-    output1 = nib.traits.Int(desc="ouput")
+    output1 = nib.traits.Int(desc="output")
 
 
 class SetInterface(nib.BaseInterface):
@@ -406,7 +405,7 @@ def test_multifield_join_node(tmpdir):
     # node and 1 post-join node.
     assert len(result.nodes()) == 10, "The number of expanded nodes is incorrect."
     # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
-    assert set(_products) == set([8, 10, 12, 15]), (
+    assert set(_products) == {8, 10, 12, 15}, (
         "The post-join products is incorrect: %s." % _products
     )
 
@@ -623,7 +622,7 @@ def test_name_prefix_join(tmpdir):
     tmpdir.chdir()
 
     def sq(x):
-        return x ** 2
+        return x**2
 
     wf = pe.Workflow("wf", base_dir=tmpdir.strpath)
     square = pe.Node(Function(function=sq), name="square")
@@ -642,7 +641,7 @@ def test_join_nestediters(tmpdir):
     tmpdir.chdir()
 
     def exponent(x, p):
-        return x ** p
+        return x**p
 
     wf = pe.Workflow("wf", base_dir=tmpdir.strpath)
 

@@ -45,7 +45,7 @@ def test_fuzzy_overlap(tmpdir):
 
     # Just considering the mask, the central pixel
     # that raised the index now is left aside.
-    data = np.zeros((3, 3, 3), dtype=int)
+    data = np.zeros((3, 3, 3), dtype=np.uint8)
     data[0, 0, 0] = 1
     data[2, 2, 2] = 1
     nb.Nifti1Image(data, np.eye(4)).to_filename("mask.nii.gz")

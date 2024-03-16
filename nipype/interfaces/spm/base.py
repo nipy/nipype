@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with SPM  tools.
@@ -201,7 +200,6 @@ class Info(PackageInfo):
             and klass._command == matlab_cmd
             and klass._paths == paths
         ):
-
             return {"name": klass._name, "path": klass._path, "release": klass._version}
         logger.debug("matlab command or path has changed. recomputing version.")
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
@@ -225,7 +223,7 @@ exit;
         """
         try:
             out = mlab.run()
-        except (IOError, RuntimeError) as e:
+        except (OSError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug("%s", e)
@@ -251,7 +249,7 @@ exit;
 
 
 def no_spm():
-    """ Checks if SPM is NOT installed
+    """Checks if SPM is NOT installed
     used with pytest.mark.skipif decorator to skip tests
     that will fail if spm is not installed"""
 
@@ -270,7 +268,7 @@ class SPMCommandInputSpec(BaseInterfaceInputSpec):
         True,
         min_ver="8",
         usedefault=True,
-        desc=("Generate SPM8 and higher " "compatible jobs"),
+        desc=("Generate SPM8 and higher compatible jobs"),
     )
 
 
@@ -290,7 +288,7 @@ class SPMCommand(BaseInterface):
     _paths = None
     _use_mcr = None
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@book{FrackowiakFristonFrithDolanMazziotta1997,"
@@ -307,7 +305,7 @@ class SPMCommand(BaseInterface):
     ]
 
     def __init__(self, **inputs):
-        super(SPMCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(
             self._matlab_cmd_update, ["matlab_cmd", "mfile", "paths", "use_mcr"]
         )
@@ -361,7 +359,9 @@ class SPMCommand(BaseInterface):
             use_mcr=self.inputs.use_mcr,
         )
         if info_dict:
-            return "%s.%s" % (info_dict["name"].split("SPM")[-1], info_dict["release"])
+            return "{}.{}".format(
+                info_dict["name"].split("SPM")[-1], info_dict["release"]
+            )
 
     @property
     def jobtype(self):
@@ -485,7 +485,7 @@ class SPMCommand(BaseInterface):
             return jobstring
         if isinstance(contents, dict):
             for key, value in list(contents.items()):
-                newprefix = "%s.%s" % (prefix, key)
+                newprefix = f"{prefix}.{key}"
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if isinstance(contents, np.ndarray):
@@ -504,9 +504,9 @@ class SPMCommand(BaseInterface):
                                 "{}" if not isinstance(el, (str, bytes)) else "'{}'"
                             ]
                         val_format = ", ".join(items_format).format
-                        jobstring += "[{}];...\n".format(val_format(*val))
+                        jobstring += f"[{val_format(*val)}];...\n"
                     elif isinstance(val, (str, bytes)):
-                        jobstring += "'{}';...\n".format(val)
+                        jobstring += f"'{val}';...\n"
                     else:
                         jobstring += "%s;...\n" % str(val)
                 jobstring += "};\n"
@@ -520,9 +520,9 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix, val[field])
             return jobstring
         if isinstance(contents, (str, bytes)):
-            jobstring += "%s = '%s';\n" % (prefix, contents)
+            jobstring += f"{prefix} = '{contents}';\n"
             return jobstring
-        jobstring += "%s = %s;\n" % (prefix, str(contents))
+        jobstring += f"{prefix} = {str(contents)};\n"
         return jobstring
 
     def _make_matlab_command(self, contents, postscript=None):
@@ -562,7 +562,7 @@ class SPMCommand(BaseInterface):
         if self.mlab.inputs.mfile:
             if isdefined(self.inputs.use_v8struct) and self.inputs.use_v8struct:
                 mscript += self._generate_job(
-                    "jobs{1}.spm.%s.%s" % (self.jobtype, self.jobname), contents[0]
+                    f"jobs{{1}}.spm.{self.jobtype}.{self.jobname}", contents[0]
                 )
             else:
                 if self.jobname in [
@@ -577,13 +577,13 @@ class SPMCommand(BaseInterface):
                 ]:
                     # parentheses
                     mscript += self._generate_job(
-                        "jobs{1}.%s{1}.%s(1)" % (self.jobtype, self.jobname),
+                        f"jobs{{1}}.{self.jobtype}{{1}}.{self.jobname}(1)",
                         contents[0],
                     )
                 else:
                     # curly brackets
                     mscript += self._generate_job(
-                        "jobs{1}.%s{1}.%s{1}" % (self.jobtype, self.jobname),
+                        f"jobs{{1}}.{self.jobtype}{{1}}.{self.jobname}{{1}}",
                         contents[0],
                     )
         else:
@@ -621,11 +621,11 @@ class ImageFileSPM(ImageFile):
         self, value=NoDefaultSpecified, exists=False, resolve=False, **metadata
     ):
         """Create an ImageFileSPM trait."""
-        super(ImageFileSPM, self).__init__(
+        super().__init__(
             value=value,
             exists=exists,
             types=["nifti1", "nifti2"],
             allow_compressed=False,
             resolve=resolve,
-            **metadata
+            **metadata,
         )

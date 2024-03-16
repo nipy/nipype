@@ -19,15 +19,21 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from collections import Sequence
+from collections.abc import Sequence
 
 # perform all external trait imports here
 from traits import __version__ as traits_version
 import traits.api as traits
-from traits.trait_handlers import TraitType, NoDefaultSpecified
+from traits.api import TraitType, Unicode
 from traits.trait_base import _Undefined
 
-from traits.api import Unicode
+try:
+    # Moved in traits 6.0
+    from traits.trait_type import NoDefaultSpecified
+except ImportError:
+    # Pre-6.0
+    from traits.trait_handlers import NoDefaultSpecified
+
 from pathlib import Path
 from ...utils.filemanip import path_resolve
 
@@ -44,7 +50,7 @@ IMG_FORMATS = {
     "nifti2": (".nii", ".nii.gz"),
     "nrrd": (".nrrd", ".nhdr"),
 }
-IMG_ZIP_FMT = set([".nii.gz", "tar.gz", ".gii.gz", ".mgz", ".mgh.gz", "img.gz"])
+IMG_ZIP_FMT = {".nii.gz", "tar.gz", ".gii.gz", ".mgz", ".mgh.gz", "img.gz"}
 
 """
 The functions that pop-up the Traits GUIs, edit_traits and
@@ -115,7 +121,7 @@ class BasePath(TraitType):
         """Create a BasePath trait."""
         self.exists = exists
         self.resolve = resolve
-        super(BasePath, self).__init__(value, **metadata)
+        super().__init__(value, **metadata)
 
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
@@ -292,7 +298,7 @@ class File(BasePath):
         resolve=False,
         allow_compressed=True,
         extensions=None,
-        **metadata
+        **metadata,
     ):
         """Create a File trait."""
         if extensions is not None:
@@ -303,28 +309,23 @@ class File(BasePath):
                 extensions = list(set(extensions) - IMG_ZIP_FMT)
 
             self._exts = sorted(
-                set(
-                    [
-                        ".%s" % ext if not ext.startswith(".") else ext
-                        for ext in extensions
-                    ]
-                )
+                {f".{ext}" if not ext.startswith(".") else ext for ext in extensions}
             )
 
-        super(File, self).__init__(
+        super().__init__(
             value=value,
             exists=exists,
             resolve=resolve,
             extensions=self._exts,
-            **metadata
+            **metadata,
         )
 
     def validate(self, objekt, name, value, return_pathlike=False):
         """Validate a value change."""
-        value = super(File, self).validate(objekt, name, value, return_pathlike=True)
+        value = super().validate(objekt, name, value, return_pathlike=True)
         if self._exts:
             fname = value.name
-            if not any((fname.endswith(e) for e in self._exts)):
+            if not any(fname.endswith(e) for e in self._exts):
                 self.error(objekt, name, str(value))
 
         if not return_pathlike:
@@ -342,7 +343,7 @@ class ImageFile(File):
         exists=False,
         resolve=False,
         types=None,
-        **metadata
+        **metadata,
     ):
         """Create an ImageFile trait."""
         extensions = None
@@ -360,12 +361,12 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
                 )
             extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
-        super(ImageFile, self).__init__(
+        super().__init__(
             value=value,
             exists=exists,
             extensions=extensions,
             resolve=resolve,
-            **metadata
+            **metadata,
         )
 
 
@@ -396,11 +397,9 @@ def has_metadata(trait, metadata, value=None, recursive=True):
 
 
 class MultiObject(traits.List):
-    """ Abstract class - shared functionality of input and output MultiObject
-    """
+    """Abstract class - shared functionality of input and output MultiObject"""
 
     def validate(self, objekt, name, value):
-
         # want to treat range and other sequences (except str) as list
         if not isinstance(value, (str, bytes)) and isinstance(value, Sequence):
             value = list(value)
@@ -417,7 +416,7 @@ class MultiObject(traits.List):
             and not isinstance(value[0], list)
         ):
             newvalue = [value]
-        value = super(MultiObject, self).validate(objekt, name, newvalue)
+        value = super().validate(objekt, name, newvalue)
 
         if value:
             return value
@@ -426,7 +425,7 @@ class MultiObject(traits.List):
 
 
 class OutputMultiObject(MultiObject):
-    """ Implements a user friendly traits that accepts one or more
+    """Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the output version which
     return a single string whenever possible (when it was set to a
     single value or a list of length 1). Default value of this trait
@@ -472,7 +471,7 @@ class OutputMultiObject(MultiObject):
 
 
 class InputMultiObject(MultiObject):
-    """ Implements a user friendly traits that accepts one or more
+    """Implements a user friendly traits that accepts one or more
     paths to files or directories. This is the input version which
     always returns a list. Default value of this trait
     is _Undefined. It does not accept empty lists.

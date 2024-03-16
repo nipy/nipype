@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from .specialized import (
     BRAINSCut,
     BRAINSROIAuto,

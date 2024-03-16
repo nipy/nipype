@@ -1,4 +1,4 @@
-from distutils.version import LooseVersion
+from looseversion import LooseVersion
 from ... import logging
 from .base import HAVE_DIPY, dipy_version, dipy_to_nipype_interface, get_dipy_workflows
 

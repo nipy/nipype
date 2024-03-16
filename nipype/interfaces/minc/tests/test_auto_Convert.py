@@ -4,12 +4,29 @@ from ..minc import Convert
 
 def test_Convert_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        chunk=dict(argstr="-chunk %d",),
-        clobber=dict(argstr="-clobber", usedefault=True,),
-        compression=dict(argstr="-compress %s",),
-        environ=dict(nohash=True, usedefault=True,),
-        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
+        args=dict(
+            argstr="%s",
+        ),
+        chunk=dict(
+            argstr="-chunk %d",
+        ),
+        clobber=dict(
+            argstr="-clobber",
+            usedefault=True,
+        ),
+        compression=dict(
+            argstr="-compress %s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -19,8 +36,12 @@ def test_Convert_inputs():
             name_template="%s_convert_output.mnc",
             position=-1,
         ),
-        template=dict(argstr="-template",),
-        two=dict(argstr="-2",),
+        template=dict(
+            argstr="-template",
+        ),
+        two=dict(
+            argstr="-2",
+        ),
     )
     inputs = Convert.input_spec()
 
@@ -30,7 +51,11 @@ def test_Convert_inputs():
 
 
 def test_Convert_outputs():
-    output_map = dict(output_file=dict(extensions=None,),)
+    output_map = dict(
+        output_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Convert.output_spec()
 
     for key, metadata in list(output_map.items()):

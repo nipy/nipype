@@ -67,7 +67,7 @@ class StatsCommand(NiftySegCommand):
         return np.array(out).squeeze()
 
     def _run_interface(self, runtime):
-        new_runtime = super(StatsCommand, self)._run_interface(runtime)
+        new_runtime = super()._run_interface(runtime)
         self.output = self._parse_stdout(new_runtime.stdout)
         return new_runtime
 
@@ -121,7 +121,7 @@ Operation to perform:
     * B - Bounding box of all nonzero voxels [ xmin xsize ymin ysize zmin zsize ]
     * xvox - Output the number of voxels in the x direction.
       Replace x with y/z for other directions.
-    * xdim - Output the voxel dimention in the x direction.
+    * xdim - Output the voxel dimension in the x direction.
       Replace x with y/z for other directions.
 
 """,

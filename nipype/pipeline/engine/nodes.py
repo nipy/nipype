@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
@@ -9,6 +8,7 @@ from collections import OrderedDict, defaultdict
 
 import os
 import os.path as op
+from pathlib import Path
 import shutil
 import socket
 from copy import deepcopy
@@ -30,7 +30,6 @@ from ...utils.filemanip import (
     load_json,
     emptydirs,
     savepkl,
-    indirectory,
     silentrm,
 )
 
@@ -62,6 +61,10 @@ from .utils import (
 from .base import EngineBase
 
 logger = logging.getLogger("nipype.workflow")
+
+
+class NodeExecutionError(RuntimeError):
+    """A nipype-specific name for exceptions when executing a Node."""
 
 
 class Node(EngineBase):
@@ -98,7 +101,7 @@ class Node(EngineBase):
         run_without_submitting=False,
         n_procs=None,
         mem_gb=0.20,
-        **kwargs
+        **kwargs,
     ):
         """
         Parameters
@@ -170,11 +173,11 @@ class Node(EngineBase):
         """
         # Make sure an interface is set, and that it is an Interface
         if interface is None:
-            raise IOError("Interface must be provided")
+            raise OSError("Interface must be provided")
         if not isinstance(interface, Interface):
-            raise IOError("interface must be an instance of an Interface")
+            raise OSError("interface must be an instance of an Interface")
 
-        super(Node, self).__init__(name, kwargs.get("base_dir"))
+        super().__init__(name, kwargs.get("base_dir"))
 
         self._interface = interface
         self._hierarchy = None
@@ -204,6 +207,9 @@ class Node(EngineBase):
         self._needed_outputs = []
         self.needed_outputs = needed_outputs
         self.config = None
+
+        if hasattr(self._interface, "write_cmdline"):
+            self._interface.write_cmdline = True
 
     @property
     def interface(self):
@@ -286,9 +292,12 @@ class Node(EngineBase):
         if self._hierarchy:
             outputdir = op.join(outputdir, *self._hierarchy.split("."))
         if self.parameterization:
-            params_str = ["{}".format(p) for p in self.parameterization]
-            if not str2bool(self.config["execution"]["parameterize_dirs"]):
-                params_str = [_parameterization_dir(p) for p in params_str]
+            maxlen = (
+                252 if str2bool(self.config["execution"]["parameterize_dirs"]) else 32
+            )
+            params_str = [
+                _parameterization_dir(str(p), maxlen) for p in self.parameterization
+            ]
             outputdir = op.join(outputdir, *params_str)
 
         self._output_dir = op.realpath(op.join(outputdir, self.name))
@@ -439,7 +448,8 @@ class Node(EngineBase):
         )
 
         # Check hash, check whether run should be enforced
-        logger.info('[Node] Setting-up "%s" in "%s".', self.fullname, outdir)
+        if not isinstance(self, MapNode):
+            logger.info(f'[Node] Setting-up "{self.fullname}" in "{outdir}".')
         cached, updated = self.is_cached()
 
         # If the node is cached, check on pklz files and finish
@@ -530,7 +540,6 @@ directory. Please ensure no other concurrent workflows are racing""",
         # Tear-up after success
         shutil.move(hashfile_unfinished, hashfile_unfinished.replace("_unfinished", ""))
         write_node_report(self, result=result, is_mapnode=isinstance(self, MapNode))
-        logger.info('[Node] Finished "%s".', self.fullname)
         return result
 
     def _get_hashval(self):
@@ -582,7 +591,7 @@ directory. Please ensure no other concurrent workflows are racing""",
                 logger.critical("%s", e)
 
             if outputs is None:
-                raise RuntimeError(
+                raise NodeExecutionError(
                     """\
 Error populating the inputs of node "%s": the results file of the source node \
 (%s) does not contain any outputs."""
@@ -643,7 +652,7 @@ Error populating the inputs of node "%s": the results file of the source node \
             logger.debug("Error populating inputs/outputs, (re)aggregating results...")
         except (AttributeError, ImportError) as err:
             logger.debug(
-                "attribute error: %s probably using " "different trait pickled file",
+                "attribute error: %s probably using different trait pickled file",
                 str(err),
             )
             old_inputs = loadpkl(op.join(cwd, "_inputs.pklz"))
@@ -687,7 +696,7 @@ Error populating the inputs of node "%s": the results file of the source node \
             except (FileNotFoundError, AttributeError):
                 # if aggregation does not work, rerun the node
                 logger.info(
-                    "[Node] Some of the outputs were not found: " "rerunning node."
+                    "[Node] Some of the outputs were not found: rerunning node."
                 )
                 copyfiles = False  # OE: this was like this before,
                 execute = True  # I'll keep them for safety
@@ -697,78 +706,68 @@ Error populating the inputs of node "%s": the results file of the source node \
                 )
                 return result
 
-        outdir = self.output_dir()
-        # Run command: either execute is true or load_results failed.
-        result = InterfaceResult(
-            interface=self._interface.__class__,
-            runtime=Bunch(
-                cwd=outdir,
-                returncode=1,
-                environ=dict(os.environ),
-                hostname=socket.gethostname(),
-            ),
-            inputs=self._interface.inputs.get_traitsfree(),
-        )
-
+        outdir = Path(self.output_dir())
         if copyfiles:
             self._originputs = deepcopy(self._interface.inputs)
             self._copyfiles_to_wd(execute=execute)
 
-        message = '[Node] Running "{}" ("{}.{}")'.format(
-            self.name, self._interface.__module__, self._interface.__class__.__name__
+        # Run command: either execute is true or load_results failed.
+        logger.info(
+            f'[Node] Executing "{self.name}" <{self._interface.__module__}'
+            f".{self._interface.__class__.__name__}>"
         )
-        if issubclass(self._interface.__class__, CommandLine):
-            try:
-                with indirectory(outdir):
-                    cmd = self._interface.cmdline
-            except Exception as msg:
-                result.runtime.stderr = "{}\n\n{}".format(
-                    getattr(result.runtime, "stderr", ""), msg
-                )
-                _save_resultfile(
-                    result,
-                    outdir,
-                    self.name,
-                    rebase=str2bool(self.config["execution"]["use_relative_paths"]),
-                )
-                raise
-            cmdfile = op.join(outdir, "command.txt")
-            with open(cmdfile, "wt") as fd:
-                print(cmd + "\n", file=fd)
-            message += ", a CommandLine Interface with command:\n{}".format(cmd)
-        logger.info(message)
-        try:
-            result = self._interface.run(cwd=outdir)
-        except Exception as msg:
-            result.runtime.stderr = "%s\n\n%s".format(
-                getattr(result.runtime, "stderr", ""), msg
-            )
-            _save_resultfile(
-                result,
+
+        # Invoke core run method of the interface ignoring exceptions
+        result = self._interface.run(cwd=outdir, ignore_exception=True)
+        logger.info(
+            f'[Node] Finished "{self.name}", elapsed time {result.runtime.duration}s.'
+        )
+
+        exc_tb = getattr(result.runtime, "traceback", None)
+
+        if not exc_tb:
+            # Clean working directory if no errors
+            dirs2keep = None
+            if isinstance(self, MapNode):
+                dirs2keep = [op.join(outdir, "mapflow")]
+
+            result.outputs = clean_working_directory(
+                result.outputs,
                 outdir,
-                self.name,
-                rebase=str2bool(self.config["execution"]["use_relative_paths"]),
+                self._interface.inputs,
+                self.needed_outputs,
+                self.config,
+                dirs2keep=dirs2keep,
             )
-            raise
 
-        dirs2keep = None
-        if isinstance(self, MapNode):
-            dirs2keep = [op.join(outdir, "mapflow")]
-
-        result.outputs = clean_working_directory(
-            result.outputs,
-            outdir,
-            self._interface.inputs,
-            self.needed_outputs,
-            self.config,
-            dirs2keep=dirs2keep,
-        )
+        # Store results file under all circumstances
         _save_resultfile(
             result,
             outdir,
             self.name,
             rebase=str2bool(self.config["execution"]["use_relative_paths"]),
         )
+
+        if exc_tb:
+            runtime = result.runtime
+
+            def _tab(text):
+                from textwrap import indent
+
+                if not text:
+                    return ""
+                return indent(text, '\t')
+
+            msg = f"Exception raised while executing Node {self.name}.\n\n"
+            if hasattr(runtime, 'cmdline'):
+                msg += (
+                    f"Cmdline:\n{_tab(runtime.cmdline)}\n"
+                    f"Stdout:\n{_tab(runtime.stdout)}\n"
+                    f"Stderr:\n{_tab(runtime.stderr)}\n"
+                )
+            # Always pass along the traceback
+            msg += f"Traceback:\n{_tab(runtime.traceback)}"
+            raise NodeExecutionError(msg)
 
         return result
 
@@ -872,7 +871,7 @@ class JoinNode(Node):
 
         See Node docstring for additional keyword arguments.
         """
-        super(JoinNode, self).__init__(interface, name, **kwargs)
+        super().__init__(interface, name, **kwargs)
 
         self._joinsource = None  # The member should be defined
         self.joinsource = joinsource  # Let the setter do the job
@@ -938,9 +937,9 @@ class JoinNode(Node):
         """
         # create the new join item fields
         idx = self._next_slot_index
-        newfields = dict(
-            [(field, self._add_join_item_field(field, idx)) for field in self.joinfield]
-        )
+        newfields = {
+            field: self._add_join_item_field(field, idx) for field in self.joinfield
+        }
         # increment the join slot index
         logger.debug("Added the %s join item fields %s.", self, newfields)
         self._next_slot_index += 1
@@ -1001,7 +1000,7 @@ class JoinNode(Node):
     def _run_command(self, execute, copyfiles=True):
         """Collates the join inputs prior to delegating to the superclass."""
         self._collate_join_field_inputs()
-        return super(JoinNode, self)._run_command(execute, copyfiles)
+        return super()._run_command(execute, copyfiles)
 
     def _collate_join_field_inputs(self):
         """
@@ -1113,7 +1112,7 @@ class MapNode(Node):
         See Node docstring for additional keyword arguments.
         """
 
-        super(MapNode, self).__init__(interface, name, **kwargs)
+        super().__init__(interface, name, **kwargs)
         if isinstance(iterfield, (str, bytes)):
             iterfield = [iterfield]
         self.iterfield = iterfield
@@ -1126,8 +1125,7 @@ class MapNode(Node):
         self._serial = serial
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
-        """Convert specific fields of a trait to accept multiple inputs
-        """
+        """Convert specific fields of a trait to accept multiple inputs"""
         output = DynamicTraitedSpec()
         if fields is None:
             fields = basetraits.copyable_trait_names()
@@ -1291,8 +1289,8 @@ class MapNode(Node):
                 if code is not None:
                     msg += ["Subnode %d failed" % i]
                     msg += ["Error: %s" % str(code)]
-            raise Exception(
-                "Subnodes of node: %s failed:\n%s" % (self.name, "\n".join(msg))
+            raise NodeExecutionError(
+                "Subnodes of node: {} failed:\n{}".format(self.name, "\n".join(msg))
             )
 
         return finalresult
@@ -1320,7 +1318,7 @@ class MapNode(Node):
             self._interface.inputs, fields=self.iterfield
         )
         self._inputs.trait_set(**old_inputs)
-        super(MapNode, self)._get_inputs()
+        super()._get_inputs()
 
     def _check_iterfield(self):
         """Checks iterfield
@@ -1331,18 +1329,14 @@ class MapNode(Node):
         for iterfield in self.iterfield:
             if not isdefined(getattr(self.inputs, iterfield)):
                 raise ValueError(
-                    ("Input %s was not set but it is listed " "in iterfields.")
-                    % iterfield
+                    "Input %s was not set but it is listed in iterfields." % iterfield
                 )
         if len(self.iterfield) > 1:
             first_len = len(ensure_list(getattr(self.inputs, self.iterfield[0])))
             for iterfield in self.iterfield[1:]:
                 if first_len != len(ensure_list(getattr(self.inputs, iterfield))):
                     raise ValueError(
-                        (
-                            "All iterfields of a MapNode have to "
-                            "have the same length. %s"
-                        )
+                        "All iterfields of a MapNode have to have the same length. %s"
                         % str(self.inputs)
                     )
 
@@ -1366,13 +1360,39 @@ class MapNode(Node):
         nodenames = [nnametpl.format(i) for i in range(nitems)]
 
         # Run mapnode
-        result = self._collate_results(
-            _node_runner(
-                self._make_nodes(cwd),
-                updatehash=updatehash,
-                stop_first=str2bool(self.config["execution"]["stop_on_first_crash"]),
-            )
+        outdir = self.output_dir()
+        result = InterfaceResult(
+            interface=self._interface.__class__,
+            runtime=Bunch(
+                cwd=outdir,
+                returncode=1,
+                environ=dict(os.environ),
+                hostname=socket.gethostname(),
+            ),
+            inputs=self._interface.inputs.get_traitsfree(),
         )
+        try:
+            result = self._collate_results(
+                _node_runner(
+                    self._make_nodes(cwd),
+                    updatehash=updatehash,
+                    stop_first=str2bool(
+                        self.config["execution"]["stop_on_first_crash"]
+                    ),
+                )
+            )
+        except Exception as msg:
+            result.runtime.stderr = "%s\n\n%s".format(
+                getattr(result.runtime, "stderr", ""), msg
+            )
+            _save_resultfile(
+                result,
+                outdir,
+                self.name,
+                rebase=str2bool(self.config["execution"]["use_relative_paths"]),
+            )
+            raise
+
         # And store results
         _save_resultfile(result, cwd, self.name, rebase=False)
         # remove any node directories no longer required

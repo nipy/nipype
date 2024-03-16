@@ -4,16 +4,43 @@ from ..minc import Norm
 
 def test_Norm_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        clamp=dict(argstr="-clamp", usedefault=True,),
-        clobber=dict(argstr="-clobber", usedefault=True,),
-        cutoff=dict(argstr="-cutoff %s",),
-        environ=dict(nohash=True, usedefault=True,),
-        input_file=dict(argstr="%s", extensions=None, mandatory=True, position=-2,),
-        lower=dict(argstr="-lower %s",),
-        mask=dict(argstr="-mask %s", extensions=None,),
-        out_ceil=dict(argstr="-out_ceil %s",),
-        out_floor=dict(argstr="-out_floor %s",),
+        args=dict(
+            argstr="%s",
+        ),
+        clamp=dict(
+            argstr="-clamp",
+            usedefault=True,
+        ),
+        clobber=dict(
+            argstr="-clobber",
+            usedefault=True,
+        ),
+        cutoff=dict(
+            argstr="-cutoff %s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        input_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-2,
+        ),
+        lower=dict(
+            argstr="-lower %s",
+        ),
+        mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        out_ceil=dict(
+            argstr="-out_ceil %s",
+        ),
+        out_floor=dict(
+            argstr="-out_floor %s",
+        ),
         output_file=dict(
             argstr="%s",
             extensions=None,
@@ -30,11 +57,21 @@ def test_Norm_inputs():
             name_source=["input_file"],
             name_template="%s_norm_threshold_mask.mnc",
         ),
-        threshold=dict(argstr="-threshold",),
-        threshold_blur=dict(argstr="-threshold_blur %s",),
-        threshold_bmt=dict(argstr="-threshold_bmt",),
-        threshold_perc=dict(argstr="-threshold_perc %s",),
-        upper=dict(argstr="-upper %s",),
+        threshold=dict(
+            argstr="-threshold",
+        ),
+        threshold_blur=dict(
+            argstr="-threshold_blur %s",
+        ),
+        threshold_bmt=dict(
+            argstr="-threshold_bmt",
+        ),
+        threshold_perc=dict(
+            argstr="-threshold_perc %s",
+        ),
+        upper=dict(
+            argstr="-upper %s",
+        ),
     )
     inputs = Norm.input_spec()
 
@@ -45,8 +82,12 @@ def test_Norm_inputs():
 
 def test_Norm_outputs():
     output_map = dict(
-        output_file=dict(extensions=None,),
-        output_threshold_mask=dict(extensions=None,),
+        output_file=dict(
+            extensions=None,
+        ),
+        output_threshold_mask=dict(
+            extensions=None,
+        ),
     )
     outputs = Norm.output_spec()
 

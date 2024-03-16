@@ -4,12 +4,20 @@ from ..utils import Analyze2nii
 
 def test_Analyze2nii_inputs():
     input_map = dict(
-        analyze_file=dict(extensions=None, mandatory=True,),
+        analyze_file=dict(
+            extensions=None,
+            mandatory=True,
+        ),
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True,),
+        mfile=dict(
+            usedefault=True,
+        ),
         paths=dict(),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True,),
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
+        ),
     )
     inputs = Analyze2nii.input_spec()
 
@@ -21,11 +29,18 @@ def test_Analyze2nii_inputs():
 def test_Analyze2nii_outputs():
     output_map = dict(
         matlab_cmd=dict(),
-        mfile=dict(usedefault=True,),
-        nifti_file=dict(extensions=None,),
+        mfile=dict(
+            usedefault=True,
+        ),
+        nifti_file=dict(
+            extensions=None,
+        ),
         paths=dict(),
         use_mcr=dict(),
-        use_v8struct=dict(min_ver="8", usedefault=True,),
+        use_v8struct=dict(
+            min_ver="8",
+            usedefault=True,
+        ),
     )
     outputs = Analyze2nii.output_spec()
 

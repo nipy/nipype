@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -119,7 +118,7 @@ class Tracks2ProbInputSpec(CommandLineInputSpec):
         exists=True,
         argstr="-template %s",
         position=1,
-        desc="an image file to be used as a template for the output (the output image wil have the same transform and field of view)",
+        desc="an image file to be used as a template for the output (the output image will have the same transform and field of view)",
     )
     voxel_dims = traits.List(
         traits.Float,
@@ -215,7 +214,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
         mandatory=True,
         position=-2,
         desc="the image containing the source data."
-        "The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, "
+        "The type of data required depends on the type of tracking as set in the preceding argument. For DT methods, "
         "the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.",
     )
 
@@ -388,14 +387,14 @@ class StreamlineTrack(CommandLine):
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
-    >>> strack = mrt.StreamlineTrack()
-    >>> strack.inputs.inputmodel = 'SD_PROB'
-    >>> strack.inputs.in_file = 'data.Bfloat'
-    >>> strack.inputs.seed_file = 'seed_mask.nii'
-    >>> strack.inputs.mask_file = 'mask.nii'
-    >>> strack.cmdline
+    >>> streamtrack = mrt.StreamlineTrack()
+    >>> streamtrack.inputs.inputmodel = 'SD_PROB'
+    >>> streamtrack.inputs.in_file = 'data.Bfloat'
+    >>> streamtrack.inputs.seed_file = 'seed_mask.nii'
+    >>> streamtrack.inputs.mask_file = 'mask.nii'
+    >>> streamtrack.cmdline
     'streamtrack -mask mask.nii -seed seed_mask.nii SD_PROB data.Bfloat data_tracked.tck'
-    >>> strack.run()                                    # doctest: +SKIP
+    >>> streamtrack.run()                                    # doctest: +SKIP
     """
 
     _cmd = "streamtrack"
@@ -423,17 +422,17 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
     -------
 
     >>> import nipype.interfaces.mrtrix as mrt
-    >>> dtstrack = mrt.DiffusionTensorStreamlineTrack()
-    >>> dtstrack.inputs.in_file = 'data.Bfloat'
-    >>> dtstrack.inputs.seed_file = 'seed_mask.nii'
-    >>> dtstrack.run()                                  # doctest: +SKIP
+    >>> dtstreamtrack = mrt.DiffusionTensorStreamlineTrack()
+    >>> dtstreamtrack.inputs.in_file = 'data.Bfloat'
+    >>> dtstreamtrack.inputs.seed_file = 'seed_mask.nii'
+    >>> dtstreamtrack.run()                                  # doctest: +SKIP
     """
 
     input_spec = DiffusionTensorStreamlineTrackInputSpec
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "DT_STREAM"
-        return super(DiffusionTensorStreamlineTrack, self).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec(
@@ -467,9 +466,7 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_PROB"
-        return super(
-            ProbabilisticSphericallyDeconvolutedStreamlineTrack, self
-        ).__init__(command, **inputs)
+        return super().__init__(command, **inputs)
 
 
 class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
@@ -494,6 +491,4 @@ class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_STREAM"
-        return super(SphericallyDeconvolutedStreamlineTrack, self).__init__(
-            command, **inputs
-        )
+        return super().__init__(command, **inputs)

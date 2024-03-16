@@ -4,13 +4,32 @@ from ..denoising import CurvatureAnisotropicDiffusion
 
 def test_CurvatureAnisotropicDiffusion_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        conductance=dict(argstr="--conductance %f",),
-        environ=dict(nohash=True, usedefault=True,),
-        inputVolume=dict(argstr="%s", extensions=None, position=-2,),
-        iterations=dict(argstr="--iterations %d",),
-        outputVolume=dict(argstr="%s", hash_files=False, position=-1,),
-        timeStep=dict(argstr="--timeStep %f",),
+        args=dict(
+            argstr="%s",
+        ),
+        conductance=dict(
+            argstr="--conductance %f",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        inputVolume=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        iterations=dict(
+            argstr="--iterations %d",
+        ),
+        outputVolume=dict(
+            argstr="%s",
+            hash_files=False,
+            position=-1,
+        ),
+        timeStep=dict(
+            argstr="--timeStep %f",
+        ),
     )
     inputs = CurvatureAnisotropicDiffusion.input_spec()
 
@@ -20,7 +39,12 @@ def test_CurvatureAnisotropicDiffusion_inputs():
 
 
 def test_CurvatureAnisotropicDiffusion_outputs():
-    output_map = dict(outputVolume=dict(extensions=None, position=-1,),)
+    output_map = dict(
+        outputVolume=dict(
+            extensions=None,
+            position=-1,
+        ),
+    )
     outputs = CurvatureAnisotropicDiffusion.output_spec()
 
     for key, metadata in list(output_map.items()):

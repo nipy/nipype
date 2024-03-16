@@ -1,4 +1,5 @@
 """Build a file URL."""
+
 import os
 import inspect
 import subprocess
@@ -23,7 +24,7 @@ def get_url(obj):
     revision = _get_git_revision()
     if revision is not None:
         shortfile = os.path.join("nipype", filename.split("nipype/")[-1])
-        uri = "http://github.com/nipy/nipype/blob/%s/%s" % (revision, shortfile,)
+        uri = f"http://github.com/nipy/nipype/blob/{revision}/{shortfile}"
     lines, lstart = inspect.getsourcelines(obj)
     lend = len(lines) + lstart
     return "%s#L%d-L%d" % (uri, lstart, lend)

@@ -4,9 +4,19 @@ from ..model import FEAT
 
 def test_FEAT_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        fsf_file=dict(argstr="%s", extensions=None, mandatory=True, position=0,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        fsf_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=0,
+        ),
         output_type=dict(),
     )
     inputs = FEAT.input_spec()
@@ -17,7 +27,9 @@ def test_FEAT_inputs():
 
 
 def test_FEAT_outputs():
-    output_map = dict(feat_dir=dict(),)
+    output_map = dict(
+        feat_dir=dict(),
+    )
     outputs = FEAT.output_spec()
 
     for key, metadata in list(output_map.items()):

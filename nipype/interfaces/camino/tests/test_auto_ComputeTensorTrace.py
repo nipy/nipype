@@ -4,14 +4,39 @@ from ..dti import ComputeTensorTrace
 
 def test_ComputeTensorTrace_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="< %s", extensions=None, mandatory=True, position=1,),
-        inputdatatype=dict(argstr="-inputdatatype %s",),
-        inputmodel=dict(argstr="-inputmodel %s",),
-        out_file=dict(argstr="> %s", extensions=None, genfile=True, position=-1,),
-        outputdatatype=dict(argstr="-outputdatatype %s",),
-        scheme_file=dict(argstr="%s", extensions=None, position=2,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="< %s",
+            extensions=None,
+            mandatory=True,
+            position=1,
+        ),
+        inputdatatype=dict(
+            argstr="-inputdatatype %s",
+        ),
+        inputmodel=dict(
+            argstr="-inputmodel %s",
+        ),
+        out_file=dict(
+            argstr="> %s",
+            extensions=None,
+            genfile=True,
+            position=-1,
+        ),
+        outputdatatype=dict(
+            argstr="-outputdatatype %s",
+        ),
+        scheme_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=2,
+        ),
     )
     inputs = ComputeTensorTrace.input_spec()
 
@@ -21,7 +46,11 @@ def test_ComputeTensorTrace_inputs():
 
 
 def test_ComputeTensorTrace_outputs():
-    output_map = dict(trace=dict(extensions=None,),)
+    output_map = dict(
+        trace=dict(
+            extensions=None,
+        ),
+    )
     outputs = ComputeTensorTrace.output_spec()
 
     for key, metadata in list(output_map.items()):

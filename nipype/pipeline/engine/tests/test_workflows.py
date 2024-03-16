@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine workflows module
@@ -83,8 +82,23 @@ def test_doubleconnect():
     assert "Trying to connect" in str(excinfo.value)
 
 
-def test_duplicate_node_check():
+def test_nested_workflow_doubleconnect():
+    # double input with nested workflows
+    a = pe.Node(niu.IdentityInterface(fields=["a", "b"]), name="a")
+    b = pe.Node(niu.IdentityInterface(fields=["a", "b"]), name="b")
+    c = pe.Node(niu.IdentityInterface(fields=["a", "b"]), name="c")
+    flow1 = pe.Workflow(name="test1")
+    flow2 = pe.Workflow(name="test2")
+    flow3 = pe.Workflow(name="test3")
+    flow1.add_nodes([b])
+    flow2.connect(a, "a", flow1, "b.a")
+    with pytest.raises(Exception) as excinfo:
+        flow3.connect(c, "a", flow2, "test1.b.a")
+    assert "Some connections were not found" in str(excinfo.value)
+    flow3.connect(c, "b", flow2, "test1.b.b")
 
+
+def test_duplicate_node_check():
     wf = pe.Workflow(name="testidentity")
 
     original_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -119,7 +133,7 @@ def _test_function(arg1):
     file4 = os.path.join(os.getcwd(), "subdir", "file4.txt")
     os.mkdir("subdir")
     for filename in [file1, file2, file3, file4]:
-        with open(filename, "wt") as fp:
+        with open(filename, "w") as fp:
             fp.write("%d" % arg1)
     return file1, file2, os.path.join(os.getcwd(), "subdir")
 
@@ -127,7 +141,7 @@ def _test_function(arg1):
 def _test_function2(in_file, arg):
     import os
 
-    with open(in_file, "rt") as fp:
+    with open(in_file) as fp:
         in_arg = fp.read()
 
     file1 = os.path.join(os.getcwd(), "file1.txt")
@@ -135,7 +149,7 @@ def _test_function2(in_file, arg):
     file3 = os.path.join(os.getcwd(), "file3.txt")
     files = [file1, file2, file3]
     for filename in files:
-        with open(filename, "wt") as fp:
+        with open(filename, "w") as fp:
             fp.write("%d" % arg + in_arg)
     return file1, file2, 1
 

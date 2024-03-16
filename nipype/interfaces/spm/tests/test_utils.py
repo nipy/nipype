@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -21,9 +20,9 @@ def test_coreg():
     assert not isdefined(coreg.inputs.mat)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
-    mat = os.path.join(pth, "%s_to_%s.mat" % (mov, tgt))
+    mat = os.path.join(pth, f"{mov}_to_{tgt}.mat")
     invmat = fname_presuffix(mat, prefix="inverse_")
-    scrpt = coreg._make_matlab_command(None)
+    script = coreg._make_matlab_command(None)
     assert coreg.inputs.mat == mat
     assert coreg.inputs.invmat == invmat
 
@@ -35,11 +34,11 @@ def test_apply_transform():
     assert applymat.inputs.matlab_cmd == "mymatlab"
     applymat.inputs.in_file = moving
     applymat.inputs.mat = mat
-    scrpt = applymat._make_matlab_command(None)
+    script = applymat._make_matlab_command(None)
     expected = "[p n e v] = spm_fileparts(V.fname);"
-    assert expected in scrpt
+    assert expected in script
     expected = "V.mat = transform.M * V.mat;"
-    assert expected in scrpt
+    assert expected in script
 
 
 def test_reslice():

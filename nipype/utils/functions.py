@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 """
 Handles custom functions used in Function interface. Future imports
 are avoided to keep namespace as clear as possible.
 """
+
 import inspect
 from textwrap import dedent
 
@@ -34,7 +34,7 @@ def create_function_from_source(function_source, imports=None):
         exec(function_source, ns)
 
     except Exception as e:
-        msg = "Error executing function\n{}\n".format(function_source)
+        msg = f"Error executing function\n{function_source}\n"
         msg += (
             "Functions in connection strings have to be standalone. "
             "They cannot be declared either interactively or inside "

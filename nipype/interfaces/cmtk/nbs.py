@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -6,6 +5,7 @@ import os.path as op
 
 import numpy as np
 import networkx as nx
+import pickle
 
 from ... import logging
 from ..base import (
@@ -23,23 +23,26 @@ from .base import have_cv
 iflogger = logging.getLogger("nipype.interface")
 
 
+def _read_pickle(fname):
+    with open(fname, 'rb') as f:
+        return pickle.load(f)
+
+
 def ntwks_to_matrices(in_files, edge_key):
-    first = nx.read_gpickle(in_files[0])
+    first = _read_pickle(in_files[0])
     files = len(in_files)
     nodes = len(first.nodes())
     matrix = np.zeros((nodes, nodes, files))
     for idx, name in enumerate(in_files):
-        graph = nx.read_gpickle(name)
+        graph = _read_pickle(name)
         for u, v, d in graph.edges(data=True):
             try:
                 graph[u][v]["weight"] = d[
                     edge_key
                 ]  # Setting the edge requested edge value as weight value
             except:
-                raise KeyError(
-                    "the graph edges do not have {} attribute".format(edge_key)
-                )
-        matrix[:, :, idx] = nx.to_numpy_matrix(graph)  # Retrieve the matrix
+                raise KeyError(f"the graph edges do not have {edge_key} attribute")
+        matrix[:, :, idx] = nx.to_numpy_array(graph)  # Retrieve the matrix
     return matrix
 
 
@@ -149,8 +152,8 @@ class NetworkBasedStatistic(LibraryBaseInterface):
             pADJ[x, y] = PVAL[idx]
 
         # Create networkx graphs from the adjacency matrix
-        nbsgraph = nx.from_numpy_matrix(ADJ)
-        nbs_pval_graph = nx.from_numpy_matrix(pADJ)
+        nbsgraph = nx.from_numpy_array(ADJ)
+        nbs_pval_graph = nx.from_numpy_array(pADJ)
 
         # Relabel nodes because they should not start at zero for our convention
         nbsgraph = nx.relabel_nodes(nbsgraph, lambda x: x + 1)
@@ -161,7 +164,7 @@ class NetworkBasedStatistic(LibraryBaseInterface):
         else:
             node_ntwk_name = self.inputs.in_group1[0]
 
-        node_network = nx.read_gpickle(node_ntwk_name)
+        node_network = _read_pickle(node_ntwk_name)
         iflogger.info(
             "Populating node dictionaries with attributes from %s", node_ntwk_name
         )
@@ -172,12 +175,14 @@ class NetworkBasedStatistic(LibraryBaseInterface):
 
         path = op.abspath("NBS_Result_" + details)
         iflogger.info(path)
-        nx.write_gpickle(nbsgraph, path)
+        with open(path, 'wb') as f:
+            pickle.dump(nbsgraph, f, pickle.HIGHEST_PROTOCOL)
         iflogger.info("Saving output NBS edge network as %s", path)
 
         pval_path = op.abspath("NBS_P_vals_" + details)
         iflogger.info(pval_path)
-        nx.write_gpickle(nbs_pval_graph, pval_path)
+        with open(pval_path, 'wb') as f:
+            pickle.dump(nbs_pval_graph, f, pickle.HIGHEST_PROTOCOL)
         iflogger.info("Saving output p-value network as %s", pval_path)
         return runtime
 

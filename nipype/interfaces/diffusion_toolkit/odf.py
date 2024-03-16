@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
@@ -90,8 +89,7 @@ class HARDIMatOutputSpec(TraitedSpec):
 
 
 class HARDIMat(CommandLine):
-    """Use hardi_mat to calculate a reconstruction matrix from a gradient table
-    """
+    """Use hardi_mat to calculate a reconstruction matrix from a gradient table"""
 
     input_spec = HARDIMatInputSpec
     output_spec = HARDIMatOutputSpec
@@ -110,15 +108,15 @@ class HARDIMat(CommandLine):
         for i in range(len(bvals)):
             if int(bvals[i]) == 0:
                 continue
-            gradient_matrix_f.write("%s %s %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i]))
+            gradient_matrix_f.write(f"{bvecs_x[i]} {bvecs_y[i]} {bvecs_z[i]}\n")
         gradient_matrix_f.close()
         return _gradient_matrix_file
 
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
             new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
-            return super(HARDIMat, self)._format_arg("bvecs", spec, new_val)
-        return super(HARDIMat, self)._format_arg(name, spec, value)
+            return super()._format_arg("bvecs", spec, new_val)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -210,8 +208,7 @@ class ODFReconOutputSpec(TraitedSpec):
 
 
 class ODFRecon(CommandLine):
-    """Use odf_recon to generate tensors and other maps
-    """
+    """Use odf_recon to generate tensors and other maps"""
 
     input_spec = ODFReconInputSpec
     output_spec = ODFReconOutputSpec
@@ -368,8 +365,7 @@ class ODFTrackerOutputSpec(TraitedSpec):
 
 
 class ODFTracker(CommandLine):
-    """Use odf_tracker to generate track file
-    """
+    """Use odf_tracker to generate track file"""
 
     input_spec = ODFTrackerInputSpec
     output_spec = ODFTrackerOutputSpec
@@ -391,7 +387,7 @@ class ODFTracker(CommandLine):
             copy=False,
         )
 
-        return super(ODFTracker, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

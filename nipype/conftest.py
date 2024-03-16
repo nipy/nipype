@@ -17,6 +17,7 @@ shutil.copytree(NIPYPE_DATADIR, data_dir)
 def add_np(doctest_namespace):
     doctest_namespace["np"] = numpy
     doctest_namespace["os"] = os
+    doctest_namespace["pytest"] = pytest
     doctest_namespace["datadir"] = data_dir
 
 
@@ -26,7 +27,6 @@ def _docdir(request):
     # Trigger ONLY for the doctests.
     doctest_plugin = request.config.pluginmanager.getplugin("doctest")
     if isinstance(request.node, doctest_plugin.DoctestItem):
-
         # Get the fixture dynamically by its name.
         tmpdir = pp.local(data_dir)
 

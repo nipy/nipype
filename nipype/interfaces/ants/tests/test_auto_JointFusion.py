@@ -4,30 +4,95 @@ from ..segmentation import JointFusion
 
 def test_JointFusion_inputs():
     input_map = dict(
-        alpha=dict(requires=["method"], usedefault=True,),
-        args=dict(argstr="%s",),
-        atlas_group_id=dict(argstr="-gp %d...",),
-        atlas_group_weights=dict(argstr="-gpw %d...",),
-        beta=dict(requires=["method"], usedefault=True,),
-        dimension=dict(argstr="%d", mandatory=True, position=0, usedefault=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        exclusion_region=dict(argstr="-x %s", extensions=None,),
-        method=dict(argstr="-m %s", usedefault=True,),
-        modalities=dict(argstr="%d", mandatory=True, position=1,),
-        num_threads=dict(nohash=True, usedefault=True,),
-        output_label_image=dict(
+        alpha=dict(
+            argstr="-a %s",
+            usedefault=True,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        atlas_image=dict(
+            argstr="-g %s...",
+            mandatory=True,
+        ),
+        atlas_segmentation_image=dict(
+            argstr="-l %s...",
+            mandatory=True,
+        ),
+        beta=dict(
+            argstr="-b %s",
+            usedefault=True,
+        ),
+        constrain_nonnegative=dict(
+            argstr="-c",
+            usedefault=True,
+        ),
+        dimension=dict(
+            argstr="-d %d",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        exclusion_image=dict(),
+        exclusion_image_label=dict(
+            argstr="-e %s",
+            requires=["exclusion_image"],
+        ),
+        mask_image=dict(
+            argstr="-x %s",
+            extensions=None,
+        ),
+        num_threads=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        out_atlas_voting_weight_name_format=dict(
+            requires=[
+                "out_label_fusion",
+                "out_intensity_fusion_name_format",
+                "out_label_post_prob_name_format",
+            ],
+        ),
+        out_intensity_fusion_name_format=dict(
+            argstr="",
+        ),
+        out_label_fusion=dict(
             argstr="%s",
             extensions=None,
-            mandatory=True,
-            name_template="%s",
-            output_name="output_label_image",
-            position=-1,
+            hash_files=False,
         ),
-        patch_radius=dict(argstr="-rp %s", maxlen=3, minlen=3,),
-        search_radius=dict(argstr="-rs %s", maxlen=3, minlen=3,),
-        target_image=dict(argstr="-tg %s...", mandatory=True,),
-        warped_intensity_images=dict(argstr="-g %s...", mandatory=True,),
-        warped_label_images=dict(argstr="-l %s...", mandatory=True,),
+        out_label_post_prob_name_format=dict(
+            requires=["out_label_fusion", "out_intensity_fusion_name_format"],
+        ),
+        patch_metric=dict(
+            argstr="-m %s",
+        ),
+        patch_radius=dict(
+            argstr="-p %s",
+            maxlen=3,
+            minlen=3,
+        ),
+        retain_atlas_voting_images=dict(
+            argstr="-f",
+            usedefault=True,
+        ),
+        retain_label_posterior_images=dict(
+            argstr="-r",
+            requires=["atlas_segmentation_image"],
+            usedefault=True,
+        ),
+        search_radius=dict(
+            argstr="-s %s",
+            usedefault=True,
+        ),
+        target_image=dict(
+            argstr="-t %s",
+            mandatory=True,
+        ),
+        verbose=dict(
+            argstr="-v",
+        ),
     )
     inputs = JointFusion.input_spec()
 
@@ -37,7 +102,14 @@ def test_JointFusion_inputs():
 
 
 def test_JointFusion_outputs():
-    output_map = dict(output_label_image=dict(extensions=None,),)
+    output_map = dict(
+        out_atlas_voting_weight=dict(),
+        out_intensity_fusion=dict(),
+        out_label_fusion=dict(
+            extensions=None,
+        ),
+        out_label_post_prob=dict(),
+    )
     outputs = JointFusion.output_spec()
 
     for key, metadata in list(output_map.items()):

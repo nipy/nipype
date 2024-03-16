@@ -31,8 +31,8 @@ class NiftyFitCommand(CommandLine):
     _suffix = "_nf"
 
     def __init__(self, **inputs):
-        """ Init method calling super. No version to be checked."""
-        super(NiftyFitCommand, self).__init__(**inputs)
+        """Init method calling super. No version to be checked."""
+        super().__init__(**inputs)
 
     def _gen_fname(self, basename, out_dir=None, suffix=None, ext=None):
         if basename == "":

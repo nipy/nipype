@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -98,14 +97,32 @@ def log_to_dict(logfile):
     """
 
     # Init variables
-    with open(logfile, "r") as content:
+    with open(logfile) as content:
         # read file separating each line
         lines = content.readlines()
 
     nodes_list = [json.loads(l) for l in lines]
 
+    def _convert_string_to_datetime(datestring):
+        try:
+            datetime_object: datetime.datetime = datetime.datetime.strptime(
+                datestring, "%Y-%m-%dT%H:%M:%S.%f"
+            )
+            return datetime_object
+        except Exception as _:
+            pass
+        return datestring
+
+    date_object_node_list: list = list()
+    for n in nodes_list:
+        if "start" in n.keys():
+            n["start"] = _convert_string_to_datetime(n["start"])
+        if "finish" in n.keys():
+            n["finish"] = _convert_string_to_datetime(n["finish"])
+        date_object_node_list.append(n)
+
     # Return list of nodes
-    return nodes_list
+    return date_object_node_list
 
 
 def calculate_resource_timeseries(events, resource):
@@ -322,8 +339,7 @@ def draw_resource_bar(
     left,
     resource,
 ):
-    """
-    """
+    """ """
 
     # Memory header
     result = "<p class='time' style='top:198px;left:%dpx;'>%s</p>" % (left, resource)
@@ -516,7 +532,11 @@ def generate_gantt_chart(
     # Create the header of the report with useful information
     start_node = nodes_list[0]
     last_node = nodes_list[-1]
-    duration = (last_node["finish"] - start_node["start"]).total_seconds()
+    duration: float = 0.0
+    if isinstance(start_node["start"], datetime.date) and isinstance(
+        last_node["finish"], datetime.date
+    ):
+        duration = (last_node["finish"] - start_node["start"]).total_seconds()
 
     # Get events based dictionary of node run stats
     events = create_event_dict(start_node["start"], nodes_list)
@@ -528,7 +548,7 @@ def generate_gantt_chart(
     html_string += (
         "<p>Finish: " + last_node["finish"].strftime("%Y-%m-%d %H:%M:%S") + "</p>"
     )
-    html_string += "<p>Duration: " + "{0:.2f}".format(duration / 60) + " minutes</p>"
+    html_string += "<p>Duration: " + f"{duration / 60:.2f}" + " minutes</p>"
     html_string += "<p>Nodes: " + str(len(nodes_list)) + "</p>"
     html_string += "<p>Cores: " + str(cores) + "</p>"
     html_string += close_header

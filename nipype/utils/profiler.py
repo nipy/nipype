@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Utilities to keep track of performance
 """
 import os
+import numpy as np
 import threading
 from time import time
 
@@ -20,12 +20,30 @@ proflogger = logging.getLogger("nipype.utils")
 resource_monitor = config.resource_monitor
 
 # Init variables
-_MB = 1024.0 ** 2
+_MB = 1024.0**2
+
+
+class ResourceMonitorMock:
+    """A mock class to use when the monitor is disabled."""
+
+    @property
+    def fname(self):
+        """Get/set the internal filename"""
+        return None
+
+    def __init__(self, pid, freq=5, fname=None, python=True):
+        pass
+
+    def start(self):
+        pass
+
+    def stop(self):
+        return {}
 
 
 class ResourceMonitor(threading.Thread):
     """
-    A ``Thread`` to monitor a specific PID with a certain frequence
+    A ``Thread`` to monitor a specific PID with a certain frequency
     to a file
     """
 
@@ -57,13 +75,32 @@ class ResourceMonitor(threading.Thread):
         return self._fname
 
     def stop(self):
-        """Stop monitoring"""
+        """Stop monitoring."""
         if not self._event.is_set():
             self._event.set()
             self.join()
             self._sample()
             self._logfile.flush()
             self._logfile.close()
+
+        retval = {
+            "mem_peak_gb": None,
+            "cpu_percent": None,
+        }
+
+        # Read .prof file in and set runtime values
+        vals = np.loadtxt(self._fname, delimiter=",")
+        if vals.size:
+            vals = np.atleast_2d(vals)
+            retval["mem_peak_gb"] = vals[:, 2].max() / 1024
+            retval["cpu_percent"] = vals[:, 1].max()
+            retval["prof_dict"] = {
+                "time": vals[:, 0].tolist(),
+                "cpus": vals[:, 1].tolist(),
+                "rss_GiB": (vals[:, 2] / 1024).tolist(),
+                "vms_GiB": (vals[:, 3] / 1024).tolist(),
+            }
+        return retval
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
@@ -94,7 +131,7 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        print("%f,%f,%f,%f" % (time(), cpu, rss / _MB, vms / _MB), file=self._logfile)
+        print(f"{time():f},{cpu:f},{rss / _MB:f},{vms / _MB:f}", file=self._logfile)
         self._logfile.flush()
 
     def run(self):
@@ -165,14 +202,14 @@ def get_system_total_memory_gb():
 
     # Get memory
     if "linux" in sys.platform:
-        with open("/proc/meminfo", "r") as f_in:
+        with open("/proc/meminfo") as f_in:
             meminfo_lines = f_in.readlines()
             mem_total_line = [line for line in meminfo_lines if "MemTotal" in line][0]
             mem_total = float(mem_total_line.split()[1])
-            memory_gb = mem_total / (1024.0 ** 2)
+            memory_gb = mem_total / (1024.0**2)
     elif "darwin" in sys.platform:
         mem_str = os.popen("sysctl hw.memsize").read().strip().split(" ")[-1]
-        memory_gb = float(mem_str) / (1024.0 ** 3)
+        memory_gb = float(mem_str) / (1024.0**3)
     else:
         err_msg = "System platform: %s is not supported"
         raise Exception(err_msg)
@@ -349,7 +386,7 @@ def _use_resources(n_procs, mem_gb):
     # Getsize of one character string
     BSIZE = sys.getsizeof("  ") - sys.getsizeof(" ")
     BOFFSET = sys.getsizeof("")
-    _GB = 1024.0 ** 3
+    _GB = 1024.0**3
 
     def _use_gb_ram(mem_gb):
         """A test function to consume mem_gb GB of RAM"""

@@ -4,10 +4,24 @@ from ..maths import UnaryMaths
 
 def test_UnaryMaths_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
-        operation=dict(argstr="-%s", mandatory=True, position=4,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
+        operation=dict(
+            argstr="-%s",
+            mandatory=True,
+            position=4,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -15,7 +29,10 @@ def test_UnaryMaths_inputs():
             name_template="%s",
             position=-2,
         ),
-        output_datatype=dict(argstr="-odt %s", position=-3,),
+        output_datatype=dict(
+            argstr="-odt %s",
+            position=-3,
+        ),
     )
     inputs = UnaryMaths.input_spec()
 
@@ -25,7 +42,11 @@ def test_UnaryMaths_inputs():
 
 
 def test_UnaryMaths_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = UnaryMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

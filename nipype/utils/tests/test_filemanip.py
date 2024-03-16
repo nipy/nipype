@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import time
-import warnings
 from pathlib import Path
 
-import mock
+from unittest import mock, SkipTest
 import pytest
 from ...testing import TempFATFS
 from ...utils.filemanip import (
@@ -31,6 +29,8 @@ from ...utils.filemanip import (
     loadcrash,
     savepkl,
     path_resolve,
+    write_rst_list,
+    emptydirs,
 )
 
 
@@ -154,7 +154,7 @@ def test_copyfiles(_temp_analyze_files, _temp_analyze_files_prime):
 
 
 def test_linkchain(_temp_analyze_files):
-    if os.name is not "posix":
+    if os.name != "posix":
         return
     orig_img, orig_hdr = _temp_analyze_files
     pth, fname = os.path.split(orig_img)
@@ -230,30 +230,30 @@ def test_recopy(_temp_analyze_files):
 
 
 def test_copyfallback(_temp_analyze_files):
-    if os.name is not "posix":
+    if os.name != "posix":
         return
     orig_img, orig_hdr = _temp_analyze_files
     pth, imgname = os.path.split(orig_img)
     pth, hdrname = os.path.split(orig_hdr)
     try:
         fatfs = TempFATFS()
-    except (IOError, OSError):
-        warnings.warn("Fuse mount failed. copyfile fallback tests skipped.")
-    else:
-        with fatfs as fatdir:
-            tgt_img = os.path.join(fatdir, imgname)
-            tgt_hdr = os.path.join(fatdir, hdrname)
-            for copy in (True, False):
-                for use_hardlink in (True, False):
-                    copyfile(orig_img, tgt_img, copy=copy, use_hardlink=use_hardlink)
-                    assert os.path.exists(tgt_img)
-                    assert os.path.exists(tgt_hdr)
-                    assert not os.path.islink(tgt_img)
-                    assert not os.path.islink(tgt_hdr)
-                    assert not os.path.samefile(orig_img, tgt_img)
-                    assert not os.path.samefile(orig_hdr, tgt_hdr)
-                    os.unlink(tgt_img)
-                    os.unlink(tgt_hdr)
+    except OSError:
+        raise SkipTest("Fuse mount failed. copyfile fallback tests skipped.")
+
+    with fatfs as fatdir:
+        tgt_img = os.path.join(fatdir, imgname)
+        tgt_hdr = os.path.join(fatdir, hdrname)
+        for copy in (True, False):
+            for use_hardlink in (True, False):
+                copyfile(orig_img, tgt_img, copy=copy, use_hardlink=use_hardlink)
+                assert os.path.exists(tgt_img)
+                assert os.path.exists(tgt_hdr)
+                assert not os.path.islink(tgt_img)
+                assert not os.path.islink(tgt_hdr)
+                assert not os.path.samefile(orig_img, tgt_img)
+                assert not os.path.samefile(orig_hdr, tgt_hdr)
+                os.unlink(tgt_img)
+                os.unlink(tgt_hdr)
 
 
 def test_get_related_files(_temp_analyze_files):
@@ -295,7 +295,7 @@ def test_ensure_list(filename, expected):
 
 
 @pytest.mark.parametrize(
-    "list, expected", [(["foo.nii"], "foo.nii"), (["foo", "bar"], ["foo", "bar"]),]
+    "list, expected", [(["foo.nii"], "foo.nii"), (["foo", "bar"], ["foo", "bar"])]
 )
 def test_simplify_list(list, expected):
     x = simplify_list(list)
@@ -611,7 +611,6 @@ def test_versioned_pklization(tmpdir):
         with mock.patch(
             "nipype.utils.tests.test_filemanip.Pickled", PickledBreaker
         ), mock.patch("nipype.__version__", "0.0.0"):
-
             loadpkl("./pickled.pkz")
 
 
@@ -630,7 +629,7 @@ def test_path_strict_resolve(tmpdir):
     """Check the monkeypatch to test strict resolution of Path."""
     tmpdir.chdir()
 
-    # Default strict=False should work out out of the box
+    # Default strict=False should work out of the box
     testfile = Path("somefile.txt")
     resolved = "%s/somefile.txt" % tmpdir
     assert str(path_resolve(testfile)) == resolved
@@ -653,3 +652,43 @@ def test_pickle(tmp_path, save_versioning):
     savepkl(pickle_fname, testobj, versioning=save_versioning)
     outobj = loadpkl(pickle_fname)
     assert outobj == testobj
+
+
+@pytest.mark.parametrize(
+    "items,expected",
+    [
+        ("", " \n\n"),
+        ("A string", " A string\n\n"),
+        (["A list", "Of strings"], " A list\n Of strings\n\n"),
+        (None, TypeError),
+    ],
+)
+def test_write_rst_list(tmp_path, items, expected):
+    if items is not None:
+        assert write_rst_list(items) == expected
+    else:
+        with pytest.raises(expected):
+            write_rst_list(items)
+
+
+def nfs_unlink(pathlike, *, dir_fd=None):
+    if dir_fd is None:
+        path = Path(pathlike)
+        deleted = path.with_name(".nfs00000000")
+        path.rename(deleted)
+    else:
+        os.rename(pathlike, ".nfs1111111111", src_dir_fd=dir_fd, dst_dir_fd=dir_fd)
+
+
+def test_emptydirs_dangling_nfs(tmp_path):
+    busyfile = tmp_path / "base" / "subdir" / "busyfile"
+    busyfile.parent.mkdir(parents=True)
+    busyfile.touch()
+
+    with mock.patch("os.unlink") as mocked:
+        mocked.side_effect = nfs_unlink
+        emptydirs(tmp_path / "base")
+
+    assert Path.exists(tmp_path / "base")
+    assert not busyfile.exists()
+    assert busyfile.parent.exists()  # Couldn't remove

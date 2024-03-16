@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI preprocessing interfaces."""
@@ -37,8 +36,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 class CentralityInputSpec(AFNICommandInputSpec):
-    """Common input spec class for all centrality-related commands
-    """
+    """Common input spec class for all centrality-related commands"""
 
     mask = File(desc="mask file to mask input data", argstr="-mask %s", exists=True)
     thresh = traits.Float(
@@ -182,7 +180,7 @@ class AlignEpiAnatPy(AFNIPythonCommand):
     >>> al_ea.cmdline # doctest: +ELLIPSIS
     'python2 ...align_epi_anat.py -anat structural.nii -epi_base 0 -epi_strip 3dAutomask -epi \
 functional.nii -save_skullstrip -suffix _al -tshift off -volreg off'
-    >>> res = allineate.run()  # doctest: +SKIP
+    >>> res = al_ea.run()  # doctest: +SKIP
 
     See Also
     --------
@@ -585,7 +583,7 @@ class Allineate(AFNICommand):
     output_spec = AllineateOutputSpec
 
     def _list_outputs(self):
-        outputs = super(Allineate, self)._list_outputs()
+        outputs = super()._list_outputs()
 
         if self.inputs.out_weight_file:
             outputs["out_weight_file"] = op.abspath(self.inputs.out_weight_file)
@@ -623,7 +621,7 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
         copyfile=False,
     )
     polort = traits.Int(
-        desc="Remove polynomical trend of order m or -1 for no detrending",
+        desc="Remove polynomial trend of order m or -1 for no detrending",
         argstr="-polort %d",
     )
     eta2 = traits.Bool(desc="eta^2 similarity", argstr="-eta2")
@@ -822,7 +820,7 @@ No Cigar means: Don't try that combination, it makes no sense.""",
 
 
 class AutoTLRC(AFNICommand):
-    """A minmal wrapper for the AutoTLRC script
+    """A minimal wrapper for the AutoTLRC script
     The only option currently supported is no_ss.
     For complete details, see the `3dQwarp Documentation.
     <https://afni.nimh.nih.gov/pub/dist/doc/program_help/@auto_tlrc.html>`_
@@ -1134,7 +1132,6 @@ class ClipLevel(AFNICommandBase):
     output_spec = ClipLevelOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
 
         outfile = os.path.join(os.getcwd(), "stat_result.json")
@@ -1142,7 +1139,7 @@ class ClipLevel(AFNICommandBase):
         if runtime is None:
             try:
                 clip_val = load_json(outfile)["stat"]
-            except IOError:
+            except OSError:
                 return self.run().outputs
         else:
             clip_val = []
@@ -1163,8 +1160,7 @@ class ClipLevel(AFNICommandBase):
 
 
 class DegreeCentralityInputSpec(CentralityInputSpec):
-    """DegreeCentrality inputspec
-    """
+    """DegreeCentrality inputspec"""
 
     in_file = File(
         desc="input file to 3dDegreeCentrality",
@@ -1183,8 +1179,7 @@ class DegreeCentralityInputSpec(CentralityInputSpec):
 
 
 class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
-    """DegreeCentrality outputspec
-    """
+    """DegreeCentrality outputspec"""
 
     oned_file = File(
         desc="The text output of the similarity matrix computed after "
@@ -1221,7 +1216,7 @@ class DegreeCentrality(AFNICommand):
     # Re-define generated inputs
     def _list_outputs(self):
         # Update outputs dictionary if oned file is defined
-        outputs = super(DegreeCentrality, self)._list_outputs()
+        outputs = super()._list_outputs()
         if self.inputs.oned_file:
             outputs["oned_file"] = os.path.abspath(self.inputs.oned_file)
 
@@ -1310,8 +1305,7 @@ class Detrend(AFNICommand):
 
 
 class ECMInputSpec(CentralityInputSpec):
-    """ECM inputspec
-    """
+    """ECM inputspec"""
 
     in_file = File(
         desc="input file to 3dECM",
@@ -1331,7 +1325,7 @@ class ECMInputSpec(CentralityInputSpec):
     )
     fecm = traits.Bool(
         desc="Fast centrality method; substantial speed increase but cannot "
-        "accomodate thresholding; automatically selected if -thresh or "
+        "accommodate thresholding; automatically selected if -thresh or "
         "-sparsity are not set",
         argstr="-fecm",
     )
@@ -1559,7 +1553,7 @@ class Hist(AFNICommandBase):
     _redirect_x = True
 
     def __init__(self, **inputs):
-        super(Hist, self).__init__(**inputs)
+        super().__init__(**inputs)
         if not no_afni():
             version = Info.version()
 
@@ -1572,10 +1566,10 @@ class Hist(AFNICommandBase):
             if skip is None:
                 skip = []
             skip += ["out_show"]
-        return super(Hist, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     def _list_outputs(self):
-        outputs = super(Hist, self)._list_outputs()
+        outputs = super()._list_outputs()
         outputs["out_file"] += ".niml.hist"
         if not self.inputs.showhist:
             outputs["out_show"] = Undefined
@@ -1583,8 +1577,7 @@ class Hist(AFNICommandBase):
 
 
 class LFCDInputSpec(CentralityInputSpec):
-    """LFCD inputspec
-    """
+    """LFCD inputspec"""
 
     in_file = File(
         desc="input file to 3dLFCD",
@@ -1839,12 +1832,10 @@ class OutlierCount(CommandLine):
 
         if not self.inputs.save_outliers:
             skip += ["outliers_file"]
-        return super(OutlierCount, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(OutlierCount, self)._run_interface(
-            runtime, correct_return_codes
-        )
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         # Read from runtime.stdout or runtime.merged
         with open(op.abspath(self.inputs.out_file), "w") as outfh:
@@ -2112,7 +2103,7 @@ class ROIStats(AFNICommandBase):
         }
         if name == "stat":
             value = [_stat_dict[v] for v in value]
-        return super(ROIStats, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class RetroicorInputSpec(AFNICommandInputSpec):
@@ -2212,7 +2203,7 @@ class Retroicor(AFNICommand):
         if name == "in_file":
             if not isdefined(self.inputs.card) and not isdefined(self.inputs.resp):
                 return None
-        return super(Retroicor, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class SegInputSpec(CommandLineInputSpec):
@@ -2300,7 +2291,6 @@ class Seg(AFNICommandBase):
     output_spec = AFNICommandOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         import glob
 
         outputs = self._outputs()
@@ -2358,7 +2348,7 @@ class SkullStrip(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
     def __init__(self, **inputs):
-        super(SkullStrip, self).__init__(**inputs)
+        super().__init__(**inputs)
 
         if not no_afni():
             v = Info.version()
@@ -2553,7 +2543,208 @@ class TCorrMap(AFNICommand):
         elif name == "histogram":
             return trait_spec.argstr % (self.inputs.histogram_bin_numbers, value)
         else:
-            return super(TCorrMap, self)._format_arg(name, trait_spec, value)
+            return super()._format_arg(name, trait_spec, value)
+
+
+class NetCorrInputSpec(AFNICommandInputSpec):
+    in_file = File(
+        desc="input time series file (4D data set)",
+        exists=True,
+        argstr="-inset %s",
+        mandatory=True,
+    )
+    in_rois = File(
+        desc="input set of ROIs, each labelled with distinct integers",
+        exists=True,
+        argstr="-in_rois %s",
+        mandatory=True,
+    )
+    mask = File(
+        desc="can include a whole brain mask within which to "
+        "calculate correlation. Otherwise, data should be "
+        "masked already",
+        exists=True,
+        argstr="-mask %s",
+    )
+    weight_ts = File(
+        desc="input a 1D file WTS of weights that will be applied "
+        "multiplicatively to each ROI's average time series. "
+        "WTS can be a column- or row-file of values, but it "
+        "must have the same length as the input time series "
+        "volume. "
+        "If the initial average time series was A[n] for "
+        "n=0,..,(N-1) time points, then applying a set of "
+        "weights W[n] of the same length from WTS would "
+        "produce a new time series:  B[n] = A[n] * W[n]",
+        exists=True,
+        argstr="-weight_ts %s",
+    )
+    fish_z = traits.Bool(
+        desc="switch to also output a matrix of Fisher Z-transform "
+        "values for the corr coefs (r): "
+        "Z = atanh(r) , "
+        "(with Z=4 being output along matrix diagonals where "
+        "r=1, as the r-to-Z conversion is ceilinged at "
+        "Z = atanh(r=0.999329) = 4, which is still *quite* a "
+        "high Pearson-r value",
+        argstr="-fish_z",
+    )
+    part_corr = traits.Bool(
+        desc="output the partial correlation matrix", argstr="-part_corr"
+    )
+    ts_out = traits.Bool(
+        desc="switch to output the mean time series of the ROIs that "
+        "have been used to generate the correlation matrices. "
+        "Output filenames mirror those of the correlation "
+        "matrix files, with a '.netts' postfix",
+        argstr="-ts_out",
+    )
+    ts_label = traits.Bool(
+        desc="additional switch when using '-ts_out'. Using this "
+        "option will insert the integer ROI label at the start "
+        "of each line of the *.netts file created. Thus, for "
+        "a time series of length N, each line will have N+1 "
+        "numbers, where the first is the integer ROI label "
+        "and the subsequent N are scientific notation values",
+        argstr="-ts_label",
+    )
+    ts_indiv = traits.Bool(
+        desc="switch to create a directory for each network that "
+        "contains the average time series for each ROI in "
+        "individual files (each file has one line). "
+        "The directories are labelled PREFIX_000_INDIV/, "
+        "PREFIX_001_INDIV/, etc. (one per network). Within each "
+        "directory, the files are labelled ROI_001.netts, "
+        "ROI_002.netts, etc., with the numbers given by the "
+        "actual ROI integer labels",
+        argstr="-ts_indiv",
+    )
+    ts_wb_corr = traits.Bool(
+        desc="switch to create a set of whole brain correlation maps. "
+        "Performs whole brain correlation for each "
+        "ROI's average time series; this will automatically "
+        "create a directory for each network that contains the "
+        "set of whole brain correlation maps (Pearson 'r's). "
+        "The directories are labelled as above for '-ts_indiv' "
+        "Within each directory, the files are labelled "
+        "WB_CORR_ROI_001+orig, WB_CORR_ROI_002+orig, etc., with "
+        "the numbers given by the actual ROI integer labels",
+        argstr="-ts_wb_corr",
+    )
+    ts_wb_Z = traits.Bool(
+        desc="same as above in '-ts_wb_corr', except that the maps "
+        "have been Fisher transformed to Z-scores the relation: "
+        "Z=atanh(r). "
+        "To avoid infinities in the transform, Pearson values "
+        "are effectively capped at |r| = 0.999329 (where |Z| = 4.0). "
+        "Files are labelled WB_Z_ROI_001+orig, etc",
+        argstr="-ts_wb_Z",
+    )
+    ts_wb_strlabel = traits.Bool(
+        desc="by default, '-ts_wb_{corr,Z}' output files are named "
+        "using the int number of a given ROI, such as: "
+        "WB_Z_ROI_001+orig. "
+        "With this option, one can replace the int (such as '001') "
+        "with the string label (such as 'L-thalamus') "
+        "*if* one has a labeltable attached to the file",
+        argstr="-ts_wb_strlabel",
+    )
+    nifti = traits.Bool(
+        desc="output any correlation map files as NIFTI files "
+        "(default is BRIK/HEAD). Only useful if using "
+        "'-ts_wb_corr' and/or '-ts_wb_Z'",
+        argstr="-nifti",
+    )
+    output_mask_nonnull = traits.Bool(
+        desc="internally, this program checks for where there are "
+        "nonnull time series, because we don't like those, in "
+        "general.  With this flag, the user can output the "
+        "determined mask of non-null time series.",
+        argstr="-output_mask_nonnull",
+    )
+    push_thru_many_zeros = traits.Bool(
+        desc="by default, this program will grind to a halt and "
+        "refuse to calculate if any ROI contains >10 percent "
+        "of voxels with null times series (i.e., each point is "
+        "0), as of April, 2017.  This is because it seems most "
+        "likely that hidden badness is responsible. However, "
+        "if the user still wants to carry on the calculation "
+        "anyways, then this option will allow one to push on "
+        "through.  However, if any ROI *only* has null time "
+        "series, then the program will not calculate and the "
+        "user will really, really, really need to address their masking",
+        argstr="-push_thru_many_zeros",
+    )
+    ignore_LT = traits.Bool(
+        desc="switch to ignore any label table labels in the "
+        "'-in_rois' file, if there are any labels attached",
+        argstr="-ignore_LT",
+    )
+    out_file = File(
+        desc="output file name part",
+        name_template="%s_netcorr",
+        argstr="-prefix %s",
+        position=1,
+        name_source="in_file",
+    )
+
+
+class NetCorrOutputSpec(TraitedSpec):
+    out_corr_matrix = File(
+        desc="output correlation matrix between ROIs written to a text file with .netcc suffix"
+    )
+    out_corr_maps = traits.List(
+        File(), desc="output correlation maps in Pearson and/or Z-scores"
+    )
+
+
+class NetCorr(AFNICommand):
+    """Calculate correlation matrix of a set of ROIs (using mean time series of
+    each). Several networks may be analyzed simultaneously, one per brick.
+
+    For complete details, see the `3dNetCorr Documentation
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dNetCorr.html>`_.
+
+    Examples
+    --------
+    >>> from nipype.interfaces import afni
+    >>> ncorr = afni.NetCorr()
+    >>> ncorr.inputs.in_file = 'functional.nii'
+    >>> ncorr.inputs.mask = 'mask.nii'
+    >>> ncorr.inputs.in_rois = 'maps.nii'
+    >>> ncorr.inputs.ts_wb_corr = True
+    >>> ncorr.inputs.ts_wb_Z = True
+    >>> ncorr.inputs.fish_z = True
+    >>> ncorr.inputs.out_file = 'sub0.tp1.ncorr'
+    >>> ncorr.cmdline
+    '3dNetCorr -prefix sub0.tp1.ncorr -fish_z -inset functional.nii -in_rois maps.nii -mask mask.nii -ts_wb_Z -ts_wb_corr'
+    >>> res = ncorr.run()  # doctest: +SKIP
+
+    """
+
+    _cmd = "3dNetCorr"
+    input_spec = NetCorrInputSpec
+    output_spec = NetCorrOutputSpec
+
+    def _list_outputs(self):
+        import glob
+
+        outputs = self.output_spec().get()
+
+        if not isdefined(self.inputs.out_file):
+            prefix = self._gen_fname(self.inputs.in_file, suffix="_netcorr")
+        else:
+            prefix = self.inputs.out_file
+
+        # All outputs should be in the same directory as the prefix
+        odir = os.path.dirname(os.path.abspath(prefix))
+        outputs["out_corr_matrix"] = glob.glob(os.path.join(odir, "*.netcc"))[0]
+
+        if isdefined(self.inputs.ts_wb_corr) or isdefined(self.inputs.ts_Z_corr):
+            corrdir = os.path.join(odir, prefix + "_000_INDIV")
+            outputs["out_corr_maps"] = glob.glob(os.path.join(corrdir, "*.nii.gz"))
+
+        return outputs
 
 
 class TCorrelateInputSpec(AFNICommandInputSpec):
@@ -2583,7 +2774,7 @@ class TCorrelateInputSpec(AFNICommandInputSpec):
         desc="Correlation is the normal Pearson correlation coefficient",
         argstr="-pearson",
     )
-    polort = traits.Int(desc="Remove polynomical trend of order m", argstr="-polort %d")
+    polort = traits.Int(desc="Remove polynomial trend of order m", argstr="-polort %d")
 
 
 class TCorrelate(AFNICommand):
@@ -2737,7 +2928,7 @@ Specifies how censored time points are treated in
 the output dataset:
 
 * mode = ZERO -- put zero values in their place;
-  output datset is same length as input
+  output dataset is same length as input
 * mode = KILL -- remove those time points;
   output dataset is shorter than input
 * mode = NTRP -- censored values are replaced by interpolated
@@ -2877,7 +3068,7 @@ class TProject(AFNICommand):
     as ``-passband``.  In this way, you can bandpass time-censored data, and at
     the same time, remove other time series of no interest
     (e.g., physiological estimates, motion parameters).
-    Shifts voxel time series from input so that seperate slices are aligned to
+    Shifts voxel time series from input so that separate slices are aligned to
     the same temporal origin.
 
     Examples
@@ -2992,7 +3183,7 @@ class TShiftOutputSpec(AFNICommandOutputSpec):
 
 
 class TShift(AFNICommand):
-    """Shifts voxel time series from input so that seperate slices are aligned
+    """Shifts voxel time series from input so that separate slices are aligned
     to the same temporal origin.
 
     For complete details, see the `3dTshift Documentation.
@@ -3093,7 +3284,7 @@ class TShift(AFNICommand):
             )
         elif name == "slice_timing" and isinstance(value, list):
             value = self._write_slice_timing()
-        return super(TShift, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _write_slice_timing(self):
         slice_timing = list(self.inputs.slice_timing)
@@ -3106,7 +3297,7 @@ class TShift(AFNICommand):
         return fname
 
     def _list_outputs(self):
-        outputs = super(TShift, self)._list_outputs()
+        outputs = super()._list_outputs()
         if isdefined(self.inputs.slice_timing):
             if isinstance(self.inputs.slice_timing, list):
                 outputs["timing_file"] = os.path.abspath("slice_timing.1D")
@@ -3313,7 +3504,7 @@ rm.epi.volreg.r1 -verbose -base functional.nii -zpad 1 -maxdisp1D functional_md.
     def _format_arg(self, name, trait_spec, value):
         if name == "in_weight_volume" and not isinstance(value, tuple):
             value = (value, 0)
-        return super(Volreg, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
 
 class WarpInputSpec(AFNICommandInputSpec):
@@ -3409,17 +3600,17 @@ class Warp(AFNICommand):
     output_spec = WarpOutputSpec
 
     def _run_interface(self, runtime, correct_return_codes=(0,)):
-        runtime = super(Warp, self)._run_interface(runtime, correct_return_codes)
+        runtime = super()._run_interface(runtime, correct_return_codes)
 
         if self.inputs.save_warp:
             import numpy as np
 
             warp_file = self._list_outputs()["warp_file"]
-            np.savetxt(warp_file, [runtime.stdout], fmt=str("%s"))
+            np.savetxt(warp_file, [runtime.stdout], fmt="%s")
         return runtime
 
     def _list_outputs(self):
-        outputs = super(Warp, self)._list_outputs()
+        outputs = super()._list_outputs()
         if self.inputs.save_warp:
             outputs["warp_file"] = fname_presuffix(
                 outputs["out_file"], suffix="_transform.mat", use_ext=False
@@ -3462,7 +3653,7 @@ Sets the prefix/suffix for the output datasets.
   with 3dNwarpApply and 3dNwarpCat, for example.
 * To be clear, this is the warp from source dataset
   coordinates to base dataset coordinates, where the
-  values at each base grid point are the xyz displacments
+  values at each base grid point are the xyz displacements
   needed to move that grid point's xyz values to the
   corresponding xyz values in the source dataset:
   base( (x,y,z) + WARP(x,y,z) ) matches source(x,y,z)
@@ -3838,7 +4029,7 @@ for getting a speedy coarse first alignment."
   The goal is greater speed, and it seems to help this"
   positively piggish program to be more expeditious."
 * However, accuracy is somewhat lower with '-duplo',"
-  for reasons that currenly elude Zhark; for this reason,"
+  for reasons that currently elude Zhark; for this reason,"
   the Emperor does not usually use '-duplo'.
 
 """,
@@ -4029,21 +4220,21 @@ Do NOT use zero-padding on the 3D base and source images.
     )
     hel = traits.Bool(
         desc="Hellinger distance: a matching function for the adventurous"
-        "This option has NOT be extensively tested for usefullness"
+        "This option has NOT be extensively tested for usefulness"
         "and should be considered experimental at this infundibulum.",
         argstr="-hel",
         xor=["nmi", "mi", "lpc", "lpa", "pear"],
     )
     mi = traits.Bool(
         desc="Mutual Information: a matching function for the adventurous"
-        "This option has NOT be extensively tested for usefullness"
+        "This option has NOT be extensively tested for usefulness"
         "and should be considered experimental at this infundibulum.",
         argstr="-mi",
         xor=["mi", "hel", "lpc", "lpa", "pear"],
     )
     nmi = traits.Bool(
         desc="Normalized Mutual Information: a matching function for the adventurous"
-        "This option has NOT been extensively tested for usefullness"
+        "This option has NOT been extensively tested for usefulness"
         "and should be considered experimental at this infundibulum.",
         argstr="-nmi",
         xor=["nmi", "hel", "lpc", "lpa", "pear"],
@@ -4173,7 +4364,7 @@ warp+tlrc.HEAD -prefix Q11'
     def _format_arg(self, name, trait_spec, value):
         if name == "allineate_opts":
             return trait_spec.argstr % ("'" + value + "'")
-        return super(Qwarp, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

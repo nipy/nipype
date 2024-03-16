@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -12,7 +11,7 @@ from ..qt1 import FitQt1
 
 @pytest.mark.skipif(no_nifty_tool(cmd="fit_qt1"), reason="niftyfit is not installed")
 def test_fit_qt1():
-    """ Testing FitQt1 interface."""
+    """Testing FitQt1 interface."""
     # Create a node object
     fit_qt1 = FitQt1()
 

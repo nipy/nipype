@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft = python sts = 4 ts = 4 sw = 4 et:
 """
@@ -197,7 +196,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         desc="output the sample variance (MSE) for each stimulus", argstr="-vout"
     )
     nofdr = traits.Bool(
-        desc="Don't compute the statistic-vs-FDR curves for the bucket " "dataset.",
+        desc="Don't compute the statistic-vs-FDR curves for the bucket dataset.",
         argstr="-noFDR",
     )
     global_times = traits.Bool(
@@ -219,7 +218,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
             File(desc="stimulus timing file", exists=True),
             Str(desc="model"),
         ),
-        desc="generate a response model from a set of stimulus times" " given in file.",
+        desc="generate a response model from a set of stimulus times given in file.",
         argstr="-stim_times %d %s '%s'...",
         position=-5,
     )
@@ -265,7 +264,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
 class DeconvolveOutputSpec(TraitedSpec):
     out_file = File(desc="output statistics file", exists=True)
     reml_script = File(
-        desc="automatical generated script to run 3dREMLfit", exists=True
+        desc="automatically generated script to run 3dREMLfit", exists=True
     )
     x1D = File(desc="save out X matrix", exists=True)
     cbucket = File(desc="output regression coefficients file (if generated)")
@@ -305,7 +304,7 @@ class Deconvolve(AFNICommand):
                 if val.startswith("SYM: "):
                     value[n] = val.lstrip("SYM: ")
 
-        return super(Deconvolve, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         if skip is None:
@@ -317,7 +316,7 @@ class Deconvolve(AFNICommand):
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = "Decon.nii"
 
-        return super(Deconvolve, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -528,7 +527,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         "be included.",
         argstr="-Rglt %s",
     )
-    fitts_file = File(desc="ouput dataset for REML fitted model", argstr="-Rfitts %s")
+    fitts_file = File(desc="output dataset for REML fitted model", argstr="-Rfitts %s")
     errts_file = File(
         desc="output dataset for REML residuals = data - fitted model",
         argstr="-Rerrts %s",
@@ -570,23 +569,23 @@ class RemlfitInputSpec(AFNICommandInputSpec):
 
 class RemlfitOutputSpec(AFNICommandOutputSpec):
     out_file = File(
-        desc="dataset for beta + statistics from the REML estimation (if " "generated"
+        desc="dataset for beta + statistics from the REML estimation (if generated)"
     )
     var_file = File(desc="dataset for REML variance parameters (if generated)")
     rbeta_file = File(
-        desc="dataset for beta weights from the REML estimation (if " "generated)"
+        desc="dataset for beta weights from the REML estimation (if generated)"
     )
     rbeta_file = File(
-        desc="output dataset for beta weights from the REML estimation (if " "generated"
+        desc="output dataset for beta weights from the REML estimation (if generated)"
     )
     glt_file = File(
         desc="output dataset for beta + statistics from the REML estimation, "
         "but ONLY for the GLTs added on the REMLfit command "
         "line itself via 'gltsym' (if generated)"
     )
-    fitts_file = File(desc="ouput dataset for REML fitted model (if generated)")
+    fitts_file = File(desc="output dataset for REML fitted model (if generated)")
     errts_file = File(
-        desc="output dataset for REML residuals = data - fitted model (if " "generated"
+        desc="output dataset for REML residuals = data - fitted model (if generated)"
     )
     wherr_file = File(
         desc="dataset for REML residual, whitened using the estimated "
@@ -594,17 +593,17 @@ class RemlfitOutputSpec(AFNICommandOutputSpec):
     )
     ovar = File(desc="dataset for OLSQ st.dev. parameter (if generated)")
     obeta = File(
-        desc="dataset for beta weights from the OLSQ estimation (if " "generated)"
+        desc="dataset for beta weights from the OLSQ estimation (if generated)"
     )
     obuck = File(
-        desc="dataset for beta + statistics from the OLSQ estimation (if " "generated)"
+        desc="dataset for beta + statistics from the OLSQ estimation (if generated)"
     )
     oglt = File(
-        desc="dataset for beta + statistics from 'gltsym' options (if " "generated"
+        desc="dataset for beta + statistics from 'gltsym' options (if generated)"
     )
     ofitts = File(desc="dataset for OLSQ fitted model (if generated)")
     oerrts = File(
-        desc="dataset for OLSQ residuals = data - fitted model (if " "generated"
+        desc="dataset for OLSQ residuals = data - fitted model (if generated)"
     )
 
 
@@ -637,7 +636,7 @@ class Remlfit(AFNICommand):
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-        return super(Remlfit, self)._parse_inputs(skip)
+        return super()._parse_inputs(skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -651,13 +650,13 @@ class Remlfit(AFNICommand):
 
 class SynthesizeInputSpec(AFNICommandInputSpec):
     cbucket = File(
-        desc="Read the dataset output from " "3dDeconvolve via the '-cbucket' option.",
+        desc="Read the dataset output from 3dDeconvolve via the '-cbucket' option.",
         argstr="-cbucket %s",
         copyfile=False,
         mandatory=True,
     )
     matrix = File(
-        desc="Read the matrix output from " "3dDeconvolve via the '-x1D' option.",
+        desc="Read the matrix output from 3dDeconvolve via the '-x1D' option.",
         argstr="-matrix %s",
         copyfile=False,
         mandatory=True,
@@ -682,7 +681,7 @@ class SynthesizeInputSpec(AFNICommandInputSpec):
         argstr="-prefix %s",
     )
     dry_run = traits.Bool(
-        desc="Don't compute the output, just " "check the inputs.", argstr="-dry"
+        desc="Don't compute the output, just check the inputs.", argstr="-dry"
     )
     TR = traits.Float(
         desc="TR to set in the output.  The default value of "

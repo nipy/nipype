@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2008 Lowell Alleman
 #
 #   Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -40,13 +39,10 @@ See the README file for an example usage of this module.
 
 """
 
-from builtins import range
 
 __version__ = "$Id: cloghandler.py 6175 2009-11-02 18:40:35Z lowell $"
 __author__ = "Lowell Alleman"
-__all__ = [
-    "ConcurrentRotatingFileHandler",
-]
+__all__ = ["ConcurrentRotatingFileHandler"]
 
 import os
 import sys
@@ -153,7 +149,9 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 )
         try:
             BaseRotatingHandler.__init__(self, filename, mode, encoding)
-        except TypeError:  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
+        except (
+            TypeError
+        ):  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
             BaseRotatingHandler.__init__(self, filename, mode)
             self.encoding = encoding
 
@@ -175,8 +173,8 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             self.stream = open(self.baseFilename, mode)
 
     def acquire(self):
-        """ Acquire thread and file locks. Also re-opening log file when running
-        in 'degraded' mode. """
+        """Acquire thread and file locks. Also re-opening log file when running
+        in 'degraded' mode."""
         # handle thread lock
         Handler.acquire(self)
         self.stream_lock.acquire()
@@ -184,14 +182,14 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             self._openFile(self.mode)
 
     def release(self):
-        """ Release file and thread locks. Flush stream and take care of closing
-        stream in 'degraded' mode. """
+        """Release file and thread locks. Flush stream and take care of closing
+        stream in 'degraded' mode."""
         try:
             if not self.stream.closed:
                 self.stream.flush()
                 if self._rotateFailed:
                     self.stream.close()
-        except IOError:
+        except OSError:
             if self._rotateFailed:
                 self.stream.close()
         finally:
@@ -211,7 +209,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         Handler.close(self)
 
     def flush(self):
-        """ flush():  Do nothing.
+        """flush():  Do nothing.
 
         Since a flush is issued in release(), we don't do it here. To do a flush
         here, it would be necessary to re-lock everything, and it is just easier
@@ -220,16 +218,16 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
 
         Doing a flush() here would also introduces a window of opportunity for
         another process to write to the log file in between calling
-        stream.write() and stream.flush(), which seems like a bad thing. """
+        stream.write() and stream.flush(), which seems like a bad thing."""
         pass
 
     def _degrade(self, degrade, msg, *args):
-        """ Set degrade mode or not.  Ignore msg. """
+        """Set degrade mode or not.  Ignore msg."""
         self._rotateFailed = degrade
         del msg, args  # avoid pychecker warnings
 
     def _degrade_debug(self, degrade, msg, *args):
-        """ A more colorful version of _degade(). (This is enabled by passing
+        """A more colorful version of _degade(). (This is enabled by passing
         "debug=True" at initialization).
         """
         if degrade:
@@ -266,10 +264,10 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             try:
                 # Do a rename test to determine if we can successfully rename the log file
                 os.rename(self.baseFilename, tmpname)
-            except (IOError, OSError):
+            except OSError:
                 exc_value = sys.exc_info()[1]
                 self._degrade(
-                    True, "rename failed.  File in use?  " "exception=%s", exc_value
+                    True, "rename failed.  File in use?  exception=%s", exc_value
                 )
                 return
 
@@ -319,7 +317,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         if self.maxBytes > 0:  # are we rolling over?
             try:
                 self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
-            except IOError:
+            except OSError:
                 return True
             if self.stream.tell() >= self.maxBytes:
                 return True

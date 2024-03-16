@@ -4,22 +4,83 @@ from ..preprocess import ResponseSD
 
 def test_ResponseSD_inputs():
     input_map = dict(
-        algorithm=dict(argstr="%s", mandatory=True, position=1,),
-        args=dict(argstr="%s",),
-        bval_scale=dict(argstr="-bvalue_scaling %s",),
-        csf_file=dict(argstr="%s", extensions=None, position=-1,),
-        environ=dict(nohash=True, usedefault=True,),
-        gm_file=dict(argstr="%s", extensions=None, position=-2,),
-        grad_file=dict(argstr="-grad %s", extensions=None, xor=["grad_fsl"],),
-        grad_fsl=dict(argstr="-fslgrad %s %s", xor=["grad_file"],),
-        in_bval=dict(extensions=None,),
-        in_bvec=dict(argstr="-fslgrad %s %s", extensions=None,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=-5,),
-        in_mask=dict(argstr="-mask %s", extensions=None,),
-        max_sh=dict(argstr="-lmax %s", sep=",",),
-        mtt_file=dict(argstr="%s", extensions=None, position=-4,),
-        nthreads=dict(argstr="-nthreads %d", nohash=True,),
-        wm_file=dict(argstr="%s", extensions=None, position=-3, usedefault=True,),
+        algorithm=dict(
+            argstr="%s",
+            mandatory=True,
+            position=1,
+        ),
+        args=dict(
+            argstr="%s",
+        ),
+        bval_scale=dict(
+            argstr="-bvalue_scaling %s",
+        ),
+        csf_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=-1,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        gm_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=-2,
+        ),
+        grad_file=dict(
+            argstr="-grad %s",
+            extensions=None,
+            xor=["grad_fsl"],
+        ),
+        grad_fsl=dict(
+            argstr="-fslgrad %s %s",
+            xor=["grad_file"],
+        ),
+        in_bval=dict(
+            extensions=None,
+        ),
+        in_bvec=dict(
+            argstr="-fslgrad %s %s",
+            extensions=None,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=-5,
+        ),
+        in_mask=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        max_sh=dict(
+            argstr="-lmax %s",
+            sep=",",
+        ),
+        mtt_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=-4,
+        ),
+        nthreads=dict(
+            argstr="-nthreads %d",
+            nohash=True,
+        ),
+        out_bval=dict(
+            extensions=None,
+        ),
+        out_bvec=dict(
+            argstr="-export_grad_fsl %s %s",
+            extensions=None,
+        ),
+        wm_file=dict(
+            argstr="%s",
+            extensions=None,
+            position=-3,
+            usedefault=True,
+        ),
     )
     inputs = ResponseSD.input_spec()
 
@@ -30,9 +91,18 @@ def test_ResponseSD_inputs():
 
 def test_ResponseSD_outputs():
     output_map = dict(
-        csf_file=dict(argstr="%s", extensions=None,),
-        gm_file=dict(argstr="%s", extensions=None,),
-        wm_file=dict(argstr="%s", extensions=None,),
+        csf_file=dict(
+            argstr="%s",
+            extensions=None,
+        ),
+        gm_file=dict(
+            argstr="%s",
+            extensions=None,
+        ),
+        wm_file=dict(
+            argstr="%s",
+            extensions=None,
+        ),
     )
     outputs = ResponseSD.output_spec()
 

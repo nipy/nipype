@@ -4,16 +4,34 @@ from ..brains import fcsv_to_hdf5
 
 def test_fcsv_to_hdf5_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        landmarkGlobPattern=dict(argstr="--landmarkGlobPattern %s",),
-        landmarkTypesList=dict(argstr="--landmarkTypesList %s", extensions=None,),
-        landmarksInformationFile=dict(
-            argstr="--landmarksInformationFile %s", hash_files=False,
+        args=dict(
+            argstr="%s",
         ),
-        modelFile=dict(argstr="--modelFile %s", hash_files=False,),
-        numberOfThreads=dict(argstr="--numberOfThreads %d",),
-        versionID=dict(argstr="--versionID %s",),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        landmarkGlobPattern=dict(
+            argstr="--landmarkGlobPattern %s",
+        ),
+        landmarkTypesList=dict(
+            argstr="--landmarkTypesList %s",
+            extensions=None,
+        ),
+        landmarksInformationFile=dict(
+            argstr="--landmarksInformationFile %s",
+            hash_files=False,
+        ),
+        modelFile=dict(
+            argstr="--modelFile %s",
+            hash_files=False,
+        ),
+        numberOfThreads=dict(
+            argstr="--numberOfThreads %d",
+        ),
+        versionID=dict(
+            argstr="--versionID %s",
+        ),
     )
     inputs = fcsv_to_hdf5.input_spec()
 
@@ -24,8 +42,12 @@ def test_fcsv_to_hdf5_inputs():
 
 def test_fcsv_to_hdf5_outputs():
     output_map = dict(
-        landmarksInformationFile=dict(extensions=None,),
-        modelFile=dict(extensions=None,),
+        landmarksInformationFile=dict(
+            extensions=None,
+        ),
+        modelFile=dict(
+            extensions=None,
+        ),
     )
     outputs = fcsv_to_hdf5.output_spec()
 

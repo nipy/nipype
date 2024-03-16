@@ -4,8 +4,13 @@ from ..base import FSScriptCommand
 
 def test_FSScriptCommand_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
         subjects_dir=dict(),
     )
     inputs = FSScriptCommand.input_spec()

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """ Base interfaces for dipy """
 
 import os.path as op
@@ -27,13 +26,13 @@ except ImportError:
 
 
 def no_dipy():
-    """ Check if dipy is available """
+    """Check if dipy is available."""
     global HAVE_DIPY
     return not HAVE_DIPY
 
 
 def dipy_version():
-    """ Check dipy version """
+    """Check dipy version."""
     if no_dipy():
         return None
 
@@ -41,9 +40,7 @@ def dipy_version():
 
 
 class DipyBaseInterface(LibraryBaseInterface):
-    """
-    A base interface for py:mod:`dipy` computations
-    """
+    """A base interface for py:mod:`dipy` computations."""
 
     _pkg = "dipy"
 
@@ -57,9 +54,7 @@ class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
 
 
 class DipyDiffusionInterface(DipyBaseInterface):
-    """
-    A base interface for py:mod:`dipy` computations
-    """
+    """A base interface for py:mod:`dipy` computations."""
 
     input_spec = DipyBaseInterfaceInputSpec
 
@@ -90,11 +85,31 @@ class DipyDiffusionInterface(DipyBaseInterface):
         return out_prefix + "_" + name + ext
 
 
+def get_default_args(func):
+    """Return optional arguments of a function.
+
+    Parameters
+    ----------
+    func: callable
+
+    Returns
+    -------
+    dict
+
+    """
+    signature = inspect.signature(func)
+    return {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
+
+
 def convert_to_traits_type(dipy_type, is_file=False):
     """Convert DIPY type to Traits type."""
     dipy_type = dipy_type.lower()
     is_mandatory = bool("optional" not in dipy_type)
-    if "variable" in dipy_type and "string" in dipy_type:
+    if "variable" in dipy_type and "str" in dipy_type:
         return traits.ListStr, is_mandatory
     elif "variable" in dipy_type and "int" in dipy_type:
         return traits.ListInt, is_mandatory
@@ -104,9 +119,9 @@ def convert_to_traits_type(dipy_type, is_file=False):
         return traits.ListBool, is_mandatory
     elif "variable" in dipy_type and "complex" in dipy_type:
         return traits.ListComplex, is_mandatory
-    elif "string" in dipy_type and not is_file:
+    elif "str" in dipy_type and not is_file:
         return traits.Str, is_mandatory
-    elif "string" in dipy_type and is_file:
+    elif "str" in dipy_type and is_file:
         return File, is_mandatory
     elif "int" in dipy_type:
         return traits.Int, is_mandatory
@@ -117,11 +132,8 @@ def convert_to_traits_type(dipy_type, is_file=False):
     elif "complex" in dipy_type:
         return traits.Complex, is_mandatory
     else:
-        msg = (
-            "Error during convert_to_traits_type({0}).".format(dipy_type)
-            + "Unknown DIPY type."
-        )
-        raise IOError(msg)
+        msg = f"Error during convert_to_traits_type({dipy_type}). Unknown DIPY type."
+        raise OSError(msg)
 
 
 def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
@@ -176,7 +188,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     cls_name: string
         new class name
     dipy_flow: Workflow class type.
-        It should be any children class of `dipy.workflows.workflow.Worflow`
+        It should be any children class of `dipy.workflows.workflow.Workflow`
     BaseClass: object
         nipype instance object
 
@@ -189,7 +201,7 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     parser = IntrospectiveArgumentParser()
     flow = dipy_flow()
     parser.add_workflow(flow)
-    default_values = inspect.getfullargspec(flow.run).defaults
+    default_values = list(get_default_args(flow.run).values())
     optional_params = [
         args + (val,) for args, val in zip(parser.optional_parameters, default_values)
     ]
@@ -202,13 +214,13 @@ def dipy_to_nipype_interface(cls_name, dipy_flow, BaseClass=DipyBaseInterface):
     input_parameters = parser.positional_parameters + optional_params
 
     input_spec = create_interface_specs(
-        "{}InputSpec".format(cls_name),
+        f"{cls_name}InputSpec",
         input_parameters,
         BaseClass=BaseInterfaceInputSpec,
     )
 
     output_spec = create_interface_specs(
-        "{}OutputSpec".format(cls_name), output_parameters, BaseClass=TraitedSpec
+        f"{cls_name}OutputSpec", output_parameters, BaseClass=TraitedSpec
     )
 
     def _run_interface(self, runtime):
@@ -249,7 +261,7 @@ def get_dipy_workflows(module):
     -------
     l_wkflw : list of tuple
         This a list of tuple containing 2 elements:
-        Worflow name, Workflow class obj
+        Workflow name, Workflow class obj
 
     Examples
     --------

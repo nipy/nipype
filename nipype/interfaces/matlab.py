@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to run MATLAB scripts."""
@@ -17,32 +16,18 @@ from .base import (
 
 
 def get_matlab_command():
-    if "NIPYPE_NO_MATLAB" in os.environ:
-        return None
+    """Determine whether Matlab is installed and can be executed."""
+    if "NIPYPE_NO_MATLAB" not in os.environ:
+        from nipype.utils.filemanip import which
 
-    try:
-        matlab_cmd = os.environ["MATLABCMD"]
-    except:
-        matlab_cmd = "matlab"
-
-    try:
-        res = CommandLine(
-            command="which",
-            args=matlab_cmd,
-            resource_monitor=False,
-            terminal_output="allatonce",
-        ).run()
-        matlab_path = res.runtime.stdout.strip()
-    except Exception:
-        return None
-    return matlab_cmd
+        return which(os.getenv("MATLABCMD", "matlab"))
 
 
 no_matlab = get_matlab_command() is None
 
 
 class MatlabInputSpec(CommandLineInputSpec):
-    """ Basic expected inputs to Matlab interface """
+    """Basic expected inputs to Matlab interface"""
 
     script = traits.Str(
         argstr='-r "%s;exit"', desc="m-code to run", mandatory=True, position=-1
@@ -111,7 +96,7 @@ class MatlabCommand(CommandLine):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash')
         """
-        super(MatlabCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         if matlab_cmd and isdefined(matlab_cmd):
             self._cmd = matlab_cmd
         elif self._default_matlab_cmd:
@@ -167,7 +152,7 @@ class MatlabCommand(CommandLine):
 
     def _run_interface(self, runtime):
         self.terminal_output = "allatonce"
-        runtime = super(MatlabCommand, self)._run_interface(runtime)
+        runtime = super()._run_interface(runtime)
         try:
             # Matlab can leave the terminal in a barbbled state
             os.system("stty sane")
@@ -184,10 +169,10 @@ class MatlabCommand(CommandLine):
             if self.inputs.uses_mcr:
                 argstr = "%s"
             return self._gen_matlab_command(argstr, value)
-        return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
-        """ Generates commands and, if mfile specified, writes it to disk."""
+        """Generates commands and, if mfile specified, writes it to disk."""
         cwd = os.getcwd()
         mfile = self.inputs.mfile or self.inputs.uses_mcr
         paths = []
@@ -205,7 +190,10 @@ class MatlabCommand(CommandLine):
         else:
             prescript.insert(0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
-            prescript.append("addpath('%s');\n" % path)
+            # addpath() is not available after compilation
+            # https://www.mathworks.com/help/compiler/ismcc.html
+            # https://www.mathworks.com/help/compiler/isdeployed.html
+            prescript.append("if ~(ismcc || isdeployed), addpath('%s'); end;\n" % path)
 
         if not mfile:
             # clean up the code of comments and replace newlines with commas
@@ -219,12 +207,12 @@ class MatlabCommand(CommandLine):
 
         script_lines = "\n".join(prescript) + script_lines + "\n".join(postscript)
         if mfile:
-            with open(os.path.join(cwd, self.inputs.script_file), "wt") as mfile:
+            with open(os.path.join(cwd, self.inputs.script_file), "w") as mfile:
                 mfile.write(script_lines)
             if self.inputs.uses_mcr:
                 script = "%s" % (os.path.join(cwd, self.inputs.script_file))
             else:
-                script = "addpath('%s');%s" % (
+                script = "addpath('{}');{}".format(
                     cwd,
                     self.inputs.script_file.split(".")[0],
                 )

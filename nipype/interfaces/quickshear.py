@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Quickshear is a simple geometric defacing algorithm."""
 
 from .base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
@@ -27,7 +26,7 @@ class QuickshearInputSpec(CommandLineInputSpec):
     buff = traits.Int(
         position=4,
         argstr="%d",
-        desc="buffer size (in voxels) between shearing " "plane and the brain",
+        desc="buffer size (in voxels) between shearing plane and the brain",
     )
 
 
@@ -75,7 +74,7 @@ class Quickshear(CommandLine):
     input_spec = QuickshearInputSpec
     output_spec = QuickshearOutputSpec
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@inproceedings{Schimke2011,"

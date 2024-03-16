@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by diffusion toolkit
@@ -88,8 +87,7 @@ class DTIReconOutputSpec(TraitedSpec):
 
 
 class DTIRecon(CommandLine):
-    """Use dti_recon to generate tensors and other maps
-    """
+    """Use dti_recon to generate tensors and other maps"""
 
     input_spec = DTIReconInputSpec
     output_spec = DTIReconOutputSpec
@@ -108,15 +106,15 @@ class DTIRecon(CommandLine):
         with open(_gradient_matrix_file, "w") as gradient_matrix_f:
             for i in range(len(bvals)):
                 gradient_matrix_f.write(
-                    "%s, %s, %s, %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i])
+                    f"{bvecs_x[i]}, {bvecs_y[i]}, {bvecs_z[i]}, {bvals[i]}\n"
                 )
         return _gradient_matrix_file
 
     def _format_arg(self, name, spec, value):
         if name == "bvecs":
             new_val = self._create_gradient_matrix(self.inputs.bvecs, self.inputs.bvals)
-            return super(DTIRecon, self)._format_arg("bvecs", spec, new_val)
-        return super(DTIRecon, self)._format_arg(name, spec, value)
+            return super()._format_arg("bvecs", spec, new_val)
+        return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
         out_prefix = self.inputs.out_prefix
@@ -174,7 +172,7 @@ class DTITrackerInputSpec(CommandLineInputSpec):
 Input and output file type. Accepted values are:
 
 * analyze -> analyze format 7.5
-* ni1     -> nifti format saved in seperate .hdr and .img file
+* ni1     -> nifti format saved in separate .hdr and .img file
 * nii     -> nifti format with one .nii file
 * nii.gz  -> nifti format with compression
 
@@ -209,7 +207,7 @@ and 0.1 for other methods""",
         desc="set angle threshold. default value is 35 degree", argstr="-at %f"
     )
     angle_threshold_weight = traits.Float(
-        desc="set angle threshold weighting factor. weighting will be be applied "
+        desc="set angle threshold weighting factor. weighting will be applied "
         "on top of the angle_threshold",
         argstr="-atw %f",
     )
@@ -278,7 +276,7 @@ class DTITracker(CommandLine):
             copy=False,
         )
 
-        return super(DTITracker, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

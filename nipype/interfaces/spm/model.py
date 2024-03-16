@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with matlab
@@ -81,7 +80,7 @@ Dictionary names of the basis function to parameters:
         mandatory=True,
     )
     volterra_expansion_order = traits.Enum(
-        1, 2, field="volt", desc=("Model interactions - yes:1, no:2")
+        1, 2, field="volt", desc=("Model interactions - no:1, yes:2")
     )
     global_intensity_normalization = traits.Enum(
         "none",
@@ -145,8 +144,7 @@ class Level1Design(SPMCommand):
     _jobname = "fmri_spec"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["spm_mat_dir", "mask_image"]:
             return np.array([str(val)], dtype=object)
         if opt in ["session_info"]:  # , 'factor_info']:
@@ -154,14 +152,11 @@ class Level1Design(SPMCommand):
                 return [val]
             else:
                 return val
-        return super(Level1Design, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
-        einputs = super(Level1Design, self)._parse_inputs(
-            skip=("mask_threshold", "flags")
-        )
+        """validate spm realign options if set to None ignore"""
+        einputs = super()._parse_inputs(skip=("mask_threshold", "flags"))
         if isdefined(self.inputs.flags):
             einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
         for sessinfo in einputs[0]["sess"]:
@@ -193,9 +188,7 @@ class Level1Design(SPMCommand):
             postscript += "save SPM SPM;\n"
         else:
             postscript = None
-        return super(Level1Design, self)._make_matlab_command(
-            content, postscript=postscript
-        )
+        return super()._make_matlab_command(content, postscript=postscript)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -252,6 +245,34 @@ class EstimateModelOutputSpec(TraitedSpec):
         ImageFileSPM(exists=True),
         desc="Images of the standard deviation of parameter posteriors",
     )
+    con_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "contrast images from a t-contrast "
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
+    spmT_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "stat images from a t-contrast"
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
+    ess_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "contrast images from an F-contrast"
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
+    spmF_images = OutputMultiPath(
+        File(exists=True),
+        desc=(
+            "stat images from an F-contrast"
+            "(created if factor_info used in Level1Design)"
+        ),
+    )
 
 
 class EstimateModel(SPMCommand):
@@ -273,21 +294,19 @@ class EstimateModel(SPMCommand):
     _jobname = "fmri_est"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "spm_mat_file":
             return np.array([str(val)], dtype=object)
         if opt == "estimation_method":
             if isinstance(val, (str, bytes)):
-                return {"{}".format(val): 1}
+                return {f"{val}": 1}
             else:
                 return val
-        return super(EstimateModel, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
-        einputs = super(EstimateModel, self)._parse_inputs(skip=("flags"))
+        """validate spm realign options if set to None ignore"""
+        einputs = super()._parse_inputs(skip=("flags"))
         if isdefined(self.inputs.flags):
             einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
         return einputs
@@ -305,26 +324,45 @@ class EstimateModel(SPMCommand):
             "Bayesian" in self.inputs.estimation_method.keys()
             or "Bayesian2" in self.inputs.estimation_method.keys()
         ):
-            outputs["labels"] = os.path.join(pth, "labels.{}".format(outtype))
+            outputs["labels"] = os.path.join(pth, f"labels.{outtype}")
             outputs["SDerror"] = glob(os.path.join(pth, "Sess*_SDerror*"))
             outputs["ARcoef"] = glob(os.path.join(pth, "Sess*_AR_*"))
             if betas:
-                outputs["Cbetas"] = [
-                    os.path.join(pth, "C{}".format(beta)) for beta in betas
-                ]
-                outputs["SDbetas"] = [
-                    os.path.join(pth, "SD{}".format(beta)) for beta in betas
-                ]
+                outputs["Cbetas"] = [os.path.join(pth, f"C{beta}") for beta in betas]
+                outputs["SDbetas"] = [os.path.join(pth, f"SD{beta}") for beta in betas]
 
         if "Classical" in self.inputs.estimation_method.keys():
-            outputs["residual_image"] = os.path.join(pth, "ResMS.{}".format(outtype))
-            outputs["RPVimage"] = os.path.join(pth, "RPV.{}".format(outtype))
+            outputs["residual_image"] = os.path.join(pth, f"ResMS.{outtype}")
+            outputs["RPVimage"] = os.path.join(pth, f"RPV.{outtype}")
             if self.inputs.write_residuals:
                 outputs["residual_images"] = glob(os.path.join(pth, "Res_*"))
             if betas:
                 outputs["beta_images"] = [os.path.join(pth, beta) for beta in betas]
+            # When 'factor_info' is used in Level1Design
+            # spm automatically creates contrast
+            try:
+                contrast = [c.Vcon[0][0].fname[0] for c in spm["SPM"][0, 0].xCon[0]]
+                contrast_spm = [c.Vspm[0][0].fname[0] for c in spm["SPM"][0, 0].xCon[0]]
+            except Exception:
+                contrast = []
+                contrast_spm = []
 
-        outputs["mask_image"] = os.path.join(pth, "mask.{}".format(outtype))
+            if contrast:
+                outputs["con_images"] = [
+                    os.path.join(pth, cont) for cont in contrast if 'con' in cont
+                ]
+                outputs["ess_images"] = [
+                    os.path.join(pth, cont) for cont in contrast if 'ess' in cont
+                ]
+            if contrast_spm:
+                outputs["spmT_images"] = [
+                    os.path.join(pth, cont) for cont in contrast_spm if 'spmT' in cont
+                ]
+                outputs["spmF_images"] = [
+                    os.path.join(pth, cont) for cont in contrast_spm if 'spmF' in cont
+                ]
+
+        outputs["mask_image"] = os.path.join(pth, f"mask.{outtype}")
         outputs["spm_mat_file"] = os.path.join(pth, "SPM.mat")
         return outputs
 
@@ -514,12 +552,12 @@ end;"""
                             script += ["sidx = find(condsess(idx)==%d);" % (sno + 1)]
                             script += [
                                 "consess{%d}.tcon.convec(idx(sidx)) = %f;"
-                                % (i + 1, sw * contrast.weights[c0],)
+                                % (i + 1, sw * contrast.weights[c0])
                             ]
                     else:
                         script += [
                             "consess{%d}.tcon.convec(idx) = %f;"
-                            % (i + 1, contrast.weights[c0],)
+                            % (i + 1, contrast.weights[c0])
                         ]
         for i, contrast in enumerate(contrasts):
             if contrast.stat == "F":
@@ -590,6 +628,16 @@ class ThresholdInputSpec(SPMCommandInputSpec):
             "set to p-value)"
         ),
     )
+    use_vox_fdr_correction = traits.Bool(
+        False,
+        usedefault=True,
+        desc=(
+            "whether to use voxel-based FDR "
+            "correction for initial threshold "
+            "(height_threshold_type has to be "
+            "set to q-value)"
+        ),
+    )
     use_topo_fdr = traits.Bool(
         True,
         usedefault=True,
@@ -620,7 +668,7 @@ class ThresholdInputSpec(SPMCommandInputSpec):
         desc=(
             "In case no clusters survive the "
             "topological inference step this "
-            "will pick a culster with the highes "
+            "will pick a culster with the highest "
             "sum of t-values. Use with care."
         ),
     )
@@ -665,8 +713,16 @@ class Threshold(SPMCommand):
     def _make_matlab_command(self, _):
         script = "con_index = %d;\n" % self.inputs.contrast_index
         script += "cluster_forming_thr = %f;\n" % self.inputs.height_threshold
-        if self.inputs.use_fwe_correction:
+
+        if self.inputs.use_fwe_correction and self.inputs.use_vox_fdr_correction:
+            raise ValueError(
+                "'use_fwe_correction' and 'use_vox_fdr_correction' can't both be True"
+            )
+
+        if self.inputs.use_fwe_correction and not self.inputs.use_vox_fdr_correction:
             script += "thresDesc  = 'FWE';\n"
+        elif self.inputs.use_vox_fdr_correction and not self.inputs.use_fwe_correction:
+            script += "thresDesc  = 'FDR';\n"
         else:
             script += "thresDesc  = 'none';\n"
 
@@ -691,6 +747,8 @@ class Threshold(SPMCommand):
 FWHM  = SPM.xVol.FWHM;
 df = [SPM.xCon(con_index).eidf SPM.xX.erdf];
 STAT = SPM.xCon(con_index).STAT;
+VspmSv   = cat(1,SPM.xCon(con_index).Vspm);
+
 R = SPM.xVol.R;
 S = SPM.xVol.S;
 n = 1;
@@ -698,6 +756,9 @@ n = 1;
 switch thresDesc
     case 'FWE'
         cluster_forming_thr = spm_uc(cluster_forming_thr,df,STAT,R,n,S);
+
+    case 'FDR'
+        cluster_forming_thr = spm_uc_FDR(cluster_forming_thr,df,STAT,n,VspmSv,0);
 
     case 'none'
         if strcmp(height_threshold_type, 'p-value')
@@ -830,8 +891,7 @@ class ThresholdStatisticsInputSpec(SPMCommandInputSpec):
         mandatory=True, desc="which contrast in the SPM.mat to use"
     )
     height_threshold = traits.Float(
-        desc=("stat value for initial thresholding (defining clusters)"),
-        mandatory=True,
+        desc=("stat value for initial thresholding (defining clusters)"), mandatory=True
     )
     extent_threshold = traits.Int(
         0, usedefault=True, desc="Minimum cluster size in voxels"
@@ -1020,8 +1080,7 @@ class FactorialDesign(SPMCommand):
     _jobname = "factorial_design"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["spm_mat_dir", "explicit_mask_file"]:
             return np.array([str(val)], dtype=object)
         if opt in ["covariates"]:
@@ -1038,12 +1097,11 @@ class FactorialDesign(SPMCommand):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
-        return super(FactorialDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
-        """validate spm realign options if set to None ignore
-        """
-        einputs = super(FactorialDesign, self)._parse_inputs()
+        """validate spm realign options if set to None ignore"""
+        einputs = super()._parse_inputs()
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]["dir"] = np.array([str(os.getcwd())], dtype=object)
         return einputs
@@ -1079,11 +1137,10 @@ class OneSampleTTestDesign(FactorialDesign):
     input_spec = OneSampleTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["in_files"]:
             return np.array(val, dtype=object)
-        return super(OneSampleTTestDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
 
 class TwoSampleTTestDesignInputSpec(FactorialDesignInputSpec):
@@ -1127,11 +1184,10 @@ class TwoSampleTTestDesign(FactorialDesign):
     input_spec = TwoSampleTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["group1_files", "group2_files"]:
             return np.array(val, dtype=object)
-        return super(TwoSampleTTestDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
 
 class PairedTTestDesignInputSpec(FactorialDesignInputSpec):
@@ -1164,11 +1220,10 @@ class PairedTTestDesign(FactorialDesign):
     input_spec = PairedTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["paired_files"]:
             return [dict(scans=np.array(files, dtype=object)) for files in val]
-        return super(PairedTTestDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
 
 class MultipleRegressionDesignInputSpec(FactorialDesignInputSpec):
@@ -1206,8 +1261,7 @@ class MultipleRegressionDesign(FactorialDesign):
     input_spec = MultipleRegressionDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt in ["in_files"]:
             return np.array(val, dtype=object)
         if opt in ["user_covariates"]:
@@ -1219,4 +1273,4 @@ class MultipleRegressionDesign(FactorialDesign):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
-        return super(MultipleRegressionDesign, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)

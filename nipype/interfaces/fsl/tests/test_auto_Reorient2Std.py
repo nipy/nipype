@@ -4,10 +4,24 @@ from ..utils import Reorient2Std
 
 def test_Reorient2Std_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True,),
-        out_file=dict(argstr="%s", extensions=None, genfile=True, hash_files=False,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+        ),
+        out_file=dict(
+            argstr="%s",
+            extensions=None,
+            genfile=True,
+            hash_files=False,
+        ),
         output_type=dict(),
     )
     inputs = Reorient2Std.input_spec()
@@ -18,7 +32,11 @@ def test_Reorient2Std_inputs():
 
 
 def test_Reorient2Std_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = Reorient2Std.output_spec()
 
     for key, metadata in list(output_map.items()):

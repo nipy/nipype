@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -103,7 +102,7 @@ def test_run_interface(tmpdir):
     # bypasses ubuntu dash issue
     mc = mlab.MatlabCommand(script="foo;", paths=[tmpdir.strpath], mfile=True)
     assert not os.path.exists(default_script_file), "scriptfile should not exist 4."
-    with pytest.raises(RuntimeError):
+    with pytest.raises(OSError):
         mc.run()
     assert os.path.exists(default_script_file), "scriptfile should exist 4."
     if os.path.exists(default_script_file):  # cleanup

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -8,17 +7,118 @@ Miscellaneous tools to support Interface functionality
 
 """
 import os
+from contextlib import AbstractContextManager
 from copy import deepcopy
 from textwrap import wrap
 import re
+from datetime import datetime as dt
+from dateutil.parser import parse as parseutc
+import platform
 
-from ... import logging
-from ...utils.misc import is_container
+from ... import logging, config
+from ...utils.misc import is_container, rgetcwd
 from ...utils.filemanip import md5, hash_infile
 
 iflogger = logging.getLogger("nipype.interface")
 
 HELP_LINEWIDTH = 70
+
+
+class RuntimeContext(AbstractContextManager):
+    """A context manager to run NiPype interfaces."""
+
+    __slots__ = ("_runtime", "_resmon", "_ignore_exc")
+
+    def __init__(self, resource_monitor=False, ignore_exception=False):
+        """Initialize the context manager object."""
+        self._ignore_exc = ignore_exception
+        _proc_pid = os.getpid()
+        if resource_monitor:
+            from ...utils.profiler import ResourceMonitor
+        else:
+            from ...utils.profiler import ResourceMonitorMock as ResourceMonitor
+
+        self._resmon = ResourceMonitor(
+            _proc_pid,
+            freq=float(config.get("execution", "resource_monitor_frequency", 1)),
+        )
+
+    def __call__(self, interface, cwd=None, redirect_x=False):
+        """Generate a new runtime object."""
+        # Tear-up: get current and prev directories
+        _syscwd = rgetcwd(error=False)  # Recover when wd does not exist
+        if cwd is None:
+            cwd = _syscwd
+
+        self._runtime = Bunch(
+            cwd=str(cwd),
+            duration=None,
+            endTime=None,
+            environ=deepcopy(dict(os.environ)),
+            hostname=platform.node(),
+            interface=interface.__class__.__name__,
+            platform=platform.platform(),
+            prevcwd=str(_syscwd),
+            redirect_x=redirect_x,
+            resmon=self._resmon.fname or "off",
+            returncode=None,
+            startTime=None,
+            version=interface.version,
+        )
+        return self
+
+    def __enter__(self):
+        """Tear-up the execution of an interface."""
+        if self._runtime.redirect_x:
+            self._runtime.environ["DISPLAY"] = config.get_display()
+
+        self._runtime.startTime = dt.isoformat(dt.utcnow())
+        self._resmon.start()
+        # TODO: Perhaps clean-up path and ensure it exists?
+        os.chdir(self._runtime.cwd)
+        return self._runtime
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        """Tear-down interface execution."""
+        self._runtime.endTime = dt.isoformat(dt.utcnow())
+        timediff = parseutc(self._runtime.endTime) - parseutc(self._runtime.startTime)
+        self._runtime.duration = (
+            timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6
+        )
+        # Collect monitored data
+        for k, v in self._resmon.stop().items():
+            setattr(self._runtime, k, v)
+
+        os.chdir(self._runtime.prevcwd)
+
+        if exc_type is not None or exc_value is not None or exc_tb is not None:
+            import traceback
+
+            # Retrieve the maximum info fast
+            self._runtime.traceback = "".join(
+                traceback.format_exception(exc_type, exc_value, exc_tb)
+            )
+            # Gather up the exception arguments and append nipype info.
+            exc_args = exc_value.args if getattr(exc_value, "args") else tuple()
+            exc_args += (
+                f"An exception of type {exc_type.__name__} occurred while "
+                f"running interface {self._runtime.interface}.",
+            )
+            self._runtime.traceback_args = ("\n".join([f"{arg}" for arg in exc_args]),)
+
+            if self._ignore_exc:
+                return True
+
+        if hasattr(self._runtime, "cmdline"):
+            retcode = self._runtime.returncode
+            if retcode not in self._runtime.success_codes:
+                self._runtime.traceback = (
+                    f"RuntimeError: subprocess exited with code {retcode}."
+                )
+
+    @property
+    def runtime(self):
+        return self._runtime
 
 
 class NipypeInterfaceError(Exception):
@@ -28,10 +128,10 @@ class NipypeInterfaceError(Exception):
         self.value = value
 
     def __str__(self):
-        return "{}".format(self.value)
+        return f"{self.value}"
 
 
-class Bunch(object):
+class Bunch:
     """
     Dictionary-like class that provides attribute-style access to its items.
 
@@ -75,13 +175,11 @@ class Bunch(object):
         return list(self.items())
 
     def get(self, *args):
-        """Support dictionary get() functionality
-        """
+        """Support dictionary get() functionality"""
         return self.__dict__.get(*args)
 
     def set(self, **kwargs):
-        """Support dictionary get() functionality
-        """
+        """Support dictionary get() functionality"""
         return self.__dict__.update(**kwargs)
 
     def dictcopy(self):
@@ -104,11 +202,11 @@ class Bunch(object):
             if isinstance(v, dict):
                 pairs = []
                 for key, value in sorted(v.items()):
-                    pairs.append("'%s': %s" % (key, value))
+                    pairs.append(f"'{key}': {value}")
                 v = "{" + ", ".join(pairs) + "}"
-                outstr.append("%s=%s" % (k, v))
+                outstr.append(f"{k}={v}")
             else:
-                outstr.append("%s=%r" % (k, v))
+                outstr.append(f"{k}={v!r}")
             first = False
         outstr.append(")")
         return "".join(outstr)
@@ -190,7 +288,7 @@ def _hash_bunch_dict(adict, key):
     return [(afile, hash_infile(afile)) for afile in stuff]
 
 
-class InterfaceResult(object):
+class InterfaceResult:
     """Object that contains the results of running a particular Interface.
 
     Attributes
@@ -324,7 +422,7 @@ def _outputs_help(cls):
 
 def _refs_help(cls):
     """Prints interface references."""
-    references = getattr(cls, "references_", None)
+    references = getattr(cls, "_references", None)
     if not references:
         return []
 
@@ -349,7 +447,7 @@ def get_trait_desc(inputs, name, spec):
     default = ""
     if spec.usedefault:
         default = ", nipype default value: %s" % str(spec.default_value()[1])
-    line = "(%s%s)" % (type_info, default)
+    line = f"({type_info}{default})"
 
     manhelpstr = wrap(
         line,
@@ -369,7 +467,7 @@ def get_trait_desc(inputs, name, spec):
         pos = spec.position
         if pos is not None:
             manhelpstr += wrap(
-                "argument: ``%s``, position: %s" % (argstr, pos),
+                f"argument: ``{argstr}``, position: {pos}",
                 HELP_LINEWIDTH,
                 initial_indent="\t\t",
                 subsequent_indent="\t\t",

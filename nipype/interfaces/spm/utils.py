@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -24,7 +23,6 @@ class Analyze2niiOutputSpec(SPMCommandInputSpec):
 
 
 class Analyze2nii(SPMCommand):
-
     input_spec = Analyze2niiInputSpec
     output_spec = Analyze2niiOutputSpec
 
@@ -52,7 +50,7 @@ class CalcCoregAffineInputSpec(SPMCommandInputSpec):
         exists=True,
         mandatory=True,
         copyfile=False,
-        desc=("volume transform can be applied to register with " "target"),
+        desc=("volume transform can be applied to register with target"),
     )
     mat = File(desc="Filename used to store affine matrix")
     invmat = File(desc="Filename used to store inverse affine matrix")
@@ -64,7 +62,7 @@ class CalcCoregAffineOutputSpec(TraitedSpec):
 
 
 class CalcCoregAffine(SPMCommand):
-    """ Uses SPM (spm_coreg) to calculate the transform mapping
+    """Uses SPM (spm_coreg) to calculate the transform mapping
     moving to target. Saves Transform in mat (matlab binary file)
     Also saves inverse transform
 
@@ -90,15 +88,15 @@ class CalcCoregAffine(SPMCommand):
     output_spec = CalcCoregAffineOutputSpec
 
     def _make_inv_file(self):
-        """ makes filename to hold inverse transform if not specified"""
+        """makes filename to hold inverse transform if not specified"""
         invmat = fname_presuffix(self.inputs.mat, prefix="inverse_")
         return invmat
 
     def _make_mat_file(self):
-        """ makes name for matfile if doesn exist"""
+        """makes name for matfile if doesn exist"""
         pth, mv, _ = split_filename(self.inputs.moving)
         _, tgt, _ = split_filename(self.inputs.target)
-        mat = os.path.join(pth, "%s_to_%s.mat" % (mv, tgt))
+        mat = os.path.join(pth, f"{mv}_to_{tgt}.mat")
         return mat
 
     def _make_matlab_command(self, _):
@@ -108,16 +106,16 @@ class CalcCoregAffine(SPMCommand):
         if not isdefined(self.inputs.invmat):
             self.inputs.invmat = self._make_inv_file()
         script = """
-        target = '%s';
-        moving = '%s';
+        target = '{}';
+        moving = '{}';
         targetv = spm_vol(target);
         movingv = spm_vol(moving);
         x = spm_coreg(targetv, movingv);
         M = spm_matrix(x);
-        save('%s' , 'M' );
+        save('{}' , 'M' );
         M = inv(M);
-        save('%s','M')
-        """ % (
+        save('{}','M')
+        """.format(
             self.inputs.target,
             self.inputs.moving,
             self.inputs.mat,
@@ -148,7 +146,7 @@ class ApplyTransformOutputSpec(TraitedSpec):
 
 
 class ApplyTransform(SPMCommand):
-    """ Uses SPM to apply transform stored in a .mat file to given file
+    """Uses SPM to apply transform stored in a .mat file to given file
 
     Examples
     --------
@@ -169,9 +167,9 @@ class ApplyTransform(SPMCommand):
         outputs = self._list_outputs()
         self.inputs.out_file = outputs["out_file"]
         script = """
-        infile = '%s';
-        outfile = '%s'
-        transform = load('%s');
+        infile = '{}';
+        outfile = '{}'
+        transform = load('{}');
 
         V = spm_vol(infile);
         X = spm_read_vols(V);
@@ -180,7 +178,7 @@ class ApplyTransform(SPMCommand):
         V.fname = fullfile(outfile);
         spm_write_vol(V,X);
 
-        """ % (
+        """.format(
             self.inputs.in_file,
             self.inputs.out_file,
             self.inputs.mat,
@@ -228,13 +226,13 @@ class ResliceOutputSpec(TraitedSpec):
 
 
 class Reslice(SPMCommand):
-    """ uses  spm_reslice to resample in_file into space of space_defining"""
+    """uses  spm_reslice to resample in_file into space of space_defining"""
 
     input_spec = ResliceInputSpec
     output_spec = ResliceOutputSpec
 
     def _make_matlab_command(self, _):
-        """ generates script"""
+        """generates script"""
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = fname_presuffix(self.inputs.in_file, prefix="r")
         script = """
@@ -305,7 +303,7 @@ class ApplyInverseDeformationOutput(TraitedSpec):
 
 
 class ApplyInverseDeformation(SPMCommand):
-    """ Uses spm to apply inverse deformation stored in a .mat file or a
+    """Uses spm to apply inverse deformation stored in a .mat file or a
     deformation field to a given file
 
     Examples
@@ -326,8 +324,7 @@ class ApplyInverseDeformation(SPMCommand):
     _jobname = "defs"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return scans_for_fnames(ensure_list(val))
         if opt == "target":
@@ -402,8 +399,7 @@ class ResliceToReference(SPMCommand):
     _jobname = "defs"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return scans_for_fnames(ensure_list(val))
         if opt == "target":
@@ -466,7 +462,7 @@ class DicomImportOutputSpec(TraitedSpec):
 
 
 class DicomImport(SPMCommand):
-    """ Uses spm to convert DICOM files to nii or img+hdr.
+    """Uses spm to convert DICOM files to nii or img+hdr.
 
     Examples
     --------
@@ -484,8 +480,7 @@ class DicomImport(SPMCommand):
     _jobname = "dicom"
 
     def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
+        """Convert input to appropriate format for spm"""
         if opt == "in_files":
             return np.array(val, dtype=object)
         if opt == "output_dir":
@@ -496,13 +491,13 @@ class DicomImport(SPMCommand):
             if val:
                 return 1
             return 0
-        return super(DicomImport, self)._format_arg(opt, spec, val)
+        return super()._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
         od = os.path.abspath(self.inputs.output_dir)
         if not os.path.isdir(od):
             os.mkdir(od)
-        return super(DicomImport, self)._run_interface(runtime)
+        return super()._run_interface(runtime)
 
     def _list_outputs(self):
         from glob import glob

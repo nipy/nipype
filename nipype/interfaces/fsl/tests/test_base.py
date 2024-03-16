@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -13,8 +12,7 @@ import pytest
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fslversion():
     ver = fsl.Info.version()
-    ver = ver.split(".")
-    assert ver[0] in ["4", "5"]
+    assert ver.split(".", 1)[0].isdigit()
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")

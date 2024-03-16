@@ -4,25 +4,75 @@ from ..dcm2nii import Dcm2nii
 
 def test_Dcm2nii_inputs():
     input_map = dict(
-        anonymize=dict(argstr="-a", usedefault=True,),
-        args=dict(argstr="%s",),
-        collapse_folders=dict(argstr="-c", usedefault=True,),
-        config_file=dict(argstr="-b %s", extensions=None, genfile=True,),
-        convert_all_pars=dict(argstr="-v", usedefault=True,),
-        date_in_filename=dict(argstr="-d", usedefault=True,),
-        environ=dict(nohash=True, usedefault=True,),
-        events_in_filename=dict(argstr="-e", usedefault=True,),
-        gzip_output=dict(argstr="-g", usedefault=True,),
-        id_in_filename=dict(argstr="-i", usedefault=True,),
-        nii_output=dict(argstr="-n", usedefault=True,),
-        output_dir=dict(argstr="-o %s", genfile=True,),
-        protocol_in_filename=dict(argstr="-p", usedefault=True,),
-        reorient=dict(argstr="-r",),
-        reorient_and_crop=dict(argstr="-x", usedefault=True,),
-        source_dir=dict(
-            argstr="%s", mandatory=True, position=-1, xor=["source_names"],
+        anonymize=dict(
+            argstr="-a",
+            usedefault=True,
         ),
-        source_in_filename=dict(argstr="-f", usedefault=True,),
+        args=dict(
+            argstr="%s",
+        ),
+        collapse_folders=dict(
+            argstr="-c",
+            usedefault=True,
+        ),
+        config_file=dict(
+            argstr="-b %s",
+            extensions=None,
+            genfile=True,
+        ),
+        convert_all_pars=dict(
+            argstr="-v",
+            usedefault=True,
+        ),
+        date_in_filename=dict(
+            argstr="-d",
+            usedefault=True,
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        events_in_filename=dict(
+            argstr="-e",
+            usedefault=True,
+        ),
+        gzip_output=dict(
+            argstr="-g",
+            usedefault=True,
+        ),
+        id_in_filename=dict(
+            argstr="-i",
+            usedefault=True,
+        ),
+        nii_output=dict(
+            argstr="-n",
+            usedefault=True,
+        ),
+        output_dir=dict(
+            argstr="-o %s",
+            genfile=True,
+        ),
+        protocol_in_filename=dict(
+            argstr="-p",
+            usedefault=True,
+        ),
+        reorient=dict(
+            argstr="-r",
+        ),
+        reorient_and_crop=dict(
+            argstr="-x",
+            usedefault=True,
+        ),
+        source_dir=dict(
+            argstr="%s",
+            mandatory=True,
+            position=-1,
+            xor=["source_names"],
+        ),
+        source_in_filename=dict(
+            argstr="-f",
+            usedefault=True,
+        ),
         source_names=dict(
             argstr="%s",
             copyfile=False,
@@ -30,7 +80,10 @@ def test_Dcm2nii_inputs():
             position=-1,
             xor=["source_dir"],
         ),
-        spm_analyze=dict(argstr="-s", xor=["nii_output"],),
+        spm_analyze=dict(
+            argstr="-s",
+            xor=["nii_output"],
+        ),
     )
     inputs = Dcm2nii.input_spec()
 

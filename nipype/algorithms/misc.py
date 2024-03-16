@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous algorithms."""
@@ -141,8 +140,7 @@ class SimpleThresholdOutputSpec(TraitedSpec):
 
 
 class SimpleThreshold(BaseInterface):
-    """Applies a threshold to input volumes
-    """
+    """Applies a threshold to input volumes"""
 
     input_spec = SimpleThresholdInputSpec
     output_spec = SimpleThresholdOutputSpec
@@ -240,8 +238,7 @@ class CreateNiftiOutputSpec(TraitedSpec):
 
 
 class CreateNifti(BaseInterface):
-    """Creates a nifti volume
-    """
+    """Creates a nifti volume"""
 
     input_spec = CreateNiftiInputSpec
     output_spec = CreateNiftiOutputSpec
@@ -273,15 +270,72 @@ class CreateNifti(BaseInterface):
         return outputs
 
 
-class GunzipInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True)
+class GzipInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc="file to (de)compress")
+    mode = traits.Enum(
+        "compress", "decompress", usedefault=True, desc="compress or decompress"
+    )
 
 
-class GunzipOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+class GzipOutputSpec(TraitedSpec):
+    out_file = File()
 
 
-class Gunzip(BaseInterface):
+class Gzip(BaseInterface):
+    """Gzip wrapper
+
+    >>> from nipype.algorithms.misc import Gzip
+    >>> gzip = Gzip(in_file='tpms_msk.nii.gz', mode="decompress")
+    >>> res = gzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii'
+
+    >>> gzip = Gzip(in_file='tpms_msk.nii')
+    >>> res = gzip.run()
+    >>> res.outputs.out_file  # doctest: +ELLIPSIS
+    '.../tpms_msk.nii.gz'
+
+    .. testcleanup::
+
+    >>> os.unlink('tpms_msk.nii')
+    """
+
+    input_spec = GzipInputSpec
+    output_spec = GzipOutputSpec
+
+    def _gen_output_file_name(self):
+        _, base, ext = split_filename(self.inputs.in_file)
+        if self.inputs.mode == "decompress" and ext[-3:].lower() == ".gz":
+            ext = ext[:-3]
+        elif self.inputs.mode == "compress":
+            ext = f"{ext}.gz"
+        return os.path.abspath(base + ext)
+
+    def _run_interface(self, runtime):
+        import gzip
+        import shutil
+
+        if self.inputs.mode == "compress":
+            open_input, open_output = open, gzip.open
+        else:
+            open_input, open_output = gzip.open, open
+
+        with open_input(self.inputs.in_file, "rb") as in_file:
+            with open_output(self._gen_output_file_name(), "wb") as out_file:
+                shutil.copyfileobj(in_file, out_file)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self._gen_output_file_name()
+        return outputs
+
+
+class GunzipInputSpec(GzipInputSpec):
+    mode = traits.Enum("decompress", usedefault=True, desc="decompress or compress")
+
+
+class Gunzip(Gzip):
     """Gunzip wrapper
 
     >>> from nipype.algorithms.misc import Gunzip
@@ -296,27 +350,6 @@ class Gunzip(BaseInterface):
     """
 
     input_spec = GunzipInputSpec
-    output_spec = GunzipOutputSpec
-
-    def _gen_output_file_name(self):
-        _, base, ext = split_filename(self.inputs.in_file)
-        if ext[-3:].lower() == ".gz":
-            ext = ext[:-3]
-        return os.path.abspath(base + ext)
-
-    def _run_interface(self, runtime):
-        import gzip
-        import shutil
-
-        with gzip.open(self.inputs.in_file, "rb") as in_file:
-            with open(self._gen_output_file_name(), "wb") as out_file:
-                shutil.copyfileobj(in_file, out_file)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = self._gen_output_file_name()
-        return outputs
 
 
 def replaceext(in_list, ext):
@@ -460,7 +493,7 @@ def merge_csvs(in_list):
             try:
                 in_array = np.loadtxt(in_file, delimiter=",", skiprows=1)
             except ValueError:
-                with open(in_file, "r") as first:
+                with open(in_file) as first:
                     header_line = first.readline()
 
                 header_list = header_line.split(",")
@@ -637,7 +670,7 @@ class MergeCSVFiles(BaseInterface):
             iflogger.info(
                 'Row headings have been provided. Adding "labels"' "column header."
             )
-            prefix = '"{p}","'.format(p=self.inputs.row_heading_title)
+            prefix = f'"{self.inputs.row_heading_title}","'
             csv_headings = prefix + '","'.join(itertools.chain(headings)) + '"\n'
             rowheadingsBool = True
         else:
@@ -738,7 +771,7 @@ class AddCSVColumn(BaseInterface):
     output_spec = AddCSVColumnOutputSpec
 
     def _run_interface(self, runtime):
-        in_file = open(self.inputs.in_file, "r")
+        in_file = open(self.inputs.in_file)
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == ".csv":
             ext = ".csv"
@@ -774,12 +807,12 @@ class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
             if not isdefined(value):
-                super(AddCSVRowInputSpec, self).__setattr__(key, value)
+                super().__setattr__(key, value)
             self._outputs[key] = value
         else:
             if key in self._outputs:
                 self._outputs[key] = value
-            super(AddCSVRowInputSpec, self).__setattr__(key, value)
+            super().__setattr__(key, value)
 
 
 class AddCSVRowOutputSpec(TraitedSpec):
@@ -816,7 +849,7 @@ class AddCSVRow(BaseInterface):
     output_spec = AddCSVRowOutputSpec
 
     def __init__(self, infields=None, force_run=True, **kwargs):
-        super(AddCSVRow, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         undefined_traits = {}
         self._infields = infields
         self._have_lock = False
@@ -837,7 +870,7 @@ class AddCSVRow(BaseInterface):
             import pandas as pd
         except ImportError as e:
             raise ImportError(
-                "This interface requires pandas " "(http://pandas.pydata.org/) to run."
+                "This interface requires pandas (http://pandas.pydata.org/) to run."
             ) from e
 
         try:
@@ -848,10 +881,8 @@ class AddCSVRow(BaseInterface):
             from warnings import warn
 
             warn(
-                (
-                    "Python module filelock was not found: AddCSVRow will not be"
-                    " thread-safe in multi-processor execution"
-                )
+                "Python module filelock was not found: AddCSVRow will not be"
+                " thread-safe in multi-processor execution"
             )
 
         input_dict = {}
@@ -892,7 +923,7 @@ class AddCSVRow(BaseInterface):
         return outputs
 
     def _outputs(self):
-        return self._add_output_traits(super(AddCSVRow, self)._outputs())
+        return self._add_output_traits(super()._outputs())
 
     def _add_output_traits(self, base):
         return base
@@ -934,7 +965,6 @@ class CalculateNormalizedMoments(BaseInterface):
     output_spec = CalculateNormalizedMomentsOutputSpec
 
     def _run_interface(self, runtime):
-
         self._moments = calc_moments(self.inputs.timeseries_file, self.inputs.moment)
         return runtime
 
@@ -970,7 +1000,7 @@ class AddNoiseInputSpec(TraitedSpec):
     )
     in_mask = File(
         exists=True,
-        desc=("input mask, voxels outside this mask " "will be considered background"),
+        desc=("input mask, voxels outside this mask will be considered background"),
     )
     snr = traits.Float(10.0, desc="desired output SNR in dB", usedefault=True)
     dist = traits.Enum(
@@ -985,7 +1015,7 @@ class AddNoiseInputSpec(TraitedSpec):
         "rayleigh",
         usedefault=True,
         mandatory=True,
-        desc=("desired noise distribution, currently " "only normal is implemented"),
+        desc=("desired noise distribution, currently only normal is implemented"),
     )
     out_file = File(desc="desired output filename")
 
@@ -1037,7 +1067,7 @@ class AddNoise(BaseInterface):
     def _gen_output_filename(self):
         if not isdefined(self.inputs.out_file):
             _, base, ext = split_filename(self.inputs.in_file)
-            out_file = os.path.abspath("%s_SNR%03.2f%s" % (base, self.inputs.snr, ext))
+            out_file = os.path.abspath(f"{base}_SNR{self.inputs.snr:03.2f}{ext}")
         else:
             out_file = self.inputs.out_file
 
@@ -1088,7 +1118,7 @@ class AddNoise(BaseInterface):
             im_noise = np.sqrt((image + stde_1) ** 2 + (stde_2) ** 2)
         else:
             raise NotImplementedError(
-                ("Only normal and rician distributions " "are supported")
+                "Only normal and rician distributions are supported"
             )
 
         return im_noise
@@ -1144,7 +1174,7 @@ class NormalizeProbabilityMapSet(BaseInterface):
 
 
 class SplitROIsInputSpec(TraitedSpec):
-    in_file = File(exists=True, mandatory=True, desc="file to be splitted")
+    in_file = File(exists=True, mandatory=True, desc="file to be split")
     in_mask = File(exists=True, desc="only process files inside mask")
     roi_size = traits.Tuple(traits.Int, traits.Int, traits.Int, desc="desired ROI size")
 
@@ -1408,7 +1438,7 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
     # to avoid memory errors
     if op.splitext(in_ref)[1] == ".gz":
         try:
-            iflogger.info("uncompress %i", in_ref)
+            iflogger.info("uncompress %s", in_ref)
             sp.check_call(["gunzip", in_ref], stdout=sp.PIPE, shell=True)
             in_ref = op.splitext(in_ref)[0]
         except:
@@ -1514,7 +1544,7 @@ class CalculateMedian(BaseInterface):
     output_spec = CalculateMedianOutputSpec
 
     def __init__(self, *args, **kwargs):
-        super(CalculateMedian, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._median_files = []
 
     def _gen_fname(self, suffix, idx=None, ext=None):
@@ -1536,10 +1566,10 @@ class CalculateMedian(BaseInterface):
         if self.inputs.median_file:
             outname = self.inputs.median_file
         else:
-            outname = "{}_{}".format(fname, suffix)
+            outname = f"{fname}_{suffix}"
         if idx:
             outname += str(idx)
-        return op.abspath("{}.{}".format(outname, ext))
+        return op.abspath(f"{outname}.{ext}")
 
     def _run_interface(self, runtime):
         total = None

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """CSV Handling utilities
@@ -59,7 +58,7 @@ class CSVReader(BaseInterface):
         return entry
 
     def _get_outfields(self):
-        with open(self.inputs.in_file, "r") as fid:
+        with open(self.inputs.in_file) as fid:
             entry = self._parse_line(fid.readline())
             if self.inputs.header:
                 self._outfields = tuple(entry)
@@ -72,7 +71,7 @@ class CSVReader(BaseInterface):
         return runtime
 
     def _outputs(self):
-        return self._add_output_traits(super(CSVReader, self)._outputs())
+        return self._add_output_traits(super()._outputs())
 
     def _add_output_traits(self, base):
         return add_traits(base, self._get_outfields())
@@ -82,7 +81,7 @@ class CSVReader(BaseInterface):
         isHeader = True
         for key in self._outfields:
             outputs[key] = []  # initialize outfields
-        with open(self.inputs.in_file, "r") as fid:
+        with open(self.inputs.in_file) as fid:
             for line in fid.readlines():
                 if self.inputs.header and isHeader:  # skip header line
                     isHeader = False

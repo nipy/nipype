@@ -4,9 +4,19 @@ from ..maths import BinaryMaths
 
 def test_BinaryMaths_inputs():
     input_map = dict(
-        args=dict(argstr="%s",),
-        environ=dict(nohash=True, usedefault=True,),
-        in_file=dict(argstr="%s", extensions=None, mandatory=True, position=2,),
+        args=dict(
+            argstr="%s",
+        ),
+        environ=dict(
+            nohash=True,
+            usedefault=True,
+        ),
+        in_file=dict(
+            argstr="%s",
+            extensions=None,
+            mandatory=True,
+            position=2,
+        ),
         operand_file=dict(
             argstr="%s",
             extensions=None,
@@ -26,7 +36,11 @@ def test_BinaryMaths_inputs():
             position=5,
             xor=["operand_file", "operand_str"],
         ),
-        operation=dict(argstr="-%s", mandatory=True, position=4,),
+        operation=dict(
+            argstr="-%s",
+            mandatory=True,
+            position=4,
+        ),
         out_file=dict(
             argstr="%s",
             extensions=None,
@@ -34,7 +48,10 @@ def test_BinaryMaths_inputs():
             name_template="%s",
             position=-2,
         ),
-        output_datatype=dict(argstr="-odt %s", position=-3,),
+        output_datatype=dict(
+            argstr="-odt %s",
+            position=-3,
+        ),
     )
     inputs = BinaryMaths.input_spec()
 
@@ -44,7 +61,11 @@ def test_BinaryMaths_inputs():
 
 
 def test_BinaryMaths_outputs():
-    output_map = dict(out_file=dict(extensions=None,),)
+    output_map = dict(
+        out_file=dict(
+            extensions=None,
+        ),
+    )
     outputs = BinaryMaths.output_spec()
 
     for key, metadata in list(output_map.items()):

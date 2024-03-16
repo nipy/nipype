@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
@@ -50,7 +49,6 @@ class Info(PackageInfo):
     >>> from nipype.interfaces.fsl import Info
     >>> Info.version()  # doctest: +SKIP
     >>> Info.output_type()  # doctest: +SKIP
-
 
     """
 
@@ -146,14 +144,12 @@ class FSLCommandInputSpec(CommandLineInputSpec):
 
 
 class FSLCommand(CommandLine):
-    """Base support for FSL commands.
-
-    """
+    """Base support for FSL commands."""
 
     input_spec = FSLCommandInputSpec
     _output_type = None
 
-    references_ = [
+    _references = [
         {
             "entry": BibTeX(
                 "@article{JenkinsonBeckmannBehrensWoolrichSmith2012,"
@@ -171,7 +167,7 @@ class FSLCommand(CommandLine):
     ]
 
     def __init__(self, **inputs):
-        super(FSLCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, "output_type")
 
         if self._output_type is None:
@@ -209,8 +205,8 @@ class FSLCommand(CommandLine):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extentions specified in
-        <instance>intputs.output_type.
+        If change_ext is True, it will use the extensions specified in
+        <instance>inputs.output_type.
 
         Parameters
         ----------

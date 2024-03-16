@@ -22,7 +22,7 @@ def fetch_data():
             """Fetches some test DICOMs using datalad"""
             api.install(path=datadir, source=DICOM_DIR)
             data = os.path.join(datadir, dicoms)
-            api.get(path=data)
+            api.get(path=data, dataset=datadir)
         except IncompleteResultsError as exc:
             pytest.skip("Failed to fetch test data: %s" % str(exc))
         return data
@@ -32,7 +32,6 @@ def fetch_data():
 
 @pytest.mark.skipif(no_datalad, reason="Datalad required")
 @pytest.mark.skipif(no_dcm2niix, reason="Dcm2niix required")
-@pytest.mark.xfail(reason="Intermittent failures. Let's come back to this later.")
 def test_dcm2niix_dti(fetch_data, tmpdir):
     tmpdir.chdir()
     datadir = tmpdir.mkdir("data").strpath

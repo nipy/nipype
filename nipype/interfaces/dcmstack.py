@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """dcmstack allows series of DICOM images to be stacked into multi-dimensional arrays."""
 
 import os
@@ -24,7 +23,7 @@ from .base import (
 
 have_dcmstack = True
 try:
-    import dicom
+    import pydicom
     import dcmstack
     from dcmstack.dcmmeta import NiftiWrapper
 except ImportError:
@@ -34,7 +33,7 @@ except ImportError:
 def sanitize_path_comp(path_comp):
     result = []
     for char in path_comp:
-        if char not in string.letters + string.digits + "-_.":
+        if char not in string.ascii_letters + string.digits + "-_.":
             result.append("_")
         else:
             result.append(char)
@@ -55,7 +54,7 @@ class NiftiGeneratorBase(BaseInterface):
     embedded meta data."""
 
     def _get_out_path(self, meta, idx=None):
-        """Return the output path for the gernerated Nifti."""
+        """Return the output path for the generated Nifti."""
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
         else:
@@ -101,10 +100,10 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     )
     embed_meta = traits.Bool(desc="Embed DICOM meta data into result")
     exclude_regexes = traits.List(
-        desc="Meta data to exclude, suplementing " "any default exclude filters"
+        desc="Meta data to exclude, supplementing any default exclude filters"
     )
     include_regexes = traits.List(
-        desc="Meta data to include, overriding any " "exclude filters"
+        desc="Meta data to include, overriding any exclude filters"
     )
     force_read = traits.Bool(
         True, usedefault=True, desc=("Force reading files without DICM marker")
@@ -154,7 +153,7 @@ class DcmStack(NiftiGeneratorBase):
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
             if not imghdr.what(src_path) == "gif":
-                src_dcm = dicom.read_file(src_path, force=self.inputs.force_read)
+                src_dcm = pydicom.dcmread(src_path, force=self.inputs.force_read)
                 stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
@@ -177,8 +176,7 @@ class GroupAndStackOutputSpec(TraitedSpec):
 
 
 class GroupAndStack(DcmStack):
-    """Create (potentially) multiple Nifti files for a set of DICOM files.
-    """
+    """Create (potentially) multiple Nifti files for a set of DICOM files."""
 
     input_spec = DcmStackInputSpec
     output_spec = GroupAndStackOutputSpec
@@ -251,7 +249,7 @@ class LookupMeta(BaseInterface):
 
     def _outputs(self):
         self._make_name_map()
-        outputs = super(LookupMeta, self)._outputs()
+        outputs = super()._outputs()
         undefined_traits = {}
         for out_name in list(self._meta_keys.values()):
             outputs.add_trait(out_name, traits.Any)
@@ -263,7 +261,7 @@ class LookupMeta(BaseInterface):
         return outputs
 
     def _run_interface(self, runtime):
-        # If the 'meta_keys' input is a list, covert it to a dict
+        # If the 'meta_keys' input is a list, convert it to a dict
         self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
@@ -286,9 +284,7 @@ class CopyMetaInputSpec(TraitedSpec):
         "classifications to include. If not "
         "specified include everything."
     )
-    exclude_classes = traits.List(
-        desc="List of meta data " "classifications to exclude"
-    )
+    exclude_classes = traits.List(desc="List of meta data classifications to exclude")
 
 
 class CopyMetaOutputSpec(TraitedSpec):
@@ -338,12 +334,12 @@ class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     sort_order = traits.Either(
         traits.Str(),
         traits.List(),
-        desc="One or more meta data keys to " "sort files by.",
+        desc="One or more meta data keys to sort files by.",
     )
     merge_dim = traits.Int(
         desc="Dimension to merge along. If not "
         "specified, the last singular or "
-        "non-existant dimension is used."
+        "non-existent dimension is used."
     )
 
 

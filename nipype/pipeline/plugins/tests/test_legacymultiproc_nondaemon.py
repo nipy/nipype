@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Testing module for functions and classes from multiproc.py
@@ -50,7 +49,6 @@ def mytestFunction(insum=0):
             f.write(str(j))
 
     for n in range(numberOfThreads):
-
         # mark thread as alive
         a[n] = True
 
@@ -64,11 +62,9 @@ def mytestFunction(insum=0):
     # block until all processes are done
     allDone = False
     while not allDone:
-
         time.sleep(1)
 
         for n in range(numberOfThreads):
-
             a[n] = t[n].is_alive()
 
         if not any(a):
@@ -134,6 +130,9 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     return result
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8"
+)
 def test_run_multiproc_nondaemon_false():
     """
     This is the entry point for the test. Two times a pipe of several
@@ -152,6 +151,9 @@ def test_run_multiproc_nondaemon_false():
     assert shouldHaveFailed
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8"
+)
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)

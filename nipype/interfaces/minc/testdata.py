@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 from ...testing import example_data
 
@@ -10,4 +8,4 @@ nlp_config = example_data("minc_nlp.conf")
 
 
 def nonempty_minc_data(i, shape="2D"):
-    return example_data("minc_test_%s_%.2d.mnc" % (shape, i,))
+    return example_data("minc_test_%s_%.2d.mnc" % (shape, i))

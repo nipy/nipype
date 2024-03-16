@@ -9,20 +9,24 @@ PYTHON ?= python
 zipdoc: html
 	zip documentation.zip doc/_build/html
 
+.git-blame-ignore-revs: .git/HEAD
+	git log --grep "\[ignore-rev\]\|STY: black\|run black" -i --pretty=format:"# %ad - %ae - %s%n%H" > .git-blame-ignore-revs
+	echo >> .git-blame-ignore-revs
+
 sdist: zipdoc
 	@echo "Building source distribution..."
-	python setup.py sdist
+	$(PYTHON) setup.py sdist
 	@echo "Done building source distribution."
 	# XXX copy documentation.zip to dist directory.
 
 egg: zipdoc
 	@echo "Building egg..."
-	python setup.py bdist_egg
+	$(PYTHON) setup.py bdist_egg
 	@echo "Done building egg."
 
 upload_to_pypi: zipdoc
 	@echo "Uploading to PyPi..."
-	python setup.py sdist --formats=zip,gztar upload
+	$(PYTHON) setup.py sdist --formats=zip,gztar upload
 
 trailing-spaces:
 	find . -name "*[.py|.rst]" -type f | xargs perl -pi -e 's/[ \t]*$$//'
@@ -56,10 +60,10 @@ inplace:
 	$(PYTHON) setup.py build_ext -i
 
 test-code: in
-	py.test --doctest-modules nipype
+	$(PYTHON) -m pytest --doctest-modules nipype
 
 test-coverage: clean-tests in
-	py.test --doctest-modules --cov-config .coveragerc --cov=nipype nipype
+	$(PYTHON) -m pytest --doctest-modules --cov-config .coveragerc --cov=nipype nipype
 
 test: tests # just another name
 tests: clean test-code
@@ -70,7 +74,7 @@ html:
 
 specs:
 	@echo "Checking specs and autogenerating spec tests"
-	env PYTHONPATH=".:$(PYTHONPATH)" python tools/checkspecs.py
+	env PYTHONPATH=".:$(PYTHONPATH)" $(PYTHON) tools/checkspecs.py
 
 check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test

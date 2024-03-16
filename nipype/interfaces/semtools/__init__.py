@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 """SEM Tools are useful tools for Structural Equation Modeling."""
+
 from .diffusion import *
 from .featurecreator import GenerateCsfClippedFromClassifiedImage
 from .segmentation import *

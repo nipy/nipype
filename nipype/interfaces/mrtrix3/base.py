@@ -2,7 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
 
-from ... import logging, LooseVersion
+from looseversion import LooseVersion
+
+from ... import logging
 from ...utils.filemanip import which
 from ..base import (
     CommandLineInputSpec,
@@ -36,7 +38,7 @@ class Info(PackageInfo):
 
     @classmethod
     def looseversion(cls):
-        """ Return a comparable version object
+        """Return a comparable version object
 
         If no version found, use LooseVersion('0.0.0')
         """
@@ -46,7 +48,7 @@ class Info(PackageInfo):
 class MRTrix3BaseInputSpec(CommandLineInputSpec):
     nthreads = traits.Int(
         argstr="-nthreads %d",
-        desc="number of threads. if zero, the number" " of available cpus will be used",
+        desc="number of threads. if zero, the number of available cpus will be used",
         nohash=True,
     )
     # DW gradient table import options
@@ -79,6 +81,15 @@ class MRTrix3BaseInputSpec(CommandLineInputSpec):
         exists=True, argstr="-fslgrad %s %s", desc="bvecs file in FSL format"
     )
     in_bval = File(exists=True, desc="bvals file in FSL format")
+    out_bvec = File(
+        exists=False,
+        argstr="-export_grad_fsl %s %s",
+        desc="export bvec file in FSL format",
+    )
+    out_bval = File(
+        exists=False,
+        desc="export bval file in FSL format",
+    )
 
 
 class MRTrix3Base(CommandLine):
@@ -96,8 +107,10 @@ class MRTrix3Base(CommandLine):
 
         if name == "in_bvec":
             return trait_spec.argstr % (value, self.inputs.in_bval)
+        if name == "out_bvec":
+            return trait_spec.argstr % (value, self.inputs.out_bval)
 
-        return super(MRTrix3Base, self)._format_arg(name, trait_spec, value)
+        return super()._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         if skip is None:
@@ -112,13 +125,13 @@ class MRTrix3Base(CommandLine):
             if is_bvec or is_bval:
                 if not is_bvec or not is_bval:
                     raise RuntimeError(
-                        "If using bvecs and bvals inputs, both" "should be defined"
+                        "If using bvecs and bvals inputs, both should be defined"
                     )
                 skip += ["in_bval"]
         except AttributeError:
             pass
 
-        return super(MRTrix3Base, self)._parse_inputs(skip=skip)
+        return super()._parse_inputs(skip=skip)
 
     @property
     def version(self):
