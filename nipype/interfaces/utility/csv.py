@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """CSV Handling utilities
 """
+import csv
 from ..base import traits, TraitedSpec, DynamicTraitedSpec, File, BaseInterface
 from ..io import add_traits
 
@@ -13,6 +14,7 @@ class CSVReaderInputSpec(DynamicTraitedSpec, TraitedSpec):
     header = traits.Bool(
         False, usedefault=True, desc="True if the first line is a column header"
     )
+    delimiter = traits.String(",", usedefault=True, desc="Delimiter to use.")
 
 
 class CSVReader(BaseInterface):
@@ -52,14 +54,11 @@ class CSVReader(BaseInterface):
             outputs[key].append(value)
         return outputs
 
-    def _parse_line(self, line):
-        line = line.replace("\n", "")
-        entry = [x.strip() for x in line.split(",")]
-        return entry
-
     def _get_outfields(self):
         with open(self.inputs.in_file) as fid:
-            entry = self._parse_line(fid.readline())
+            reader = csv.reader(fid, delimiter=self.inputs.delimiter)
+
+            entry = next(reader)
             if self.inputs.header:
                 self._outfields = tuple(entry)
             else:
@@ -82,10 +81,10 @@ class CSVReader(BaseInterface):
         for key in self._outfields:
             outputs[key] = []  # initialize outfields
         with open(self.inputs.in_file) as fid:
-            for line in fid.readlines():
+            reader = csv.reader(fid, delimiter=self.inputs.delimiter)
+            for entry in reader:
                 if self.inputs.header and isHeader:  # skip header line
                     isHeader = False
                     continue
-                entry = self._parse_line(line)
                 outputs = self._append_entry(outputs, entry)
         return outputs
