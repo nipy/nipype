@@ -1,4 +1,5 @@
 """sphinx autodoc ext."""
+
 from sphinx.locale import _
 from sphinx.ext import autodoc
 from nipype.interfaces.base import BaseInterface

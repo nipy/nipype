@@ -417,9 +417,9 @@ None])
                                 sessinfo[i]["cond"][cid]["pmod"][j]["poly"] = info.pmod[
                                     cid
                                 ].poly[j]
-                                sessinfo[i]["cond"][cid]["pmod"][j][
-                                    "param"
-                                ] = info.pmod[cid].param[j]
+                                sessinfo[i]["cond"][cid]["pmod"][j]["param"] = (
+                                    info.pmod[cid].param[j]
+                                )
 
             sessinfo[i]["regress"] = []
             if hasattr(info, "regressors") and info.regressors is not None:

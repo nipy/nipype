@@ -1,4 +1,5 @@
 """Convert3D is a command-line tool for converting 3D images between common file formats."""
+
 import os
 from glob import glob
 

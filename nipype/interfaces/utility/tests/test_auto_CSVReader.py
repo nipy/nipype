@@ -4,6 +4,9 @@ from ..csv import CSVReader
 
 def test_CSVReader_inputs():
     input_map = dict(
+        delimiter=dict(
+            usedefault=True,
+        ),
         header=dict(
             usedefault=True,
         ),

@@ -2,6 +2,7 @@
 Using nipype with persistence and lazy recomputation but without explicit
 name-steps pipeline: getting back scope in command-line based programming.
 """
+
 import os
 import hashlib
 import pickle

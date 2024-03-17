@@ -5,6 +5,7 @@ Interfaces for the `Diffusion Tensor Imaging Toolkit (DTI-TK)
 <http://dti-tk.sourceforge.net/pmwiki/pmwiki.php>`_ command line tools.
 
 """
+
 from .registration import (
     Rigid,
     Affine,

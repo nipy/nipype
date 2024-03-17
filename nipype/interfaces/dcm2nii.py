@@ -1,4 +1,5 @@
 """dcm2nii converts images from the proprietary scanner DICOM format to NIfTI."""
+
 import os
 import re
 from copy import deepcopy
