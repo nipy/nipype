@@ -509,7 +509,9 @@ def search_files(prefix, outtypes, search_crop):
     )
     if search_crop:
         found = it.chain(
-            it.chain.from_iterable(iglob(glob.escape(prefix) + "_Crop_*" + outtype) for outtype in outtypes),
-            found
+            it.chain.from_iterable(
+                iglob(glob.escape(prefix) + "_Crop_*" + outtype) for outtype in outtypes
+            ),
+            found,
         )
     return found
