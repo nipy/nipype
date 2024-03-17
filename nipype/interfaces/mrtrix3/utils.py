@@ -234,7 +234,10 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
     in_file = traits.Either(
         File(exists=True),
         Directory(exists=True),
-        argstr="%s", mandatory=True, position=-2, desc="input image / directory"
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input image / directory",
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
