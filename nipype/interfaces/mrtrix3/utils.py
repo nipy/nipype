@@ -1250,39 +1250,33 @@ class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
     wm_fod = File(
         argstr="%s",
         exists=True,
-        mandatory=False,
         position=1,
         desc="input fod of white matter tissue compartment"
     )
     out_file_wm = File(
         argstr="%s",
-        mandatory=False,
         position=2,
         desc="output file of white matter tissue compartment"
     )
     gm_fod = File(
         argstr="%s",
         exists=True,
-        mandatory=False,
         position=3,
         desc="input fod of grey matter tissue compartment"
     )
     out_file_gm = File(
         argstr="%s",
-        mandatory=False,
         position=4,
         desc="output file of grey matter tissue compartment"
     )
     csf_fod = File(
         argstr="%s",
         exists=True,
-        mandatory=False,
         position=5,
         desc="input fod of CSF tissue compartment"
     )
     out_file_csf = File(
         argstr="%s",
-        mandatory=False,
         position=6,
         desc="output file of CSF tissue compartment 3"
     )
