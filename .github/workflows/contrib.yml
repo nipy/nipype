@@ -50,7 +50,7 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -71,12 +71,13 @@ jobs:
       - name: Run tests
         run: tools/ci/check.sh
         if: ${{ matrix.check != 'skiptests' }}
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
           file: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
       - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}
           path: test-results.xml

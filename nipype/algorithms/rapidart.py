@@ -584,9 +584,9 @@ class ArtifactDetect(BaseInterface):
             if displacement is not None:
                 dmap = np.zeros((x, y, z, timepoints), dtype=np.float64)
                 for i in range(timepoints):
-                    dmap[
-                        voxel_coords[0], voxel_coords[1], voxel_coords[2], i
-                    ] = displacement[i, :]
+                    dmap[voxel_coords[0], voxel_coords[1], voxel_coords[2], i] = (
+                        displacement[i, :]
+                    )
                 dimg = Nifti1Image(dmap, affine)
                 dimg.to_filename(displacementfile)
         else:

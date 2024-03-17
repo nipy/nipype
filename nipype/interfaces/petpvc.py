@@ -37,6 +37,7 @@ pvc_methods = [
     "RBV+VC",
     "RL",
     "VC",
+    "STC",
 ]
 
 
@@ -75,6 +76,7 @@ Desired PVC method:
     * Muller Gartner -- ``MG``
     * Muller Gartner with Van-Cittert -- ``MG+VC``
     * Muller Gartner with Richardson-Lucy -- ``MG+RL``
+    * Single-target correction -- ``STC``
 
 """,
     )

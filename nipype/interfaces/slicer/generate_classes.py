@@ -2,6 +2,7 @@
 modules are selected from the hardcoded list below and generated code is placed
 in the cli_modules.py file (and imported in __init__.py). For this to work
 correctly you must have your CLI executables in $PATH"""
+
 import xml.dom.minidom
 import subprocess
 import os

@@ -380,9 +380,11 @@ class BaseInterface(Interface):
         """
         rtc = RuntimeContext(
             resource_monitor=config.resource_monitor and self.resource_monitor,
-            ignore_exception=ignore_exception
-            if ignore_exception is not None
-            else self.ignore_exception,
+            ignore_exception=(
+                ignore_exception
+                if ignore_exception is not None
+                else self.ignore_exception
+            ),
         )
 
         with indirectory(cwd or os.getcwd()):

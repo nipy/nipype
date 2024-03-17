@@ -11,6 +11,7 @@ from ..base import (
     traits,
     TraitedSpec,
     File,
+    Directory,
     InputMultiPath,
     isdefined,
 )
@@ -224,13 +225,19 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
         "fsl",
         "gif",
         "freesurfer",
+        "hsvs",
         argstr="%s",
         position=-3,
         mandatory=True,
         desc="tissue segmentation algorithm",
     )
-    in_file = File(
-        exists=True, argstr="%s", mandatory=True, position=-2, desc="input image"
+    in_file = traits.Either(
+        File(exists=True),
+        Directory(exists=True),
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="input image / directory",
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
 
@@ -822,13 +829,11 @@ class MRTransformInputSpec(MRTrix3BaseInputSpec):
     )
     invert = traits.Bool(
         argstr="-inverse",
-        position=1,
         desc="Invert the specified transform before using it",
     )
     linear_transform = File(
         exists=True,
         argstr="-linear %s",
-        position=1,
         desc=(
             "Specify a linear transform to apply, in the form of a 3x4 or 4x4 ascii file. "
             "Note the standard reverse convention is used, "
@@ -838,38 +843,32 @@ class MRTransformInputSpec(MRTrix3BaseInputSpec):
     )
     replace_transform = traits.Bool(
         argstr="-replace",
-        position=1,
         desc="replace the current transform by that specified, rather than applying it to the current transform",
     )
     transformation_file = File(
         exists=True,
         argstr="-transform %s",
-        position=1,
         desc="The transform to apply, in the form of a 4x4 ascii file.",
     )
     template_image = File(
         exists=True,
         argstr="-template %s",
-        position=1,
         desc="Reslice the input image to match the specified template image.",
     )
     reference_image = File(
         exists=True,
         argstr="-reference %s",
-        position=1,
         desc="in case the transform supplied maps from the input image onto a reference image, use this option to specify the reference. Note that this implicitly sets the -replace option.",
     )
     flip_x = traits.Bool(
         argstr="-flipx",
-        position=1,
         desc="assume the transform is supplied assuming a coordinate system with the x-axis reversed relative to the MRtrix convention (i.e. x increases from right to left). This is required to handle transform matrices produced by FSL's FLIRT command. This is only used in conjunction with the -reference option.",
     )
     quiet = traits.Bool(
         argstr="-quiet",
-        position=1,
         desc="Do not display information messages or progress status.",
     )
-    debug = traits.Bool(argstr="-debug", position=1, desc="Display debugging messages.")
+    debug = traits.Bool(argstr="-debug", desc="Display debugging messages.")
 
 
 class MRTransformOutputSpec(TraitedSpec):

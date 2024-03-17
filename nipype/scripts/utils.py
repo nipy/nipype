@@ -2,7 +2,6 @@
 Utilities for the CLI functions.
 """
 
-
 import re
 import click
 import json

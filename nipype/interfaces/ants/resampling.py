@@ -1,5 +1,6 @@
 """ANTS Apply Transforms interface
 """
+
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
@@ -349,6 +350,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         "MultiLabel",
         "Gaussian",
         "BSpline",
+        "GenericLabel",
         argstr="%s",
         usedefault=True,
     )
@@ -357,6 +359,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         traits.Tuple(
             traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
         ),
+        traits.Tuple(traits.Str()),  # GenericLabel
     )
     transforms = InputMultiObject(
         traits.Either(File(exists=True), "identity"),
@@ -497,6 +500,7 @@ class ApplyTransforms(ANTSCommand):
                 "BSpline",
                 "MultiLabel",
                 "Gaussian",
+                "GenericLabel",
             ] and isdefined(self.inputs.interpolation_parameters):
                 return "--interpolation {}[ {} ]".format(
                     self.inputs.interpolation,

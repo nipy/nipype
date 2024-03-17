@@ -2,6 +2,7 @@
 Handles custom functions used in Function interface. Future imports
 are avoided to keep namespace as clear as possible.
 """
+
 import inspect
 from textwrap import dedent
 
