@@ -37,7 +37,6 @@ def test_Generate5tt_inputs():
         ),
         in_file=dict(
             argstr="%s",
-            extensions=None,
             mandatory=True,
             position=-2,
         ),

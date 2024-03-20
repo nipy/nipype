@@ -12,7 +12,6 @@ def test_MRTransform_inputs():
         ),
         debug=dict(
             argstr="-debug",
-            position=1,
         ),
         environ=dict(
             nohash=True,
@@ -20,7 +19,6 @@ def test_MRTransform_inputs():
         ),
         flip_x=dict(
             argstr="-flipx",
-            position=1,
         ),
         grad_file=dict(
             argstr="-grad %s",
@@ -45,12 +43,10 @@ def test_MRTransform_inputs():
         ),
         invert=dict(
             argstr="-inverse",
-            position=1,
         ),
         linear_transform=dict(
             argstr="-linear %s",
             extensions=None,
-            position=1,
         ),
         nthreads=dict(
             argstr="-nthreads %d",
@@ -71,26 +67,21 @@ def test_MRTransform_inputs():
         ),
         quiet=dict(
             argstr="-quiet",
-            position=1,
         ),
         reference_image=dict(
             argstr="-reference %s",
             extensions=None,
-            position=1,
         ),
         replace_transform=dict(
             argstr="-replace",
-            position=1,
         ),
         template_image=dict(
             argstr="-template %s",
             extensions=None,
-            position=1,
         ),
         transformation_file=dict(
             argstr="-transform %s",
             extensions=None,
-            position=1,
         ),
     )
     inputs = MRTransform.input_spec()
