@@ -1185,3 +1185,184 @@ class SH2Amp(CommandLine):
         outputs = self.output_spec().get()
         outputs["out_file"] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class MaskFilterInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        argstr="%s",
+        position=-3,
+        desc="Input mask",
+    )
+    filter = traits.Str(
+        mandatory=True,
+        argstr="%s",
+        position=-2,
+        desc="Filter to perform (e.g. dilate, erode)",
+    )
+    out_file = File(
+        name_source=["input_image"],
+        mandatory=True,
+        argstr="%s",
+        position=-1,
+        desc="Output mask",
+    )
+    npass = traits.Int(argstr="-npass %d", position=1, desc="Number of passes")
+
+
+class MaskFilterOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="the filtered output mask")
+
+
+class MaskFilter(CommandLine):
+    """
+    Perform filtering operations on 3D / 4D mask images.
+    Only supports dilate / erode filters at the moment.
+    For more information see: https://mrtrix.readthedocs.io/en/latest/reference/commands/maskfilter.html
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mf = mrt.MaskFilter()
+    >>> mf.inputs.in_file = 'mask.mif'
+    >>> mf.inputs.filter = 'dilate'
+    >>> mf.inputs.npass = 2
+    >>> mf.inputs.out_file = 'mask_filtered.mif'
+    >>> mf.cmdline
+    'maskfilter -npass 2 mask.mif dilate mask_filtered.mif'
+    >>> mf.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "maskfilter"
+    input_spec = MaskFilterInputSpec
+    output_spec = MaskFilterOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MTNormaliseInputSpec(MRTrix3BaseInputSpec):
+    wm_fod = File(
+        argstr="%s",
+        exists=True,
+        position=1,
+        desc="input fod of white matter tissue compartment",
+    )
+    out_file_wm = File(
+        argstr="%s", position=2, desc="output file of white matter tissue compartment"
+    )
+    gm_fod = File(
+        argstr="%s",
+        exists=True,
+        position=3,
+        desc="input fod of grey matter tissue compartment",
+    )
+    out_file_gm = File(
+        argstr="%s", position=4, desc="output file of grey matter tissue compartment"
+    )
+    csf_fod = File(
+        argstr="%s", exists=True, position=5, desc="input fod of CSF tissue compartment"
+    )
+    out_file_csf = File(
+        argstr="%s", position=6, desc="output file of CSF tissue compartment 3"
+    )
+    mask = File(argstr="-mask %s", exists=True, position=-1, desc="input brain mask")
+
+
+class MTNormaliseOutputSpec(TraitedSpec):
+    out_file_wm = File(exists=True, desc="the normalized white matter fod")
+    out_file_gm = File(exists=True, desc="the normalized grey matter fod")
+    out_file_csf = File(exists=True, desc="the normalized csf fod")
+
+
+class MTNormalise(CommandLine):
+    """
+    Multi-tissue informed log-domain intensity normalisation
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mtn = mrt.MTNormalise()
+    >>> mtn.inputs.wm_fod = 'wmfod.mif'
+    >>> mtn.inputs.gm_fod = 'gmfod.mif'
+    >>> mtn.inputs.csf_fod = 'csffod.mif'
+    >>> mtn.inputs.out_file_wm = 'wmfod_norm.mif'
+    >>> mtn.inputs.out_file_gm = 'gmfod_norm.mif'
+    >>> mtn.inputs.out_file_csf = 'csffod_norm.mif'
+    >>> mtn.inputs.mask = 'mask.mif'
+    >>> mtn.cmdline
+    'mtnormalise wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif -mask mask.mif'
+    >>> mtn.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "mtnormalise"
+    input_spec = MTNormaliseInputSpec
+    output_spec = MTNormaliseOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file_wm"] = op.abspath(self.inputs.out_file_wm)
+        outputs["out_file_gm"] = op.abspath(self.inputs.out_file_gm)
+        outputs["out_file_csf"] = op.abspath(self.inputs.out_file_csf)
+        return outputs
+
+
+class Generate5tt2gmwmiInputSpec(MRTrix3BaseInputSpec):
+    in_file = File(
+        exists=True,
+        argstr="%s",
+        mandatory=True,
+        position=-2,
+        desc="the input 5TT segmented anatomical image",
+    )
+    mask_out = File(
+        "mask_gmwmi.mif",
+        argstr="%s",
+        mandatory=True,
+        position=-1,
+        desc="the output mask image",
+    )
+    mask_in = File(
+        argstr="-mask_in %s",
+        position=-3,
+        desc="filter an input mask image according to those voxels that lie upon the grey matter - white matter boundary",
+    )
+
+
+class Generate5tt2gmwmiOutputSpec(TraitedSpec):
+    mask_out = File(exists=True, desc="the output mask file")
+
+
+class Generate5tt2gmwmi(CommandLine):
+    """
+    Generate a mask image appropriate for seeding streamlines on
+    the grey matter-white matter interface
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> gmwmi = mrt.Generate5tt2gmwmi()
+    >>> gmwmi.inputs.in_file = '5tt_in.mif'
+    >>> gmwmi.inputs.mask_out = 'mask_gmwmi.mif'
+    >>> gmwmi.cmdline
+    '5tt2gmwmi 5tt_in.mif mask_gmwmi.mif'
+    >>> gmwmi.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = "5tt2gmwmi"
+    input_spec = Generate5tt2gmwmiInputSpec
+    output_spec = Generate5tt2gmwmiOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["mask_out"] = op.abspath(self.inputs.mask_out)
+        return outputs
