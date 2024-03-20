@@ -1233,7 +1233,7 @@ class MaskFilter(CommandLine):
     >>> mf.inputs.out_file = 'mask_filtered.mif'
     >>> mf.cmdline
     'maskfilter -npass 2 mask.mif dilate mask_filtered.mif'
-    >>> mf.run()
+    >>> mf.run()                                 # doctest: +SKIP
     """
 
     _cmd = "maskfilter"
@@ -1290,16 +1290,16 @@ class MTNormalise(CommandLine):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> mtn = mrt.MTNormalise()
-    >>> mtn.inputs.fod_wm = 'wmfod.mif'
-    >>> mtn.inputs.fod_gm = 'gmfod.mif'
-    >>> mtn.inputs.fod_csf = 'csffod.mif'
+    >>> mtn.inputs.wm_fod = 'wmfod.mif'
+    >>> mtn.inputs.gm_fod = 'gmfod.mif'
+    >>> mtn.inputs.csf_fod = 'csffod.mif'
     >>> mtn.inputs.out_file_wm = 'wmfod_norm.mif'
     >>> mtn.inputs.out_file_gm = 'gmfod_norm.mif'
     >>> mtn.inputs.out_file_csf = 'csffod_norm.mif'
     >>> mtn.inputs.mask = 'mask.mif'
     >>> mtn.cmdline
     'mtnormalise wmfod.mif wmfod_norm.mif gmfod.mif gmfod_norm.mif csffod.mif csffod_norm.mif -mask mask.mif'
-    >>> mtn.run()
+    >>> mtn.run()                                 # doctest: +SKIP
     """
 
     _cmd = "mtnormalise"
@@ -1355,7 +1355,7 @@ class Generate5tt2gmwmi(CommandLine):
     >>> gmwmi.inputs.mask_out = 'mask_gmwmi.mif'
     >>> gmwmi.cmdline
     '5tt2gmwmi 5tt_in.mif mask_gmwmi.mif'
-    >>> gmwmi.run()
+    >>> gmwmi.run()                                 # doctest: +SKIP
     """
 
     _cmd = "5tt2gmwmi"
