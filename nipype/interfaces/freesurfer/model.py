@@ -420,6 +420,14 @@ class GLMFitInputSpec(FSTraitedSpec):
         argstr="--logan %s %s %f",
         desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",
     )
+    bp_clip_neg = traits.Bool(
+        argstr="--bp-clip-neg",
+        desc="set negative BP voxels to zero",
+    )
+    bp_clip_max = traits.Float(
+        argstr="--bp-clip-max %f",
+        desc="set BP voxels above max to max",
+    )
     force_perm = traits.Bool(
         argstr="--perm-force",
         desc="force perumtation test, even when design matrix is not orthog",

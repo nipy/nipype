@@ -207,6 +207,9 @@ def test_GTMPVC_inputs():
 
 def test_GTMPVC_outputs():
     output_map = dict(
+        eres=dict(
+            extensions=None,
+        ),
         gtm_file=dict(
             extensions=None,
         ),
@@ -254,6 +257,18 @@ def test_GTMPVC_outputs():
             extensions=None,
         ),
         reg_rbvpet2anat=dict(
+            extensions=None,
+        ),
+        seg=dict(
+            extensions=None,
+        ),
+        seg_ctab=dict(
+            extensions=None,
+        ),
+        tissue_fraction=dict(
+            extensions=None,
+        ),
+        tissue_fraction_psf=dict(
             extensions=None,
         ),
         yhat=dict(
