@@ -421,7 +421,7 @@ class GLMFitInputSpec(FSTraitedSpec):
         desc="RefTac TimeSec tstar   : perform Logan kinetic modeling",
     )
     bp_clip_neg = traits.Bool(
-        argstr="--bp-clip-neg", 
+        argstr="--bp-clip-neg",
         desc="set negative BP voxels to zero",
     )
     bp_clip_max = traits.Float(
