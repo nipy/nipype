@@ -3,7 +3,7 @@ name: Test tutorials
 on:
   push:
     branches:
-      - 'rel/*'
+      - "rel/*"
 
 concurrency:
   group: tutorials-${{ github.ref }}

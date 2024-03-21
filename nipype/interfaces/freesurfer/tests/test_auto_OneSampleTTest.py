@@ -13,6 +13,12 @@ def test_OneSampleTTest_inputs():
         args=dict(
             argstr="%s",
         ),
+        bp_clip_max=dict(
+            argstr="--bp-clip-max %f",
+        ),
+        bp_clip_neg=dict(
+            argstr="--bp-clip-neg",
+        ),
         calc_AR1=dict(
             argstr="--tar1",
         ),

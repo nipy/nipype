@@ -30,4 +30,7 @@ from .utils import (
     SHConv,
     TensorMetrics,
     TransformFSLConvert,
+    MaskFilter,
+    MTNormalise,
+    Generate5tt2gmwmi,
 )
