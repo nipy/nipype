@@ -3502,5 +3502,4 @@ class Zeropad(AFNICommand):
 
         if not isdefined(out_file):
             out_file = "zeropad+tlrc.BRIK"
-
-        return {"out_file": out_file}
+        return {"out_file": op.abspath(out_file)}
