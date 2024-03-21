@@ -31,10 +31,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-latest']
+        os: ["ubuntu-latest"]
         python-version: [3.8]
-        nipype-extras: ['dev']
-        check: ['specs', 'style']
+        nipype-extras: ["dev"]
+        check: ["specs", "style"]
     env:
       DEPENDS: ""
       CHECK_TYPE: ${{ matrix.check }}

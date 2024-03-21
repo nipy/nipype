@@ -458,10 +458,25 @@ class GTMPVCOutputSpec(TraitedSpec):
     yhat_with_noise = File(
         desc="4D PET file with full FOV of signal estimate (yhat) with noise after PVC (smoothed with PSF)",
     )
+    eres = File(
+        desc="4D PET file of residual error after PVC (smoothed with PSF)",
+    )
+    tissue_fraction = File(
+        desc="4D PET file of tissue fraction before PVC",
+    )
+    tissue_fraction_psf = File(
+        desc="4D PET file of tissue fraction after PVC (smoothed with PSF)",
+    )
+    seg = File(
+        desc="Segmentation file of regions used for PVC",
+    )
+    seg_ctab = File(
+        desc="Color table file for segmentation file",
+    )
 
 
 class GTMPVC(FSCommand):
-    """create an anatomical segmentation for the geometric transfer matrix (GTM).
+    """Perform Partial Volume Correction (PVC) to PET Data.
 
     Examples
     --------
@@ -536,6 +551,15 @@ class GTMPVC(FSCommand):
         outputs["gtm_stats"] = os.path.join(pvcdir, "gtm.stats.dat")
         outputs["reg_pet2anat"] = os.path.join(pvcdir, "aux", "bbpet2anat.lta")
         outputs["reg_anat2pet"] = os.path.join(pvcdir, "aux", "anat2bbpet.lta")
+        outputs["eres"] = os.path.join(pvcdir, "eres.nii.gz")
+        outputs["tissue_fraction"] = os.path.join(
+            pvcdir, "aux", "tissue.fraction.nii.gz"
+        )
+        outputs["tissue_fraction_psf"] = os.path.join(
+            pvcdir, "aux", "tissue.fraction.psf.nii.gz"
+        )
+        outputs["seg"] = os.path.join(pvcdir, "aux", "seg.nii.gz")
+        outputs["seg_ctab"] = os.path.join(pvcdir, "aux", "seg.ctab")
 
         # Assign the conditional outputs
         if self.inputs.save_input:
@@ -562,7 +586,7 @@ class GTMPVC(FSCommand):
         return outputs
 
 
-class MRTMInputSpec(GLMFitInputSpec):
+class MRTM1InputSpec(GLMFitInputSpec):
     mrtm1 = traits.Tuple(
         File(exists=True),
         File(exists=True),
@@ -572,12 +596,12 @@ class MRTMInputSpec(GLMFitInputSpec):
     )
 
 
-class MRTM(GLMFit):
+class MRTM1(GLMFit):
     """Perform MRTM1 kinetic modeling.
 
     Examples
     --------
-    >>> mrtm = MRTM()
+    >>> mrtm = MRTM1()
     >>> mrtm.inputs.in_file = 'tac.nii'
     >>> mrtm.inputs.mrtm1 = ('ref_tac.dat', 'timing.dat')
     >>> mrtm.inputs.glm_dir = 'mrtm'
@@ -585,7 +609,7 @@ class MRTM(GLMFit):
     'mri_glmfit --glmdir mrtm --y tac.nii --mrtm1 ref_tac.dat timing.dat'
     """
 
-    input_spec = MRTMInputSpec
+    input_spec = MRTM1InputSpec
 
 
 class MRTM2InputSpec(GLMFitInputSpec):
@@ -614,7 +638,7 @@ class MRTM2(GLMFit):
     input_spec = MRTM2InputSpec
 
 
-class LoganRefInputSpec(GLMFitInputSpec):
+class LoganInputSpec(GLMFitInputSpec):
     logan = traits.Tuple(
         File(exists=True),
         File(exists=True),
@@ -625,11 +649,11 @@ class LoganRefInputSpec(GLMFitInputSpec):
     )
 
 
-class LoganRef(GLMFit):
-    """Perform Logan reference kinetic modeling.
+class Logan(GLMFit):
+    """Perform Logan kinetic modeling.
     Examples
     --------
-    >>> logan = LoganRef()
+    >>> logan = Logan()
     >>> logan.inputs.in_file = 'tac.nii'
     >>> logan.inputs.logan = ('ref_tac.dat', 'timing.dat', 2600)
     >>> logan.inputs.glm_dir = 'logan'
@@ -637,4 +661,4 @@ class LoganRef(GLMFit):
     'mri_glmfit --glmdir logan --y tac.nii --logan ref_tac.dat timing.dat 2600'
     """
 
-    input_spec = LoganRefInputSpec
+    input_spec = LoganInputSpec

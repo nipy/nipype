@@ -19,7 +19,7 @@ on:
       - maint/*
   schedule:
     # 8am EST / 9am EDT Mondays
-    - cron: '0 13 * * 1'
+    - cron: "0 13 * * 1"
 
 defaults:
   run:
@@ -57,7 +57,7 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        package: ['wheel', 'sdist']
+        package: ["wheel", "sdist"]
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -90,28 +90,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-22.04']
-        python-version: ['3.8', '3.9', '3.10', '3.11']
-        check: ['test']
-        pip-flags: ['']
-        depends: ['REQUIREMENTS']
+        os: ["ubuntu-22.04"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        check: ["test"]
+        pip-flags: [""]
+        depends: ["REQUIREMENTS"]
         deb-depends: [false]
-        nipype-extras: ['doc,tests,profiler']
+        nipype-extras: ["doc,tests,profiler"]
         include:
           - os: ubuntu-22.04
-            python-version: '3.8'
+            python-version: "3.8"
             check: test
-            pip-flags: ''
+            pip-flags: ""
             depends: REQUIREMENTS
             deb-depends: true
             nipype-extras: doc,tests,profiler,duecredit,ssh
-          # - os: ubuntu-20.04
-          #   python-version: 3.8
-          #   check: test
-          #   pip-flags: ''
-          #   depends: NUMPY123
-          #   deb-depends: true
-          #   nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
+          - os: ubuntu-20.04
+            python-version: 3.8
+            check: test
+            pip-flags: ""
+            depends: REQUIREMENTS
+            deb-depends: true
+            nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
     env:
       DEPENDS: ${{ matrix.depends }}
       CHECK_TYPE: ${{ matrix.check }}

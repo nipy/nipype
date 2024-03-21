@@ -4,7 +4,6 @@ SETUP_REQUIRES="pip setuptools>=30.3.0 wheel"
 REQUIREMENTS="-r requirements.txt"
 # Minimum versions of minimum requirements
 MIN_REQUIREMENTS="-r min-requirements.txt"
-NUMPY123="numpy<1.24 -r requirements.txt"
 
 # Numpy and scipy upload nightly/weekly/intermittent wheels
 NIGHTLY_WHEELS="https://pypi.anaconda.org/scipy-wheels-nightly/simple"
