@@ -488,7 +488,7 @@ class Dcm2niix(CommandLine):
 
         # in siemens mosaic conversion nipype misread dcm2niix output and generate a duplicate list of results
         # next line remove duplicates from output files array
-        outfiles = [*set(outfiles)]
+        outfiles = list(dict.fromkeys(outfiles))
 
         self.output_files = outfiles
         self.bvecs = bvecs
