@@ -22,9 +22,11 @@ def test_search_files(tmp_path, fname, extension, search_crop):
         test_cropped_file = tmp_path / tmp_cropped_fname
         test_cropped_file.touch()
 
-    actual_files_list = dcm2nii.search_files(str(tmp_path / fname), [extension], search_crop)
+    actual_files_list = dcm2nii.search_files(
+        str(tmp_path / fname), [extension], search_crop
+    )
     for f in actual_files_list:
         if search_crop:
-            assert (f in (str(test_cropped_file), str(test_file)))
+            assert f in (str(test_cropped_file), str(test_file))
         else:
             assert str(test_file) == f
