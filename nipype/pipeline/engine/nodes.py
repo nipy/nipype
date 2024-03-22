@@ -821,6 +821,10 @@ Error populating the inputs of node "%s": the results file of the source node \
         """Update inputs"""
         self.inputs.update(**opts)
 
+    def is_gpu_node(self):
+        return ((hasattr(self.inputs, 'use_cuda') and self.inputs.use_cuda)
+                or (hasattr(self.inputs, 'use_gpu') and self.inputs.use_gpu))
+
 
 class JoinNode(Node):
     """Wraps interface objects that join inputs into a list.

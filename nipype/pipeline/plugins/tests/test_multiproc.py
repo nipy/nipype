@@ -56,6 +56,7 @@ def test_run_multiproc(tmpdir):
 class InputSpecSingleNode(nib.TraitedSpec):
     input1 = nib.traits.Int(desc="a random int")
     input2 = nib.traits.Int(desc="a random int")
+    use_gpu = nib.traits.Bool(False, mandatory = False, desc="boolean for GPU nodes")
 
 
 class OutputSpecSingleNode(nib.TraitedSpec):
@@ -115,6 +116,20 @@ def test_no_more_threads_than_specified(tmpdir):
     max_threads = 2
     with pytest.raises(RuntimeError):
         pipe.run(plugin="MultiProc", plugin_args={"n_procs": max_threads})
+
+def test_no_more_gpu_threads_than_specified(tmpdir):
+    tmpdir.chdir()
+
+    pipe = pe.Workflow(name="pipe")
+    n1 = pe.Node(SingleNodeTestInterface(), name="n1", n_procs=2)
+    n1.inputs.use_gpu = True
+    n1.inputs.input1 = 4
+    pipe.add_nodes([n1])
+
+    max_threads = 2
+    max_gpu = 1
+    with pytest.raises(RuntimeError):
+        pipe.run(plugin="MultiProc", plugin_args={"n_procs": max_threads, 'n_gpu_procs': max_gpu})
 
 
 @pytest.mark.skipif(
