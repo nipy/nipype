@@ -149,6 +149,7 @@ REQUIRES = [
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
     "looseversion!=1.2",
+    "gputil=1.4.0",
 ]
 
 TESTS_REQUIRES = [
