@@ -134,13 +134,14 @@ class MultiProcPlugin(DistributedPluginBase):
         # GPU found on system
         self.n_gpus_visible = MultiProcPlugin.gpu_count()
         # proc per GPU set by user
-        self.n_gpu_procs = plugin_args.get('n_gpu_procs', self.n_gpus_visible)
+        self.n_gpu_procs = self.plugin_args.get('n_gpu_procs', self.n_gpus_visible)
 
         # total no. of processes allowed on all gpus
         if self.n_gpu_procs > self.n_gpus_visible:
             logger.info(
-                'Total number of GPUs proc requested (%d) exceeds the available number of GPUs (%d) on the system. Using requested GPU slots at your own risk!' % (
-                    self.n_gpu_procs, self.n_gpus_visible))
+                'Total number of GPUs proc requested (%d) exceeds the available number of GPUs (%d) on the system. Using requested GPU slots at your own risk!'
+                % (self.n_gpu_procs, self.n_gpus_visible)
+            )
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug(
@@ -220,9 +221,7 @@ class MultiProcPlugin(DistributedPluginBase):
             if self.raise_insufficient:
                 raise RuntimeError("Insufficient resources available for job")
         if np.any(np.array(tasks_gpu_th) > self.n_gpu_procs):
-            logger.warning(
-                'Nodes demand more GPU than allowed (%d).',
-                self.n_gpu_procs)
+            logger.warning('Nodes demand more GPU than allowed (%d).', self.n_gpu_procs)
             if self.raise_insufficient:
                 raise RuntimeError('Insufficient GPU resources available for job')
 
@@ -257,7 +256,9 @@ class MultiProcPlugin(DistributedPluginBase):
         )
 
         # Check available resources by summing all threads and memory used
-        free_memory_gb, free_processors, free_gpu_slots = self._check_resources(self.pending_tasks)
+        free_memory_gb, free_processors, free_gpu_slots = self._check_resources(
+            self.pending_tasks
+        )
 
         stats = (
             len(self.pending_tasks),
@@ -267,7 +268,7 @@ class MultiProcPlugin(DistributedPluginBase):
             free_processors,
             self.processors,
             free_gpu_slots,
-            self.n_gpu_procs
+            self.n_gpu_procs,
         )
         if self._stats != stats:
             tasks_list_msg = ""
@@ -338,8 +339,11 @@ class MultiProcPlugin(DistributedPluginBase):
             is_gpu_node = self.procs[jobid].is_gpu_node()
 
             # If node does not fit, skip at this moment
-            if (next_job_th > free_processors or next_job_gb > free_memory_gb
-                    or (is_gpu_node and next_job_gpu_th > free_gpu_slots)):
+            if (
+                next_job_th > free_processors
+                or next_job_gb > free_memory_gb
+                or (is_gpu_node and next_job_gpu_th > free_gpu_slots)
+            ):
                 logger.debug(
                     "Cannot allocate job %d (%0.2fGB, %d threads, %d GPU slots).",
                     jobid,
@@ -424,6 +428,7 @@ class MultiProcPlugin(DistributedPluginBase):
         n_gpus = 1
         try:
             import GPUtil
+
             return len(GPUtil.getGPUs())
         except ImportError:
             return n_gpus
