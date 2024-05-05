@@ -227,7 +227,7 @@ class QstatSubstitute:
                     time.mktime(time.strptime(job_time_text, "%Y-%m-%dT%H:%M:%S"))
                 )
             except:
-                job_time = float(0.0)
+                job_time = 0.0
                 # Make job entry
 
             task_id = int(job_num)
