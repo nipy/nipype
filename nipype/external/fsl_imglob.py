@@ -91,14 +91,6 @@ def main():
     if len(sys.argv) <= 1:
         usage()
 
-    if sys.version_info < (2, 4):
-        import sets
-        from sets import Set
-
-        setAvailable = False
-    else:
-        setAvailable = True
-
     deleteExtensions = True
     primaryExtensions = [".nii.gz", ".nii", ".hdr.gz", ".hdr"]
     secondaryExtensions = [".img.gz", ".img"]
@@ -131,18 +123,13 @@ def main():
             )
 
     if deleteExtensions:
-        for file in range(0, len(filelist)):
-            filelist[file] = removeImageExtension(filelist[file], allExtensions)
-    if setAvailable:
-        filelist = list(set(filelist))
-    else:
-        filelist = list(Set(filelist))
-    filelist.sort()
+        filelist = [
+            removeImageExtension(f, allExtensions)
+            for f in filelist
+        ]
+    filelist = sorted(set(filelist))
 
-    for file in range(0, len(filelist)):
-        print(filelist[file], end=" ")
-        if file < len(filelist) - 1:
-            print(" ", end=" ")
+    print(*filelist, sep= "   ", end=" ")
 
 
 if __name__ == "__main__":
