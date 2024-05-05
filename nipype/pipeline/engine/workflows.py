@@ -289,7 +289,7 @@ connected.
         for srcnode, dstnode, conn in connection_list:
             logger.debug("disconnect(): %s->%s %s", srcnode, dstnode, str(conn))
             if self in [srcnode, dstnode]:
-                raise IOError(
+                raise OSError(
                     "Workflow connect cannot contain itself as node: src[%s] "
                     "dest[%s] workflow[%s]"
                 ) % (srcnode, dstnode, self.name)
