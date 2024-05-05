@@ -166,13 +166,7 @@ def insert_doc(doc, new_items):
     # Add rest of documents
     tmpdoc.extend(doclist[2:])
     # Insert newlines
-    newdoc = []
-    for line in tmpdoc:
-        newdoc.append(line)
-        newdoc.append("\n")
-    # We add one too many newlines, remove it.
-    newdoc.pop(-1)
-    return "".join(newdoc)
+    return "\n".join(tmpdoc)
 
 
 def build_doc(doc, opts):

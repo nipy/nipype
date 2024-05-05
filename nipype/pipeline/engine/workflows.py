@@ -483,12 +483,8 @@ connected.
     def write_hierarchical_dotfile(
         self, dotfilename=None, colored=False, simple_form=True
     ):
-        dotlist = ["digraph %s{" % self.name]
-        dotlist.append(
-            self._get_dot(prefix="  ", colored=colored, simple_form=simple_form)
-        )
-        dotlist.append("}")
-        dotstr = "\n".join(dotlist)
+        dotlist = self._get_dot(prefix="  ", colored=colored, simple_form=simple_form)
+        dotstr = f"digraph {self.name}{{\n{dotlist}\n}}"
         if dotfilename:
             fp = open(dotfilename, "w")
             fp.writelines(dotstr)
@@ -1068,23 +1064,27 @@ connected.
                 nodename = fullname.replace(".", "_")
                 dotlist.append("subgraph cluster_%s {" % nodename)
                 if colored:
-                    dotlist.append(
-                        prefix + prefix + 'edge [color="%s"];' % (colorset[level + 1])
+                    dotlist.extend(
+                        (
+                            prefix
+                            + prefix
+                            + 'edge [color="%s"];' % (colorset[level + 1]),
+                            prefix + prefix + "style=filled;",
+                            prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2]),
+                        )
                     )
-                    dotlist.append(prefix + prefix + "style=filled;")
-                    dotlist.append(
-                        prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2])
-                    )
-                dotlist.append(
-                    node._get_dot(
-                        prefix=prefix + prefix,
-                        hierarchy=hierarchy + [self.name],
-                        colored=colored,
-                        simple_form=simple_form,
-                        level=level + 3,
+                dotlist.extend(
+                    (
+                        node._get_dot(
+                            prefix=prefix + prefix,
+                            hierarchy=hierarchy + [self.name],
+                            colored=colored,
+                            simple_form=simple_form,
+                            level=level + 3,
+                        ),
+                        "}",
                     )
                 )
-                dotlist.append("}")
             else:
                 for subnode in self._graph.successors(node):
                     if node._hierarchy != subnode._hierarchy:

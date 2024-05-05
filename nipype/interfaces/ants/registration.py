@@ -1127,14 +1127,10 @@ class Registration(ANTSCommand):
         return retval
 
     def _format_transform(self, index):
-        retval = []
-        retval.append("%s[ " % self.inputs.transforms[index])
         parameters = ", ".join(
             [str(element) for element in self.inputs.transform_parameters[index]]
         )
-        retval.append("%s" % parameters)
-        retval.append(" ]")
-        return "".join(retval)
+        return f"{self.inputs.transforms[index]}[ {parameters} ]"
 
     def _format_registration(self):
         retval = []
