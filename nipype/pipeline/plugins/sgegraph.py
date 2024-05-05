@@ -130,9 +130,7 @@ class SGEGraphPlugin(GraphPluginBase):
                                 not self._dont_resubmit_completed_jobs
                                 or not cache_doneness_per_node[jobid]
                             ):
-                                values += "${{{0}}},".format(
-                                    make_job_name(jobid, nodes)
-                                )
+                                values += f"${{{make_job_name(jobid, nodes)}}},"
                         if (
                             values != " "
                         ):  # i.e. if some jobs were added to dependency list
