@@ -528,7 +528,7 @@ connected.
             lines.append(wfdef)
             if include_config:
                 lines.append(f"{self.name}.config = {self.config}")
-            for idx, node in enumerate(nodes):
+            for node in nodes:
                 nodename = node.fullname.replace(".", "_")
                 # write nodes
                 nodelines = format_node(

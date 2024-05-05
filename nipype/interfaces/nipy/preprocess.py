@@ -203,7 +203,7 @@ class SpaceTimeRealigner(NipyBaseInterface):
             # nipy does not encode euler angles. return in original form of
             # translation followed by rotation vector see:
             # http://en.wikipedia.org/wiki/Rodrigues'_rotation_formula
-            for i, mo in enumerate(motion):
+            for mo in motion:
                 params = [
                     "%.10f" % item for item in np.hstack((mo.translation, mo.rotation))
                 ]

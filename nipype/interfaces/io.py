@@ -975,7 +975,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
                     outputs[key] = simplify_list(filelist)
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -1250,7 +1250,7 @@ class DataGrabber(IOBase):
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
                     outputs[key] = simplify_list(filelist)
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -1995,7 +1995,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         if file_object.exists()
                     ]
                 )
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -2609,7 +2609,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
             if not args:
                 outputs[key] = self._get_files_over_ssh(template)
 
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):

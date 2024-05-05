@@ -124,7 +124,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         ntwk = remove_all_edges(ntwk_res_file)
         counting_ntwk = ntwk.copy()
         # Sums all the relevant variables
-        for index, subject in enumerate(in_files):
+        for subject in in_files:
             tmp = _read_pickle(subject)
             iflogger.info("File %s has %i edges", subject, tmp.number_of_edges())
             edges = list(tmp.edges())
