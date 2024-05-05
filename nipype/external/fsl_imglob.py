@@ -123,13 +123,10 @@ def main():
             )
 
     if deleteExtensions:
-        filelist = [
-            removeImageExtension(f, allExtensions)
-            for f in filelist
-        ]
+        filelist = [removeImageExtension(f, allExtensions) for f in filelist]
     filelist = sorted(set(filelist))
 
-    print(*filelist, sep= "   ", end=" ")
+    print(*filelist, sep="   ", end=" ")
 
 
 if __name__ == "__main__":
