@@ -91,10 +91,8 @@ class QJobInfo:
             # if initializing for more than 5 minute, failure due to
             # initialization and completion before registration
             sge_debug_print(
-                "FAILURE! QJobInfo.IsPending found long running at {1} seconds"
-                "'initializing' returning False for to break loop!\n{0}".format(
-                    self, time_diff
-                )
+                f"FAILURE! QJobInfo.IsPending found long running at {time_diff} seconds "
+                f"'initializing' returning False for to break loop!\n{self}"
             )
             is_pending_status = True  # Job initialization took too long, so report!
         else:  # self.is_running() || self.is_pending():
@@ -227,7 +225,7 @@ class QstatSubstitute:
                     time.mktime(time.strptime(job_time_text, "%Y-%m-%dT%H:%M:%S"))
                 )
             except:
-                job_time = float(0.0)
+                job_time = 0.0
                 # Make job entry
 
             task_id = int(job_num)

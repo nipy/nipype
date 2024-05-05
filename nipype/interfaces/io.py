@@ -84,7 +84,7 @@ def copytree(src, dst, use_hardlink=False):
                     hashmethod="content",
                     use_hardlink=use_hardlink,
                 )
-        except (OSError, os.error) as why:
+        except OSError as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
