@@ -486,9 +486,8 @@ connected.
         dotlist = self._get_dot(prefix="  ", colored=colored, simple_form=simple_form)
         dotstr = f"digraph {self.name}{{\n{dotlist}\n}}"
         if dotfilename:
-            fp = open(dotfilename, "w")
-            fp.writelines(dotstr)
-            fp.close()
+            with open(dotfilename, "w") as fp:
+                fp.writelines(dotstr)
         else:
             logger.info(dotstr)
 
