@@ -1066,11 +1066,9 @@ connected.
                 if colored:
                     dotlist.extend(
                         (
-                            prefix
-                            + prefix
-                            + 'edge [color="%s"];' % (colorset[level + 1]),
-                            prefix + prefix + "style=filled;",
-                            prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2]),
+                            f'{prefix * 2}edge [color="{colorset[level + 1]}"];',
+                            f"{prefix * 2}style=filled;",
+                            f'{prefix * 2}fillcolor="{colorset[level + 2]}";',
                         )
                     )
                 dotlist.extend(
