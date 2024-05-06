@@ -33,5 +33,3 @@ execution_environment:
   - docker
   - conda
   - pypi
-
-
