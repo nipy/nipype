@@ -124,7 +124,7 @@ class RESTORE(DipyDiffusionInterface):
         else:
             nodiff = np.where(~gtab.b0s_mask)
             nodiffidx = nodiff[0].tolist()
-            n = 20 if len(nodiffidx) >= 20 else len(nodiffidx)
+            n = min(20, len(nodiffidx))
             idxs = np.random.choice(nodiffidx, size=n, replace=False)
             noise_data = dsample.take(idxs, axis=-1)[noise_msk == 1, ...]
 

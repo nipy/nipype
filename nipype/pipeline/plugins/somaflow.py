@@ -24,7 +24,7 @@ class SomaFlowPlugin(GraphPluginBase):
     def _submit_graph(self, pyfiles, dependencies, nodes):
         jobs = []
         soma_deps = []
-        for idx, fname in enumerate(pyfiles):
+        for fname in pyfiles:
             name = os.path.splitext(os.path.split(fname)[1])[0]
             jobs.append(Job(command=[sys.executable, fname], name=name))
         for key, values in list(dependencies.items()):

@@ -16,7 +16,7 @@ except Exception as e:
 def creating_graphs(tmpdir):
     graphlist = []
     graphnames = ["name" + str(i) for i in range(6)]
-    for idx, name in enumerate(graphnames):
+    for idx in range(len(graphnames)):
         graph = np.random.rand(10, 10)
         G = nx.from_numpy_array(graph)
         out_file = tmpdir.strpath + graphnames[idx] + ".pck"

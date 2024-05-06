@@ -822,34 +822,32 @@ threshold=10, results_dir='stats')
     def _get_pe_files(self, cwd):
         files = None
         if isdefined(self.inputs.design_file):
-            fp = open(self.inputs.design_file)
-            for line in fp.readlines():
-                if line.startswith("/NumWaves"):
-                    numpes = int(line.split()[-1])
-                    files = []
-                    for i in range(numpes):
-                        files.append(self._gen_fname("pe%d.nii" % (i + 1), cwd=cwd))
-                    break
-            fp.close()
+            with open(self.inputs.design_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumWaves"):
+                        numpes = int(line.split()[-1])
+                        files = [
+                            self._gen_fname(f"pe{i + 1}.nii", cwd=cwd)
+                            for i in range(numpes)
+                        ]
+                        break
         return files
 
     def _get_numcons(self):
         numtcons = 0
         numfcons = 0
         if isdefined(self.inputs.tcon_file):
-            fp = open(self.inputs.tcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numtcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.tcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numtcons = int(line.split()[-1])
+                        break
         if isdefined(self.inputs.fcon_file):
-            fp = open(self.inputs.fcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numfcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.fcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numfcons = int(line.split()[-1])
+                        break
         return numtcons, numfcons
 
     def _list_outputs(self):
@@ -1297,19 +1295,17 @@ class ContrastMgr(FSLCommand):
         numtcons = 0
         numfcons = 0
         if isdefined(self.inputs.tcon_file):
-            fp = open(self.inputs.tcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numtcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.tcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numtcons = int(line.split()[-1])
+                        break
         if isdefined(self.inputs.fcon_file):
-            fp = open(self.inputs.fcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numfcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.fcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numfcons = int(line.split()[-1])
+                        break
         return numtcons, numfcons
 
     def _list_outputs(self):

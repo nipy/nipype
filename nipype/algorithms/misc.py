@@ -531,7 +531,7 @@ def remove_identical_paths(in_files):
         commonprefix = op.commonprefix(in_files)
         lastslash = commonprefix.rfind("/")
         commonpath = commonprefix[0 : (lastslash + 1)]
-        for fileidx, in_file in enumerate(in_files):
+        for in_file in in_files:
             path, name, ext = split_filename(in_file)
             in_file = op.join(path, name)
             name = in_file.replace(commonpath, "")
