@@ -826,9 +826,7 @@ threshold=10, results_dir='stats')
                 for line in fp:
                     if line.startswith("/NumWaves"):
                         numpes = int(line.split()[-1])
-                        files = []
-                        for i in range(numpes):
-                            files.append(self._gen_fname("pe%d.nii" % (i + 1), cwd=cwd))
+                        files = [self._gen_fname(f"pe{i + 1}.nii", cwd=cwd) for i in range(numpes)]
                         break
         return files
 
