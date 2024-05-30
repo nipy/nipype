@@ -1535,7 +1535,6 @@ def _cosine_drift(period_cut, frametimes):
     Ref: http://en.wikipedia.org/wiki/Discrete_cosine_transform DCT-II
     """
     len_tim = len(frametimes)
-    n_times = np.arange(len_tim)
     hfcut = 1.0 / period_cut  # input parameter is the period
 
     # frametimes.max() should be (len_tim-1)*dt
@@ -1543,13 +1542,15 @@ def _cosine_drift(period_cut, frametimes):
     # hfcut = 1/(2*dt) yields len_time
     # If series is too short, return constant regressor
     order = max(int(np.floor(2 * len_tim * hfcut * dt)), 1)
-    cdrift = np.zeros((len_tim, order))
-    nfct = np.sqrt(2.0 / len_tim)
+    cdrift = np.ones((len_tim, order))
 
-    for k in range(1, order):
-        cdrift[:, k] = nfct * np.cos((np.pi / len_tim) * (n_times + 0.5) * k)
+    if order > 1:
+        nfct = np.sqrt(2.0 / len_tim)
+        support = (np.pi / len_tim) * (np.arange(len_tim) + 0.5)
 
-    cdrift[:, 0] = 1.0  # or 1./sqrt(len_tim) to normalize
+        for k in range(1, order):
+            cdrift[:, k] = nfct * np.cos(support * k)
+
     return cdrift
 
 
