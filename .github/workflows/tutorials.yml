@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Start time
         id: start
-        run: echo "::set-output name=start_time::$(date +'%Y-%m-%dT%H:%M:%S%z')"
+        run: echo start_time=$(date +'%Y-%m-%dT%H:%M:%S%z') >> $GITHUB_OUTPUT
       - name: Trigger Nipype tutorial Github Action
         run: |
           set -x
@@ -38,7 +38,7 @@ jobs:
 
           # fail if not extracted
           [[ -n $RUN_ID ]] || exit 1
-          echo "::set-output name=run_id::$RUN_ID"
+          echo run_id=$RUN_ID >> $GITHUB_OUTPUT
       - name: Check if action completed
         timeout-minutes: 120
         run: |
