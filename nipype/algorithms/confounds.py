@@ -1190,12 +1190,13 @@ def _make_cosine_regressors(ntimepoints, timestep, period_cut):
 
 
 def _make_legendre_regressors(ntimepoints, degree):
-    X = np.ones((ntimepoints, 1))  # quick way to calc degree 0
-    for i in range(degree):
-        polynomial_func = Legendre.basis(i + 1)
-        value_array = np.linspace(-1, 1, ntimepoints)
-        X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
-    return X
+    support = np.linspace([-1], [1], ntimepoints)
+    return np.hstack(
+        [
+            np.ones((ntimepoints, 1)),  # Degree 0 is a constant
+            *(Legendre.basis(i + 1)(support) for i in range(degree)),
+        ]
+    )
 
 
 def _high_pass_filter(
