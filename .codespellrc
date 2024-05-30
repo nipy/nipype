@@ -10,4 +10,4 @@ skip = .git,*.pdf,*.svg,external
 # ALS, FWE - neuroimaging specific abbrevs
 # Comision - foreign word used
 # expad - AFNI flag
-ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,suh,noo,reson,als,fwe,crasher,comision,afile,expad
+ignore-words-list = te,inport,objekt,jist,nd,hel,inout,fith,whos,fot,ue,shs,smal,nam,filetest,suh,noo,reson,als,fwe,crasher,comision,afile,expad,burnin

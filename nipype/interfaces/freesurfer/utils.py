@@ -2821,7 +2821,7 @@ class MakeSurfaces(FSCommand):
         if name in ["in_T1", "in_aseg"]:
             # These inputs do not take full paths as inputs or even basenames
             basename = os.path.basename(value)
-            # whent the -mgz flag is specified, it assumes the mgz extension
+            # when the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
                 prefix = os.path.splitext(basename)[0]
             else:

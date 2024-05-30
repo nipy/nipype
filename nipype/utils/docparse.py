@@ -131,7 +131,7 @@ def insert_doc(doc, new_items):
     Parameters
     ----------
     doc : str
-        The existing docstring we're inserting docmentation into.
+        The existing docstring we're inserting documentation into.
     new_items : list
         List of strings to be inserted in the ``doc``.
 

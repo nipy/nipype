@@ -628,7 +628,7 @@ class GraphPluginBase(PluginBase):
     def _submit_graph(self, pyfiles, dependencies, nodes):
         """
         pyfiles: list of files corresponding to a topological sort
-        dependencies: dictionary of dependencies based on the toplogical sort
+        dependencies: dictionary of dependencies based on the topological sort
         """
         raise NotImplementedError
 
