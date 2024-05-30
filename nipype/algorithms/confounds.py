@@ -1220,8 +1220,8 @@ def _high_pass_filter(
     betas = np.linalg.pinv(X) @ data.T
 
     if not remove_mean:
-        X = X[:, :-1]
-        betas = betas[:-1]
+        X = X[:, 1:]
+        betas = betas[1:]
 
     residuals = data - (X @ betas).T
     return residuals.reshape(datashape), non_constant_regressors
@@ -1547,9 +1547,9 @@ def _cosine_drift(period_cut, frametimes):
     nfct = np.sqrt(2.0 / len_tim)
 
     for k in range(1, order):
-        cdrift[:, k - 1] = nfct * np.cos((np.pi / len_tim) * (n_times + 0.5) * k)
+        cdrift[:, k] = nfct * np.cos((np.pi / len_tim) * (n_times + 0.5) * k)
 
-    cdrift[:, order - 1] = 1.0  # or 1./sqrt(len_tim) to normalize
+    cdrift[:, 0] = 1.0  # or 1./sqrt(len_tim) to normalize
     return cdrift
 
 
