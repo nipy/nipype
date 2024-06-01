@@ -812,11 +812,19 @@ threshold=10, results_dir='stats')
     _cmd = "film_gls"
     input_spec = FILMGLSInputSpec
     output_spec = FILMGLSOutputSpec
+
     if Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.6"):
         input_spec = FILMGLSInputSpec507
         output_spec = FILMGLSOutputSpec507
     elif Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.4"):
         input_spec = FILMGLSInputSpec505
+
+    def __init__(self, **inputs):
+        super(FILMGLS, self).__init__(**inputs)
+        if Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.6"):
+            if 'output_type' not in inputs:
+                if isdefined(self.inputs.mode) and self.inputs.mode == 'surface':
+                    self.inputs.output_type = 'GIFTI'
 
     def _get_pe_files(self, cwd):
         files = None
