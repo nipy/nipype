@@ -525,6 +525,13 @@ class CAT12Segment(SPMCommand):
                 return scans_for_fname(val)
         elif opt in ["tpm", "shooting_tpm"]:
             return Cell2Str(val)
+        
+        if opt == "surface_measures":
+            if not self.inputs.surface_measures:
+                self.inputs.neuromorphometrics = False
+                self.inputs.lpba40 = False
+                self.inputs.cobra = False
+                self.inputs.hammers = False
 
         return super()._format_arg(opt, spec, val)
 
@@ -583,12 +590,14 @@ class CAT12Segment(SPMCommand):
             str(label) for label in Path(pth).glob("label/*") if label.is_file()
         ]
 
-        outputs["label_rois"] = fname_presuffix(
-            f, prefix=os.path.join("label", "catROIs_"), suffix=".xml", use_ext=False
-        )
-        outputs["label_roi"] = fname_presuffix(
-            f, prefix=os.path.join("label", "catROI_"), suffix=".xml", use_ext=False
-        )
+        if self.inputs.surface_measures:
+            outputs["label_rois"] = fname_presuffix(
+                f, prefix=os.path.join("label", "catROIs_"), suffix=".xml", use_ext=False
+            )
+        else:
+            outputs["label_roi"] = fname_presuffix(
+                f, prefix=os.path.join("label", "catROI_"), suffix=".xml", use_ext=False
+            )
 
         return outputs
 
