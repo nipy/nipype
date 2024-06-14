@@ -226,39 +226,73 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         " are not available as batch dependencies objects. "
     )
     surface_and_thickness_estimation = traits.Int(
-        1, field="surface", desc=_help_surf, usedefault=True
+        1, field="output.surface", desc=_help_surf, usedefault=True
     )
     surface_measures = traits.Int(
         1,
         field="output.surf_measures",
-        usedefault=True,
+        # usedefault=True,
         desc="Extract surface measures",
+        # requires=["neuromorphometrics", "lpba40", "cobra", "hammers", "thalamus", "thalamic_nuclei", "suit", "ibsr"],
+        # xor=["noROI"],
     )
 
     # Templates
     neuromorphometrics = traits.Bool(
         True,
         field="output.ROImenu.atlases.neuromorphometrics",
-        usedefault=True,
+        # usedefault=True,
         desc="Extract brain measures for Neuromorphometrics template",
+        xor=["noROI"],
     )
     lpba40 = traits.Bool(
         True,
         field="output.ROImenu.atlases.lpba40",
-        usedefault=True,
+        # usedefault=True,
         desc="Extract brain measures for LPBA40 template",
+        xor=["noROI"],
     )
     cobra = traits.Bool(
         True,
         field="output.ROImenu.atlases.hammers",
-        usedefault=True,
+        # usedefault=True,
         desc="Extract brain measures for COBRA template",
+        xor=["noROI"],
     )
     hammers = traits.Bool(
-        True,
+        False,
         field="output.ROImenu.atlases.cobra",
-        usedefault=True,
+        # usedefault=True,
         desc="Extract brain measures for Hammers template",
+        xor=["noROI"],
+    )
+    thalamus = traits.Bool(
+        True,
+        field="output.ROImenu.atlases.thalamus",
+        # usedefault=True,
+        desc="Extract brain measures for Thalamus template",
+        xor=["noROI"],
+    )
+    thalamic_nuclei = traits.Bool(
+        True,
+        field="output.ROImenu.atlases.thalamaic_nuclei",
+        # usedefault=True,
+        desc="Extract brain measures for Thalamic Nuclei template",
+        xor=["noROI"],
+    )
+    suit = traits.Bool(
+        True,
+        field="output.ROImenu.atlases.suit",
+        # usedefault=True,
+        desc="Extract brain measures for Suit template",
+        xor=["noROI"],
+    )
+    ibsr = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.ibsr",
+        # usedefault=True,
+        desc="Extract brain measures for IBSR template",
+        xor=["noROI"],
     )
     own_atlas = InputMultiPath(
         ImageFileSPM(exists=True),
@@ -266,6 +300,12 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         desc="Extract brain measures for a given template",
         mandatory=False,
         copyfile=False,
+        xor=["noROI"],
+    )
+    noROI = traits.Bool(
+        field="output.ROImenu.noROI",
+        desc="Select if no ROI analysis needed",
+        xor=["neuromorphometrics", "lpba40", "cobra", "hammers", "thalamus", "thalamic_nuclei", "suit", "ibsr"],
     )
 
     # Grey matter
@@ -525,13 +565,6 @@ class CAT12Segment(SPMCommand):
                 return scans_for_fname(val)
         elif opt in ["tpm", "shooting_tpm"]:
             return Cell2Str(val)
-        
-        if opt == "surface_measures":
-            if not self.inputs.surface_measures:
-                self.inputs.neuromorphometrics = False
-                self.inputs.lpba40 = False
-                self.inputs.cobra = False
-                self.inputs.hammers = False
 
         return super()._format_arg(opt, spec, val)
 
@@ -561,22 +594,22 @@ class CAT12Segment(SPMCommand):
 
         if self.inputs.save_bias_corrected:
             outputs["bias_corrected_image"] = fname_presuffix(
-                f, prefix=os.path.join("mri", "wmi")
+                f, prefix=os.path.join("mri", "wm")
             )
 
-        outputs["surface_files"] = [
-            str(surf) for surf in Path(pth).glob("surf/*") if surf.is_file()
-        ]
-
-        for hemisphere in ["rh", "lh"]:
-            for suffix in ["central", "sphere"]:
-                outfield = f"{hemisphere}_{suffix}_surface"
-                outputs[outfield] = fname_presuffix(
-                    f,
-                    prefix=os.path.join("surf", f"{hemisphere}.{suffix}."),
-                    suffix=".gii",
-                    use_ext=False,
-                )
+        if self.inputs.surface_and_thickness_estimation:
+            outputs["surface_files"] = [
+                str(surf) for surf in Path(pth).glob("surf/*") if surf.is_file()
+            ]
+            for hemisphere in ["rh", "lh"]:
+                for suffix in ["central", "sphere"]:
+                    outfield = f"{hemisphere}_{suffix}_surface"
+                    outputs[outfield] = fname_presuffix(
+                        f,
+                        prefix=os.path.join("surf", f"{hemisphere}.{suffix}."),
+                        suffix=".gii",
+                        use_ext=False,
+                    )
 
         outputs["report_files"] = outputs["report_files"] = [
             str(report) for report in Path(pth).glob("report/*") if report.is_file()
@@ -590,11 +623,10 @@ class CAT12Segment(SPMCommand):
             str(label) for label in Path(pth).glob("label/*") if label.is_file()
         ]
 
-        if self.inputs.surface_measures:
+        if self.inputs.noROI:
             outputs["label_rois"] = fname_presuffix(
                 f, prefix=os.path.join("label", "catROIs_"), suffix=".xml", use_ext=False
             )
-        else:
             outputs["label_roi"] = fname_presuffix(
                 f, prefix=os.path.join("label", "catROI_"), suffix=".xml", use_ext=False
             )
