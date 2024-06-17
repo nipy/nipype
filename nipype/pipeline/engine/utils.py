@@ -689,7 +689,7 @@ def evaluate_connect_function(function_source, args, first_arg):
     try:
         output_value = func(first_arg, *list(args))
     except NameError as e:
-        if e.args[0].startswith("global name") and e.args[0].endswith("is not defined"):
+        if e.args[0].endswith("is not defined"):
             e.args = (
                 e.args[0],
                 (
