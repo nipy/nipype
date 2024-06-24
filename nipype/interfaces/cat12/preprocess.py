@@ -9,6 +9,7 @@ from nipype.interfaces.base import (
     isdefined,
     File,
     Str,
+    ImageFile,
 )
 from nipype.interfaces.cat12.base import Cell
 
@@ -24,7 +25,7 @@ from nipype.utils.filemanip import split_filename, fname_presuffix
 
 class CAT12SegmentInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(
-        ImageFileSPM(exists=True),
+        ImageFile(exists=True),
         field="data",
         desc="file to segment",
         mandatory=True,
@@ -560,6 +561,8 @@ class CAT12Segment(SPMCommand):
         """Convert input to appropriate format for spm"""
         if opt == "in_files":
             if isinstance(val, list):
+                if '.nii.gz' in val[0]:
+                    return scans_for_fnames(val, keep4d=True)
                 return scans_for_fnames(val)
             else:
                 return scans_for_fname(val)
@@ -572,7 +575,8 @@ class CAT12Segment(SPMCommand):
         outputs = self._outputs().get()
         f = self.inputs.in_files[0]
         pth, base, ext = split_filename(f)
-
+        if '.nii.gz' in f:
+            f = f[:-3]
         outputs["mri_images"] = [
             str(mri) for mri in Path(pth).glob("mri/*") if mri.is_file()
         ]
