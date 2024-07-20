@@ -30,7 +30,6 @@ def test_Generate5tt_inputs():
         ),
         hippocampi=dict(
             argstr="-hippocampi %s",
-            usedefault=False,
         ),
         in_bval=dict(
             extensions=None,
