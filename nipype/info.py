@@ -148,6 +148,7 @@ REQUIRES = [
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
     "looseversion!=1.2",
+    "puremagic",
 ]
 
 TESTS_REQUIRES = [
