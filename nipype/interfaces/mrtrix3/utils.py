@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
-
 import os.path as op
 
 from ...utils.filemanip import split_filename
@@ -17,6 +16,43 @@ from ..base import (
     isdefined,
 )
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
+
+
+class TckSift2InputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr="%s", mandatory=True, position=-3, desc="input streamlines file")
+    in_fod = File(exists=True, argstr="%s", mandatory=True, position=-2, desc="input FOD file")
+    out_weights = File(argstr="%s", mandatory=True, position=-1, desc="output weights file")
+
+
+class TckSift2OutputSpec(TraitedSpec):
+    out_weights = File(exists=True, desc="output weights file")
+
+
+class TckSift2(CommandLine):
+    """
+    Interface for MRTrix's tcksift2 command
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> tcksift2 = mrt.TckSift2()
+    >>> tcksift2.inputs.in_file = 'streamlines.tck'
+    >>> tcksift2.inputs.in_fod = 'fod.mif'
+    >>> tcksift2.inputs.out_weights = 'streamlines_weights.txt'
+    >>> tcksift2.cmdline                               # doctest: +ELLIPSIS
+    'tcksift2 streamlines.tck fod.mif streamlines_weights.txt'
+    >>> tcksift2.run()                                 # doctest: +SKIP
+    """
+        
+    _cmd = 'tcksift2'
+    input_spec = TckSift2InputSpec
+    output_spec = TckSift2OutputSpec
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_weights"] = op.abspath(self.inputs.out_weights)
+        return outputs
 
 
 class BrainMaskInputSpec(MRTrix3BaseInputSpec):
