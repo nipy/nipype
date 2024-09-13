@@ -11,11 +11,12 @@ from contextlib import AbstractContextManager
 from copy import deepcopy
 from textwrap import wrap
 import re
-from datetime import datetime as dt, UTC
+from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 import platform
 
 from ... import logging, config
+from ...utils.datetime import utcnow
 from ...utils.misc import is_container, rgetcwd
 from ...utils.filemanip import md5, hash_infile
 
@@ -72,7 +73,7 @@ class RuntimeContext(AbstractContextManager):
         if self._runtime.redirect_x:
             self._runtime.environ["DISPLAY"] = config.get_display()
 
-        self._runtime.startTime = dt.isoformat(dt.now(UTC))
+        self._runtime.startTime = dt.isoformat(utcnow())
         self._resmon.start()
         # TODO: Perhaps clean-up path and ensure it exists?
         os.chdir(self._runtime.cwd)
@@ -80,7 +81,7 @@ class RuntimeContext(AbstractContextManager):
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         """Tear-down interface execution."""
-        self._runtime.endTime = dt.isoformat(dt.now(UTC))
+        self._runtime.endTime = dt.isoformat(utcnow())
         timediff = parseutc(self._runtime.endTime) - parseutc(self._runtime.startTime)
         self._runtime.duration = (
             timediff.days * 86400 + timediff.seconds + timediff.microseconds / 1e6

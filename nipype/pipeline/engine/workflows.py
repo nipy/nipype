@@ -8,7 +8,6 @@ The `Workflow` class provides core functionality for batch processing.
 import os
 import os.path as op
 import sys
-from datetime import datetime, UTC
 from copy import deepcopy
 import pickle
 import shutil
@@ -16,6 +15,7 @@ import shutil
 import numpy as np
 
 from ... import config, logging
+from ...utils.datetime import utcnow
 from ...utils.misc import str2bool
 from ...utils.functions import getsource, create_function_from_source
 
@@ -627,7 +627,7 @@ connected.
         if str2bool(self.config["execution"]["create_report"]):
             self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash, config=self.config)
-        datestr = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
+        datestr = utcnow().strftime("%Y%m%dT%H%M%S")
         if str2bool(self.config["execution"]["write_provenance"]):
             prov_base = op.join(self.base_dir, "workflow_provenance_%s" % datestr)
             logger.info("Provenance file prefix: %s" % prov_base)
