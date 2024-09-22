@@ -2302,7 +2302,7 @@ class SQLiteSink(LibraryBaseInterface, IOBase):
         super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, list(self._input_names))
 
     def _list_outputs(self):
         """Execute this module."""
@@ -2364,7 +2364,7 @@ class MySQLSink(IOBase):
         super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, list(self._input_names))
 
     def _list_outputs(self):
         """Execute this module."""

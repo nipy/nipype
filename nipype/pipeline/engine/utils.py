@@ -1046,7 +1046,7 @@ def generate_expanded_graph(graph_in):
         logger.debug("node: %s iterables: %s", inode, iterables)
 
         # collect the subnodes to expand
-        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        subnodes = list(dfs_preorder(graph_in, inode))
         prior_prefix = [re.findall(r"\.(.)I", s._id) for s in subnodes if s._id]
         prior_prefix = sorted([l for item in prior_prefix for l in item])
         if not prior_prefix:

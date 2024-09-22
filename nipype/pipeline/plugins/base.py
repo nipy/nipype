@@ -455,7 +455,7 @@ class DistributedPluginBase(PluginBase):
             dfs_preorder = nx.dfs_preorder
         except AttributeError:
             dfs_preorder = nx.dfs_preorder_nodes
-        subnodes = [s for s in dfs_preorder(graph, self.procs[jobid])]
+        subnodes = list(dfs_preorder(graph, self.procs[jobid]))
         for node in subnodes:
             idx = self.procs.index(node)
             self.proc_done[idx] = True

@@ -95,7 +95,7 @@ class Function(IOBase):
         self.inputs.on_trait_change(self._set_function_string, "function_str")
         self._input_names = ensure_list(input_names)
         self._output_names = ensure_list(output_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, list(self._input_names))
         self.imports = imports
         self._out = {}
         for name in self._output_names:

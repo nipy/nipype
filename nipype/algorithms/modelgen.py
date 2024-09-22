@@ -161,7 +161,7 @@ def bids_gen_info(
     for bids_event_file in bids_event_files:
         with open(bids_event_file) as f:
             f_events = csv.DictReader(f, skipinitialspace=True, delimiter="\t")
-            events = [{k: v for k, v in row.items()} for row in f_events]
+            events = [dict(row.items()) for row in f_events]
         if not condition_column:
             condition_column = "_trial_type"
             for i in events:

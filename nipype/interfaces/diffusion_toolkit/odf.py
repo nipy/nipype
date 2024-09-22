@@ -98,11 +98,11 @@ class HARDIMat(CommandLine):
 
     def _create_gradient_matrix(self, bvecs_file, bvals_file):
         _gradient_matrix_file = "gradient_matrix.txt"
-        bvals = [val for val in re.split(r"\s+", open(bvals_file).readline().strip())]
+        bvals = list(re.split(r"\s+", open(bvals_file).readline().strip()))
         bvecs_f = open(bvecs_file)
-        bvecs_x = [val for val in re.split(r"\s+", bvecs_f.readline().strip())]
-        bvecs_y = [val for val in re.split(r"\s+", bvecs_f.readline().strip())]
-        bvecs_z = [val for val in re.split(r"\s+", bvecs_f.readline().strip())]
+        bvecs_x = list(re.split(r"\s+", bvecs_f.readline().strip()))
+        bvecs_y = list(re.split(r"\s+", bvecs_f.readline().strip()))
+        bvecs_z = list(re.split(r"\s+", bvecs_f.readline().strip()))
         bvecs_f.close()
         gradient_matrix_f = open(_gradient_matrix_file, "w")
         for i in range(len(bvals)):
