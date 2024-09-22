@@ -10,7 +10,6 @@ import networkx as nx
 
 from ... import logging
 from ..base import (
-    BaseInterface,
     LibraryBaseInterface,
     BaseInterfaceInputSpec,
     traits,
@@ -19,7 +18,6 @@ from ..base import (
     Directory,
     isdefined,
 )
-from .base import have_cmp
 
 iflogger = logging.getLogger("nipype.interface")
 

@@ -36,7 +36,6 @@ from ...utils.filemanip import (
 from ...interfaces.base import (
     traits,
     InputMultiPath,
-    CommandLine,
     Undefined,
     DynamicTraitedSpec,
     Bunch,

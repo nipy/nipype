@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import os
 
 import pytest
 from nipype.testing import example_data

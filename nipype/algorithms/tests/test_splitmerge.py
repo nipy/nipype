@@ -6,8 +6,6 @@ from nipype.testing import example_data
 def test_split_and_merge(tmpdir):
     import numpy as np
     import nibabel as nb
-    import os.path as op
-    import os
 
     from nipype.algorithms.misc import split_rois, merge_rois
 

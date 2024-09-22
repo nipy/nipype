@@ -85,7 +85,6 @@ class RESTORE(DipyDiffusionInterface):
     def _run_interface(self, runtime):
         from scipy.special import gamma
         from dipy.reconst.dti import TensorModel
-        import gc
 
         img = nb.load(self.inputs.in_file)
         hdr = img.header.copy()
@@ -222,7 +221,6 @@ class EstimateResponseSH(DipyDiffusionInterface):
     output_spec = EstimateResponseSHOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.core.gradients import GradientTable
         from dipy.reconst.dti import fractional_anisotropy, mean_diffusivity
         from dipy.reconst.csdeconv import recursive_response, auto_response
 

@@ -1,5 +1,4 @@
 import os
-from time import sleep
 
 import nipype.interfaces.base as nib
 import pytest

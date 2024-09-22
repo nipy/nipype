@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from copy import deepcopy
-import os
 
 from nibabel import Nifti1Image
 import numpy as np

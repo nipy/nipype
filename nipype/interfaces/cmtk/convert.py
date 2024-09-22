@@ -2,7 +2,6 @@ import os
 import os.path as op
 import datetime
 import string
-import networkx as nx
 
 from ...utils.filemanip import split_filename
 from ..base import (
@@ -13,7 +12,7 @@ from ..base import (
     InputMultiPath,
     isdefined,
 )
-from .base import CFFBaseInterface, have_cfflib
+from .base import CFFBaseInterface
 
 
 def _read_pickle(fname):

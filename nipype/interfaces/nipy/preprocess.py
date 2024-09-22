@@ -5,7 +5,7 @@ import numpy as np
 
 from ...utils.filemanip import split_filename, fname_presuffix
 
-from .base import NipyBaseInterface, have_nipy
+from .base import NipyBaseInterface
 from ..base import (
     TraitedSpec,
     traits,

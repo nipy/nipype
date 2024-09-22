@@ -38,7 +38,7 @@ from ..base import (
 )
 from ..base.traits_extension import NoDefaultSpecified
 from ..matlab import MatlabCommand
-from ...external.due import due, Doi, BibTeX
+from ...external.due import BibTeX
 
 __docformat__ = "restructuredtext"
 logger = logging.getLogger("nipype.interface")

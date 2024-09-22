@@ -12,7 +12,6 @@ from ..base import (
     InputMultiObject,
     TraitedSpec,
     Undefined,
-    isdefined,
     traits,
     Tuple,
 )

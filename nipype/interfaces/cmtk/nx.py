@@ -18,7 +18,6 @@ from ..base import (
     OutputMultiPath,
     isdefined,
 )
-from .base import have_cmp
 
 iflogger = logging.getLogger("nipype.interface")
 

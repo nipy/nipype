@@ -15,7 +15,6 @@ import atexit
 from warnings import warn
 from looseversion import LooseVersion
 import configparser
-import numpy as np
 
 from simplejson import load, dump
 
