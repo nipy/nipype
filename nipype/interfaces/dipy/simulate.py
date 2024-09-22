@@ -344,7 +344,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
         bvecs = np.vstack((bvecs, vertices))
         bvals = np.hstack((bvals, v * np.ones(vertices.shape[0])))
 
-    for i in range(0, nb0s):
+    for i in range(nb0s):
         bvals = bvals.tolist()
         bvals.insert(0, 0)
 

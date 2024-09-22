@@ -714,7 +714,7 @@ class MergeCSVFiles(BaseInterface):
                 mx = shape[0]
             else:
                 mx = 1
-            for idx in range(0, mx):
+            for idx in range(mx):
                 extrafieldlist.append(self.inputs.extra_field)
             iflogger.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist

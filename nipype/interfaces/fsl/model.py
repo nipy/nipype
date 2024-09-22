@@ -259,7 +259,7 @@ class Level1Design(BaseInterface):
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
             initial = ev_ortho.substitute(c0=i, c1=0, orthogonal=1)
-            for j in range(0, num_evs[0] + 1):
+            for j in range(num_evs[0] + 1):
                 try:
                     orthogonal = int(orthogonalization[i][j])
                 except (KeyError, TypeError, ValueError, IndexError):

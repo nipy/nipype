@@ -72,7 +72,7 @@ def length(xyz, along=False):
 def get_rois_crossed(pointsmm, roiData, voxelSize):
     n_points = len(pointsmm)
     rois_crossed = []
-    for j in range(0, n_points):
+    for j in range(n_points):
         # store point
         x = int(pointsmm[j, 0] / float(voxelSize[0]))
         y = int(pointsmm[j, 1] / float(voxelSize[1]))
@@ -894,7 +894,7 @@ class ROIGen(BaseInterface):
             iflogger.info("Number of labels in LUT: %s", numLUTLabels)
             LUTlabelDict = {}
             """ Create dictionary for input LUT table"""
-            for labels in range(0, numLUTLabels):
+            for labels in range(numLUTLabels):
                 LUTlabelDict[LUTlabelsRGBA[labels][0]] = [
                     LUTlabelsRGBA[labels][1],
                     LUTlabelsRGBA[labels][2],
