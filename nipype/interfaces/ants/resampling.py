@@ -134,7 +134,7 @@ ants_Affine.txt'
         outputs = self._outputs().get()
         _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
         outputs["output_image"] = os.path.join(
-            os.getcwd(), "".join((name, self.inputs.out_postfix, ext))
+            os.getcwd(), f"{name}{self.inputs.out_postfix}{ext}"
         )
         return outputs
 
@@ -254,7 +254,7 @@ ants_Affine.txt'
     def _gen_filename(self, name):
         if name == "output_image":
             _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
-            return "".join((name, self.inputs.out_postfix, ext))
+            return f"{name}{self.inputs.out_postfix}{ext}"
         return None
 
     def _format_arg(self, opt, spec, val):

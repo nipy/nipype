@@ -145,8 +145,8 @@ class ExtractAdditionalSurfaceParameters(SPMCommand):
                             outputs[name_hemisphere] = []
                         if not isdefined(outputs[all_files_hemisphere]):
                             outputs[all_files_hemisphere] = []
-                        generated_filename = ".".join(
-                            [hemisphere, parameter_name, original_filename]
+                        generated_filename = (
+                            f"{hemisphere}.{parameter_name}.{original_filename}"
                         )
                         outputs[name_hemisphere].append(
                             os.path.join(pth, generated_filename)

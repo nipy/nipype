@@ -237,7 +237,7 @@ class FSLCommand(CommandLine):
             ext = Info.output_type_to_ext(self.inputs.output_type)
         if change_ext:
             if suffix:
-                suffix = "".join((suffix, ext))
+                suffix = f"{suffix}{ext}"
             else:
                 suffix = ext
         if suffix is None:

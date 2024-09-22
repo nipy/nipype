@@ -394,10 +394,7 @@ connected.
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 outlist.extend(
-                    [
-                        ".".join((node.name, nodename))
-                        for nodename in node.list_node_names()
-                    ]
+                    f"{node.name}.{nodename}" for nodename in node.list_node_names()
                 )
             else:
                 outlist.append(node.name)
@@ -931,7 +928,7 @@ connected.
             if isinstance(node, Workflow):
                 node._reset_hierarchy()
                 for innernode in node._graph.nodes():
-                    innernode._hierarchy = ".".join((self.name, innernode._hierarchy))
+                    innernode._hierarchy = f"{self.name}.{innernode._hierarchy}"
             else:
                 node._hierarchy = self.name
 
@@ -995,7 +992,7 @@ connected.
                 # logger.debug('expanding workflow: %s', node)
                 node._generate_flatgraph()
                 for innernode in node._graph.nodes():
-                    innernode._hierarchy = ".".join((self.name, innernode._hierarchy))
+                    innernode._hierarchy = f"{self.name}.{innernode._hierarchy}"
                 self._graph.add_nodes_from(node._graph.nodes())
                 self._graph.add_edges_from(node._graph.edges(data=True))
         if nodes2remove:

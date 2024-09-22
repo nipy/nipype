@@ -1801,7 +1801,7 @@ def getFileName(inputName, suffix):
     dotRegex = regex.compile("[^.]+")
     # extract between last slash and first period
     inputNoExtension = dotRegex.findall(fullInput)[0]
-    return os.path.abspath("".join((inputNoExtension, suffix)))
+    return os.path.abspath(f"{inputNoExtension}{suffix}")
 
 
 def l_outputs(self):

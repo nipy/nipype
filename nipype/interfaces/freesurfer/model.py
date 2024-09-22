@@ -674,7 +674,7 @@ class Binarize(FSCommand):
                 outfile = fname_presuffix(
                     self.inputs.in_file,
                     newpath=os.getcwd(),
-                    suffix=".".join(("_thresh", self.inputs.out_type)),
+                    suffix=f"_thresh.{self.inputs.out_type}",
                     use_ext=False,
                 )
             else:

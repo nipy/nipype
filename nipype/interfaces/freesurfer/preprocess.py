@@ -2541,7 +2541,7 @@ class FitMSParams(FSCommand):
                     cmd = " ".join((cmd, "-fa %.1f" % self.inputs.flip_list[i]))
                 if isdefined(self.inputs.xfm_list):
                     cmd = " ".join((cmd, "-at %s" % self.inputs.xfm_list[i]))
-                cmd = " ".join((cmd, file))
+                cmd = f"{cmd} {file}"
             return cmd
         return super()._format_arg(name, spec, value)
 
