@@ -72,7 +72,7 @@ class Function(IOBase):
 
         super().__init__(**inputs)
         if function:
-            if hasattr(function, "__call__"):
+            if callable(function):
                 try:
                     self.inputs.function_str = getsource(function)
                 except OSError:
@@ -103,7 +103,7 @@ class Function(IOBase):
 
     def _set_function_string(self, obj, name, old, new):
         if name == "function_str":
-            if hasattr(new, "__call__"):
+            if callable(new):
                 function_source = getsource(new)
                 fninfo = new.__code__
             elif isinstance(new, (str, bytes)):
