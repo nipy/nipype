@@ -287,7 +287,9 @@ class TestCompCor:
                 components_metadata = [
                     line.rstrip().split("\t") for line in metadata_file
                 ]
-                components_metadata = dict(zip(components_metadata[0], components_metadata[1]))
+                components_metadata = dict(
+                    zip(components_metadata[0], components_metadata[1])
+                )
                 assert components_metadata == expected_metadata
 
         return ccresult
