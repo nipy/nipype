@@ -2717,16 +2717,14 @@ class JSONFileGrabber(IOBase):
     def _list_outputs(self):
         import simplejson
 
-        outputs = {}
         if isdefined(self.inputs.in_file):
             with open(self.inputs.in_file) as f:
-                data = simplejson.load(f)
+                outputs = simplejson.load(f)
 
-            if not isinstance(data, dict):
+            if not isinstance(outputs, dict):
                 raise RuntimeError("JSON input has no dictionary structure")
-
-            for key, value in list(data.items()):
-                outputs[key] = value
+        else:
+            outputs = {}
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
