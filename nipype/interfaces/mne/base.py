@@ -138,7 +138,7 @@ class WatershedBEM(FSCommand):
                     else:
                         raise TypeError
                     outputs[k] = out_files
-                    if not k.rfind("surface") == -1:
+                    if k.rfind("surface") != -1:
                         mesh_paths.append(out_files)
         outputs["mesh_files"] = mesh_paths
         return outputs

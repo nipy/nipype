@@ -167,7 +167,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             data = ntwk.edge[edge[0]][edge[1]]
             if ntwk.edge[edge[0]][edge[1]]["count"] >= count_to_keep_edge:
                 for key in list(data.keys()):
-                    if not key == "count":
+                    if key != "count":
                         data[key] = data[key] / len(in_files)
                 ntwk.edge[edge[0]][edge[1]] = data
                 avg_ntwk.add_edge(edge[0], edge[1], **data)
@@ -184,7 +184,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         for edge in avg_edges:
             data = avg_ntwk.edge[edge[0]][edge[1]]
             for key in list(data.keys()):
-                if not key == "count":
+                if key != "count":
                     edge_dict[key] = np.zeros(
                         (avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes())
                     )
@@ -342,7 +342,7 @@ def add_node_data(node_array, ntwk):
     node_ntwk = nx.Graph()
     newdata = {}
     for idx, data in ntwk.nodes(data=True):
-        if not int(idx) == 0:
+        if int(idx) != 0:
             newdata["value"] = node_array[int(idx) - 1]
             data.update(newdata)
             node_ntwk.add_node(int(idx), **data)
@@ -354,7 +354,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     data = {}
     for x, row in enumerate(edge_array):
         for y in range(np.max(np.shape(edge_array[x]))):
-            if not edge_array[x, y] == 0:
+            if edge_array[x, y] != 0:
                 data["value"] = edge_array[x, y]
                 if data["value"] <= below or data["value"] >= above:
                     if edge_ntwk.has_edge(x + 1, y + 1):

@@ -152,7 +152,7 @@ class DcmStack(NiftiGeneratorBase):
         meta_filter = dcmstack.make_key_regex_filter(exclude_regexes, include_regexes)
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
-            if not imghdr.what(src_path) == "gif":
+            if imghdr.what(src_path) != "gif":
                 src_dcm = pydicom.dcmread(src_path, force=self.inputs.force_read)
                 stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)

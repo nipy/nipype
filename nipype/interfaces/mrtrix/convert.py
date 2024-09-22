@@ -116,7 +116,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             pts_str = fileobj.read(n_pts * bytesize)
             nan_str = fileobj.read(bytesize)
             if len(pts_str) < (n_pts * bytesize):
-                if not n_streams == stream_count:
+                if n_streams != stream_count:
                     raise nb.trackvis.HeaderError(
                         f"Expecting {stream_count} points, found only {n_streams}"
                     )

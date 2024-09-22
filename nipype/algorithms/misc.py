@@ -684,7 +684,7 @@ class MergeCSVFiles(BaseInterface):
 
         output_array = merge_csvs(self.inputs.in_files)
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
 
         out_file = op.abspath(name + ext)
@@ -725,7 +725,7 @@ class MergeCSVFiles(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
         out_file = op.abspath(name + ext)
         outputs["csv_file"] = out_file
@@ -771,7 +771,7 @@ class AddCSVColumn(BaseInterface):
     def _run_interface(self, runtime):
         in_file = open(self.inputs.in_file)
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
         out_file = op.abspath(name + ext)
 
@@ -791,7 +791,7 @@ class AddCSVColumn(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
         out_file = op.abspath(name + ext)
         outputs["csv_file"] = out_file

@@ -77,7 +77,7 @@ def get_rois_crossed(pointsmm, roiData, voxelSize):
         x = int(pointsmm[j, 0] / float(voxelSize[0]))
         y = int(pointsmm[j, 1] / float(voxelSize[1]))
         z = int(pointsmm[j, 2] / float(voxelSize[2]))
-        if not roiData[x, y, z] == 0:
+        if roiData[x, y, z] != 0:
             rois_crossed.append(roiData[x, y, z])
     rois_crossed = list(
         dict.fromkeys(rois_crossed).keys()
@@ -91,7 +91,7 @@ def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
         for idx_i, roi_i in enumerate(rois_crossed):
             for idx_j, roi_j in enumerate(rois_crossed):
                 if idx_i > idx_j:
-                    if not roi_i == roi_j:
+                    if roi_i != roi_j:
                         connectivity_matrix[roi_i - 1, roi_j - 1] += 1
     connectivity_matrix = connectivity_matrix + connectivity_matrix.T
     return connectivity_matrix
@@ -371,7 +371,7 @@ def cmat(
             di["fiber_length_mean"] = 0
             di["fiber_length_median"] = 0
             di["fiber_length_std"] = 0
-        if not u == v:  # Fix for self loop problem
+        if u != v:  # Fix for self loop problem
             G.add_edge(u, v, **di)
             if "fiblist" in d:
                 numfib.add_edge(u, v, weight=di["number_of_fibers"])
@@ -400,7 +400,7 @@ def cmat(
             pickle.dump(I, f, pickle.HIGHEST_PROTOCOL)
 
     path, name, ext = split_filename(matrix_mat_name)
-    if not ext == ".mat":
+    if ext != ".mat":
         ext = ".mat"
         matrix_mat_name = matrix_mat_name + ext
 
@@ -608,7 +608,7 @@ class CreateMatrix(BaseInterface):
 
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
-        if not ext == ".mat":
+        if ext != ".mat":
             ext = ".mat"
             matrix_mat_file = matrix_mat_file + ext
 
@@ -673,7 +673,7 @@ class CreateMatrix(BaseInterface):
 
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
-        if not ext == ".mat":
+        if ext != ".mat":
             ext = ".mat"
             matrix_mat_file = matrix_mat_file + ext
 
