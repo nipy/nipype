@@ -248,7 +248,7 @@ def cmat(
                     axis=1,
                 )
             )
-            G.nodes[int(u)]["dn_position"] = tuple([xyz[0], xyz[2], -xyz[1]])
+            G.nodes[int(u)]["dn_position"] = (xyz[0], xyz[2], -xyz[1])
 
     if intersections:
         iflogger.info("Filtering tractography from intersections")
@@ -1070,7 +1070,7 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
                 np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1
             )
         )
-        G.nodes[int(u)]["dn_position"] = tuple([xyz[0], xyz[2], -xyz[1]])
+        G.nodes[int(u)]["dn_position"] = (xyz[0], xyz[2], -xyz[1])
     with open(out_filename, 'wb') as f:
         pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
     return out_filename
