@@ -20,7 +20,6 @@ except ImportError:
         "Pandas not found; in order for full functionality of this module "
         "install the pandas package"
     )
-    pass
 
 
 def create_event_dict(start_time, nodes_list):

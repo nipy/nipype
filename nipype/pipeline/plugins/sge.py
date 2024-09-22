@@ -184,7 +184,6 @@ class QstatSubstitute:
             except:
                 sge_debug_print("NOTE: qacct call failed")
                 time.sleep(5)
-                pass
         return is_complete
 
     def _parse_qstat_job_list(self, xml_job_list):
@@ -259,7 +258,6 @@ class QstatSubstitute:
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
                     )
-                    pass
             if self._task_dictionary[dictionary_job].is_initializing():
                 is_completed = self._qacct_verified_complete(dictionary_job)
                 if is_completed:
@@ -271,7 +269,6 @@ class QstatSubstitute:
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
                     )
-                    pass
 
     def _run_qstat(self, reason_for_qstat, force_instant=True):
         """request all job information for the current user in xmlformat.
@@ -320,7 +317,6 @@ class QstatSubstitute:
                 )
                 sge_debug_print(exception_message)
                 time.sleep(5)
-                pass
 
     def print_dictionary(self):
         """For debugging"""

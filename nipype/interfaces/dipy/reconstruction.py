@@ -136,7 +136,6 @@ class RESTORE(DipyDiffusionInterface):
             )
         except:
             bias = 0.0
-            pass
 
         sigma = mean_std * (1 + bias)
 

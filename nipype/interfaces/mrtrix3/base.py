@@ -103,7 +103,6 @@ class MRTrix3Base(CommandLine):
                 value = cpu_count()
             except:
                 iflogger.warning("Number of threads could not be computed")
-                pass
             return trait_spec.argstr % value
 
         if name == "in_bvec":
