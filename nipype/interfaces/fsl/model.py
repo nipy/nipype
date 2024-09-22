@@ -318,7 +318,7 @@ class Level1Design(BaseInterface):
 
                     for fconidx in ftest_idx:
                         fval = 0
-                        if con[0] in con_map.keys() and fconidx in con_map[con[0]]:
+                        if con[0] in con_map and fconidx in con_map[con[0]]:
                             fval = 1
                         ev_txt += contrast_ftest_element.substitute(
                             cnum=ftest_idx.index(fconidx) + 1,
