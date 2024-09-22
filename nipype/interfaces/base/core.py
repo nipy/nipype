@@ -486,7 +486,7 @@ Output trait(s) %s not available in version %s of interface %s.\
         if not overwrite:
             def_inputs = list(self.inputs.get_traitsfree().keys())
 
-        new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
+        new_inputs = list(set(inputs_dict.keys()) - set(def_inputs))
         for key in new_inputs:
             if hasattr(self.inputs, key):
                 setattr(self.inputs, key, inputs_dict[key])

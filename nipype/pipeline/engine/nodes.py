@@ -240,7 +240,7 @@ class Node(EngineBase):
     @needed_outputs.setter
     def needed_outputs(self, new_outputs):
         """Needed outputs changes the hash, refresh if changed"""
-        new_outputs = sorted(list(set(new_outputs or [])))
+        new_outputs = sorted(set(new_outputs or []))
         if new_outputs != self._needed_outputs:
             # Reset hash
             self._hashvalue = None

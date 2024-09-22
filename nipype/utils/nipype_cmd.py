@@ -13,7 +13,7 @@ def listClasses(module=None):
         __import__(module)
         pkg = sys.modules[module]
         print("Available Interfaces:")
-        for k, v in sorted(list(pkg.__dict__.items())):
+        for k, v in sorted(pkg.__dict__.items()):
             if inspect.isclass(v) and issubclass(v, Interface):
                 print("\t%s" % k)
 
