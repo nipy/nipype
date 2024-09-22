@@ -53,7 +53,7 @@ def trim(docstring, marker=None):
             if (
                 marker is not None
                 and stripped
-                and all([s == stripped[0] for s in stripped])
+                and all(s == stripped[0] for s in stripped)
                 and stripped[0] not in [":"]
             ):
                 line = line.replace(stripped[0], marker)

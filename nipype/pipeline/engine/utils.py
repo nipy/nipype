@@ -1485,7 +1485,7 @@ def clean_working_directory(
             if f not in needed_files:
                 if not needed_dirs:
                     files2remove.append(f)
-                elif not any([f.startswith(dname) for dname in needed_dirs]):
+                elif not any(f.startswith(dname) for dname in needed_dirs):
                     files2remove.append(f)
     else:
         if not str2bool(config["execution"]["keep_inputs"]):

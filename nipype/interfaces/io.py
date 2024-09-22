@@ -1022,7 +1022,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(simplify_list(outfiles))
-            if any([val is None for val in outputs[key]]):
+            if any(val is None for val in outputs[key]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -1297,7 +1297,7 @@ class DataGrabber(IOBase):
             if self.inputs.drop_blank_outputs:
                 outputs[key] = [x for x in outputs[key] if x is not None]
             else:
-                if any([val is None for val in outputs[key]]):
+                if any(val is None for val in outputs[key]):
                     outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -2642,7 +2642,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                     outputs[key].append(self._get_files_over_ssh(filledtemplate))
 
             # disclude where there was any invalid matches
-            if any([val is None for val in outputs[key]]):
+            if any(val is None for val in outputs[key]):
                 outputs[key] = []
 
             # no outputs is None, not empty list

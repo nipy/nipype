@@ -1283,7 +1283,7 @@ class MapNode(Node):
                     )
                 setattr(finalresult.outputs, key, values)
 
-        if returncode and any([code is not None for code in returncode]):
+        if returncode and any(code is not None for code in returncode):
             msg = []
             for i, code in enumerate(returncode):
                 if code is not None:

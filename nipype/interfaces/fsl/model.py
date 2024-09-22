@@ -1503,8 +1503,8 @@ class MultipleRegressDesign(BaseInterface):
         regs = sorted(self.inputs.regressors.keys())
         nwaves = len(regs)
         npoints = len(self.inputs.regressors[regs[0]])
-        ntcons = sum([1 for con in self.inputs.contrasts if con[1] == "T"])
-        nfcons = sum([1 for con in self.inputs.contrasts if con[1] == "F"])
+        ntcons = sum(1 for con in self.inputs.contrasts if con[1] == "T")
+        nfcons = sum(1 for con in self.inputs.contrasts if con[1] == "F")
         # write mat file
         mat_txt = ["/NumWaves       %d" % nwaves, "/NumPoints      %d" % npoints]
         ppheights = []
@@ -1591,7 +1591,7 @@ class MultipleRegressDesign(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        nfcons = sum([1 for con in self.inputs.contrasts if con[1] == "F"])
+        nfcons = sum(1 for con in self.inputs.contrasts if con[1] == "F")
         for field in list(outputs.keys()):
             if ("fts" in field) and (nfcons == 0):
                 continue

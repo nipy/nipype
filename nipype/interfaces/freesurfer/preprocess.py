@@ -692,11 +692,11 @@ class DICOMConvert(FSCommand):
             if self.inputs.seq_list:
                 if self.inputs.ignore_single_slice:
                     if (int(s[8]) > 1) and any(
-                        [s[12].startswith(sn) for sn in self.inputs.seq_list]
+                        s[12].startswith(sn) for sn in self.inputs.seq_list
                     ):
                         runs.append(int(s[2]))
                 else:
-                    if any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
+                    if any(s[12].startswith(sn) for sn in self.inputs.seq_list):
                         runs.append(int(s[2]))
             else:
                 runs.append(int(s[2]))
