@@ -54,7 +54,7 @@ import os\n\n\n"""
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
     for k, v in code_struct.items():
-        if isinstance(v, str) or isinstance(v, (str, bytes)):
+        if isinstance(v, (str, bytes)):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -63,7 +63,7 @@ def crawl_code_struct(code_struct, package_dir):
             l1 = {}
             l2 = {}
             for key in list(v.keys()):
-                if isinstance(v[key], str) or isinstance(v[key], (str, bytes)):
+                if isinstance(v[key], (str, bytes)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]

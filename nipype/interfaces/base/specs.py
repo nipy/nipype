@@ -177,7 +177,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
     def _clean_container(self, objekt, undefinedval=None, skipundefined=False):
         """Convert a traited object into a pure python representation."""
-        if isinstance(objekt, TraitDictObject) or isinstance(objekt, dict):
+        if isinstance(objekt, (TraitDictObject, dict)):
             out = {}
             for key, val in list(objekt.items()):
                 if isdefined(val):
@@ -185,11 +185,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (
-            isinstance(objekt, TraitListObject)
-            or isinstance(objekt, list)
-            or isinstance(objekt, tuple)
-        ):
+        elif isinstance(objekt, (TraitListObject, list, tuple)):
             out = []
             for val in objekt:
                 if isdefined(val):
