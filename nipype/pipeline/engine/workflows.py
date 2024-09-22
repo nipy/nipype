@@ -204,7 +204,7 @@ connected.
                         ".io" in str(srcnode._interface.__class__)
                         or any(
                             ".io" in str(val)
-                             for val in srcnode._interface.__class__.__bases__
+                            for val in srcnode._interface.__class__.__bases__
                         )
                     )
                 ):
