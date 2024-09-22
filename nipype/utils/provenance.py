@@ -120,7 +120,7 @@ def _get_sorteddict(object, dictwithhash=False):
             else:
                 out = hash
         elif isinstance(object, float):
-            out = f"%.10f"
+            out = f"{object:.10f}"
         else:
             out = object
     return out
