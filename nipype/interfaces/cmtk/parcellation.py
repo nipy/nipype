@@ -23,7 +23,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
-    import cmp
+    from cmp.configuration import PipelineConfiguration
     from cmp.util import runCmd
 
     iflogger.info("Create the cortical labels necessary for our ROIs")
@@ -31,7 +31,7 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     fs_label_dir = op.join(op.join(subjects_dir, subject_id), "label")
     output_dir = op.abspath(op.curdir)
     paths = []
-    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config = PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
     for hemi in ["lh", "rh"]:
         spath = (
@@ -332,13 +332,13 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
 def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
     """Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume."""
-    import cmp
+    from cmp.configuration import PipelineConfiguration
     from cmp.util import runCmd
 
     iflogger.info("Create the ROIs:")
     output_dir = op.abspath(op.curdir)
     fs_dir = op.join(subjects_dir, subject_id)
-    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config = PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
     log = cmp_config.get_logger()
     parval = cmp_config._get_lausanne_parcellation("Lausanne2008")[parcellation_name]
@@ -467,12 +467,12 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
 
 
 def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
-    import cmp
+    from cmp.configuration import PipelineConfiguration
     import scipy.ndimage.morphology as nd
 
     iflogger.info("Create white matter mask")
     fs_dir = op.join(subjects_dir, subject_id)
-    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config = PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
     pgpath = cmp_config._get_lausanne_parcellation("Lausanne2008")[parcellation_name][
         "node_information_graphml"
@@ -618,10 +618,11 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 def crop_and_move_datasets(
     subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file, dilation
 ):
+    from cmp.configuration import PipelineConfiguration
     from cmp.util import runCmd
 
     fs_dir = op.join(subjects_dir, subject_id)
-    cmp_config = cmp.configuration.PipelineConfiguration()
+    cmp_config = PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
     log = cmp_config.get_logger()
     output_dir = op.abspath(op.curdir)
