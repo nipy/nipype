@@ -326,6 +326,4 @@ class AFNIPythonCommand(AFNICommand):
 
 def no_afni():
     """Check whether AFNI is not available."""
-    if Info.version() is None:
-        return True
-    return False
+    return Info.version() is None
