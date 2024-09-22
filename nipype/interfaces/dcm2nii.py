@@ -471,9 +471,7 @@ class Dcm2niix(CommandLine):
         for filename in filenames:
             # search for relevant files, and sort accordingly
             for fl in search_files(filename, outtypes, self.inputs.crop):
-                if (
-                    fl.endswith((".nii", ".gz", ".nrrd", ".nhdr"))
-                ):
+                if fl.endswith((".nii", ".gz", ".nrrd", ".nhdr")):
                     outfiles.append(fl)
                 elif fl.endswith(".bval"):
                     bvals.append(fl)
