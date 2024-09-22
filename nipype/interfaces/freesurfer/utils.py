@@ -2094,7 +2094,7 @@ class CheckTalairachAlignmentInputSpec(FSTraitedSpec):
         usedefault=True,
         argstr="-T %.3f",
         desc="Talairach transforms for subjects with p-values <= T "
-        + "are considered as very unlikely default=0.010",
+        "are considered as very unlikely default=0.010",
     )
 
 
@@ -2483,8 +2483,7 @@ class FixTopologyInputSpec(FSTraitedSpec):
     copy_inputs = traits.Bool(
         mandatory=True,
         desc="If running as a node, set this to True "
-        + "otherwise, the topology fixing will be done "
-        + "in place.",
+        "otherwise, the topology fixing will be done in place.",
     )
 
     # optional
@@ -2737,9 +2736,8 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     )
     white = traits.String(argstr="-white %s", desc="White surface name")
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node  directory."
     )
 
 
@@ -3012,9 +3010,8 @@ class CurvatureStatsInputSpec(FSTraitedSpec):
     )
     write = traits.Bool(argstr="--writeCurvatureFiles", desc="Write curvature files")
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node  directory."
     )
 
 
@@ -3237,7 +3234,7 @@ class VolumeMaskInputSpec(FSTraitedSpec):
         exists=True,
         xor=["in_aseg"],
         desc="Implicit aseg.mgz segmentation. "
-        + "Specify a different aseg by using the 'in_aseg' input.",
+        "Specify a different aseg by using the 'in_aseg' input.",
     )
     subject_id = traits.String(
         "subject_id",
@@ -3257,12 +3254,11 @@ class VolumeMaskInputSpec(FSTraitedSpec):
     save_ribbon = traits.Bool(
         argstr="--save_ribbon",
         desc="option to save just the ribbon for the "
-        + "hemispheres in the format ?h.ribbon.mgz",
+        "hemispheres in the format ?h.ribbon.mgz",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the implicit input files to the "
-        + "node directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the implicit input files to the node directory."
     )
 
 
@@ -3431,9 +3427,8 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
         desc="Output annotation files's colortable to text file",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
     th3 = traits.Bool(
         argstr="-th3",
@@ -3623,9 +3618,8 @@ class ContrastInputSpec(FSTraitedSpec):
         exists=True, mandatory=True, desc="Implicit input file mri/rawavg.mgz"
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
 
 

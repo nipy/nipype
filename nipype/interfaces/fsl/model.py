@@ -2366,8 +2366,8 @@ class GLMInputSpec(FSLCommandInputSpec):
         position=2,
         desc=(
             "file name of the GLM design matrix (text time"
-            + " courses for temporal regression or an image"
-            + " file for spatial regression)"
+            " courses for temporal regression or an image"
+            " file for spatial regression)"
         ),
     )
     contrasts = File(
@@ -2381,7 +2381,7 @@ class GLMInputSpec(FSLCommandInputSpec):
         argstr="--des_norm",
         desc=(
             "switch on normalization of the design"
-            + " matrix columns to unit std deviation"
+            " matrix columns to unit std deviation"
         ),
     )
     dat_norm = traits.Bool(
