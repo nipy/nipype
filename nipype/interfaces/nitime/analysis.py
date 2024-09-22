@@ -142,15 +142,13 @@ class CoherenceAnalyzer(NitimeBaseInterface):
 
         """
         # Check that input conforms to expectations:
-        first_row = open(self.inputs.in_file).readline()
+        with open(self.inputs.in_file) as f:
+            first_row = f.readline()
         if not first_row[1].isalpha():
             raise ValueError(
                 "First row of in_file should contain ROI names as strings of characters"
             )
-
-        roi_names = (
-            open(self.inputs.in_file).readline().replace('"', "").strip("\n").split(",")
-        )
+        roi_names = first_row.replace('"', "").strip("\n").split(",")
         # Transpose, so that the time is the last dimension:
         data = np.loadtxt(self.inputs.in_file, skiprows=1, delimiter=",").T
 
@@ -255,16 +253,15 @@ class CoherenceAnalyzer(NitimeBaseInterface):
             tmp_f = tempfile.mkstemp()[1]
             np.savetxt(tmp_f, this[0], delimiter=",")
 
-            fid = open(
+            with open(
                 fname_presuffix(self.inputs.output_csv_file, suffix="_%s" % this[1]),
                 "w+",
-            )
-            # this writes ROIs as header line
-            fid.write("," + ",".join(self.ROIs) + "\n")
-            # this writes ROI and data to a line
-            for r, line in zip(self.ROIs, open(tmp_f)):
-                fid.write(f"{r},{line}")
-            fid.close()
+            ) as fid:
+                # this writes ROIs as header line
+                fid.write("," + ",".join(self.ROIs) + "\n")
+                # this writes ROI and data to a line
+                for r, line in zip(self.ROIs, open(tmp_f)):
+                    fid.write(f"{r},{line}")
 
     def _make_output_figures(self):
         """
