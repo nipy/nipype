@@ -3403,7 +3403,7 @@ class NlpFit(CommandLine):
                     + ".xfm"
                 )
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3502,7 +3502,7 @@ class XfmAvg(CommandLine):
                     + ".xfm"
                 )
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _gen_outfilename(self):
         return self._gen_filename("output_file")
@@ -3573,7 +3573,7 @@ class XfmInvert(CommandLine):
                     + ".xfm"
                 )
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _gen_outfilename(self):
         return self._gen_filename("output_file")
