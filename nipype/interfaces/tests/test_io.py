@@ -565,7 +565,7 @@ def test_freesurfersource():
 
 def test_freesurfersource_incorrectdir():
     fss = nio.FreeSurferSource()
-    with pytest.raises(TraitError) as err:
+    with pytest.raises(TraitError):
         fss.inputs.subjects_dir = "path/to/no/existing/directory"
 
 

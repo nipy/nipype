@@ -530,7 +530,7 @@ class DataSink(IOBase):
         try:
             import boto3
             import botocore
-        except ImportError as exc:
+        except ImportError:
             err_msg = "Boto3 package is not installed - install boto3 and try again."
             raise Exception(err_msg)
 
@@ -572,7 +572,7 @@ class DataSink(IOBase):
         # And try fetch the bucket with the name argument
         try:
             _get_head_bucket(s3_resource, bucket_name)
-        except Exception as exc:
+        except Exception:
             # Try to connect anonymously
             s3_resource.meta.client.meta.events.register(
                 "choose-signer.s3.*", botocore.handlers.disable_signing
@@ -2619,7 +2619,6 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                             )
                         if len(arg) > maxlen:
                             maxlen = len(arg)
-                outfiles = []
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:

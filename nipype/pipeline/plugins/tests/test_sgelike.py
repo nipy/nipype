@@ -27,7 +27,7 @@ def test_crashfile_creation(tmp_path):
     pipe.config["execution"]["crashdump_dir"] = str(tmp_path)
     pipe.add_nodes([pe.Node(interface=Function(function=crasher), name="crasher")])
     sgelike_plugin = SGELikeBatchManagerBase("")
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(RuntimeError):
         assert pipe.run(plugin=sgelike_plugin)
 
     crashfiles = list(tmp_path.glob("crash*crasher*.pklz")) + list(
