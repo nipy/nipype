@@ -959,10 +959,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
             if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:
-                filelist = []
-                for fname in bkt_files:
-                    if re.match(template, fname):
-                        filelist.append(fname)
+                filelist = [fname for fname in bkt_files if re.match(template, fname)]
                 if len(filelist) == 0:
                     msg = "Output key: {} Template: {} returned no files".format(
                         key,

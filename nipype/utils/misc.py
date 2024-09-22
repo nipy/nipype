@@ -246,10 +246,7 @@ def unflatten(in_list, prev_structure):
     if not isinstance(prev_structure, list):
         return next(in_list)
 
-    out = []
-    for item in prev_structure:
-        out.append(unflatten(in_list, item))
-    return out
+    return [unflatten(in_list, item) for item in prev_structure]
 
 
 def normalize_mc_params(params, source):

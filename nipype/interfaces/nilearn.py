@@ -98,9 +98,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
     def _run_interface(self, runtime):
         maskers = self._process_inputs()
 
-        signals = []
-        for masker in maskers:
-            signals.append(masker.fit_transform(self.inputs.in_file))
+        signals = [masker.fit_transform(self.inputs.in_file) for masker in maskers]
         region_signals = np.hstack(signals)
 
         output = np.vstack((self.inputs.class_labels, region_signals.astype(str)))
@@ -127,10 +125,10 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         else:  # 4d labels
             n_labels = label_data.shape[3]
             if self.inputs.incl_shared_variance:  # independent computation
-                for img in nli.iter_img(label_data):
-                    maskers.append(
-                        nl.NiftiMapsMasker(self._4d(img.dataobj, img.affine))
-                    )
+                maskers.extend(
+                    nl.NiftiMapsMasker(self._4d(img.dataobj, img.affine))
+                    for img in nli.iter_img(label_data)
+                )
             else:  # one computation fitting all
                 maskers.append(nl.NiftiMapsMasker(label_data))
 

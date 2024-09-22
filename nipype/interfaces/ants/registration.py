@@ -190,10 +190,11 @@ class ANTS(ANTSCommand):
         delta_time = self.inputs.delta_time
         symmetry_type = self.inputs.symmetry_type
         retval = ["--transformation-model %s" % model]
-        parameters = []
-        for elem in (step_length, time_step, delta_time, symmetry_type):
-            if elem is not traits.Undefined:
-                parameters.append("%#.2g" % elem)
+        parameters = [
+            "%#.2g" % elem
+            for elem in (step_length, time_step, delta_time, symmetry_type)
+            if elem is not traits.Undefined
+        ]
         if len(parameters) > 0:
             if len(parameters) > 1:
                 parameters = ",".join(parameters)
@@ -1134,8 +1135,7 @@ class Registration(ANTSCommand):
         retval = []
         for ii in range(len(self.inputs.transforms)):
             retval.append("--transform %s" % (self._format_transform(ii)))
-            for metric in self._format_metric(ii):
-                retval.append("--metric %s" % metric)
+            retval.extend("--metric %s" % metric for metric in self._format_metric(ii))
             retval.append("--convergence %s" % self._format_convergence(ii))
             if isdefined(self.inputs.sigma_units):
                 retval.append(

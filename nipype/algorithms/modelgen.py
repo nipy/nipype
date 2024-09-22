@@ -473,15 +473,15 @@ None])
         """Generate design specification for a typical fmri paradigm"""
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
-            for parfile in self.inputs.realignment_parameters:
-                realignment_parameters.append(
-                    np.apply_along_axis(
-                        func1d=normalize_mc_params,
-                        axis=1,
-                        arr=np.loadtxt(parfile),
-                        source=self.inputs.parameter_source,
-                    )
+            realignment_parameters.extend(
+                np.apply_along_axis(
+                    func1d=normalize_mc_params,
+                    axis=1,
+                    arr=np.loadtxt(parfile),
+                    source=self.inputs.parameter_source,
                 )
+                for parfile in self.inputs.realignment_parameters
+            )
         outliers = []
         if isdefined(self.inputs.outlier_files):
             for filename in self.inputs.outlier_files:

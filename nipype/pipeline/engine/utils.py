@@ -1493,9 +1493,9 @@ def clean_working_directory(
             inputdict = inputs.trait_get()
             input_files.extend(walk_outputs(inputdict))
             input_files = [path for path, type in input_files if type == "f"]
-            for f in walk_files(cwd):
-                if f in input_files and f not in needed_files:
-                    files2remove.append(f)
+            files2remove.extend(
+                f for f in walk_files(cwd) if f in input_files and f not in needed_files
+            )
     logger.debug("Removing files: %s", ";".join(files2remove))
     for f in files2remove:
         os.remove(f)
@@ -1717,9 +1717,7 @@ def topological_sort(graph, depth_first=False):
     components = nx.connected_components(G)
     for desc in components:
         group += 1
-        indices = []
-        for node in desc:
-            indices.append(nodesort.index(node))
+        indices = [nodesort.index(node) for node in desc]
         nodes.extend(
             np.array(nodesort)[np.array(indices)[np.argsort(indices)]].tolist()
         )

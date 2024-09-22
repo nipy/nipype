@@ -301,11 +301,12 @@ connected.
             edge_data = self._graph.get_edge_data(srcnode, dstnode, {"connect": []})
             ed_conns = [(c[0], c[1]) for c in edge_data["connect"]]
 
-            remove = []
-            for edge in conn:
-                if edge in ed_conns:
-                    # idx = ed_conns.index(edge)
-                    remove.append((edge[0], edge[1]))
+            remove = [
+                # idx = ed_conns.index(edge)
+                (edge[0], edge[1])
+                for edge in conn
+                if edge in ed_conns
+            ]
 
             logger.debug("disconnect(): remove list %s", str(remove))
             for el in remove:
@@ -571,8 +572,9 @@ connected.
                             )
                             lines.append(connect_template2 % line_args)
             functionlines = ["# Functions"]
-            for function in functions:
-                functionlines.append(pickle.loads(function).rstrip())
+            functionlines.extend(
+                pickle.loads(function).rstrip() for function in functions
+            )
             all_lines = importlines + functionlines + lines
 
             if not filename:
@@ -843,10 +845,11 @@ connected.
             if isinstance(node, Workflow):
                 setattr(inputdict, node.name, node.inputs)
             else:
-                taken_inputs = []
-                for _, _, d in self._graph.in_edges(nbunch=node, data=True):
-                    for cd in d["connect"]:
-                        taken_inputs.append(cd[1])
+                taken_inputs = [
+                    cd[1]
+                    for _, _, d in self._graph.in_edges(nbunch=node, data=True)
+                    for cd in d["connect"]
+                ]
                 unconnectedinputs = TraitedSpec()
                 for key, trait in list(node.inputs.items()):
                     if key not in taken_inputs:
@@ -1088,8 +1091,10 @@ connected.
                         subnodefullname = ".".join(hierarchy + [subnode.fullname])
                         nodename = nodefullname.replace(".", "_")
                         subnodename = subnodefullname.replace(".", "_")
-                        for _ in self._graph.get_edge_data(node, subnode)["connect"]:
-                            dotlist.append(f"{nodename} -> {subnodename};")
+                        dotlist.extend(
+                            f"{nodename} -> {subnodename};"
+                            for _ in self._graph.get_edge_data(node, subnode)["connect"]
+                        )
                         logger.debug("connection: %s", dotlist[-1])
         # add between workflow connections
         for u, v, d in self._graph.edges(data=True):

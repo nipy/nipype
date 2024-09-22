@@ -549,11 +549,9 @@ def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
     if rowheadings:
         typelist.append(("heading", "a40"))
     if len(shape) > 1:
-        for idx in range(1, (min(shape) + 1)):
-            typelist.append((str(idx), float))
+        typelist.extend((str(idx), float) for idx in range(1, (min(shape) + 1)))
     else:
-        for idx in range(1, (shape[0] + 1)):
-            typelist.append((str(idx), float))
+        typelist.extend((str(idx), float) for idx in range(1, (shape[0] + 1)))
     if extraheadingBool:
         typelist.append((extraheading, "a40"))
     iflogger.info(typelist)
@@ -714,8 +712,7 @@ class MergeCSVFiles(BaseInterface):
                 mx = shape[0]
             else:
                 mx = 1
-            for idx in range(mx):
-                extrafieldlist.append(self.inputs.extra_field)
+            extrafieldlist.extend(self.inputs.extra_field for idx in range(mx))
             iflogger.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist
         iflogger.info(output)

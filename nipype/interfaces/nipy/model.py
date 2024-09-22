@@ -138,10 +138,7 @@ class FitGLM(NipyBaseInterface):
             hpf = 0
             drift_model = "Blank"
 
-        reg_names = []
-        for reg in session_info[0]["regress"]:
-            reg_names.append(reg["name"])
-
+        reg_names = [reg["name"] for reg in session_info[0]["regress"]]
         reg_vals = np.zeros((nscans, len(reg_names)))
         for i in range(len(reg_names)):
             reg_vals[:, i] = np.array(session_info[0]["regress"][i]["val"]).reshape(
