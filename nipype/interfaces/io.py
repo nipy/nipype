@@ -2938,7 +2938,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         undefined_traits = {}
         for key in self._infields:
             self.inputs.add_trait(key, traits.Any)
-            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
+            undefined_traits[key] = kwargs.get(key, Undefined)
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
