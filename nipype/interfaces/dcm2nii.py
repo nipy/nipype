@@ -472,10 +472,7 @@ class Dcm2niix(CommandLine):
             # search for relevant files, and sort accordingly
             for fl in search_files(filename, outtypes, self.inputs.crop):
                 if (
-                    fl.endswith(".nii")
-                    or fl.endswith(".gz")
-                    or fl.endswith(".nrrd")
-                    or fl.endswith(".nhdr")
+                    fl.endswith((".nii", ".gz", ".nrrd", ".nhdr"))
                 ):
                     outfiles.append(fl)
                 elif fl.endswith(".bval"):
@@ -484,7 +481,7 @@ class Dcm2niix(CommandLine):
                     bvecs.append(fl)
                 elif fl.endswith(".mvec"):
                     mvecs.append(fl)
-                elif fl.endswith(".json") or fl.endswith(".txt"):
+                elif fl.endswith((".json", ".txt")):
                     bids.append(fl)
 
         # in siemens mosaic conversion nipype misread dcm2niix output and generate a duplicate list of results

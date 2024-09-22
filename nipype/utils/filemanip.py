@@ -566,7 +566,7 @@ def load_json(filename):
 
 
 def loadcrash(infile, *args):
-    if infile.endswith("pkl") or infile.endswith("pklz"):
+    if infile.endswith(("pkl", "pklz")):
         return loadpkl(infile)
     else:
         raise ValueError("Only pickled crashfiles are supported")

@@ -2836,7 +2836,7 @@ class MakeSurfaces(FSCommand):
             suffix = basename.split(".")[1]
             return spec.argstr % suffix
         elif name == "in_orig":
-            if value.endswith("lh.orig") or value.endswith("rh.orig"):
+            if value.endswith(("lh.orig", "rh.orig")):
                 # {lh,rh}.orig inputs are not specified on command line
                 return
             else:
