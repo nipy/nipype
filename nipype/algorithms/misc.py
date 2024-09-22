@@ -669,7 +669,7 @@ class MergeCSVFiles(BaseInterface):
 
         if isdefined(self.inputs.row_headings):
             iflogger.info(
-                'Row headings have been provided. Adding "labels"' "column header."
+                'Row headings have been provided. Adding "labels" column header.'
             )
             prefix = f'"{self.inputs.row_heading_title}","'
             csv_headings = prefix + '","'.join(itertools.chain(headings)) + '"\n'

@@ -1049,7 +1049,7 @@ connected.
                 else:
                     if colored:
                         dotlist.append(
-                            ('%s[label="%s", style=filled,' ' fillcolor="%s"];')
+                            ('%s[label="%s", style=filled, fillcolor="%s"];')
                             % (nodename, node_class_name, colorset[level])
                         )
                     else:

@@ -941,7 +941,7 @@ class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
         "OR",
         "AND",
         argstr="--waycond=%s",
-        desc=('Waypoint condition. Either "AND" (default) ' 'or "OR"'),
+        desc=('Waypoint condition. Either "AND" (default) or "OR"'),
     )
     wayorder = traits.Bool(
         desc=(

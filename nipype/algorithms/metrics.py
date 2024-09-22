@@ -478,13 +478,13 @@ class FuzzyOverlap(SimpleInterface):
 
         if np.any(refdata > 1.0):
             iflogger.warning(
-                'Values greater than 1.0 found in "in_ref" input, ' "scaling values."
+                'Values greater than 1.0 found in "in_ref" input, scaling values.'
             )
             refdata /= refdata.max()
 
         if np.any(tstdata > 1.0):
             iflogger.warning(
-                'Values greater than 1.0 found in "in_tst" input, ' "scaling values."
+                'Values greater than 1.0 found in "in_tst" input, scaling values.'
             )
             tstdata /= tstdata.max()
 
