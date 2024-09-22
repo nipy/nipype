@@ -618,7 +618,7 @@ class GraphPluginBase(PluginBase):
                 else:
                     tmp_value = node.plugin_args[keyword]
 
-                if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+                if node.plugin_args.get("overwrite"):
                     value = tmp_value
                 else:
                     value += tmp_value

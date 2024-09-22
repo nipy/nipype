@@ -47,7 +47,7 @@ class SGEGraphPlugin(GraphPluginBase):
     def __init__(self, **kwargs):
         self._qsub_args = ""
         self._dont_resubmit_completed_jobs = False
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             plugin_args = kwargs["plugin_args"]
             if "template" in plugin_args:
                 self._template = plugin_args["template"]

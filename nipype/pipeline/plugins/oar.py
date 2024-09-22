@@ -38,7 +38,7 @@ class OARPlugin(SGELikeBatchManagerBase):
         self._retry_timeout = 2
         self._max_tries = 2
         self._max_jobname_length = 15
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             if "oarsub_args" in kwargs["plugin_args"]:
                 self._oarsub_args = kwargs["plugin_args"]["oarsub_args"]
             if "retry_timeout" in kwargs["plugin_args"]:
@@ -75,7 +75,7 @@ class OARPlugin(SGELikeBatchManagerBase):
         if self._oarsub_args:
             oarsubargs = self._oarsub_args
         if "oarsub_args" in node.plugin_args:
-            if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+            if node.plugin_args.get("overwrite"):
                 oarsubargs = node.plugin_args["oarsub_args"]
             else:
                 oarsubargs += " " + node.plugin_args["oarsub_args"]
