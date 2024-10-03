@@ -103,6 +103,7 @@ existing pipeline systems.
 NIBABEL_MIN_VERSION = "2.1.0"
 NETWORKX_MIN_VERSION = "2.0"
 NUMPY_MIN_VERSION = "1.17"
+NUMPY_MAX_VERSION = "2.0"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
 DATEUTIL_MIN_VERSION = "2.2"
@@ -136,7 +137,7 @@ REQUIRES = [
     "click>=%s" % CLICK_MIN_VERSION,
     "networkx>=%s" % NETWORKX_MIN_VERSION,
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
-    "numpy>=%s" % NUMPY_MIN_VERSION,
+    "numpy>=%s,<%s" % (NUMPY_MIN_VERSION, NUMPY_MAX_VERSION),
     "packaging",
     "prov>=%s" % PROV_MIN_VERSION,
     "pydot>=%s" % PYDOT_MIN_VERSION,
