@@ -105,7 +105,6 @@ NETWORKX_MIN_VERSION = "2.0"
 NUMPY_MIN_VERSION = "1.17"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
-TRAITS_MAX_VERSION = "6.4"
 DATEUTIL_MIN_VERSION = "2.2"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_MIN_VERSION = "1.5.2"
@@ -145,7 +144,7 @@ REQUIRES = [
     "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "traits>=%s,<%s,!=5.0" % (TRAITS_MIN_VERSION, TRAITS_MAX_VERSION),
+    "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
     "looseversion!=1.2",
