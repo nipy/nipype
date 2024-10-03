@@ -16,6 +16,7 @@ from ...utils.filemanip import ensure_list, simplify_list, split_filename
 from ..base import (
     Bunch,
     traits,
+    Tuple,
     TraitedSpec,
     File,
     Directory,
@@ -377,31 +378,31 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
     )
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
                     traits.Either(
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
                             traits.List(traits.Float),
                         ),
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),

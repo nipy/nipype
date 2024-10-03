@@ -36,6 +36,7 @@ from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec,
     traits,
+    Tuple,
     Str,
     File,
     Directory,
@@ -215,7 +216,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     )
     strip_dir = Str(desc="path to strip out of filename")
     substitutions = InputMultiPath(
-        traits.Tuple(Str, Str),
+        Tuple(Str, Str),
         desc=(
             "List of 2-tuples reflecting string "
             "to substitute and string to replace "
@@ -223,7 +224,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         ),
     )
     regexp_substitutions = InputMultiPath(
-        traits.Tuple(Str, Str),
+        Tuple(Str, Str),
         desc=(
             "List of 2-tuples reflecting a pair of a "
             "Python regexp pattern and a replacement "

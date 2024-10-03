@@ -11,6 +11,7 @@ from ..base import (
     TraitedSpec,
     File,
     traits,
+    Tuple,
     isdefined,
     CommandLineInputSpec,
     NipypeInterfaceError,
@@ -99,7 +100,7 @@ class LabelFusionInput(CommandLineInputSpec):
     prob_update_flag = traits.Bool(desc=desc, argstr="-prop_update")
 
     desc = "Value of P and Q [ 0 < (P,Q) < 1 ] (default = 0.99 0.99)"
-    set_pq = traits.Tuple(traits.Float, traits.Float, argstr="-setPQ %f %f", desc=desc)
+    set_pq = Tuple(traits.Float, traits.Float, argstr="-setPQ %f %f", desc=desc)
 
     mrf_value = traits.Float(
         argstr="-MRF_beta %f", desc="MRF prior strength (between 0 and 5)"

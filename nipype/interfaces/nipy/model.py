@@ -4,6 +4,7 @@ from .base import NipyBaseInterface
 from ..base import (
     TraitedSpec,
     traits,
+    Tuple,
     File,
     OutputMultiPath,
     BaseInterfaceInputSpec,
@@ -246,31 +247,31 @@ class FitGLM(NipyBaseInterface):
 class EstimateContrastInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
                     traits.Either(
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
                             traits.List(traits.Float),
                         ),
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),

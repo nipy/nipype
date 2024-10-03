@@ -27,6 +27,7 @@ from ...utils import spm_docs as sd
 from ..base import (
     BaseInterface,
     traits,
+    Tuple,
     isdefined,
     InputMultiPath,
     BaseInterfaceInputSpec,
@@ -403,7 +404,7 @@ class SPMCommand(BaseInterface):
         """Convert input to appropriate format for SPM."""
         if spec.is_trait_type(traits.Bool):
             return int(val)
-        elif spec.is_trait_type(traits.Tuple):
+        elif spec.is_trait_type(traits.BaseTuple):
             return list(val)
         else:
             return val

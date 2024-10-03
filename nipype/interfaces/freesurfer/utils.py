@@ -13,6 +13,7 @@ from ..base import (
     Directory,
     File,
     traits,
+    Tuple,
     OutputMultiPath,
     isdefined,
     CommandLine,
@@ -154,14 +155,14 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
         desc="source volume is in MNI152 space",
     )
 
-    apply_rot = traits.Tuple(
+    apply_rot = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--rot %.3f %.3f %.3f",
         desc="rotation angles (in degrees) to apply to reg matrix",
     )
-    apply_trans = traits.Tuple(
+    apply_trans = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -186,7 +187,7 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     )
     sampling_range = traits.Either(
         traits.Float,
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
         desc="sampling range - a point or a tuple of (min, max, step)",
     )
     sampling_units = traits.Enum(
@@ -863,8 +864,8 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
     overlay_range = traits.Either(
         traits.Float,
-        traits.Tuple(traits.Float, traits.Float),
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
         desc="overlay range--either min, (min, max) or (min, mid, max)",
         argstr="%s",
     )
@@ -1120,8 +1121,8 @@ class ImageInfoOutputSpec(TraitedSpec):
     TE = traits.String(desc="echo time (msec)")
     TR = traits.String(desc="repetition time(msec)")
     TI = traits.String(desc="inversion time (msec)")
-    dimensions = traits.Tuple(desc="image dimensions (voxels)")
-    vox_sizes = traits.Tuple(desc="voxel sizes (mm)")
+    dimensions = Tuple(desc="image dimensions (voxels)")
+    vox_sizes = Tuple(desc="voxel sizes (mm)")
     orientation = traits.String(desc="image orientation")
     ph_enc_dir = traits.String(desc="phase encode direction")
 
@@ -2908,7 +2909,7 @@ class CurvatureInputSpec(FSTraitedSpec):
         argstr="-w",
         desc="Save curvature files (will only generate screen output without this option)",
     )
-    distances = traits.Tuple(
+    distances = Tuple(
         traits.Int,
         traits.Int,
         argstr="-distances %d %d",
@@ -4026,12 +4027,12 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     )
     # # Requires dev version - Re-add when min_ver/max_ver support this
     # # https://github.com/freesurfer/freesurfer/blob/9730cb9/mris_expand/mris_expand.c
-    # navgs = traits.Tuple(
+    # navgs = Tuple(
     #     traits.Int, traits.Int,
     #     argstr='-navgs %d %d',
     #     desc=('Tuple of (n_averages, min_averages) parameters '
     #           '(implicit: (16, 0))'))
-    # target_intensity = traits.Tuple(
+    # target_intensity = Tuple(
     #     traits.Float, File(exists=True),
     #     argstr='-intensity %g %s',
     #     desc='Tuple of intensity and brain volume to crop to target intensity')

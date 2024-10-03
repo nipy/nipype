@@ -4,7 +4,15 @@ import os
 from glob import glob
 from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile, which, fname_presuffix
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..base import (
+    TraitedSpec,
+    File,
+    traits,
+    Tuple,
+    InputMultiPath,
+    OutputMultiPath,
+    isdefined,
+)
 from ..mixins import CopyHeaderInterface
 from .base import ANTSCommand, ANTSCommandInputSpec
 
@@ -401,7 +409,7 @@ The result is that the range can "drift" from the original at each iteration.
 This option rescales to the [min,max] range of the original image intensities
 within the user-specified mask.""",
     )
-    histogram_sharpening = traits.Tuple(
+    histogram_sharpening = Tuple(
         (0.15, 0.01, 200),
         traits.Float,
         traits.Float,

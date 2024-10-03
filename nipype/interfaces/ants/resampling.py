@@ -4,7 +4,7 @@
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiObject
+from ..base import TraitedSpec, File, traits, Tuple, isdefined, InputMultiObject
 from ...utils.filemanip import split_filename
 
 
@@ -355,11 +355,9 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         usedefault=True,
     )
     interpolation_parameters = traits.Either(
-        traits.Tuple(traits.Int()),  # BSpline (order)
-        traits.Tuple(
-            traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
-        ),
-        traits.Tuple(traits.Str()),  # GenericLabel
+        Tuple(traits.Int()),  # BSpline (order)
+        Tuple(traits.Float(), traits.Float()),  # Gaussian/MultiLabel (sigma, alpha)
+        Tuple(traits.Str()),  # GenericLabel
     )
     transforms = InputMultiObject(
         traits.Either(File(exists=True), "identity"),

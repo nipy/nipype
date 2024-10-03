@@ -7,6 +7,7 @@ import nibabel as nb
 from ... import logging
 from ..base import (
     traits,
+    Tuple,
     TraitedSpec,
     BaseInterfaceInputSpec,
     File,
@@ -38,7 +39,7 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="Diffusivity of isotropic compartments",
     )
-    diff_sf = traits.Tuple(
+    diff_sf = Tuple(
         (1700e-6, 200e-6, 200e-6),
         traits.Float,
         traits.Float,

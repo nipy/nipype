@@ -11,6 +11,7 @@ from ..base import (
     CommandLine,
     TraitedSpec,
     traits,
+    Tuple,
     isdefined,
     File,
     InputMultiPath,
@@ -2439,7 +2440,7 @@ class TCorrMapInputSpec(AFNICommandInputSpec):
     mask = File(exists=True, argstr="-mask %s")
     automask = traits.Bool(argstr="-automask")
     polort = traits.Int(argstr="-polort %d")
-    bandpass = traits.Tuple((traits.Float(), traits.Float()), argstr="-bpass %f %f")
+    bandpass = Tuple((traits.Float(), traits.Float()), argstr="-bpass %f %f")
     regress_out_timeseries = File(exists=True, argstr="-ort %s")
     blur_fwhm = traits.Float(argstr="-Gblur %f")
     seeds_width = traits.Float(argstr="-Mseed %f", xor=("seeds"))
@@ -3011,13 +3012,13 @@ Remove the 3D+time time series in dataset fset.
 
 """,
     )
-    bandpass = traits.Tuple(
+    bandpass = Tuple(
         traits.Float,
         traits.Float,
         desc="""Remove all frequencies EXCEPT those in the range""",
         argstr="-bandpass %g %g",
     )
-    stopband = traits.Tuple(
+    stopband = Tuple(
         traits.Float,
         traits.Float,
         desc="""Remove all frequencies in the range""",
@@ -3394,7 +3395,7 @@ class VolregInputSpec(AFNICommandInputSpec):
         copyfile=False,
     )
     in_weight_volume = traits.Either(
-        traits.Tuple(File(exists=True), traits.Int),
+        Tuple(File(exists=True), traits.Int),
         File(exists=True),
         desc="weights for each voxel specified by a file with an "
         "optional volume number (defaults to 0)",
@@ -3821,8 +3822,8 @@ alignments are good enough for your purposes.""",
         maxlen=5,
         xor=["wmask"],
     )
-    traits.Tuple((traits.Float(), traits.Float()), argstr="-bpass %f %f")
-    wmask = traits.Tuple(
+    bandpass = Tuple((traits.Float(), traits.Float()), argstr="-bpass %f %f")
+    wmask = Tuple(
         (File(exists=True), traits.Float()),
         desc="""\
 Similar to '-wball', but here, you provide a dataset 'ws'

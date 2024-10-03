@@ -563,12 +563,10 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
             k: _recurse_on_path_traits(func, innertrait, v, cwd)
             for k, v in value.items()
         }
-    elif isinstance(value, tuple) and thistrait.is_trait_type(traits.Tuple):
+    elif isinstance(value, tuple) and thistrait.is_trait_type(traits.BaseTuple):
         value = tuple(
-            [
-                _recurse_on_path_traits(func, subtrait, v, cwd)
-                for subtrait, v in zip(thistrait.handler.types, value)
-            ]
+            _recurse_on_path_traits(func, subtrait, v, cwd)
+            for subtrait, v in zip(thistrait.handler.types, value)
         )
     elif thistrait.is_trait_type(traits.TraitCompound):
         is_str = [

@@ -5,7 +5,7 @@ The QT1 module of niftyfit, which wraps the Multi-Echo T1 fitting methods
 in NiftyFit.
 """
 
-from ..base import TraitedSpec, File, traits, CommandLineInputSpec
+from ..base import TraitedSpec, File, traits, Tuple, CommandLineInputSpec
 from .base import NiftyFitCommand
 from ..niftyreg.base import get_custom_path
 
@@ -79,7 +79,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
     # set position to be ahead of TIs
     nb_comp = traits.Int(desc=desc, position=6, argstr="-nc %d")
     desc = "Set LM parameters (initial value, decrease rate) [100,1.2]."
-    lm_val = traits.Tuple(
+    lm_val = Tuple(
         traits.Float, traits.Float, desc=desc, argstr="-lm %f %f", position=7
     )
     desc = "Use Gauss-Newton algorithm [Levenberg-Marquardt]."
@@ -87,7 +87,7 @@ class FitQt1InputSpec(CommandLineInputSpec):
     slice_no = traits.Int(
         desc="Fit to single slice number.", argstr="-slice %d", position=9
     )
-    voxel = traits.Tuple(
+    voxel = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
