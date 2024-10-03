@@ -480,14 +480,9 @@ def test_deep_nested_write_graph_runs(tmpdir):
                 pass
 
 
-import networkx
-
-# Format of the graph has slightly changed
-graph_str = '""' if int(networkx.__version__.split(".")[0]) == 1 else ""
-
 # examples of dot files used in the following test
 dotfile_orig = [
-    "strict digraph " + graph_str + " {\n",
+    "strict digraph {\n",
     '"mod1 (engine)";\n',
     '"mod2 (engine)";\n',
     '"mod1 (engine)" -> "mod2 (engine)";\n',
