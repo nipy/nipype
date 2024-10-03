@@ -370,6 +370,14 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
         )
 
 
+class Tuple(traits.BaseTuple):
+    def validate(self, objekt, name, value):
+        if isinstance(value, list):
+            value = tuple(value)
+
+        return super().validate(objekt, name, value)
+
+
 def isdefined(objekt):
     return not isinstance(objekt, _Undefined)
 

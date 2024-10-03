@@ -5,7 +5,7 @@
 import os
 
 from ...utils.filemanip import ensure_list
-from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
+from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined, Tuple
 from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
 
@@ -423,11 +423,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         usedefault=True,
     )
     interpolation_parameters = traits.Either(
-        traits.Tuple(traits.Int()),  # BSpline (order)
-        traits.Tuple(
-            traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
-        ),
-        traits.Tuple(traits.Str()),  # GenericLabel (interpolator)
+        Tuple(traits.Int()),  # BSpline (order)
+        Tuple(traits.Float(), traits.Float()),  # Gaussian/MultiLabel (sigma, alpha)
+        Tuple(traits.Str()),  # GenericLabel (interpolator)
     )
 
     write_composite_transform = traits.Bool(
@@ -491,20 +489,20 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # Exponential, and BSplineExponential. EVEN DEFAULTS!
     transform_parameters = traits.List(
         traits.Either(
-            traits.Tuple(traits.Float()),  # Translation, Rigid, Affine,
+            Tuple(traits.Float()),  # Translation, Rigid, Affine,
             # CompositeAffine, Similarity
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # GaussianDisplacementField, SyN
                 traits.Float(),
                 traits.Float(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # BSplineSyn,
                 traits.Int(),  # BSplineDisplacementField,
                 traits.Int(),  # TimeVaryingBSplineVelocityField
                 traits.Int(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # TimeVaryingVelocityField
                 traits.Int(),
                 traits.Float(),
@@ -512,13 +510,13 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                 traits.Float(),
                 traits.Float(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # Exponential
                 traits.Float(),
                 traits.Float(),
                 traits.Int(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # BSplineExponential
                 traits.Int(),
                 traits.Int(),
