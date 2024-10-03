@@ -162,9 +162,17 @@ def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
             traits_type, is_mandatory = convert_to_traits_type(dipy_type, is_file)
             # print(name, dipy_type, desc, is_file, traits_type, is_mandatory)
             if BaseClass.__name__ == BaseInterfaceInputSpec.__name__:
-                if len(p) > 3:
+                if len(p) > 3 and p[3] is not None:
+                    default_value = p[3]
+                    if isinstance(traits_type, traits.List) and not isinstance(
+                        default_value, list
+                    ):
+                        default_value = [default_value]
                     attr[name] = traits_type(
-                        p[3], desc=desc[-1], usedefault=True, mandatory=is_mandatory
+                        default_value,
+                        desc=desc[-1],
+                        usedefault=True,
+                        mandatory=is_mandatory,
                     )
                 else:
                     attr[name] = traits_type(desc=desc[-1], mandatory=is_mandatory)
