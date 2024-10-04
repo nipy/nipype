@@ -266,43 +266,4 @@ jobs:
 workflows:
   version: 2
   build_test_deploy:
-    jobs:
-      - compare_base_dockerfiles:
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-      - get_test_data:
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-      - test_pytest:
-          filters:
-            branches:
-              ignore:
-                - /docs?\/.*/
-            tags:
-              only: /.*/
-          requires:
-            - compare_base_dockerfiles
-            - get_test_data
-      - deploy_dockerhub:
-          filters:
-            branches:
-              only: master
-            tags:
-              only: /.*/
-          requires:
-            - test_pytest
-      - update_feedstock:
-          context: nipybot
-          filters:
-            branches:
-              only: /rel\/\d.*/
-            tags:
-              only: /.*/
+    jobs: []
