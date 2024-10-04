@@ -54,14 +54,13 @@ CLASSIFIERS = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
 ]
-PYTHON_REQUIRES = ">= 3.8"
+PYTHON_REQUIRES = ">= 3.9"
 
 description = "Neuroimaging in Python: Pipelines and Interfaces"
 
@@ -103,9 +102,9 @@ existing pipeline systems.
 NIBABEL_MIN_VERSION = "2.1.0"
 NETWORKX_MIN_VERSION = "2.0"
 NUMPY_MIN_VERSION = "1.17"
+NUMPY_MAX_VERSION = "2.0"
 SCIPY_MIN_VERSION = "0.14"
 TRAITS_MIN_VERSION = "4.6"
-TRAITS_MAX_VERSION = "6.4"
 DATEUTIL_MIN_VERSION = "2.2"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_MIN_VERSION = "1.5.2"
@@ -137,7 +136,7 @@ REQUIRES = [
     "click>=%s" % CLICK_MIN_VERSION,
     "networkx>=%s" % NETWORKX_MIN_VERSION,
     "nibabel>=%s" % NIBABEL_MIN_VERSION,
-    "numpy>=%s" % NUMPY_MIN_VERSION,
+    "numpy>=%s,<%s" % (NUMPY_MIN_VERSION, NUMPY_MAX_VERSION),
     "packaging",
     "prov>=%s" % PROV_MIN_VERSION,
     "pydot>=%s" % PYDOT_MIN_VERSION,
@@ -145,7 +144,7 @@ REQUIRES = [
     "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "traits>=%s,<%s,!=5.0" % (TRAITS_MIN_VERSION, TRAITS_MAX_VERSION),
+    "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
     "etelemetry>=0.2.0",
     "looseversion!=1.2",

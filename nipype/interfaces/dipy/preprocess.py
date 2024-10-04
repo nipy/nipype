@@ -4,7 +4,7 @@ import numpy as np
 
 from looseversion import LooseVersion
 from ... import logging
-from ..base import traits, TraitedSpec, File, isdefined
+from ..base import traits, Tuple, TraitedSpec, File, isdefined
 from .base import (
     HAVE_DIPY,
     dipy_version,
@@ -35,7 +35,7 @@ class ResampleInputSpec(TraitedSpec):
     in_file = File(
         exists=True, mandatory=True, desc="The input 4D diffusion-weighted image file"
     )
-    vox_size = traits.Tuple(
+    vox_size = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,

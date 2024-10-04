@@ -10,6 +10,7 @@ from ..base import (
     CommandLineInputSpec,
     CommandLine,
     traits,
+    Tuple,
     File,
     isdefined,
     PackageInfo,
@@ -58,7 +59,7 @@ class MRTrix3BaseInputSpec(CommandLineInputSpec):
         desc="dw gradient scheme (MRTrix format)",
         xor=["grad_fsl"],
     )
-    grad_fsl = traits.Tuple(
+    grad_fsl = Tuple(
         File(exists=True),
         File(exists=True),
         argstr="-fslgrad %s %s",

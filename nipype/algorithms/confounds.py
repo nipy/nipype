@@ -24,6 +24,7 @@ from ..interfaces.base import (
     InputMultiPath,
     OutputMultiPath,
     SimpleInterface,
+    Tuple,
 )
 from ..utils.misc import normalize_mc_params
 
@@ -64,7 +65,7 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     series_tr = traits.Float(desc="repetition time in sec.")
     save_plot = traits.Bool(False, usedefault=True, desc="write DVARS plot")
     figdpi = traits.Int(100, usedefault=True, desc="output dpi for the plot")
-    figsize = traits.Tuple(
+    figsize = Tuple(
         traits.Float(11.7),
         traits.Float(2.3),
         usedefault=True,
@@ -286,7 +287,7 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     save_plot = traits.Bool(False, usedefault=True, desc="write FD plot")
     normalize = traits.Bool(False, usedefault=True, desc="calculate FD in mm/s")
     figdpi = traits.Int(100, usedefault=True, desc="output dpi for the FD plot")
-    figsize = traits.Tuple(
+    figsize = Tuple(
         traits.Float(11.7),
         traits.Float(2.3),
         usedefault=True,

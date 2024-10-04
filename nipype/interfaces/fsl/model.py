@@ -19,6 +19,7 @@ from ...external.due import BibTeX
 from ..base import (
     File,
     traits,
+    Tuple,
     isdefined,
     TraitedSpec,
     BaseInterface,
@@ -73,31 +74,31 @@ repeat this option for FILMGLS by setting autocorr_noestimate to True",
     )
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
                     traits.Either(
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
                             traits.List(traits.Float),
                         ),
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
@@ -1429,17 +1430,17 @@ class L2Model(BaseInterface):
 class MultipleRegressDesignInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
-                    traits.Tuple(
+                    Tuple(
                         traits.Str,
                         traits.Enum("T"),
                         traits.List(traits.Str),

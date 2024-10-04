@@ -23,6 +23,7 @@ from ..interfaces.base import (
     isdefined,
     DynamicTraitedSpec,
     Undefined,
+    Tuple,
 )
 from ..utils.filemanip import fname_presuffix, split_filename, ensure_list
 
@@ -1176,7 +1177,7 @@ class NormalizeProbabilityMapSet(BaseInterface):
 class SplitROIsInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True, desc="file to be split")
     in_mask = File(exists=True, desc="only process files inside mask")
-    roi_size = traits.Tuple(traits.Int, traits.Int, traits.Int, desc="desired ROI size")
+    roi_size = Tuple(traits.Int, traits.Int, traits.Int, desc="desired ROI size")
 
 
 class SplitROIsOutputSpec(TraitedSpec):

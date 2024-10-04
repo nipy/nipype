@@ -17,7 +17,7 @@ from .base import (
     FSCommandOpenMP,
     FSTraitedSpecOpenMP,
 )
-from ..base import isdefined, TraitedSpec, File, traits, Directory
+from ..base import isdefined, TraitedSpec, File, traits, Tuple, Directory
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
@@ -462,28 +462,28 @@ class MRICoregInputSpec(FSTraitedSpec):
         maxlen=2,
         desc="set spatial scales, in voxels (default [2, 4])",
     )
-    initial_translation = traits.Tuple(
+    initial_translation = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--trans %g %g %g",
         desc="initial translation in mm (implies no_cras0)",
     )
-    initial_rotation = traits.Tuple(
+    initial_rotation = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--rot %g %g %g",
         desc="initial rotation in degrees",
     )
-    initial_scale = traits.Tuple(
+    initial_scale = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--scale %g %g %g",
         desc="initial scale",
     )
-    initial_shear = traits.Tuple(
+    initial_shear = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,

@@ -9,6 +9,7 @@ from ..base import (
     CommandLineInputSpec,
     CommandLine,
     traits,
+    Tuple,
     TraitedSpec,
     File,
     Directory,
@@ -977,21 +978,21 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
     )
-    image_size = traits.Tuple(
+    image_size = Tuple(
         (traits.Int, traits.Int, traits.Int),
         argstr="-size %d,%d,%d",
         mandatory=True,
         desc="Number of voxels in each dimension of output image",
         xor=["voxel_size", "scale_factor"],
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float, traits.Float, traits.Float),
         argstr="-voxel %g,%g,%g",
         mandatory=True,
         desc="Desired voxel size in mm for the output image",
         xor=["image_size", "scale_factor"],
     )
-    scale_factor = traits.Tuple(
+    scale_factor = Tuple(
         (traits.Float, traits.Float, traits.Float),
         argstr="-scale %g,%g,%g",
         mandatory=True,

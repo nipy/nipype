@@ -19,6 +19,7 @@ import numpy as np
 from ...utils.filemanip import load_json, save_json, split_filename, fname_presuffix
 from ..base import (
     traits,
+    Tuple,
     TraitedSpec,
     OutputMultiPath,
     File,
@@ -438,7 +439,7 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
         "t_size",
     ]
     crop_list = traits.List(
-        traits.Tuple(traits.Int, traits.Int),
+        Tuple(traits.Int, traits.Int),
         argstr="%s",
         position=2,
         xor=_crop_xor,
@@ -976,7 +977,7 @@ class OverlayInputSpec(FSLCommandInputSpec):
         xor=_xor_inputs,
         mandatory=True,
     )
-    bg_thresh = traits.Tuple(
+    bg_thresh = Tuple(
         traits.Float,
         traits.Float,
         argstr="%.3f %.3f",
@@ -992,7 +993,7 @@ class OverlayInputSpec(FSLCommandInputSpec):
         argstr="%s",
         desc="statistical image to overlay in color",
     )
-    stat_thresh = traits.Tuple(
+    stat_thresh = Tuple(
         traits.Float,
         traits.Float,
         position=7,
@@ -1013,7 +1014,7 @@ class OverlayInputSpec(FSLCommandInputSpec):
         argstr="%s",
         desc="second statistical image to overlay in color",
     )
-    stat_thresh2 = traits.Tuple(
+    stat_thresh2 = Tuple(
         traits.Float,
         traits.Float,
         position=10,
@@ -1123,7 +1124,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
         argstr="-l %s",
         desc=("use different colour map from that stored in nifti header"),
     )
-    intensity_range = traits.Tuple(
+    intensity_range = Tuple(
         traits.Float,
         traits.Float,
         position=5,
@@ -1265,7 +1266,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
         xor=("plot_range",),
         desc="final column from in-file to plot",
     )
-    plot_range = traits.Tuple(
+    plot_range = Tuple(
         traits.Int,
         traits.Int,
         argstr="%s",
@@ -1279,7 +1280,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
     )
     y_min = traits.Float(argstr="--ymin=%.2f", desc="minimum y value", xor=("y_range",))
     y_max = traits.Float(argstr="--ymax=%.2f", desc="maximum y value", xor=("y_range",))
-    y_range = traits.Tuple(
+    y_range = Tuple(
         traits.Float,
         traits.Float,
         argstr="%s",
@@ -1292,7 +1293,7 @@ class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
         default_value=1,
         desc=("scaling units for x-axis (between 1 and length of in file)"),
     )
-    plot_size = traits.Tuple(
+    plot_size = Tuple(
         traits.Int, traits.Int, argstr="%s", desc="plot image height and width"
     )
     x_precision = traits.Int(argstr="--precision=%d", desc="precision of x-axis labels")
@@ -1390,7 +1391,7 @@ class PlotMotionParamsInputSpec(FSLCommandInputSpec):
         mandatory=True,
         desc=("which motion type to plot - rotations, translations, displacement"),
     )
-    plot_size = traits.Tuple(
+    plot_size = Tuple(
         traits.Int, traits.Int, argstr="%s", desc="plot image height and width"
     )
     out_file = File(
@@ -1597,7 +1598,7 @@ class SwapDimensionsInputSpec(FSLCommandInputSpec):
         exists=True, mandatory=True, argstr="%s", position="1", desc="input image"
     )
     _dims = ["x", "-x", "y", "-y", "z", "-z", "RL", "LR", "AP", "PA", "IS", "SI"]
-    new_dims = traits.Tuple(
+    new_dims = Tuple(
         traits.Enum(_dims),
         traits.Enum(_dims),
         traits.Enum(_dims),
@@ -2106,7 +2107,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
         ),
     )
 
-    warp_resolution = traits.Tuple(
+    warp_resolution = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2124,7 +2125,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
         ),
     )
 
-    knot_space = traits.Tuple(
+    knot_space = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,

@@ -2,7 +2,7 @@
 
 import os
 from warnings import warn
-from ..base import traits, isdefined, TraitedSpec, File, Str, InputMultiObject
+from ..base import traits, Tuple, isdefined, TraitedSpec, File, Str, InputMultiObject
 from ..mixins import CopyHeaderInterface
 from .base import ANTSCommandInputSpec, ANTSCommand
 
@@ -236,8 +236,8 @@ class ResampleImageBySpacingInputSpec(ANTSCommandInputSpec):
     )
     out_spacing = traits.Either(
         traits.List(traits.Float, minlen=2, maxlen=3),
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
-        traits.Tuple(traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float),
         position=4,
         argstr="%s",
         mandatory=True,
@@ -425,11 +425,11 @@ class AIInputSpec(ANTSCommandInputSpec):
         traits.Enum("Regular", "Random", "None"),
         traits.Range(value=0.2, low=0.0, high=1.0),
     )
-    metric = traits.Tuple(
+    metric = Tuple(
         *metric_trait, argstr="-m %s", mandatory=True, desc="the metric(s) to use."
     )
 
-    transform = traits.Tuple(
+    transform = Tuple(
         traits.Enum("Affine", "Rigid", "Similarity"),
         traits.Range(value=0.1, low=0.0, exclude_low=True),
         argstr="-t %s[%g]",
@@ -444,7 +444,7 @@ class AIInputSpec(ANTSCommandInputSpec):
         xor=["blobs"],
         desc="align using principal axes",
     )
-    search_factor = traits.Tuple(
+    search_factor = Tuple(
         traits.Float(20),
         traits.Range(value=0.12, low=0.0, high=1.0),
         usedefault=True,
@@ -453,16 +453,14 @@ class AIInputSpec(ANTSCommandInputSpec):
     )
 
     search_grid = traits.Either(
-        traits.Tuple(
-            traits.Float, traits.Tuple(traits.Float, traits.Float, traits.Float)
-        ),
-        traits.Tuple(traits.Float, traits.Tuple(traits.Float, traits.Float)),
+        Tuple(traits.Float, Tuple(traits.Float, traits.Float, traits.Float)),
+        Tuple(traits.Float, traits.Tuple(traits.Float, traits.Float)),
         argstr="-g %s",
         desc="Translation search grid in mm",
         min_ver="2.3.0",
     )
 
-    convergence = traits.Tuple(
+    convergence = Tuple(
         traits.Range(low=1, high=10000, value=10),
         traits.Float(1e-6),
         traits.Range(low=1, high=100, value=10),

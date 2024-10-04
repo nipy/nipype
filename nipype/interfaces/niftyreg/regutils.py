@@ -7,7 +7,7 @@ The interfaces were written to work with niftyreg version 1.5.10
 """
 import os
 
-from ..base import TraitedSpec, File, traits, isdefined
+from ..base import TraitedSpec, File, traits, Tuple, isdefined
 from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
 
@@ -270,12 +270,12 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
 
     # Smoothing using spline kernel
     desc = "Smooth the input image using a cubic spline kernel"
-    smo_s_val = traits.Tuple(
+    smo_s_val = Tuple(
         traits.Float, traits.Float, traits.Float, desc=desc, argstr="-smoS %f %f %f"
     )
 
     # Change the resolution of the input image
-    chg_res_val = traits.Tuple(
+    chg_res_val = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -285,7 +285,7 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
 
     # Smoothing using Gaussian kernel
     desc = "Smooth the input image using a Gaussian kernel"
-    smo_g_val = traits.Tuple(
+    smo_g_val = Tuple(
         traits.Float, traits.Float, traits.Float, desc=desc, argstr="-smoG %f %f %f"
     )
 
@@ -673,7 +673,7 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
         ],
     )
 
-    inv_nrr_input = traits.Tuple(
+    inv_nrr_input = Tuple(
         File(exists=True),
         File(exists=True),
         desc="Invert a non-linear transformation",
@@ -713,7 +713,7 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
     )
 
     argstr_tmp = "-makeAff %f %f %f %f %f %f %f %f %f %f %f %f"
-    make_aff_input = traits.Tuple(
+    make_aff_input = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -766,7 +766,7 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
     desc = "Convert a FLIRT affine transformation to niftyreg affine \
 transformation"
 
-    flirt_2_nr_input = traits.Tuple(
+    flirt_2_nr_input = Tuple(
         File(exists=True),
         File(exists=True),
         File(exists=True),

@@ -5,6 +5,7 @@ from nipype.interfaces.base import (
     InputMultiPath,
     TraitedSpec,
     traits,
+    Tuple,
     isdefined,
     File,
     Str,
@@ -184,7 +185,7 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         "Values:\nOptimal: [1.0 0.1]\nFixed 1.0 mm: [1.0 0.1];\nFixed 0.8 mm:[0.8 0.1]"
         "\nBest native: [0.5 0.1]"
     )
-    internal_resampling_process = traits.Tuple(
+    internal_resampling_process = Tuple(
         traits.Float(1),
         traits.Float(0.1),
         minlen=2,
@@ -409,7 +410,7 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         "\nValues: No:[0 0];\nImage->Template (forward): [1 0];\nTemplate->Image (inverse): [0 1]; "
         "\ninverse + forward: [1 1]"
     )
-    warps = traits.Tuple(
+    warps = Tuple(
         traits.Int(1),
         traits.Int(0),
         minlen=2,
