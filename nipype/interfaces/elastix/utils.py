@@ -173,9 +173,9 @@ class EditTransform(BaseInterface):
             return val
 
         if isdefined(self.inputs.output_file):
-            setattr(self, "_out_file", self.inputs.output_file)
+            self._out_file = self.inputs.output_file
             return self.inputs.output_file
 
         out_file = op.abspath(op.basename(self.inputs.transform_file))
-        setattr(self, "_out_file", out_file)
+        self._out_file = out_file
         return out_file

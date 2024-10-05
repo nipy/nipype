@@ -929,7 +929,7 @@ class AvScale(CommandLine):
                 float(r) for r in out["translations"].strip().split(" ")
             ]
 
-        setattr(self, "_results", outputs)
+        self._results = outputs
         return runtime
 
     def _list_outputs(self):
@@ -2513,8 +2513,8 @@ class WarpPoints(CommandLine):
 
     def _parse_inputs(self, skip=None):
         fname, ext = op.splitext(self.inputs.in_coords)
-        setattr(self, "_in_file", fname)
-        setattr(self, "_outformat", ext[1:])
+        self._in_file = fname
+        self._outformat = ext[1:]
         first_args = super()._parse_inputs(skip=["in_coords", "out_file"])
 
         second_args = fname + ".txt"
