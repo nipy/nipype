@@ -399,7 +399,7 @@ class DistributedPluginBase(PluginBase):
         if (
             cached
             and updated
-            and (overwrite is False or overwrite is None and not always_run)
+            and (overwrite is False or (overwrite is None and not always_run))
         ):
             logger.debug(
                 "Skipping cached node %s with ID %s.", self.procs[jobid], jobid
