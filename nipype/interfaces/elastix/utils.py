@@ -164,11 +164,11 @@ class EditTransform(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["output_file"] = getattr(self, "_out_file")
+        outputs["output_file"] = self._out_file
         return outputs
 
     def _get_outfile(self):
-        val = getattr(self, "_out_file")
+        val = self._out_file
         if val is not None and val != "":
             return val
 

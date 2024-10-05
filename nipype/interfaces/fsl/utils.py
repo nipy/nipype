@@ -2580,11 +2580,11 @@ class WarpPoints(CommandLine):
 
     def _overload_extension(self, value, name):
         if name == "out_file":
-            return "{}.{}".format(value, getattr(self, "_outformat"))
+            return "{}.{}".format(value, self._outformat)
 
     def _run_interface(self, runtime):
-        fname = getattr(self, "_in_file")
-        outformat = getattr(self, "_outformat")
+        fname = self._in_file
+        outformat = self._outformat
         tmpfile = None
 
         if outformat == "vtk":

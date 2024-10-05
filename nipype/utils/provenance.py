@@ -300,7 +300,7 @@ def write_provenance(results, filename="provenance", format="all"):
         import traceback
 
         err_msg = traceback.format_exc()
-        if getattr(e, "args"):
+        if e.args:
             err_msg += "\n\nException arguments:\n" + ", ".join(
                 ['"%s"' % arg for arg in e.args]
             )

@@ -852,7 +852,7 @@ def _identity_nodes(graph, include_iterables):
         node
         for node in nx.topological_sort(graph)
         if isinstance(node.interface, IdentityInterface)
-        and (include_iterables or getattr(node, "iterables") is None)
+        and (include_iterables or node.iterables is None)
     ]
 
 

@@ -3248,7 +3248,7 @@ class GCOR(CommandLine):
         return runtime
 
     def _list_outputs(self):
-        return {"out": getattr(self, "_gcor")}
+        return {"out": self._gcor}
 
 
 class AxializeInputSpec(AFNICommandInputSpec):
