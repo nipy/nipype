@@ -1263,7 +1263,7 @@ class Normalize(SPMCommand):
             outputs["normalized_source"] = self.inputs.source
         elif "write" in self.inputs.jobtype:
             if isdefined(self.inputs.write_preserve) and self.inputs.write_preserve:
-                prefixNorm = "".join(["m", self.inputs.out_prefix])
+                prefixNorm = f"m{self.inputs.out_prefix}"
             else:
                 prefixNorm = self.inputs.out_prefix
             outputs["normalized_files"] = []

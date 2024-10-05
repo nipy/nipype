@@ -709,7 +709,7 @@ class CommandLine(BaseInterface):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = sp.Popen(
-                " ".join((cmd, flag)),
+                f"{cmd} {flag}",
                 shell=True,
                 env=canonicalize_env(env),
                 stdout=sp.PIPE,

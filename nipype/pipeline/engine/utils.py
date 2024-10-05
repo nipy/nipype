@@ -457,9 +457,9 @@ def get_print_name(node, simple_form=True):
         if len(pkglist) > 2:
             destclass = ".%s" % pkglist[2]
         if simple_form:
-            name = node.fullname + destclass
+            name = f"{node.fullname}{destclass}"
         else:
-            name = ".".join([node.fullname, interface]) + destclass
+            name = f"{node.fullname}.{interface}{destclass}"
     if simple_form:
         parts = name.split(".")
         if len(parts) > 2:
@@ -1565,7 +1565,7 @@ def write_workflow_prov(graph, filename=None, format="all"):
         _, hashval, _, _ = node.hash_exists()
         attrs = {
             pm.PROV["type"]: nipype_ns[classname],
-            pm.PROV["label"]: "_".join((classname, node.name)),
+            pm.PROV["label"]: f"{classname}_{node.name}",
             nipype_ns["hashval"]: hashval,
         }
         process = ps.g.activity(get_id(), None, None, attrs)

@@ -292,7 +292,7 @@ class AFNICommand(AFNICommandBase):
         if ext is None:
             ext = Info.output_type_to_ext(self.inputs.outputtype)
         if change_ext:
-            suffix = "".join((suffix, ext)) if suffix else ext
+            suffix = f"{suffix}{ext}" if suffix else ext
 
         if suffix is None:
             suffix = ""

@@ -137,7 +137,7 @@ def hash_rename(filename, hashvalue):
     and sets path to output_directory
     """
     path, name, ext = split_filename(filename)
-    newfilename = "".join((name, "_0x", hashvalue, ext))
+    newfilename = f"{name}_0x{hashvalue}{ext}"
     return op.join(path, newfilename)
 
 

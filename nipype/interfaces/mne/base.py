@@ -112,7 +112,7 @@ class WatershedBEM(FSCommand):
         keydir = op.join(path, dirval)
         if altkey:
             key = altkey
-        globpattern = op.join(keydir, "".join((globprefix, key, globsuffix)))
+        globpattern = op.join(keydir, f"{globprefix}{key}{globsuffix}")
         return glob.glob(globpattern)
 
     def _list_outputs(self):

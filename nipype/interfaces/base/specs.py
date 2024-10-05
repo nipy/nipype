@@ -136,7 +136,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 msg3 = "It has been replaced by %s." % trait_spec.new_name
             else:
                 msg3 = ""
-            msg = " ".join((msg1, msg2, msg3))
+            msg = f"{msg1} {msg2} {msg3}"
             if Version(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:

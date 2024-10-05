@@ -1821,7 +1821,7 @@ class FreeSurferSource(IOBase):
             else:
                 globprefix = "*"
         keys = ensure_list(altkey) if altkey else [key]
-        globfmt = os.path.join(path, dirval, "".join((globprefix, "{}", globsuffix)))
+        globfmt = os.path.join(path, dirval, f"{globprefix}{{}}{globsuffix}")
         return [
             os.path.abspath(f) for key in keys for f in glob.glob(globfmt.format(key))
         ]
