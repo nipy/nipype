@@ -31,7 +31,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         self._retry_timeout = 2
         self._max_tries = 2
         self._bsub_args = ""
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             if "retry_timeout" in kwargs["plugin_args"]:
                 self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
             if "max_tries" in kwargs["plugin_args"]:
@@ -70,7 +70,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if self._bsub_args:
             bsubargs = self._bsub_args
         if "bsub_args" in node.plugin_args:
-            if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+            if node.plugin_args.get("overwrite"):
                 bsubargs = node.plugin_args["bsub_args"]
             else:
                 bsubargs += " " + node.plugin_args["bsub_args"]

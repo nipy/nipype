@@ -431,7 +431,7 @@ def generate_class(
     output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
-    template += f"    _redirect_x = {str(redirect_x)}\n"
+    template += f"    _redirect_x = {redirect_x}\n"
 
     main_class = (
         template.replace("%class_str%", class_string)

@@ -27,7 +27,7 @@ HELP_LINEWIDTH = 70
 class RuntimeContext(AbstractContextManager):
     """A context manager to run NiPype interfaces."""
 
-    __slots__ = ("_runtime", "_resmon", "_ignore_exc")
+    __slots__ = ("_ignore_exc", "_resmon", "_runtime")
 
     def __init__(self, resource_monitor=False, ignore_exception=False):
         """Initialize the context manager object."""

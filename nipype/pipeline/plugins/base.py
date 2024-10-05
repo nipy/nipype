@@ -399,7 +399,7 @@ class DistributedPluginBase(PluginBase):
         if (
             cached
             and updated
-            and (overwrite is False or overwrite is None and not always_run)
+            and (overwrite is False or (overwrite is None and not always_run))
         ):
             logger.debug(
                 "Skipping cached node %s with ID %s.", self.procs[jobid], jobid
@@ -618,7 +618,7 @@ class GraphPluginBase(PluginBase):
                 else:
                     tmp_value = node.plugin_args[keyword]
 
-                if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+                if node.plugin_args.get("overwrite"):
                     value = tmp_value
                 else:
                     value += tmp_value

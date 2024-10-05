@@ -34,7 +34,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         self._retry_timeout = 2
         self._max_tries = 2
         self._max_jobname_length = 15
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             if "retry_timeout" in kwargs["plugin_args"]:
                 self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
             if "max_tries" in kwargs["plugin_args"]:
@@ -73,7 +73,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         if self._qsub_args:
             qsubargs = self._qsub_args
         if "qsub_args" in node.plugin_args:
-            if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+            if node.plugin_args.get("overwrite"):
                 qsubargs = node.plugin_args["qsub_args"]
             else:
                 qsubargs += " " + node.plugin_args["qsub_args"]

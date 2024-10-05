@@ -523,7 +523,7 @@ class SPMCommand(BaseInterface):
         if isinstance(contents, (str, bytes)):
             jobstring += f"{prefix} = '{contents}';\n"
             return jobstring
-        jobstring += f"{prefix} = {str(contents)};\n"
+        jobstring += f"{prefix} = {contents};\n"
         return jobstring
 
     def _make_matlab_command(self, contents, postscript=None):

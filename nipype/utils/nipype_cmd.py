@@ -52,7 +52,7 @@ def run_instance(interface, options):
             try:
                 setattr(interface.inputs, input_name, value)
             except ValueError as e:
-                print(f"Error when setting the value of {input_name}: '{str(e)}'")
+                print(f"Error when setting the value of {input_name}: '{e}'")
 
     print(interface.inputs)
     res = interface.run()

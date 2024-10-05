@@ -55,7 +55,7 @@ another exception occurred:\n\n{}.""".format(
         login_name = getpass.getuser()
     except KeyError:
         login_name = f"UID{os.getuid():d}"
-    crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{str(uuid.uuid4())}"
+    crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{uuid.uuid4()}"
     crashdir = node.config["execution"].get("crashdump_dir", os.getcwd())
 
     os.makedirs(crashdir, exist_ok=True)

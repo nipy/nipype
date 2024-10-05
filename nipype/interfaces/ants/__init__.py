@@ -50,9 +50,9 @@ from .utils import (
 )
 
 __all__ = [
-    "AffineInitializer",
     "AI",
     "ANTS",
+    "AffineInitializer",
     "AntsJointFusion",
     "ApplyTransforms",
     "ApplyTransformsToPoints",
