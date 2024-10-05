@@ -53,7 +53,7 @@ class HistogramMatchingFilterInputSpec(CommandLineInputSpec):
     )
     histogramAlgorithm = traits.Enum(
         "OtsuHistogramMatching",
-        desc=" histogram algrithm selection",
+        desc=" histogram algorithm selection",
         argstr="--histogramAlgorithm %s",
     )
     verbose = traits.Bool(
