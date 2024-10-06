@@ -1345,7 +1345,7 @@ def split_rois(in_file, mask=None, roishape=None):
     """
     import nibabel as nb
     import numpy as np
-    from math import sqrt, ceil
+    from math import ceil
     import os.path as op
 
     if roishape is None:

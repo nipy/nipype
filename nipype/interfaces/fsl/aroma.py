@@ -11,7 +11,6 @@ from ..base import (
     File,
     Directory,
     traits,
-    isdefined,
 )
 import os
 

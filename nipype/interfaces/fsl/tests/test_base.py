@@ -4,7 +4,7 @@ import os
 
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
-from nipype.interfaces.fsl import check_fsl, no_fsl
+from nipype.interfaces.fsl import no_fsl
 
 import pytest
 

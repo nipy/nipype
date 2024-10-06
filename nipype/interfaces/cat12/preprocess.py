@@ -576,7 +576,7 @@ class CAT12Segment(SPMCommand):
         ]
 
         outputs["report"] = fname_presuffix(
-            f, prefix=os.path.join("report", f"cat_"), suffix=".xml", use_ext=False
+            f, prefix=os.path.join("report", "cat_"), suffix=".xml", use_ext=False
         )
 
         outputs["label_files"] = [

@@ -8,7 +8,7 @@ import pytest
 have_cv = True
 try:
     package_check("cviewer")
-except Exception as e:
+except Exception:
     have_cv = False
 
 
@@ -39,7 +39,7 @@ def test_importerror(creating_graphs, tmpdir):
     nbs.inputs.in_group2 = group2
     nbs.inputs.edge_key = "weight"
 
-    with pytest.raises(ImportError) as e:
+    with pytest.raises(ImportError):
         nbs.run()
 
 

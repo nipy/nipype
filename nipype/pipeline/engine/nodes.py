@@ -36,7 +36,6 @@ from ...utils.filemanip import (
 from ...interfaces.base import (
     traits,
     InputMultiPath,
-    CommandLine,
     Undefined,
     DynamicTraitedSpec,
     Bunch,
@@ -1382,7 +1381,7 @@ class MapNode(Node):
                 )
             )
         except Exception as msg:
-            result.runtime.stderr = "%s\n\n%s".format(
+            result.runtime.stderr = "{}\n\n{}".format(
                 getattr(result.runtime, "stderr", ""), msg
             )
             _save_resultfile(

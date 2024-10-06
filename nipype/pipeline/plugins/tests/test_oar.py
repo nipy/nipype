@@ -1,3 +1,4 @@
+import os
 from shutil import which
 
 import nipype.interfaces.base as nib

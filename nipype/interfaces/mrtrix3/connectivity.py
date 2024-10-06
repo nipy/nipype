@@ -212,7 +212,7 @@ class LabelConfig(MRTrix3Base):
 
             path = which(self._cmd)
             if path is None:
-                path = os.getenv(MRTRIX3_HOME, "/opt/mrtrix3")
+                path = os.getenv("MRTRIX3_HOME", "/opt/mrtrix3")
             else:
                 path = op.dirname(op.dirname(path))
 
@@ -304,7 +304,7 @@ class LabelConvert(MRTrix3Base):
 
             path = which(self._cmd)
             if path is None:
-                path = os.getenv(MRTRIX3_HOME, "/opt/mrtrix3")
+                path = os.getenv("MRTRIX3_HOME", "/opt/mrtrix3")
             else:
                 path = op.dirname(op.dirname(path))
 

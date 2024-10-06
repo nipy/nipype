@@ -1,4 +1,3 @@
-import os
 from ...testing import example_data
 
 minc2Dfile = example_data("minc_test_2D_00.mnc")

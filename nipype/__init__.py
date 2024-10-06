@@ -25,7 +25,7 @@ try:
     import faulthandler
 
     faulthandler.enable()
-except (ImportError, OSError) as e:
+except (ImportError, OSError):
     pass
 
 config = NipypeConfig()

@@ -3,7 +3,6 @@
 """Defines functionality for pipelined execution of interfaces."""
 from copy import deepcopy
 import re
-import numpy as np
 
 from ... import config
 from ...interfaces.base import DynamicTraitedSpec

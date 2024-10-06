@@ -5,10 +5,9 @@ import os
 
 import numpy as np
 
-import nibabel as nb
 import pytest
 import nipype.interfaces.fsl.utils as fsl
-from nipype.interfaces.fsl import no_fsl, Info
+from nipype.interfaces.fsl import no_fsl
 
 from nipype.testing.fixtures import create_files_in_directory_plus_output_type
 

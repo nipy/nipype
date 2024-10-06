@@ -5,7 +5,6 @@ Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
 # Import packages
-import sys
 import random
 import datetime
 import simplejson as json

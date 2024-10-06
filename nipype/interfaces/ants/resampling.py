@@ -122,7 +122,7 @@ ants_Affine.txt'
             if isdefined(self.inputs.invert_affine):
                 diff_inv = set(self.inputs.invert_affine) - set(affine_invert)
                 if diff_inv:
-                    raise Exceptions(
+                    raise Exception(
                         "Review invert_affine, not all indexes from invert_affine were used, "
                         "check the description for the full definition"
                     )
@@ -275,7 +275,7 @@ ants_Affine.txt'
             if isdefined(self.inputs.invert_affine):
                 diff_inv = set(self.inputs.invert_affine) - set(affine_invert)
                 if diff_inv:
-                    raise Exceptions(
+                    raise Exception(
                         "Review invert_affine, not all indexes from invert_affine were used, "
                         "check the description for the full definition"
                     )

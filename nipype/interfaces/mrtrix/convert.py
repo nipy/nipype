@@ -9,7 +9,7 @@ from nibabel.orientations import aff2axcodes
 from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import TraitedSpec, File, isdefined
-from ..dipy.base import DipyBaseInterface, HAVE_DIPY as have_dipy
+from ..dipy.base import DipyBaseInterface
 
 iflogger = logging.getLogger("nipype.interface")
 

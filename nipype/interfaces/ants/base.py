@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The ants module provides basic functions for interfacing with ANTS tools."""
 import os
-from packaging.version import Version, parse
+from packaging.version import parse
 
 # Local imports
 from ... import logging

@@ -5,7 +5,6 @@ import sys
 
 from ..interfaces.base import Interface, InputMultiPath, traits
 from ..interfaces.base.support import get_trait_desc
-from .misc import str2bool
 
 
 def listClasses(module=None):

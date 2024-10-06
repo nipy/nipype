@@ -26,7 +26,6 @@ from ...utils.filemanip import (
     get_related_files,
     indirectory,
     loadpkl,
-    loadcrash,
     savepkl,
     path_resolve,
     write_rst_list,

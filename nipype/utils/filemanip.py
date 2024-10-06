@@ -47,7 +47,7 @@ def split_filename(fname):
     fname : str
         filename from fname, without extension
     ext : str
-        file extension from fname
+        file extension from fname706
 
     Examples
     --------
@@ -700,10 +700,11 @@ def savepkl(filename, record, versioning=False):
             os.rename(tmpfile, filename)
             break
         except FileNotFoundError as e:
+            last_e = e
             fmlogger.debug(str(e))
             sleep(2)
     else:
-        raise e
+        raise last_e
 
 
 rst_levels = ["=", "-", "~", "+"]

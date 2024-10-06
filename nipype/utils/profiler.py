@@ -10,7 +10,7 @@ from time import time
 
 try:
     import psutil
-except ImportError as exc:
+except ImportError:
     psutil = None
 
 

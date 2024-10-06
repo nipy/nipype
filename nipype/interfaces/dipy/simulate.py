@@ -324,7 +324,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
 
     """
     import numpy as np
-    from dipy.core.sphere import disperse_charges, Sphere, HemiSphere
+    from dipy.core.sphere import disperse_charges, HemiSphere
     from dipy.core.gradients import gradient_table
 
     theta = np.pi * np.random.rand(ndirs)

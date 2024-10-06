@@ -5,7 +5,6 @@
 from looseversion import LooseVersion
 
 from ... import logging
-from ...utils.filemanip import which
 from ..base import (
     CommandLineInputSpec,
     CommandLine,

@@ -12,26 +12,19 @@ See the docstrings of the individual classes for examples.
 import os
 
 from ..base import (
-    CommandLineInputSpec,
-    CommandLine,
-    Directory,
     TraitedSpec,
     traits,
     isdefined,
     File,
     InputMultiPath,
-    Undefined,
     Str,
     Tuple,
 )
-from ...external.due import BibTeX
 
 from .base import (
-    AFNICommandBase,
     AFNICommand,
     AFNICommandInputSpec,
     AFNICommandOutputSpec,
-    Info,
 )
 
 

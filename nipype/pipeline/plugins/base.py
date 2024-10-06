@@ -541,7 +541,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                     "Node working directory: ({}) ".format(taskid, timeout, node_dir)
                 )
                 raise OSError(error_message)
-            except OSError as e:
+            except OSError:
                 result_data["traceback"] = "\n".join(format_exception(*sys.exc_info()))
         else:
             results_file = glob(os.path.join(node_dir, "result_*.pklz"))[0]
