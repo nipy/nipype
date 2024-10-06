@@ -99,7 +99,7 @@ class RuntimeContext(AbstractContextManager):
                 traceback.format_exception(exc_type, exc_value, exc_tb)
             )
             # Gather up the exception arguments and append nipype info.
-            exc_args = exc_value.args if exc_value.args else tuple()
+            exc_args = exc_value.args or ()
             exc_args += (
                 f"An exception of type {exc_type.__name__} occurred while "
                 f"running interface {self._runtime.interface}.",
