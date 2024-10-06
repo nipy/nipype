@@ -194,11 +194,11 @@ class CFFConverter(CFFBaseInterface):
             for data in self.inputs.data_files:
                 _, data_name, _ = split_filename(data)
                 cda = cf.CData(name=data_name, src=data, fileformat="NumPy")
-                if string.find(data_name, 'lengths') != -1:
+                if 'lengths' in data_name:
                     cda.dtype = "FinalFiberLengthArray"
-                if string.find(data_name, 'endpoints') != -1:
+                if 'endpoints' in data_name:
                     cda.dtype = "FiberEndpoints"
-                if string.find(data_name, 'labels') != -1:
+                if 'labels' in data_name:
                     cda.dtype = "FinalFiberLabels"
                 a.add_connectome_data(cda)
 
