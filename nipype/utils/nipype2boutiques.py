@@ -477,7 +477,7 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
             # If extensions all the same, set path template as
             # wildcard + extension. Otherwise just use a wildcard
             if len(extensions) == 1:
-                output["path-template"] = "*" + extensions[0]
+                output["path-template"] = "*" + extensions.pop()
             else:
                 output["path-template"] = "*"
             return output

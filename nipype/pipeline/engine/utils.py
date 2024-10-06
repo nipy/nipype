@@ -1489,10 +1489,9 @@ def clean_working_directory(
                     files2remove.append(f)
     else:
         if not str2bool(config["execution"]["keep_inputs"]):
-            input_files = []
-            inputdict = inputs.trait_get()
-            input_files.extend(walk_outputs(inputdict))
-            input_files = [path for path, type in input_files if type == "f"]
+            input_files = {
+                path for path, type in walk_outputs(inputs.trait_get()) if type == "f"
+            }
             files2remove.extend(
                 f for f in walk_files(cwd) if f in input_files and f not in needed_files
             )

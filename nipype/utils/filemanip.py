@@ -444,16 +444,15 @@ def get_related_files(filename, include_this_file=True):
     include_this_file : bool
         If true, output includes the input filename.
     """
-    related_files = []
     path, name, this_type = split_filename(filename)
-    for type_set in related_filetype_sets:
-        if this_type in type_set:
-            related_files.extend(
-                op.join(path, name + related_type)
-                for related_type in type_set
-                if include_this_file or related_type != this_type
-            )
-    if not len(related_files):
+    related_files = [
+        op.join(path, f"{name}{related_type}")
+        for type_set in related_filetype_sets
+        if this_type in type_set
+        for related_type in type_set
+        if include_this_file or related_type != this_type
+    ]
+    if not related_files:
         related_files = [filename]
     return related_files
 
@@ -715,13 +714,11 @@ def write_rst_header(header, level=0):
 
 
 def write_rst_list(items, prefix=""):
-    out = [f"{prefix} {item}" for item in ensure_list(items)]
-    return "\n".join(out) + "\n\n"
+    return "\n".join(f"{prefix} {item}" for item in ensure_list(items)) + "\n\n"
 
 
 def write_rst_dict(info, prefix=""):
-    out = [f"{prefix}* {key} : {value}" for key, value in sorted(info.items())]
-    return "\n".join(out) + "\n\n"
+    return "\n".join(f"{prefix}* {k} : {v}" for k, v in sorted(info.items())) + "\n\n"
 
 
 def dist_is_editable(dist):
