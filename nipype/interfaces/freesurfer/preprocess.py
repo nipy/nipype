@@ -2645,20 +2645,20 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
         hash_files=False,
         keep_extension=True,
         desc="output volume. Output can be any format accepted by mri_convert. "
-        + "If the output format is COR, then the directory must exist.",
+        "If the output format is COR, then the directory must exist.",
     )
     iterations = traits.Int(
         4,
         usedefault=True,
         argstr="--n %d",
         desc="Number of iterations to run nu_correct. Default is 4. This is the number of times "
-        + "that nu_correct is repeated (ie, using the output from the previous run as the input for "
-        + "the next). This is different than the -iterations option to nu_correct.",
+        "that nu_correct is repeated (ie, using the output from the previous run as the input for "
+        "the next). This is different than the -iterations option to nu_correct.",
     )
     protocol_iterations = traits.Int(
         argstr="--proto-iters %d",
         desc="Passes Np as argument of the -iterations flag of nu_correct. This is different "
-        + "than the --n flag above. Default is not to pass nu_correct the -iterations flag.",
+        "than the --n flag above. Default is not to pass nu_correct the -iterations flag.",
     )
     distance = traits.Int(argstr="--distance %d", desc="N3 -distance option")
     no_rescale = traits.Bool(
@@ -3167,8 +3167,8 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
     seed = traits.Int(argstr="-seed %d", desc="")
     copy_inputs = traits.Bool(
         desc="Copies implicit inputs to node directory "
-        + "and creates a temp subjects_directory. "
-        + "Use this when running as a node"
+        "and creates a temp subjects_directory. "
+        "Use this when running as a node"
     )
 
 
@@ -3286,9 +3286,8 @@ class SegmentCCInputSpec(FSTraitedSpec):
         desc="Subject name",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
 
 

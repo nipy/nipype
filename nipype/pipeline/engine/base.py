@@ -87,7 +87,7 @@ class EngineBase:
 
         """
         if name == self.name:
-            raise ValueError('Cloning requires a new name, "%s" is ' "in use." % name)
+            raise ValueError('Cloning requires a new name, "%s" is in use.' % name)
         clone = deepcopy(self)
         clone.name = name
         if hasattr(clone, "_id"):

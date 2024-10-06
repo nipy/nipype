@@ -251,7 +251,7 @@ class RegisterInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-2,
         desc="The data to register to. In normal recon-all usage, "
-        + "this is a template file for average surface.",
+        "this is a template file for average surface.",
     )
     in_sulc = File(
         exists=True,
@@ -331,7 +331,7 @@ class PaintInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-2,
         desc="Surface file with grid (vertices) onto which the "
-        + "template data is to be sampled or 'painted'",
+        "template data is to be sampled or 'painted'",
     )
     template = File(
         argstr="%s", exists=True, mandatory=True, position=-3, desc="Template file"
@@ -348,7 +348,7 @@ class PaintInputSpec(FSTraitedSpec):
         name_source=["in_surf"],
         keep_extension=False,
         desc="File containing a surface-worth of per-vertex values, "
-        + "saved in 'curvature' format.",
+        "saved in 'curvature' format.",
     )
 
 
