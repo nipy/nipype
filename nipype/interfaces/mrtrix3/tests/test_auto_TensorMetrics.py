@@ -7,6 +7,9 @@ def test_TensorMetrics_inputs():
         args=dict(
             argstr="%s",
         ),
+        bval_scale=dict(
+            argstr="-bvalue_scaling %s",
+        ),
         component=dict(
             argstr="-num %s",
             sep=",",
@@ -15,6 +18,22 @@ def test_TensorMetrics_inputs():
         environ=dict(
             nohash=True,
             usedefault=True,
+        ),
+        grad_file=dict(
+            argstr="-grad %s",
+            extensions=None,
+            xor=["grad_fsl"],
+        ),
+        grad_fsl=dict(
+            argstr="-fslgrad %s %s",
+            xor=["grad_file"],
+        ),
+        in_bval=dict(
+            extensions=None,
+        ),
+        in_bvec=dict(
+            argstr="-fslgrad %s %s",
+            extensions=None,
         ),
         in_file=dict(
             argstr="%s",
@@ -29,12 +48,23 @@ def test_TensorMetrics_inputs():
         modulate=dict(
             argstr="-modulate %s",
         ),
+        nthreads=dict(
+            argstr="-nthreads %d",
+            nohash=True,
+        ),
         out_ad=dict(
             argstr="-ad %s",
             extensions=None,
         ),
         out_adc=dict(
             argstr="-adc %s",
+            extensions=None,
+        ),
+        out_bval=dict(
+            extensions=None,
+        ),
+        out_bvec=dict(
+            argstr="-export_grad_fsl %s %s",
             extensions=None,
         ),
         out_cl=dict(
