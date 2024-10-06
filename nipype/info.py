@@ -187,7 +187,7 @@ EXTRA_REQUIRES = {
 
 
 def _list_union(iterable):
-    return list(set(sum(iterable, [])))
+    return list(set(x for sublist in iterable for x in sublist))
 
 
 # Enable a handle to install all extra dependencies at once
