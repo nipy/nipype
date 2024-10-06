@@ -7,7 +7,7 @@ import subprocess
 
 
 def crasher():
-    raise ValueError()
+    raise ValueError
 
 
 def submit_batchtask(self, scriptfile, node):
