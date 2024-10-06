@@ -318,7 +318,7 @@ class Generate5tt(MRTrix3Base):
         return outputs
 
 
-class TensorMetricsInputSpec(CommandLineInputSpec):
+class TensorMetricsInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True,
         argstr="%s",
