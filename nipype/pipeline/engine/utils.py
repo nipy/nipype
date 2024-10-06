@@ -1479,19 +1479,21 @@ def clean_working_directory(
     needed_files = temp
     logger.debug("Needed files: %s", ";".join(needed_files))
     logger.debug("Needed dirs: %s", ";".join(needed_dirs))
-    files2remove = []
     if str2bool(config["execution"]["remove_unnecessary_outputs"]):
-        for f in walk_files(cwd):
-            if f not in needed_files and not f.startswith(tuple(needed_dirs)):
-                files2remove.append(f)
+        files2remove = [
+            f
+            for f in walk_files(cwd)
+            if f not in needed_files and not f.startswith(tuple(needed_dirs))
+        ]
+    elif not str2bool(config["execution"]["keep_inputs"]):
+        input_files = {
+            path for path, type in walk_outputs(inputs.trait_get()) if type == "f"
+        }
+        files2remove = [
+            f for f in walk_files(cwd) if f in input_files and f not in needed_files
+        ]
     else:
-        if not str2bool(config["execution"]["keep_inputs"]):
-            input_files = {
-                path for path, type in walk_outputs(inputs.trait_get()) if type == "f"
-            }
-            files2remove.extend(
-                f for f in walk_files(cwd) if f in input_files and f not in needed_files
-            )
+        files2remove = []
     logger.debug("Removing files: %s", ";".join(files2remove))
     for f in files2remove:
         os.remove(f)
