@@ -52,7 +52,7 @@ def func_is_3d(in_file):
     else:
         img = load(in_file)
         shape = img.shape
-        return len(shape) == 3 or len(shape) == 4 and shape[3] == 1
+        return len(shape) == 3 or (len(shape) == 4 and shape[3] == 1)
 
 
 def get_first_3dfile(in_files):
