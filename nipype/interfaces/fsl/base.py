@@ -57,7 +57,7 @@ class Info(PackageInfo):
         "NIFTI_PAIR": ".img",
         "NIFTI_GZ": ".nii.gz",
         "NIFTI_PAIR_GZ": ".img.gz",
-        "GIFTI": ".func.gii"
+        "GIFTI": ".func.gii",
     }
 
     if os.getenv("FSLDIR"):
