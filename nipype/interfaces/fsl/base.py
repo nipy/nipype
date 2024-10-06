@@ -57,6 +57,7 @@ class Info(PackageInfo):
         "NIFTI_PAIR": ".img",
         "NIFTI_GZ": ".nii.gz",
         "NIFTI_PAIR_GZ": ".img.gz",
+        "GIFTI": ".func.gii",
     }
 
     if os.getenv("FSLDIR"):
@@ -72,8 +73,8 @@ class Info(PackageInfo):
 
         Parameters
         ----------
-        output_type : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ'}
-            String specifying the output type.
+        output_type : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ', 'GIFTI'}
+            String specifying the output type. Note: limited GIFTI support.
 
         Returns
         -------
