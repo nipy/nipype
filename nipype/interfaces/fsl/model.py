@@ -142,13 +142,12 @@ class Level1Design(BaseInterface):
     output_spec = Level1DesignOutputSpec
 
     def _create_ev_file(self, evfname, evinfo):
-        f = open(evfname, "w")
-        for i in evinfo:
-            if len(i) == 3:
-                f.write(f"{i[0]:f} {i[1]:f} {i[2]:f}\n")
-            else:
-                f.write("%f\n" % i[0])
-        f.close()
+        with open(evfname, "w") as f:
+            for i in evinfo:
+                if len(i) == 3:
+                    f.write(f"{i[0]:f} {i[1]:f} {i[2]:f}\n")
+                else:
+                    f.write("%f\n" % i[0])
 
     def _create_ev_files(
         self,
@@ -319,7 +318,7 @@ class Level1Design(BaseInterface):
 
                     for fconidx in ftest_idx:
                         fval = 0
-                        if con[0] in con_map.keys() and fconidx in con_map[con[0]]:
+                        if con[0] in con_map and fconidx in con_map[con[0]]:
                             fval = 1
                         ev_txt += contrast_ftest_element.substitute(
                             cnum=ftest_idx.index(fconidx) + 1,
@@ -403,9 +402,8 @@ class Level1Design(BaseInterface):
             fsf_txt += cond_txt
             fsf_txt += fsf_postscript.substitute(overwrite=1)
 
-            f = open(os.path.join(cwd, "run%d.fsf" % i), "w")
-            f.write(fsf_txt)
-            f.close()
+            with open(os.path.join(cwd, "run%d.fsf" % i), "w") as f:
+                f.write(fsf_txt)
 
         return runtime
 
@@ -946,9 +944,8 @@ class FEATRegister(BaseInterface):
         for i, rundir in enumerate(ensure_list(self.inputs.feat_dirs)):
             fsf_txt += fsf_dirs.substitute(runno=i + 1, rundir=os.path.abspath(rundir))
         fsf_txt += fsf_footer.substitute()
-        f = open(os.path.join(os.getcwd(), "register.fsf"), "w")
-        f.write(fsf_txt)
-        f.close()
+        with open(os.path.join(os.getcwd(), "register.fsf"), "w") as f:
+            f.write(fsf_txt)
 
         return runtime
 
@@ -1414,9 +1411,8 @@ class L2Model(BaseInterface):
 
         # write design files
         for i, name in enumerate(["design.mat", "design.con", "design.grp"]):
-            f = open(os.path.join(cwd, name), "w")
-            f.write(txt[name])
-            f.close()
+            with open(os.path.join(cwd, name), "w") as f:
+                f.write(txt[name])
 
         return runtime
 
@@ -1503,8 +1499,8 @@ class MultipleRegressDesign(BaseInterface):
         regs = sorted(self.inputs.regressors.keys())
         nwaves = len(regs)
         npoints = len(self.inputs.regressors[regs[0]])
-        ntcons = sum([1 for con in self.inputs.contrasts if con[1] == "T"])
-        nfcons = sum([1 for con in self.inputs.contrasts if con[1] == "F"])
+        ntcons = sum(1 for con in self.inputs.contrasts if con[1] == "T")
+        nfcons = sum(1 for con in self.inputs.contrasts if con[1] == "F")
         # write mat file
         mat_txt = ["/NumWaves       %d" % nwaves, "/NumPoints      %d" % npoints]
         ppheights = []
@@ -1583,15 +1579,14 @@ class MultipleRegressDesign(BaseInterface):
             if ("fts" in key) and (nfcons == 0):
                 continue
             filename = key.replace("_", ".")
-            f = open(os.path.join(cwd, filename), "w")
-            f.write(val)
-            f.close()
+            with open(os.path.join(cwd, filename), "w") as f:
+                f.write(val)
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        nfcons = sum([1 for con in self.inputs.contrasts if con[1] == "F"])
+        nfcons = sum(1 for con in self.inputs.contrasts if con[1] == "F")
         for field in list(outputs.keys()):
             if ("fts" in field) and (nfcons == 0):
                 continue

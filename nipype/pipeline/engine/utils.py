@@ -852,7 +852,7 @@ def _identity_nodes(graph, include_iterables):
         node
         for node in nx.topological_sort(graph)
         if isinstance(node.interface, IdentityInterface)
-        and (include_iterables or getattr(node, "iterables") is None)
+        and (include_iterables or node.iterables is None)
     ]
 
 
@@ -1046,7 +1046,7 @@ def generate_expanded_graph(graph_in):
         logger.debug("node: %s iterables: %s", inode, iterables)
 
         # collect the subnodes to expand
-        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        subnodes = list(dfs_preorder(graph_in, inode))
         prior_prefix = [re.findall(r"\.(.)I", s._id) for s in subnodes if s._id]
         prior_prefix = sorted([l for item in prior_prefix for l in item])
         if not prior_prefix:
@@ -1482,11 +1482,8 @@ def clean_working_directory(
     files2remove = []
     if str2bool(config["execution"]["remove_unnecessary_outputs"]):
         for f in walk_files(cwd):
-            if f not in needed_files:
-                if not needed_dirs:
-                    files2remove.append(f)
-                elif not any([f.startswith(dname) for dname in needed_dirs]):
-                    files2remove.append(f)
+            if f not in needed_files and not f.startswith(tuple(needed_dirs)):
+                files2remove.append(f)
     else:
         if not str2bool(config["execution"]["keep_inputs"]):
             input_files = {
@@ -1709,13 +1706,11 @@ def topological_sort(graph, depth_first=False):
     logger.debug("Performing depth first search")
     nodes = []
     groups = []
-    group = 0
     G = nx.Graph()
     G.add_nodes_from(graph.nodes())
     G.add_edges_from(graph.edges())
     components = nx.connected_components(G)
-    for desc in components:
-        group += 1
+    for group, desc in enumerate(components, start=1):
         indices = [nodesort.index(node) for node in desc]
         nodes.extend(
             np.array(nodesort)[np.array(indices)[np.argsort(indices)]].tolist()

@@ -39,7 +39,7 @@ def list_interfaces(module):
     the given module.
     """
     iface_names = []
-    for k, v in sorted(list(module.__dict__.items())):
+    for k, v in sorted(module.__dict__.items()):
         if inspect.isclass(v) and issubclass(v, Interface):
             iface_names.append(k)
     return iface_names

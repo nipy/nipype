@@ -517,7 +517,7 @@ def test_datasink_copydir_2(_temp_analyze_files, tmpdir):
         base_directory=tmpdir.mkdir("basedir").strpath, parameterization=False
     )
     ds.inputs.remove_dest_dir = True
-    setattr(ds.inputs, "outdir", pth)
+    ds.inputs.outdir = pth
     ds.run()
     sep = os.path.sep
     assert not tmpdir.join("basedir", pth.split(sep)[-1], fname).check()

@@ -536,7 +536,7 @@ class AI(ANTSCommand):
         return super()._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        return getattr(self, "_output")
+        return self._output
 
 
 class AverageAffineTransformInputSpec(ANTSCommandInputSpec):

@@ -194,7 +194,7 @@ class Atropos(ANTSCommand):
                         priors_paths[0] % i for i in range(1, n_classes + 1)
                     ]
 
-                if not all([os.path.exists(p) for p in priors_paths]):
+                if not all(os.path.exists(p) for p in priors_paths):
                     raise FileNotFoundError(
                         "One or more prior images do not exist: "
                         "%s." % ", ".join(priors_paths)

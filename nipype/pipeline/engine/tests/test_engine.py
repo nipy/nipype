@@ -25,7 +25,7 @@ from .test_base import EngineTestInterface
 def test_1mod(iterables, expected):
     pipe = pe.Workflow(name="pipe")
     mod1 = pe.Node(interface=EngineTestInterface(), name="mod1")
-    setattr(mod1, "iterables", iterables["1"])
+    mod1.iterables = iterables["1"]
     pipe.add_nodes([mod1])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -49,7 +49,7 @@ def test_2mods(iterables, expected):
     mod1 = pe.Node(interface=EngineTestInterface(), name="mod1")
     mod2 = pe.Node(interface=EngineTestInterface(), name="mod2")
     for nr in ["1", "2"]:
-        setattr(eval("mod" + nr), "iterables", iterables[nr])
+        eval("mod" + nr).iterables = iterables[nr]
     pipe.connect([(mod1, mod2, [("output1", "input2")])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -87,7 +87,7 @@ def test_3mods(iterables, expected, connect):
     mod2 = pe.Node(interface=EngineTestInterface(), name="mod2")
     mod3 = pe.Node(interface=EngineTestInterface(), name="mod3")
     for nr in ["1", "2", "3"]:
-        setattr(eval("mod" + nr), "iterables", iterables[nr])
+        eval("mod" + nr).iterables = iterables[nr]
     if connect == ("1-2", "2-3"):
         pipe.connect(
             [

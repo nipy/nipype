@@ -942,7 +942,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         # get list of all files in s3 bucket
         conn = boto.connect_s3(anon=self.inputs.anon)
         bkt = conn.get_bucket(self.inputs.bucket)
-        bkt_files = list(k.key for k in bkt.list(prefix=self.inputs.bucket_path))
+        bkt_files = [k.key for k in bkt.list(prefix=self.inputs.bucket_path)]
 
         # keys are outfields, args are template args for the outfield
         for key, args in list(self.inputs.template_args.items()):
@@ -1022,7 +1022,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(simplify_list(outfiles))
-            if any([val is None for val in outputs[key]]):
+            if None in outputs[key]:
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -1053,9 +1053,9 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         local_directory = str(self.inputs.local_directory)
         bucket_path = str(self.inputs.bucket_path)
         template = str(self.inputs.template)
-        if not os.path.basename(local_directory) == "":
+        if os.path.basename(local_directory) != "":
             local_directory += "/"
-        if not os.path.basename(bucket_path) == "":
+        if os.path.basename(bucket_path) != "":
             bucket_path += "/"
         if template[0] == "/":
             template = template[1:]
@@ -1297,7 +1297,7 @@ class DataGrabber(IOBase):
             if self.inputs.drop_blank_outputs:
                 outputs[key] = [x for x in outputs[key] if x is not None]
             else:
-                if any([val is None for val in outputs[key]]):
+                if None in outputs[key]:
                     outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -2302,7 +2302,7 @@ class SQLiteSink(LibraryBaseInterface, IOBase):
         super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, self._input_names)
 
     def _list_outputs(self):
         """Execute this module."""
@@ -2364,7 +2364,7 @@ class MySQLSink(IOBase):
         super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, self._input_names)
 
     def _list_outputs(self):
         """Execute this module."""
@@ -2642,7 +2642,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                     outputs[key].append(self._get_files_over_ssh(filledtemplate))
 
             # disclude where there was any invalid matches
-            if any([val is None for val in outputs[key]]):
+            if None in outputs[key]:
                 outputs[key] = []
 
             # no outputs is None, not empty list
@@ -2938,7 +2938,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         undefined_traits = {}
         for key in self._infields:
             self.inputs.add_trait(key, traits.Any)
-            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
+            undefined_traits[key] = kwargs.get(key, Undefined)
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 

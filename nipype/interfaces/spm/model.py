@@ -159,7 +159,7 @@ class Level1Design(SPMCommand):
         """validate spm realign options if set to None ignore"""
         einputs = super()._parse_inputs(skip=("mask_threshold", "flags"))
         if isdefined(self.inputs.flags):
-            einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
+            einputs[0].update(self.inputs.flags)
         for sessinfo in einputs[0]["sess"]:
             sessinfo["scans"] = scans_for_fnames(
                 ensure_list(sessinfo["scans"]), keep4d=False
@@ -309,7 +309,7 @@ class EstimateModel(SPMCommand):
         """validate spm realign options if set to None ignore"""
         einputs = super()._parse_inputs(skip=("flags"))
         if isdefined(self.inputs.flags):
-            einputs[0].update({flag: val for (flag, val) in self.inputs.flags.items()})
+            einputs[0].update(self.inputs.flags)
         return einputs
 
     def _list_outputs(self):
@@ -322,8 +322,8 @@ class EstimateModel(SPMCommand):
 
         betas = [vbeta.fname[0] for vbeta in spm["SPM"][0, 0].Vbeta[0]]
         if (
-            "Bayesian" in self.inputs.estimation_method.keys()
-            or "Bayesian2" in self.inputs.estimation_method.keys()
+            "Bayesian" in self.inputs.estimation_method
+            or "Bayesian2" in self.inputs.estimation_method
         ):
             outputs["labels"] = os.path.join(pth, f"labels.{outtype}")
             outputs["SDerror"] = glob(os.path.join(pth, "Sess*_SDerror*"))
@@ -332,7 +332,7 @@ class EstimateModel(SPMCommand):
                 outputs["Cbetas"] = [os.path.join(pth, f"C{beta}") for beta in betas]
                 outputs["SDbetas"] = [os.path.join(pth, f"SD{beta}") for beta in betas]
 
-        if "Classical" in self.inputs.estimation_method.keys():
+        if "Classical" in self.inputs.estimation_method:
             outputs["residual_image"] = os.path.join(pth, f"ResMS.{outtype}")
             outputs["RPVimage"] = os.path.join(pth, f"RPV.{outtype}")
             if self.inputs.write_residuals:
@@ -849,30 +849,22 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
 
     def aggregate_outputs(self, runtime=None):
         outputs = self._outputs()
-        setattr(outputs, "thresholded_map", self._gen_thresholded_map_filename())
-        setattr(outputs, "pre_topo_fdr_map", self._gen_pre_topo_map_filename())
+        outputs.thresholded_map = self._gen_thresholded_map_filename()
+        outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
         for line in runtime.stdout.split("\n"):
             if line.startswith("activation_forced = "):
-                setattr(
-                    outputs,
-                    "activation_forced",
-                    line[len("activation_forced = ") :].strip() == "1",
+                outputs.activation_forced = (
+                    line[len("activation_forced = ") :].strip() == "1"
                 )
             elif line.startswith("n_clusters = "):
-                setattr(
-                    outputs, "n_clusters", int(line[len("n_clusters = ") :].strip())
-                )
+                outputs.n_clusters = int(line[len("n_clusters = ") :].strip())
             elif line.startswith("pre_topo_n_clusters = "):
-                setattr(
-                    outputs,
-                    "pre_topo_n_clusters",
-                    int(line[len("pre_topo_n_clusters = ") :].strip()),
+                outputs.pre_topo_n_clusters = int(
+                    line[len("pre_topo_n_clusters = ") :].strip()
                 )
             elif line.startswith("cluster_forming_thr = "):
-                setattr(
-                    outputs,
-                    "cluster_forming_thr",
-                    float(line[len("cluster_forming_thr = ") :].strip()),
+                outputs.cluster_forming_thr = float(
+                    line[len("cluster_forming_thr = ") :].strip()
                 )
         return outputs
 

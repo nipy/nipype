@@ -636,7 +636,7 @@ class Remlfit(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        for key in outputs.keys():
+        for key in outputs:
             if isdefined(self.inputs.get()[key]):
                 outputs[key] = os.path.abspath(self.inputs.get()[key])
 
@@ -722,7 +722,7 @@ class Synthesize(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        for key in outputs.keys():
+        for key in outputs:
             if isdefined(self.inputs.get()[key]):
                 outputs[key] = os.path.abspath(self.inputs.get()[key])
 

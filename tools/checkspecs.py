@@ -124,10 +124,8 @@ class InterfaceChecker:
         if filename is None:
             # nothing that we could handle here.
             return ([], [])
-        f = open(filename)
-        functions, classes = self._parse_lines(f, uri)
-        f.close()
-        return functions, classes
+        with open(filename) as f:
+            return self._parse_lines(f, uri)
 
     def _parse_lines(self, linesource, module):
         """Parse lines of text for functions and classes"""
@@ -287,7 +285,7 @@ class InterfaceChecker:
                         continue
                     parent_metadata = []
                     if "parent" in trait.__dict__:
-                        parent_metadata = list(getattr(trait, "parent").__dict__.keys())
+                        parent_metadata = list(trait.parent.__dict__)
                     if (
                         key
                         not in allowed_keys
@@ -375,7 +373,7 @@ class InterfaceChecker:
                         continue
                     parent_metadata = []
                     if "parent" in trait.__dict__:
-                        parent_metadata = list(getattr(trait, "parent").__dict__.keys())
+                        parent_metadata = list(trait.parent.__dict__)
                     if (
                         key
                         not in allowed_keys

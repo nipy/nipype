@@ -55,9 +55,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         iflogger.setLevel(logging.getLevelName("CRITICAL"))
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
-        if result.runtime.stdout.count("\n%d" % taskid):
-            return True
-        return False
+        return bool(result.runtime.stdout.count("\n%d" % taskid))
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine(

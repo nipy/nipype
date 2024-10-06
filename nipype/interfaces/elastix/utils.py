@@ -164,18 +164,18 @@ class EditTransform(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["output_file"] = getattr(self, "_out_file")
+        outputs["output_file"] = self._out_file
         return outputs
 
     def _get_outfile(self):
-        val = getattr(self, "_out_file")
+        val = self._out_file
         if val is not None and val != "":
             return val
 
         if isdefined(self.inputs.output_file):
-            setattr(self, "_out_file", self.inputs.output_file)
+            self._out_file = self.inputs.output_file
             return self.inputs.output_file
 
         out_file = op.abspath(op.basename(self.inputs.transform_file))
-        setattr(self, "_out_file", out_file)
+        self._out_file = out_file
         return out_file

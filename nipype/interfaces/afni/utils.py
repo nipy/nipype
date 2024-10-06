@@ -234,7 +234,7 @@ class Autobox(AFNICommand):
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()
-                outputs.trait_set(**{k: int(d[k]) for k in d.keys()})
+                outputs.trait_set(**{k: int(v) for k, v in d.items()})
         return outputs
 
 
@@ -3244,11 +3244,11 @@ class GCOR(CommandLine):
             for line in runtime.stdout.split("\n")
             if line.strip().startswith("GCOR = ")
         ][-1]
-        setattr(self, "_gcor", float(gcor_line[len("GCOR = ") :]))
+        self._gcor = float(gcor_line[len("GCOR = ") :])
         return runtime
 
     def _list_outputs(self):
-        return {"out": getattr(self, "_gcor")}
+        return {"out": self._gcor}
 
 
 class AxializeInputSpec(AFNICommandInputSpec):

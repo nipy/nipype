@@ -79,7 +79,7 @@ def test_gen_fname(args, desired_name):
     cmd = fsl.FSLCommand(command="junk", output_type="NIFTI_GZ")
     pth = os.getcwd()
     fname = cmd._gen_fname("foo.nii.gz", **args)
-    if "dir" in desired_name.keys():
+    if "dir" in desired_name:
         desired = os.path.join(desired_name["dir"], desired_name["file"])
     else:
         desired = os.path.join(pth, desired_name["file"])
