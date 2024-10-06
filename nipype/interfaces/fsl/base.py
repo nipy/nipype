@@ -262,10 +262,7 @@ def no_fsl():
     used with skipif to skip tests that will
     fail if FSL is not installed"""
 
-    if Info.version() is None:
-        return True
-    else:
-        return False
+    return Info.version() is None
 
 
 def no_fsl_course_data():

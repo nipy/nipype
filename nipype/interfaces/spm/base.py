@@ -52,10 +52,7 @@ def func_is_3d(in_file):
     else:
         img = load(in_file)
         shape = img.shape
-        if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
-            return True
-        else:
-            return False
+        return len(shape) == 3 or len(shape) == 4 and shape[3] == 1
 
 
 def get_first_3dfile(in_files):
@@ -254,10 +251,7 @@ def no_spm():
     used with pytest.mark.skipif decorator to skip tests
     that will fail if spm is not installed"""
 
-    if "NIPYPE_NO_MATLAB" in os.environ or Info.version() is None:
-        return True
-    else:
-        return False
+    return "NIPYPE_NO_MATLAB" in os.environ or Info.version() is None
 
 
 class SPMCommandInputSpec(BaseInterfaceInputSpec):

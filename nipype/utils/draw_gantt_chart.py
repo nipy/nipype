@@ -114,9 +114,9 @@ def log_to_dict(logfile):
 
     date_object_node_list: list = list()
     for n in nodes_list:
-        if "start" in n.keys():
+        if "start" in n:
             n["start"] = _convert_string_to_datetime(n["start"])
-        if "finish" in n.keys():
+        if "finish" in n:
             n["finish"] = _convert_string_to_datetime(n["finish"])
         date_object_node_list.append(n)
 

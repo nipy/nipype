@@ -54,10 +54,9 @@ class LSFPlugin(SGELikeBatchManagerBase):
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
         # logger.debug(result.runtime.stdout)
-        if "DONE" in result.runtime.stdout or "EXIT" in result.runtime.stdout:
-            return False
-        else:
-            return True
+        return (
+            "DONE" not in result.runtime.stdout and "EXIT" not in result.runtime.stdout
+        )
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine(

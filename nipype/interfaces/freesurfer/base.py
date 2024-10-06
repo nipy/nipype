@@ -269,7 +269,4 @@ def no_freesurfer():
     used with skipif to skip tests that will
     fail if FreeSurfer is not installed"""
 
-    if Info.version() is None:
-        return True
-    else:
-        return False
+    return Info.version() is None

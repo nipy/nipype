@@ -1706,13 +1706,11 @@ def topological_sort(graph, depth_first=False):
     logger.debug("Performing depth first search")
     nodes = []
     groups = []
-    group = 0
     G = nx.Graph()
     G.add_nodes_from(graph.nodes())
     G.add_edges_from(graph.edges())
     components = nx.connected_components(G)
-    for desc in components:
-        group += 1
+    for group, desc in enumerate(components, start=1):
         indices = [nodesort.index(node) for node in desc]
         nodes.extend(
             np.array(nodesort)[np.array(indices)[np.argsort(indices)]].tolist()

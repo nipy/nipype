@@ -1053,9 +1053,9 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         local_directory = str(self.inputs.local_directory)
         bucket_path = str(self.inputs.bucket_path)
         template = str(self.inputs.template)
-        if not os.path.basename(local_directory) == "":
+        if os.path.basename(local_directory) != "":
             local_directory += "/"
-        if not os.path.basename(bucket_path) == "":
+        if os.path.basename(bucket_path) != "":
             bucket_path += "/"
         if template[0] == "/":
             template = template[1:]
@@ -2938,7 +2938,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         undefined_traits = {}
         for key in self._infields:
             self.inputs.add_trait(key, traits.Any)
-            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
+            undefined_traits[key] = kwargs.get(key, Undefined)
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 

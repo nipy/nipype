@@ -109,10 +109,10 @@ def test_create_interface_specs():
     assert new_interface.__name__ == "MyInterface"
     current_params = new_interface().get()
     assert len(current_params) == 4
-    assert "params1" in current_params.keys()
-    assert "params2_files" in current_params.keys()
-    assert "params3" in current_params.keys()
-    assert "out_params" in current_params.keys()
+    assert "params1" in current_params
+    assert "params2_files" in current_params
+    assert "params3" in current_params
+    assert "out_params" in current_params
 
 
 @pytest.mark.skipif(
@@ -184,10 +184,10 @@ def test_dipy_to_nipype_interface():
     params_in = new_specs().inputs.get()
     params_out = new_specs()._outputs().get()
     assert len(params_in) == 4
-    assert "in_files" in params_in.keys()
-    assert "param1" in params_in.keys()
-    assert "out_dir" in params_out.keys()
-    assert "out_ref" in params_out.keys()
+    assert "in_files" in params_in
+    assert "param1" in params_in
+    assert "out_dir" in params_out
+    assert "out_ref" in params_out
 
     with pytest.raises(ValueError):
         new_specs().run()

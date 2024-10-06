@@ -322,8 +322,8 @@ class EstimateModel(SPMCommand):
 
         betas = [vbeta.fname[0] for vbeta in spm["SPM"][0, 0].Vbeta[0]]
         if (
-            "Bayesian" in self.inputs.estimation_method.keys()
-            or "Bayesian2" in self.inputs.estimation_method.keys()
+            "Bayesian" in self.inputs.estimation_method
+            or "Bayesian2" in self.inputs.estimation_method
         ):
             outputs["labels"] = os.path.join(pth, f"labels.{outtype}")
             outputs["SDerror"] = glob(os.path.join(pth, "Sess*_SDerror*"))
@@ -332,7 +332,7 @@ class EstimateModel(SPMCommand):
                 outputs["Cbetas"] = [os.path.join(pth, f"C{beta}") for beta in betas]
                 outputs["SDbetas"] = [os.path.join(pth, f"SD{beta}") for beta in betas]
 
-        if "Classical" in self.inputs.estimation_method.keys():
+        if "Classical" in self.inputs.estimation_method:
             outputs["residual_image"] = os.path.join(pth, f"ResMS.{outtype}")
             outputs["RPVimage"] = os.path.join(pth, f"RPV.{outtype}")
             if self.inputs.write_residuals:

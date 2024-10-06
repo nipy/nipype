@@ -87,12 +87,7 @@ def is_container(item):
         True if container
         False if not (eg string)
     """
-    if isinstance(item, str):
-        return False
-    elif hasattr(item, "__iter__"):
-        return True
-    else:
-        return False
+    return not isinstance(item, str) and hasattr(item, "__iter__")
 
 
 def container_to_string(cont):
