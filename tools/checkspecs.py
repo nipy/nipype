@@ -301,7 +301,7 @@ class InterfaceChecker:
                         bad_specs.append(
                             [uri, c, "Inputs", traitname, "mandatory=False"]
                         )
-                    if key == "usedefault" and trait.__dict__[key] == False:
+                    if key == "usedefault" and trait.__dict__[key] is False:
                         bad_specs.append(
                             [uri, c, "Inputs", traitname, "usedefault=False"]
                         )
