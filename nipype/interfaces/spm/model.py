@@ -159,7 +159,7 @@ class Level1Design(SPMCommand):
         """validate spm realign options if set to None ignore"""
         einputs = super()._parse_inputs(skip=("mask_threshold", "flags"))
         if isdefined(self.inputs.flags):
-            einputs[0].update(dict(self.inputs.flags.items()))
+            einputs[0].update(self.inputs.flags)
         for sessinfo in einputs[0]["sess"]:
             sessinfo["scans"] = scans_for_fnames(
                 ensure_list(sessinfo["scans"]), keep4d=False
@@ -309,7 +309,7 @@ class EstimateModel(SPMCommand):
         """validate spm realign options if set to None ignore"""
         einputs = super()._parse_inputs(skip=("flags"))
         if isdefined(self.inputs.flags):
-            einputs[0].update(dict(self.inputs.flags.items()))
+            einputs[0].update(self.inputs.flags)
         return einputs
 
     def _list_outputs(self):

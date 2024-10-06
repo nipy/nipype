@@ -1482,11 +1482,8 @@ def clean_working_directory(
     files2remove = []
     if str2bool(config["execution"]["remove_unnecessary_outputs"]):
         for f in walk_files(cwd):
-            if f not in needed_files:
-                if not needed_dirs:
-                    files2remove.append(f)
-                elif not any(f.startswith(dname) for dname in needed_dirs):
-                    files2remove.append(f)
+            if f not in needed_files and not f.startswith(tuple(needed_dirs)):
+                files2remove.append(f)
     else:
         if not str2bool(config["execution"]["keep_inputs"]):
             input_files = {

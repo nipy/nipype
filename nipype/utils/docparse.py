@@ -283,7 +283,7 @@ def _parse_doc(doc, style=["--"]):
         flag = [
             item
             for i, item in enumerate(linelist)
-            if i < 2 and any(item.startswith(s) for s in style) and len(item) > 1
+            if i < 2 and item.startswith(tuple(style)) and len(item) > 1
         ]
         if flag:
             if len(flag) == 1:
