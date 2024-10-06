@@ -499,7 +499,7 @@ def ensure_list(filename):
     elif isinstance(filename, list):
         return filename
     elif is_container(filename):
-        return [x for x in filename]
+        return list(filename)
     else:
         return None
 

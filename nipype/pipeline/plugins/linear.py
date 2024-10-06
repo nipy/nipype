@@ -50,7 +50,7 @@ class LinearPlugin(PluginBase):
                 # node might fail
                 crashfile = report_crash(node)
                 # remove dependencies from queue
-                subnodes = [s for s in dfs_preorder(graph, node)]
+                subnodes = list(dfs_preorder(graph, node))
                 notrun.append(
                     {"node": node, "dependents": subnodes, "crashfile": crashfile}
                 )

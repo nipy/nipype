@@ -1046,7 +1046,7 @@ def generate_expanded_graph(graph_in):
         logger.debug("node: %s iterables: %s", inode, iterables)
 
         # collect the subnodes to expand
-        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        subnodes = list(dfs_preorder(graph_in, inode))
         prior_prefix = [re.findall(r"\.(.)I", s._id) for s in subnodes if s._id]
         prior_prefix = sorted([l for item in prior_prefix for l in item])
         if not prior_prefix:
@@ -1482,11 +1482,8 @@ def clean_working_directory(
     files2remove = []
     if str2bool(config["execution"]["remove_unnecessary_outputs"]):
         for f in walk_files(cwd):
-            if f not in needed_files:
-                if not needed_dirs:
-                    files2remove.append(f)
-                elif not any([f.startswith(dname) for dname in needed_dirs]):
-                    files2remove.append(f)
+            if f not in needed_files and not f.startswith(tuple(needed_dirs)):
+                files2remove.append(f)
     else:
         if not str2bool(config["execution"]["keep_inputs"]):
             input_files = {

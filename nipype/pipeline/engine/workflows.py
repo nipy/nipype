@@ -191,10 +191,8 @@ connected.
                     and (
                         ".io" in str(destnode._interface.__class__)
                         or any(
-                            [
-                                ".io" in str(val)
-                                for val in destnode._interface.__class__.__bases__
-                            ]
+                            ".io" in str(val)
+                            for val in destnode._interface.__class__.__bases__
                         )
                     )
                 ):
@@ -205,10 +203,8 @@ connected.
                     and (
                         ".io" in str(srcnode._interface.__class__)
                         or any(
-                            [
-                                ".io" in str(val)
-                                for val in srcnode._interface.__class__.__bases__
-                            ]
+                            ".io" in str(val)
+                            for val in srcnode._interface.__class__.__bases__
                         )
                     )
                 ):
