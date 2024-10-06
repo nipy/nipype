@@ -356,7 +356,7 @@ def test_mapnode_json(tmpdir):
     # check that multiple json's don't trigger rerun
     with open(os.path.join(node.output_dir(), "test.json"), "w") as fp:
         fp.write("dummy file")
-    w1.config["execution"].update(**{"stop_on_first_rerun": True})
+    w1.config["execution"].update(stop_on_first_rerun=True)
 
     w1.run()
 

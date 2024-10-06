@@ -288,7 +288,7 @@ def get_boutiques_input(
     if handler_type == "TraitCompound":
         input_list = []
         # Recursively create an input for each trait
-        for i in range(0, len(trait_handler.handlers)):
+        for i in range(len(trait_handler.handlers)):
             inp = get_boutiques_input(
                 inputs,
                 interface,

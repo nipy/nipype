@@ -353,7 +353,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     edge_ntwk = ntwk.copy()
     data = {}
     for x, row in enumerate(edge_array):
-        for y in range(0, np.max(np.shape(edge_array[x]))):
+        for y in range(np.max(np.shape(edge_array[x]))):
             if not edge_array[x, y] == 0:
                 data["value"] = edge_array[x, y]
                 if data["value"] <= below or data["value"] >= above:

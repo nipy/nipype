@@ -1073,7 +1073,7 @@ class Registration(ANTSCommand):
         # from the non-list inputs.
         if isinstance(name_input, list):
             items = list(stage_inputs.items())
-            indexes = list(range(0, len(name_input)))
+            indexes = list(range(len(name_input)))
             specs = list()
             for i in indexes:
                 temp = {k: v[i] for k, v in items}

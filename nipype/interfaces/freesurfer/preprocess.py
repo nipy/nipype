@@ -580,7 +580,7 @@ class MRIConvert(FSCommand):
                 stem = ".".join(outfile.split(".")[:-1])
                 ext = "." + outfile.split(".")[-1]
             outfile = []
-            for idx in range(0, tp):
+            for idx in range(tp):
                 outfile.append(stem + "%04d" % idx + ext)
         if isdefined(self.inputs.out_type):
             if self.inputs.out_type in ["spm", "analyze"]:
