@@ -594,10 +594,10 @@ class MRIConvert(FSCommand):
                     raise Exception(
                         "Not taking frame manipulations into account- please warn the developers"
                     )
-                outfiles = []
                 outfile = self._get_outfilename()
-                for i in range(tp):
-                    outfiles.append(fname_presuffix(outfile, suffix="%03d" % (i + 1)))
+                outfiles = [
+                    fname_presuffix(outfile, suffix="%03d" % (i + 1)) for i in range(tp)
+                ]
                 outfile = outfiles
         outputs["out_file"] = outfile
         return outputs

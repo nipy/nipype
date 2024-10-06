@@ -126,10 +126,9 @@ def fname_presuffix(fname, prefix="", suffix="", newpath=None, use_ext=True):
 
 def fnames_presuffix(fnames, prefix="", suffix="", newpath=None, use_ext=True):
     """Calls fname_presuffix for a list of files."""
-    f2 = []
-    for fname in fnames:
-        f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
-    return f2
+    return [
+        fname_presuffix(fname, prefix, suffix, newpath, use_ext) for fname in fnames
+    ]
 
 
 def hash_rename(filename, hashvalue):
@@ -445,14 +444,15 @@ def get_related_files(filename, include_this_file=True):
     include_this_file : bool
         If true, output includes the input filename.
     """
-    related_files = []
     path, name, this_type = split_filename(filename)
-    for type_set in related_filetype_sets:
-        if this_type in type_set:
-            for related_type in type_set:
-                if include_this_file or related_type != this_type:
-                    related_files.append(op.join(path, name + related_type))
-    if not len(related_files):
+    related_files = [
+        op.join(path, f"{name}{related_type}")
+        for type_set in related_filetype_sets
+        if this_type in type_set
+        for related_type in type_set
+        if include_this_file or related_type != this_type
+    ]
+    if not related_files:
         related_files = [filename]
     return related_files
 
@@ -714,17 +714,11 @@ def write_rst_header(header, level=0):
 
 
 def write_rst_list(items, prefix=""):
-    out = []
-    for item in ensure_list(items):
-        out.append(f"{prefix} {item}")
-    return "\n".join(out) + "\n\n"
+    return "\n".join(f"{prefix} {item}" for item in ensure_list(items)) + "\n\n"
 
 
 def write_rst_dict(info, prefix=""):
-    out = []
-    for key, value in sorted(info.items()):
-        out.append(f"{prefix}* {key} : {value}")
-    return "\n".join(out) + "\n\n"
+    return "\n".join(f"{prefix}* {k} : {v}" for k, v in sorted(info.items())) + "\n\n"
 
 
 def dist_is_editable(dist):

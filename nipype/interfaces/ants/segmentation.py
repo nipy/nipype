@@ -813,16 +813,15 @@ class CorticalThickness(ANTSCommand):
             os.getcwd(),
             self.inputs.out_prefix + "BrainSegmentation0N4." + self.inputs.image_suffix,
         )
-        posteriors = []
-        for i in range(len(self.inputs.segmentation_priors)):
-            posteriors.append(
-                os.path.join(
-                    os.getcwd(),
-                    self.inputs.out_prefix
-                    + "BrainSegmentationPosteriors%02d." % (i + 1)
-                    + self.inputs.image_suffix,
-                )
+        posteriors = [
+            os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix
+                + "BrainSegmentationPosteriors%02d." % (i + 1)
+                + self.inputs.image_suffix,
             )
+            for i in range(len(self.inputs.segmentation_priors))
+        ]
         outputs["BrainSegmentationPosteriors"] = posteriors
         outputs["CorticalThickness"] = os.path.join(
             os.getcwd(),
@@ -1488,15 +1487,13 @@ class JointFusion(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == "exclusion_image_label":
-            retval = []
-            for ii in range(len(self.inputs.exclusion_image_label)):
-                retval.append(
-                    "-e {}[{}]".format(
-                        self.inputs.exclusion_image_label[ii],
-                        self.inputs.exclusion_image[ii],
-                    )
+            return " ".join(
+                "-e {}[{}]".format(
+                    self.inputs.exclusion_image_label[ii],
+                    self.inputs.exclusion_image[ii],
                 )
-            return " ".join(retval)
+                for ii in range(len(self.inputs.exclusion_image_label))
+            )
         if opt == "patch_radius":
             return f"-p {self._format_xarray(val)}"
         if opt == "search_radius":

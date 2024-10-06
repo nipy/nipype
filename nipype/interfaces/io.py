@@ -959,10 +959,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
             if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:
-                filelist = []
-                for fname in bkt_files:
-                    if re.match(template, fname):
-                        filelist.append(fname)
+                filelist = [fname for fname in bkt_files if re.match(template, fname)]
                 if len(filelist) == 0:
                     msg = "Output key: {} Template: {} returned no files".format(
                         key,
@@ -2720,16 +2717,14 @@ class JSONFileGrabber(IOBase):
     def _list_outputs(self):
         import simplejson
 
-        outputs = {}
         if isdefined(self.inputs.in_file):
             with open(self.inputs.in_file) as f:
-                data = simplejson.load(f)
+                outputs = simplejson.load(f)
 
-            if not isinstance(data, dict):
+            if not isinstance(outputs, dict):
                 raise RuntimeError("JSON input has no dictionary structure")
-
-            for key, value in list(data.items()):
-                outputs[key] = value
+        else:
+            outputs = {}
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults

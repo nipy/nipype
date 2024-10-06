@@ -222,20 +222,17 @@ class SimulateMultiTensor(DipyBaseInterface):
         mevals = [sf_evals] * nsticks + [[ba_evals[d]] * 3 for d in range(nballs)]
 
         b0 = b0_im.get_fdata()[msk > 0]
-        args = []
-        for i in range(nvox):
-            args.append(
-                {
-                    "fractions": fracs[i, ...].tolist(),
-                    "sticks": [
-                        tuple(dirs[i, j : j + 3]) for j in range(nsticks + nballs)
-                    ],
-                    "gradients": gtab,
-                    "mevals": mevals,
-                    "S0": b0[i],
-                    "snr": self.inputs.snr,
-                }
-            )
+        args = [
+            {
+                "fractions": fracs[i, ...].tolist(),
+                "sticks": [tuple(dirs[i, j : j + 3]) for j in range(nsticks + nballs)],
+                "gradients": gtab,
+                "mevals": mevals,
+                "S0": b0[i],
+                "snr": self.inputs.snr,
+            }
+            for i in range(nvox)
+        ]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:

@@ -328,9 +328,11 @@ def cmat(
     else:
         final_fibers_indices = final_fibers_idx
 
-    for idx in final_fibers_indices:
+    finalfiberlength.extend(
         # compute length of fiber
-        finalfiberlength.append(length(fib[idx][0]))
+        length(fib[idx][0])
+        for idx in final_fibers_indices
+    )
 
     # convert to array
     final_fiberlength_array = np.array(finalfiberlength)
@@ -463,9 +465,7 @@ def cmat(
 def save_fibers(oldhdr, oldfib, fname, indices):
     """Stores a new trackvis file fname using only given indices"""
     hdrnew = oldhdr.copy()
-    outstreams = []
-    for i in indices:
-        outstreams.append(oldfib[i])
+    outstreams = [oldfib[i] for i in indices]
     n_fib_out = len(outstreams)
     hdrnew["n_count"] = n_fib_out
     iflogger.info("Writing final non-orphan fibers as %s", fname)

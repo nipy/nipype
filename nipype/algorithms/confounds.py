@@ -1290,11 +1290,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         raise ValueError(
             f"mask_index {mask_index} must be less than number of mask files {len(mask_files)}"
         )
-    masks = []
     if mask_method == "none":
-        for filename in mask_files:
-            masks.append(nb.load(filename))
-        return masks
+        return [nb.load(filename) for filename in mask_files]
 
     if mask_method == "union":
         mask = None

@@ -1047,10 +1047,11 @@ class LibraryBaseInterface(BaseInterface):
         if check_import:
             import pkgutil
 
-            failed_imports = []
-            for pkg in (self._pkg,) + tuple(self.imports):
-                if pkgutil.find_loader(pkg) is None:
-                    failed_imports.append(pkg)
+            failed_imports = [
+                pkg
+                for pkg in (self._pkg,) + tuple(self.imports)
+                if pkgutil.find_loader(pkg) is None
+            ]
             if failed_imports:
                 iflogger.warning(
                     "Unable to import %s; %s interface may fail to run",
