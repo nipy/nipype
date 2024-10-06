@@ -287,7 +287,7 @@ class InterfaceChecker:
                         continue
                     parent_metadata = []
                     if "parent" in trait.__dict__:
-                        parent_metadata = list(getattr(trait, "parent").__dict__.keys())
+                        parent_metadata = list(trait.parent.__dict__)
                     if (
                         key
                         not in allowed_keys
@@ -375,7 +375,7 @@ class InterfaceChecker:
                         continue
                     parent_metadata = []
                     if "parent" in trait.__dict__:
-                        parent_metadata = list(getattr(trait, "parent").__dict__.keys())
+                        parent_metadata = list(trait.parent.__dict__)
                     if (
                         key
                         not in allowed_keys

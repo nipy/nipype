@@ -353,7 +353,7 @@ class NipypeConfig:
 
             # Older versions of xvfbwrapper used vdisplay_num
             if not hasattr(self._display, "new_display"):
-                setattr(self._display, "new_display", self._display.vdisplay_num)
+                self._display.new_display = self._display.vdisplay_num
             return self.get_display()
 
     def stop_display(self):

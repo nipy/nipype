@@ -849,30 +849,22 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
 
     def aggregate_outputs(self, runtime=None):
         outputs = self._outputs()
-        setattr(outputs, "thresholded_map", self._gen_thresholded_map_filename())
-        setattr(outputs, "pre_topo_fdr_map", self._gen_pre_topo_map_filename())
+        outputs.thresholded_map = self._gen_thresholded_map_filename()
+        outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
         for line in runtime.stdout.split("\n"):
             if line.startswith("activation_forced = "):
-                setattr(
-                    outputs,
-                    "activation_forced",
-                    line[len("activation_forced = ") :].strip() == "1",
+                outputs.activation_forced = (
+                    line[len("activation_forced = ") :].strip() == "1"
                 )
             elif line.startswith("n_clusters = "):
-                setattr(
-                    outputs, "n_clusters", int(line[len("n_clusters = ") :].strip())
-                )
+                outputs.n_clusters = int(line[len("n_clusters = ") :].strip())
             elif line.startswith("pre_topo_n_clusters = "):
-                setattr(
-                    outputs,
-                    "pre_topo_n_clusters",
-                    int(line[len("pre_topo_n_clusters = ") :].strip()),
+                outputs.pre_topo_n_clusters = int(
+                    line[len("pre_topo_n_clusters = ") :].strip()
                 )
             elif line.startswith("cluster_forming_thr = "):
-                setattr(
-                    outputs,
-                    "cluster_forming_thr",
-                    float(line[len("cluster_forming_thr = ") :].strip()),
+                outputs.cluster_forming_thr = float(
+                    line[len("cluster_forming_thr = ") :].strip()
                 )
         return outputs
 
