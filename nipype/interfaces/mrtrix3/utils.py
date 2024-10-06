@@ -40,7 +40,7 @@ class TckSift2(CommandLine):
     >>> tcksift2.inputs.in_file = 'streamlines.tck'
     >>> tcksift2.inputs.in_fod = 'fod.mif'
     >>> tcksift2.inputs.out_weights = 'streamlines_weights.txt'
-    >>> tcksift2.cmdline                               # doctest: +ELLIPSIS
+    >>> tcksift2.cmdline
     'tcksift2 streamlines.tck fod.mif streamlines_weights.txt'
     >>> tcksift2.run()                                 # doctest: +SKIP
     """
