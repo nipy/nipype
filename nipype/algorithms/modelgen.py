@@ -7,7 +7,9 @@ algorithms for generating regressors for sparse and sparse-clustered acquisition
 experiments.
 """
 from copy import deepcopy
-import csv, math, os
+import csv
+import math
+import os
 
 from nibabel import load
 import numpy as np
