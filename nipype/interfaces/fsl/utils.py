@@ -483,9 +483,7 @@ class ExtractROI(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         if name == "crop_list":
-            return " ".join(
-                map(str, (x for sublist in map(list, value) for x in sublist))
-            )
+            return " ".join(str(x) for sublist in value for x in sublist)
         return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
