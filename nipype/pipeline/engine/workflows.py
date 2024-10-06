@@ -549,7 +549,7 @@ connected.
                                 ][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
-                            args = tuple([arg for arg in args if arg])
+                            args = tuple(arg for arg in args if arg)
                             line_args = (
                                 u.fullname.replace(".", "_"),
                                 args,

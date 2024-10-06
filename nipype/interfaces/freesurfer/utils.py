@@ -1024,7 +1024,7 @@ class SurfaceSnapshots(FSCommand):
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
             if isdefined(stem_args):
-                args = tuple([getattr(self.inputs, arg) for arg in stem_args])
+                args = tuple(getattr(self.inputs, arg) for arg in stem_args)
                 stem = stem % args
         # Check if the DISPLAY variable is set -- should avoid crashes (might not?)
         if "DISPLAY" not in os.environ:
@@ -1094,7 +1094,7 @@ class SurfaceSnapshots(FSCommand):
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
             if isdefined(stem_args):
-                args = tuple([getattr(self.inputs, arg) for arg in stem_args])
+                args = tuple(getattr(self.inputs, arg) for arg in stem_args)
                 stem = stem % args
         snapshots = ["%s-lat.tif", "%s-med.tif", "%s-dor.tif", "%s-ven.tif"]
         if self.inputs.six_images:
@@ -1156,7 +1156,7 @@ class ImageInfo(FSCommand):
         vox = tuple(vox.split(", "))
         outputs.vox_sizes = vox
         dim = self.info_regexp(info, "dimensions")
-        dim = tuple([int(d) for d in dim.split(" x ")])
+        dim = tuple(int(d) for d in dim.split(" x "))
         outputs.dimensions = dim
 
         outputs.orientation = self.info_regexp(info, "Orientation")
