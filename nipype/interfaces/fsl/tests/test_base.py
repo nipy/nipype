@@ -37,7 +37,7 @@ def test_FSLCommand():
     # testing the one item that is not.
     cmd = fsl.FSLCommand(command="ls")
     res = cmd.run()
-    assert type(res) == InterfaceResult
+    assert type(res) is InterfaceResult
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")

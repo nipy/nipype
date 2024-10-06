@@ -20,7 +20,7 @@ def test_init():
     with pytest.raises(TypeError):
         pe.Workflow()
     pipe = pe.Workflow(name="pipe")
-    assert type(pipe._graph) == nx.DiGraph
+    assert type(pipe._graph) is nx.DiGraph
 
 
 def test_connect():

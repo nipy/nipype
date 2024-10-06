@@ -35,7 +35,7 @@ def test_bunch_methods():
     assert b.get("a") == 3
     assert b.get("badkey", "otherthing") == "otherthing"
     assert b != newb
-    assert type(dict()) == type(newb)
+    assert type(dict()) is type(newb)
     assert newb["a"] == 3
 
 
