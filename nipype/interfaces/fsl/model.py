@@ -821,9 +821,9 @@ threshold=10, results_dir='stats')
     def __init__(self, **inputs):
         super(FILMGLS, self).__init__(**inputs)
         if Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.6"):
-            if 'output_type' not in inputs:
-                if isdefined(self.inputs.mode) and self.inputs.mode == 'surface':
-                    self.inputs.output_type = 'GIFTI'
+            if "output_type" not in inputs:
+                if isdefined(self.inputs.mode) and self.inputs.mode == "surface":
+                    self.inputs.output_type = "GIFTI"
 
     def _get_pe_files(self, cwd):
         files = None

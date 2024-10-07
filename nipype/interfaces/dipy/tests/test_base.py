@@ -127,19 +127,19 @@ def test_get_default_args():
     def test(dummy=11, x=3):
         return dummy, x
 
-    @deprecated_params('x', None, '0.3', '0.5', alternative='test2.y')
+    @deprecated_params("x", None, "0.3", "0.5", alternative="test2.y")
     def test2(dummy=11, x=3):
         return dummy, x
 
-    @deprecated_params(['dummy', 'x'], None, '0.3', alternative='test2.y')
+    @deprecated_params(["dummy", "x"], None, "0.3", alternative="test2.y")
     def test3(dummy=11, x=3):
         return dummy, x
 
-    @deprecated_params(['dummy', 'x'], None, '0.3', '0.5', alternative='test2.y')
+    @deprecated_params(["dummy", "x"], None, "0.3", "0.5", alternative="test2.y")
     def test4(dummy=11, x=3):
         return dummy, x
 
-    expected_res = {'dummy': 11, 'x': 3}
+    expected_res = {"dummy": 11, "x": 3}
     for func in [test, test2, test3, test4]:
         assert get_default_args(func) == expected_res
 

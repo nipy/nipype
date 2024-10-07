@@ -335,11 +335,11 @@ class ApplyVDM(SPMCommand):
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm"""
 
-        if opt == 'in_files':
+        if opt == "in_files":
             return scans_for_fnames(
                 ensure_list(val), keep4d=False, separate_sessions=False
             )
-        if opt == 'vdmfile':
+        if opt == "vdmfile":
             return scans_for_fname(ensure_list(val))
         return super()._format_arg(opt, spec, val)
 

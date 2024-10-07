@@ -16,7 +16,7 @@ class RobexInputSpec(CommandLineInputSpec):
         position=1,
         argstr="%s",
         hash_files=False,
-        name_template='%s_brain',
+        name_template="%s_brain",
         name_source=["in_file"],
         keep_extension=True,
     )
@@ -25,7 +25,7 @@ class RobexInputSpec(CommandLineInputSpec):
         position=2,
         argstr="%s",
         hash_files=False,
-        name_template='%s_brainmask',
+        name_template="%s_brainmask",
         name_source=["in_file"],
         keep_extension=True,
     )
@@ -61,4 +61,4 @@ class RobexSegment(CommandLine):
 
     input_spec = RobexInputSpec
     output_spec = RobexOutputSpec
-    _cmd = 'runROBEX.sh'
+    _cmd = "runROBEX.sh"
