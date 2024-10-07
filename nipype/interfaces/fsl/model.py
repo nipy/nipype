@@ -199,8 +199,8 @@ class Level1Design(BaseInterface):
         # generate sections for conditions and other nuisance
         # regressors
         num_evs = [0, 0]
-        for field in ["cond", "regress"]:
-            for i, cond in enumerate(runinfo[field]):
+        for field in ("cond", "regress"):
+            for cond in runinfo[field]:
                 name = cond["name"]
                 evname.append(name)
                 evfname = os.path.join(
@@ -279,9 +279,7 @@ class Level1Design(BaseInterface):
             contrastmask_element = load_template("feat_contrastmask_element.tcl")
             # add t/f contrast info
             ev_txt += contrast_header.substitute()
-            con_names = []
-            for j, con in enumerate(contrasts):
-                con_names.append(con[0])
+            con_names = [con[0] for con in contrasts]
             con_map = {}
             ftest_idx = []
             ttest_idx = []
@@ -365,7 +363,7 @@ class Level1Design(BaseInterface):
         n_tcon = 0
         n_fcon = 0
         if isdefined(self.inputs.contrasts):
-            for i, c in enumerate(self.inputs.contrasts):
+            for c in self.inputs.contrasts:
                 if c[1] == "T":
                     n_tcon += 1
                 elif c[1] == "F":
@@ -422,7 +420,7 @@ class Level1Design(BaseInterface):
             outputs["ev_files"].insert(runno, [])
             evname = []
             for field in ["cond", "regress"]:
-                for i, cond in enumerate(runinfo[field]):
+                for cond in runinfo[field]:
                     name = cond["name"]
                     evname.append(name)
                     evfname = os.path.join(
@@ -1389,8 +1387,7 @@ class L2Model(BaseInterface):
             "",
             "/Matrix",
         ]
-        for i in range(self.inputs.num_copes):
-            mat_txt += ["1"]
+        grp_txt.extend(["1"] * self.inputs.num_copes)
         mat_txt = "\n".join(mat_txt)
 
         con_txt = [
@@ -1412,16 +1409,15 @@ class L2Model(BaseInterface):
             "",
             "/Matrix",
         ]
-        for i in range(self.inputs.num_copes):
-            grp_txt += ["1"]
+        grp_txt.extend(["1"] * self.inputs.num_copes)
         grp_txt = "\n".join(grp_txt)
 
         txt = {"design.mat": mat_txt, "design.con": con_txt, "design.grp": grp_txt}
 
         # write design files
-        for i, name in enumerate(["design.mat", "design.con", "design.grp"]):
+        for name, name_txt in txt.items():
             with open(os.path.join(cwd, name), "w") as f:
-                f.write(txt[name])
+                f.write(name_txt)
 
         return runtime
 
@@ -1560,7 +1556,7 @@ class MultipleRegressDesign(BaseInterface):
                 "",
                 "/Matrix",
             ]
-            for conidx, con in enumerate(self.inputs.contrasts):
+            for con in self.inputs.contrasts:
                 if con[1] == "F":
                     convals = np.zeros((ntcons, 1))
                     for tcon in con[2]:

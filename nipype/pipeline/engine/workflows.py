@@ -232,7 +232,7 @@ connected.
             raise Exception("\n".join(["Some connections were not found"] + infostr))
 
         # turn functions into strings
-        for srcnode, destnode, connects in connection_list:
+        for srcnode, destnode, connects in connection_list:  # noqa: B007
             for idx, (src, dest) in enumerate(connects):
                 if isinstance(src, tuple) and not isinstance(src[1], (str, bytes)):
                     function_source = getsource(src[1])
@@ -702,9 +702,9 @@ connected.
 
         json_dict = []
         for i, node in enumerate(nodes):
-            imports = []
-            for u, v in graph.in_edges(nbunch=node):
-                imports.append(getname(u, nodes.index(u)))
+            imports = [
+                getname(u, nodes.index(u)) for u, v in graph.in_edges(nbunch=node)
+            ]
             json_dict.append(
                 dict(name=getname(node, i), size=1, group=groups[i], imports=imports)
             )

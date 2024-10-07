@@ -363,10 +363,10 @@ class ApplyVDM(SPMCommand):
 
         if resliced_all:
             outputs["out_files"] = []
-            for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
+            for imgf in ensure_list(self.inputs.in_files):
                 appliedvdm_run = []
                 if isinstance(imgf, list):
-                    for i, inner_imgf in enumerate(ensure_list(imgf)):
+                    for inner_imgf in ensure_list(imgf):
                         newfile = fname_presuffix(
                             inner_imgf, prefix=self.inputs.out_prefix
                         )
@@ -656,10 +656,10 @@ class Realign(SPMCommand):
 
             if resliced_all:
                 outputs["realigned_files"] = []
-                for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
+                for imgf in ensure_list(self.inputs.in_files):
                     realigned_run = []
                     if isinstance(imgf, list):
-                        for i, inner_imgf in enumerate(ensure_list(imgf)):
+                        for inner_imgf in ensure_list(imgf):
                             newfile = fname_presuffix(
                                 inner_imgf, prefix=self.inputs.out_prefix
                             )
@@ -927,10 +927,10 @@ class RealignUnwarp(SPMCommand):
 
         if resliced_all:
             outputs["realigned_unwarped_files"] = []
-            for idx, imgf in enumerate(ensure_list(self.inputs.in_files)):
+            for imgf in ensure_list(self.inputs.in_files):
                 realigned_run = []
                 if isinstance(imgf, list):
-                    for i, inner_imgf in enumerate(ensure_list(imgf)):
+                    for inner_imgf in ensure_list(imgf):
                         newfile = fname_presuffix(
                             inner_imgf, prefix=self.inputs.out_prefix
                         )
@@ -1916,11 +1916,10 @@ class NewSegment(SPMCommand):
         n_classes = 5
         if isdefined(self.inputs.tissues):
             n_classes = len(self.inputs.tissues)
-        for i in range(n_classes):
-            outputs["native_class_images"].append([])
-            outputs["dartel_input_images"].append([])
-            outputs["normalized_class_images"].append([])
-            outputs["modulated_class_images"].append([])
+        outputs["native_class_images"].extend([] for _ in range(n_classes))
+        outputs["dartel_input_images"].extend([] for _ in range(n_classes))
+        outputs["normalized_class_images"].extend([] for _ in range(n_classes))
+        outputs["modulated_class_images"].extend([] for _ in range(n_classes))
 
         for filename in self.inputs.channel_files:
             pth, base, ext = split_filename(filename)
@@ -2164,11 +2163,10 @@ class MultiChannelNewSegment(SPMCommand):
         n_classes = 5
         if isdefined(self.inputs.tissues):
             n_classes = len(self.inputs.tissues)
-        for i in range(n_classes):
-            outputs["native_class_images"].append([])
-            outputs["dartel_input_images"].append([])
-            outputs["normalized_class_images"].append([])
-            outputs["modulated_class_images"].append([])
+        outputs["native_class_images"].extend([] for _ in range(n_classes))
+        outputs["dartel_input_images"].extend([] for _ in range(n_classes))
+        outputs["normalized_class_images"].extend([] for _ in range(n_classes))
+        outputs["modulated_class_images"].extend([] for _ in range(n_classes))
 
         # main outputs are generated for the first channel images only
         for filename in self.inputs.channels[0][0]:

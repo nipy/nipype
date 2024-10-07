@@ -537,7 +537,7 @@ def _write_detailed_dot(graph, dotfilename):
             + ["}"]
         )
         outports = []
-        for u, v, d in graph.out_edges(nbunch=n, data=True):
+        for u, v, d in graph.out_edges(nbunch=n, data=True):  # noqa: B007
             for cd in d["connect"]:
                 if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
@@ -1599,7 +1599,7 @@ def write_workflow_prov(graph, filename=None, format="all"):
 
     # add dependencies (edges)
     # Process->Process
-    for idx, edgeinfo in enumerate(graph.in_edges()):
+    for edgeinfo in graph.in_edges():
         ps.g.wasStartedBy(
             processes[list(nodes).index(edgeinfo[1])],
             starter=processes[list(nodes).index(edgeinfo[0])],

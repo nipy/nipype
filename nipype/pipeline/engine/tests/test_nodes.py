@@ -181,7 +181,7 @@ def test_mapnode_expansion(tmpdir):
     )
     mapnode.inputs.in1 = [1, 2]
 
-    for idx, node in mapnode._make_nodes():
+    for idx, node in mapnode._make_nodes():  # noqa: B007
         for attr in ("overwrite", "run_without_submitting", "plugin_args"):
             assert getattr(node, attr) == getattr(mapnode, attr)
         for attr in ("_n_procs", "_mem_gb"):

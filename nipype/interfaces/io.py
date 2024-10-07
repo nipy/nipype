@@ -609,7 +609,7 @@ class DataSink(IOBase):
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
             src_files = []
-            for root, dirs, files in os.walk(src):
+            for root, dirs, files in os.walk(src):  # noqa: B007
                 src_files.extend([os.path.join(root, fil) for fil in files])
             # Make the dst files have the dst folder as base dir
             dst_files = [os.path.join(dst, src_f.split(src)[1]) for src_f in src_files]
@@ -1393,7 +1393,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in list(templates.items()):
+        for template in templates.values():
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None:
                     field_name = re.match(r"\w+", field_name).group()

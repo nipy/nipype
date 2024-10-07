@@ -208,7 +208,7 @@ class SimulateMultiTensor(DipyBaseInterface):
                 dirs = np.hstack((dirs, fd[msk > 0]))
 
         # Add random directions for isotropic components
-        for d in range(nballs):
+        for _ in range(nballs):
             fd = np.random.randn(nvox, 3)
             w = np.linalg.norm(fd, axis=1)
             fd[w < np.finfo(float).eps, ...] = np.array([1.0, 0.0, 0.0])
@@ -341,7 +341,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
         bvecs = np.vstack((bvecs, vertices))
         bvals = np.hstack((bvals, v * np.ones(vertices.shape[0])))
 
-    for i in range(nb0s):
+    for _ in range(nb0s):
         bvals = bvals.tolist()
         bvals.insert(0, 0)
 
