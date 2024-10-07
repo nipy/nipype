@@ -25,3 +25,86 @@ doctest_optionflags = "ALLOW_UNICODE NORMALIZE_WHITESPACE ELLIPSIS"
 env = "PYTHONHASHSEED=0"
 filterwarnings = ["ignore::DeprecationWarning"]
 junit_family = "xunit2"
+
+[tool.ruff]
+line-length = 88  # same as black
+
+[tool.ruff.lint]
+extend-select = [
+    "B",
+    "C4",
+    "FLY",
+    "FURB",
+    "PERF",
+    "PGH",
+    "PIE",
+    "PLE",
+    "PT",
+    "PYI",
+    "Q",
+    "RSE",
+    "RUF",
+    "UP",
+]
+ignore = [
+    "B006",    # requires annotations
+    "B011",
+    "B017",    # TODO: enable rule
+    "B020",    # TODO: enable rule
+    "B028",
+    "B904",
+    "C401",
+    "C408",
+    "C420",    # TODO: enable rule
+    "E402",
+    "E722",
+    "E731",    # TODO: enable rule
+    "F401",
+    "F403",
+    "F811",
+    "F841",
+    "FURB101",
+    "FURB103",
+    "FURB113",
+    "FURB118", # TODO: enable rule
+    "FURB140", # TODO: enable rule
+    "FURB171", # TODO: enable rule
+    "PGH003",  # TODO: enable rule
+    "PGH004",  # TODO: enable rule
+    "PERF203",
+    "PIE790",
+    "PIE794",
+    "PT001",
+    "PT004",   # deprecated
+    "PT005",   # deprecated
+    "PT011",
+    "PT015",   # TODO: enable rule
+    "PT017",   # TODO: enable rule
+    "PT018",
+    "PT019",   # TODO: enable rule
+    "PT021",   # TODO: enable rule
+    "PYI024",
+    "RUF002",
+    "RUF005",
+    "RUF012",  # requires annotations
+    "RUF015",
+    "UP027",   # deprecated
+    "UP031",   # TODO: enable rule
+    "UP032",   # TODO: enable rule
+    "UP038",   # https://github.com/astral-sh/ruff/issues/7871
+    # https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+    "D206",
+    "D300",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "COM812",
+    "COM819",
+    "ISC001",
+    "ISC002",
+]
