@@ -23,7 +23,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def _read_pickle(fname):
-    with open(fname, 'rb') as f:
+    with open(fname, "rb") as f:
         return pickle.load(f)
 
 
@@ -203,7 +203,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
 
     # Writes the networks and returns the name
     network_name = group_id + "_average.pck"
-    with open(op.abspath(network_name), 'wb') as f:
+    with open(op.abspath(network_name), "wb") as f:
         pickle.dump(avg_ntwk, f, pickle.HIGHEST_PROTOCOL)
     iflogger.info("Saving average network as %s", op.abspath(network_name))
     avg_ntwk = fix_keys_for_gexf(avg_ntwk)
@@ -487,7 +487,7 @@ class NetworkXMetrics(BaseInterface):
         for key in list(node_measures.keys()):
             newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            with open(out_file, 'wb') as f:
+            with open(out_file, "wb") as f:
                 pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             nodentwks.append(out_file)
         if isdefined(self.inputs.out_node_metrics_matlab):
@@ -502,7 +502,7 @@ class NetworkXMetrics(BaseInterface):
         for key in list(edge_measures.keys()):
             newntwk = add_edge_data(edge_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            with open(out_file, 'wb') as f:
+            with open(out_file, "wb") as f:
                 pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             edgentwks.append(out_file)
         if isdefined(self.inputs.out_edge_metrics_matlab):
@@ -527,7 +527,7 @@ class NetworkXMetrics(BaseInterface):
                 out_file = op.abspath(
                     self._gen_outfilename(self.inputs.out_k_crust, "pck")
                 )
-            with open(out_file, 'wb') as f:
+            with open(out_file, "wb") as f:
                 pickle.dump(ntwk_measures[key], f, pickle.HIGHEST_PROTOCOL)
             kntwks.append(out_file)
         gpickled.extend(kntwks)

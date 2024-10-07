@@ -124,7 +124,7 @@ def write_node_report(node, result=None, is_mapnode=False):
 
     if result is None:
         logger.debug('[Node] Writing pre-exec report to "%s"', report_file)
-        report_file.write_text("\n".join(lines), encoding='utf-8')
+        report_file.write_text("\n".join(lines), encoding="utf-8")
         return
 
     logger.debug('[Node] Writing post-exec report to "%s"', report_file)
@@ -137,7 +137,7 @@ def write_node_report(node, result=None, is_mapnode=False):
     outputs = result.outputs
     if outputs is None:
         lines += ["None"]
-        report_file.write_text("\n".join(lines), encoding='utf-8')
+        report_file.write_text("\n".join(lines), encoding="utf-8")
         return
 
     if isinstance(outputs, Bunch):
@@ -162,7 +162,7 @@ def write_node_report(node, result=None, is_mapnode=False):
             subnode_report_files.append("subnode %d : %s" % (i, subnode_file))
 
         lines.append(write_rst_list(subnode_report_files))
-        report_file.write_text("\n".join(lines), encoding='utf-8')
+        report_file.write_text("\n".join(lines), encoding="utf-8")
         return
 
     lines.append(write_rst_header("Runtime info", level=1))
@@ -204,7 +204,7 @@ def write_node_report(node, result=None, is_mapnode=False):
             write_rst_dict(result.runtime.environ),
         ]
 
-    report_file.write_text("\n".join(lines), encoding='utf-8')
+    report_file.write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_report(node, report_type=None, is_mapnode=False):
