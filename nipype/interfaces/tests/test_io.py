@@ -104,7 +104,7 @@ templates3 = {"model": "interfaces/{package.name}/model.py"}
 
 
 @pytest.mark.parametrize(
-    "SF_args, inputs_att, expected",
+    ("SF_args", "inputs_att", "expected"),
     [
         (
             {"templates": templates1},
