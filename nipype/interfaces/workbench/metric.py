@@ -164,7 +164,7 @@ class MetricResample(WBCommand):
         if opt == "valid_roi_out" and val:
             # generate a filename and add it to argstr
             roi_out = self._gen_filename(self.inputs.in_file, suffix="_roi")
-            iflogger.info("Setting roi output file as", roi_out)
+            iflogger.info("Setting roi output file as %s", roi_out)
             spec.argstr += " " + roi_out
         return super()._format_arg(opt, spec, val)
 
