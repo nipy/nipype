@@ -46,20 +46,20 @@ def test_LaplacianThickness_wrongargs(change_dir, create_lt):
     with pytest.raises(
         ValueError, match=r".* requires a value for input 'sulcus_prior' .*"
     ):
-        lt.cmdline
+        lt.cmdline  # noqa: B018
     lt.inputs.sulcus_prior = 0.15
     with pytest.raises(ValueError, match=r".* requires a value for input 'dT' .*"):
-        lt.cmdline
+        lt.cmdline  # noqa: B018
     lt.inputs.dT = 0.01
     with pytest.raises(
         ValueError, match=r".* requires a value for input 'prior_thickness' .*"
     ):
-        lt.cmdline
+        lt.cmdline  # noqa: B018
     lt.inputs.prior_thickness = 5.9
     with pytest.raises(
         ValueError, match=r".* requires a value for input 'smooth_param' .*"
     ):
-        lt.cmdline
+        lt.cmdline  # noqa: B018
     lt.inputs.smooth_param = 4.5
     assert (
         lt.cmdline == "LaplacianThickness functional.nii diffusion_weighted.nii "

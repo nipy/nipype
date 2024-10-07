@@ -229,11 +229,11 @@ def test_flirt(setup_flirt):
     flirter = fsl.FLIRT()
     # infile not specified
     with pytest.raises(ValueError):
-        flirter.cmdline
+        flirter.cmdline  # noqa: B018
     flirter.inputs.in_file = infile
     # reference not specified
     with pytest.raises(ValueError):
-        flirter.cmdline
+        flirter.cmdline  # noqa: B018
     flirter.inputs.reference = reffile
 
     # Generate outfile and outmatrix
@@ -253,7 +253,7 @@ def test_flirt(setup_flirt):
     axfm.inputs.apply_xfm = True
     # in_matrix_file or uses_qform must be defined
     with pytest.raises(RuntimeError):
-        axfm.cmdline
+        axfm.cmdline  # noqa: B018
     axfm2 = deepcopy(axfm)
     # test uses_qform
     axfm.inputs.uses_qform = True

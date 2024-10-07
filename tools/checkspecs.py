@@ -418,7 +418,7 @@ class InterfaceChecker:
             matchstr = matchstr[L:]
         for pat in patterns:
             try:
-                pat.search
+                pat.search  # noqa: B018
             except AttributeError:
                 pat = re.compile(pat)
             if pat.search(matchstr):
