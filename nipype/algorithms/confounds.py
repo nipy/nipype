@@ -53,7 +53,7 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     variance_tol = traits.Float(
         1e-7,
         usedefault=True,
-        desc="maximum variance to consider \"close to\" zero for the purposes of removal",
+        desc='maximum variance to consider "close to" zero for the purposes of removal',
     )
     save_std = traits.Bool(True, usedefault=True, desc="save standardized DVARS")
     save_nstd = traits.Bool(False, usedefault=True, desc="save non-standardized DVARS")
