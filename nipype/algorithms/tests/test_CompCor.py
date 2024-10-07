@@ -28,7 +28,7 @@ def close_up_to_column_sign(a, b, rtol=1e-05, atol=1e-08, equal_nan=False):
 
 
 @pytest.mark.parametrize(
-    "a, b, close",
+    ("a", "b", "close"),
     [
         ([[0.1, 0.2], [0.3, 0.4]], [[-0.1, 0.2], [-0.3, 0.4]], True),
         ([[0.1, 0.2], [0.3, 0.4]], [[-0.1, 0.2], [0.3, -0.4]], False),

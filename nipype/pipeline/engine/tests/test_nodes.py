@@ -114,7 +114,7 @@ def test_mapnode_iterfield_check():
 
 
 @pytest.mark.parametrize(
-    "x_inp, f_exp",
+    ("x_inp", "f_exp"),
     [
         (3, [6]),
         ([2, 3], [4, 6]),

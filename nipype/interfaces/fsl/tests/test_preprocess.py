@@ -588,7 +588,7 @@ def setup_fugue(tmpdir):
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.parametrize(
-    "attr, out_file",
+    ("attr", "out_file"),
     [
         (
             {
