@@ -60,7 +60,6 @@ def test_split(tmpdir, args, expected):
         ([], {}, [0, [1, 2], [3, 4, 5]], [0, [1, 2], [3, 4, 5]]),
         ([3], {"axis": "hstack"}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
         ([3], {"axis": "hstack"}, [[0, 1], [2, 3], [4, 5]], [[0, 2, 4], [1, 3, 5]]),
-        ([3], {"axis": "hstack"}, [[0, 1], [2, 3], [4, 5]], [[0, 2, 4], [1, 3, 5]]),
     ],
 )
 def test_merge(tmpdir, args, kwargs, in_lists, expected):
