@@ -70,8 +70,8 @@ def test_no_et_bare(tmp_path):
         assert next(iter(res.nodes)).result.outputs.out == et
 
 
-@pytest.mark.parametrize("plugin", ("MultiProc", "LegacyMultiProc"))
-@pytest.mark.parametrize("run_without_submitting", (True, False))
+@pytest.mark.parametrize("plugin", ["MultiProc", "LegacyMultiProc"])
+@pytest.mark.parametrize("run_without_submitting", [True, False])
 def test_no_et_multiproc(tmp_path, plugin, run_without_submitting):
     from unittest.mock import patch
     from nipype.pipeline import engine as pe
