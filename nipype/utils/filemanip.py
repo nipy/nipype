@@ -591,11 +591,7 @@ def loadpkl(infile):
         fmlogger.debug(f"'{infile}' missing; waiting 2s")
         sleep(2)
     if timed_out:
-        error_message = (
-            "Result file {} expected, but "
-            "does not exist after ({}) "
-            "seconds.".format(infile, timeout)
-        )
+        error_message = f"Result file {infile} expected, but does not exist after {timeout} seconds."
         raise OSError(error_message)
 
     with pklopen(str(infile), "rb") as pkl_file:

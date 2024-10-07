@@ -100,10 +100,7 @@ def add_args_options(arg_parser, interface):
 
             if has_multiple_inner_traits:
                 raise NotImplementedError(
-                    "This interface cannot be used. via the"
-                    " command line as multiple inner traits"
-                    " are currently not supported for mandatory"
-                    " argument: {}.".format(name)
+                    f"This interface cannot be used via the command line, as multiple inner traits are currently not supported for mandatory argument: {name}."
                 )
             arg_parser.add_argument(name, help=desc, **args)
         else:

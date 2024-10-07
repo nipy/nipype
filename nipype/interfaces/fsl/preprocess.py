@@ -1319,9 +1319,9 @@ class FNIRT(FSLCommand):
             if name == "out_intensitymap_file":
                 value = self._list_outputs()[name]
             value = [FNIRT.intensitymap_file_basename(v) for v in value]
-            assert len(set(value)) == 1, "Found different basenames for {}: {}".format(
-                name, value
-            )
+            assert (
+                len(set(value)) == 1
+            ), f"Found different basenames for {name}: {value}"
             return spec.argstr % value[0]
         if name in list(self.filemap.keys()):
             return spec.argstr % self._list_outputs()[name]

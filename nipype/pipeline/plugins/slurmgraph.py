@@ -144,14 +144,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                     stdoutFile = ""
                     if self._sbatch_args.count("-o ") == 0:
                         stdoutFile = f"-o {batchscriptoutfile}"
-                    full_line = "{jobNm}=$(sbatch {outFileOption} {errFileOption} {extraSBatchArgs} {dependantIndex} -J {jobNm} {batchscript} | awk '/^Submitted/ {{print $4}}')\n".format(
-                        jobNm=jobname,
-                        outFileOption=stdoutFile,
-                        errFileOption=stderrFile,
-                        extraSBatchArgs=sbatch_args,
-                        dependantIndex=deps,
-                        batchscript=batchscriptfile,
-                    )
+                    full_line = f"{jobname}=$(sbatch {stdoutFile} {stderrFile} {sbatch_args} {deps} -J {jobname} {batchscriptfile} | awk '/^Submitted/ {{print $4}}')\n"
                     fp.writelines(full_line)
         cmd = CommandLine(
             "bash",

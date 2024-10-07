@@ -315,15 +315,10 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
     )
     runCmd(mri_cmd, log)
     runCmd("mris_volmask %s" % subject_id, log)
-    mri_cmd = 'mri_convert -i "{}/mri/ribbon.mgz" -o "{}/mri/ribbon.nii.gz"'.format(
-        op.join(subjects_dir, subject_id),
-        op.join(subjects_dir, subject_id),
-    )
+    subject_path = op.join(subjects_dir, subject_id)
+    mri_cmd = f'mri_convert -i "{subject_path}/mri/ribbon.mgz" -o "{subject_path}/mri/ribbon.nii.gz"'
     runCmd(mri_cmd, log)
-    mri_cmd = 'mri_convert -i "{}/mri/aseg.mgz" -o "{}/mri/aseg.nii.gz"'.format(
-        op.join(subjects_dir, subject_id),
-        op.join(subjects_dir, subject_id),
-    )
+    mri_cmd = f'mri_convert -i "{subject_path}/mri/aseg.mgz" -o "{subject_path}/mri/aseg.nii.gz"'
     runCmd(mri_cmd, log)
 
     iflogger.info("[ DONE ]")

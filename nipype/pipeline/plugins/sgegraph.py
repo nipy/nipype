@@ -144,14 +144,7 @@ class SGEGraphPlugin(GraphPluginBase):
                     stdoutFile = ""
                     if self._qsub_args.count("-o ") == 0:
                         stdoutFile = f"-o {batchscriptoutfile}"
-                    full_line = "{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk '/^Your job/{{print $3}}')\n".format(
-                        jobNm=jobname,
-                        outFileOption=stdoutFile,
-                        errFileOption=stderrFile,
-                        extraQSubArgs=qsub_args,
-                        dependantIndex=deps,
-                        batchscript=batchscriptfile,
-                    )
+                    full_line = f"{jobname}=$(qsub {stdoutFile} {stderrFile} {qsub_args} {deps} -N {jobname} {batchscriptfile} | awk '/^Your job/{{print $3}}')\n"
                     fp.writelines(full_line)
         cmd = CommandLine(
             "bash",

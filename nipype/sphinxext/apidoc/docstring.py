@@ -138,15 +138,11 @@ def _parse_spec(inputs, name, spec):
         pos = spec.position
         if pos is None:
             desc_lines += [
-                """Maps to a command-line argument: :code:`{arg}`.""".format(
-                    arg=argstr.strip()
-                )
+                f"""Maps to a command-line argument: :code:`{argstr.strip()}`."""
             ]
         else:
             desc_lines += [
-                """Maps to a command-line argument: :code:`{arg}` (position: {pos}).""".format(
-                    arg=argstr.strip(), pos=pos
-                )
+                f"""Maps to a command-line argument: :code:`{argstr.strip()}` (position: {pos})."""
             ]
 
     xor = spec.xor

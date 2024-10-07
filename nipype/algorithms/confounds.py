@@ -608,8 +608,7 @@ class CompCor(SimpleInterface):
 
         if len(imgseries.shape) != 4:
             raise ValueError(
-                "{} expected a 4-D nifti file. Input {} has "
-                "{} dimensions (shape {})".format(
+                "{} expected a 4-D nifti file. Input {} has {} dimensions (shape {})".format(  # noqa: UP032
                     self._header,
                     self.inputs.realigned_file,
                     len(imgseries.shape),
@@ -648,8 +647,7 @@ class CompCor(SimpleInterface):
 
                 if TR == 0:
                     raise ValueError(
-                        "{} cannot detect repetition time from image - "
-                        "Set the repetition_time input".format(self._header)
+                        f"{self._header} cannot detect repetition time from image - Set the repetition_time input"
                     )
 
         if isdefined(self.inputs.variance_threshold):
@@ -753,8 +751,7 @@ class CompCor(SimpleInterface):
                 f.write("\t".join(["component"] + list(metadata.keys())) + "\n")
                 for i in zip(components_names, *metadata.values()):
                     f.write(
-                        "{0[0]}\t{0[1]}\t{0[2]:.10f}\t"
-                        "{0[3]:.10f}\t{0[4]:.10f}\t{0[5]}\n".format(i)
+                        f"{i[0]}\t{i[1]}\t{i[2]:.10f}\t{i[3]:.10f}\t{i[4]:.10f}\t{i[5]}\n"
                     )
 
         return runtime
@@ -1398,9 +1395,7 @@ def compute_noise_components(
         if imgseries.shape[:3] != mask.shape:
             raise ValueError(
                 "Inputs for CompCor, timeseries and mask, do not have "
-                "matching spatial dimensions ({} and {}, respectively)".format(
-                    imgseries.shape[:3], mask.shape
-                )
+                f"matching spatial dimensions ({imgseries.shape[:3]} and {mask.shape}, respectively)"
             )
 
         voxel_timecourses = imgseries[mask, :]

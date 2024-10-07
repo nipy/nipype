@@ -210,10 +210,7 @@ def test_mrisexpand(tmpdir):
     nd_res = expand_nd.run()
 
     # Commandlines differ
-    node_cmdline = (
-        "mris_expand -T 60 -pial {cwd}/lh.pial {cwd}/lh.smoothwm "
-        "1 expandtmp".format(cwd=nd_res.runtime.cwd)
-    )
+    node_cmdline = f"mris_expand -T 60 -pial {nd_res.runtime.cwd}/lh.pial {nd_res.runtime.cwd}/lh.smoothwm 1 expandtmp"
     assert nd_res.runtime.cmdline == node_cmdline
 
     # Check output

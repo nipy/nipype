@@ -240,12 +240,7 @@ def test_flirt(setup_flirt):
     pth, fname, ext = split_filename(infile)
     outfile = fsl_name(flirter, "%s_flirt" % fname)
     outmat = "%s_flirt.mat" % fname
-    realcmd = "flirt -in {} -ref {} -out {} -omat {}".format(
-        infile,
-        reffile,
-        outfile,
-        outmat,
-    )
+    realcmd = f"flirt -in {infile} -ref {reffile} -out {outfile} -omat {outmat}"
     assert flirter.cmdline == realcmd
 
     # test apply_xfm option
@@ -433,14 +428,7 @@ def test_fnirt(setup_flirt):
                 " --iout=%s" % (infile, log, flag, strval, reffile, iout)
             )
         elif item in ("in_fwhm", "intensity_mapping_model"):
-            cmd = "fnirt --in={} {}={} --logout={} --ref={} --iout={}".format(
-                infile,
-                flag,
-                strval,
-                log,
-                reffile,
-                iout,
-            )
+            cmd = f"fnirt --in={infile} {flag}={strval} --logout={log} --ref={reffile} --iout={iout}"
         elif item.startswith("apply"):
             cmd = (
                 "fnirt %s=%s "

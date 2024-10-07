@@ -534,11 +534,8 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
             results_file = None
             try:
                 error_message = (
-                    "Job id ({}) finished or terminated, but "
-                    "results file does not exist after ({}) "
-                    "seconds. Batch dir contains crashdump file "
-                    "if node raised an exception.\n"
-                    "Node working directory: ({}) ".format(taskid, timeout, node_dir)
+                    f"Job id ({taskid}) finished or terminated, but results file does not exist after ({timeout}) seconds. Batch dir contains crashdump file if node raised an exception.\n"
+                    f"Node working directory: ({node_dir}) "
                 )
                 raise OSError(error_message)
             except OSError:
