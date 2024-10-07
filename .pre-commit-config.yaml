@@ -12,6 +12,11 @@ repos:
     rev: 24.2.0
     hooks:
       - id: black
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix", "--show-source"]
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.6
     hooks:
