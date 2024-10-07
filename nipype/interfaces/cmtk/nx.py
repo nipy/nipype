@@ -351,7 +351,7 @@ def add_node_data(node_array, ntwk):
 def add_edge_data(edge_array, ntwk, above=0, below=0):
     edge_ntwk = ntwk.copy()
     data = {}
-    for x, row in enumerate(edge_array):
+    for x, row in enumerate(edge_array):  # noqa: B007
         for y in range(np.max(np.shape(edge_array[x]))):
             if edge_array[x, y] != 0:
                 data["value"] = edge_array[x, y]
@@ -550,14 +550,14 @@ class NetworkXMetrics(BaseInterface):
         # stacks them together, and saves them in a MATLAB .mat file via Scipy
         global dicts
         dicts = list()
-        for idx, key in enumerate(dict_measures.keys()):
-            for idxd, keyd in enumerate(dict_measures[key].keys()):
+        for key, value in dict_measures.items():
+            for idxd, keyd in enumerate(value.keys()):
                 if idxd == 0:
                     nparraykeys = np.array(keyd)
-                    nparrayvalues = np.array(dict_measures[key][keyd])
+                    nparrayvalues = np.array(value[keyd])
                 else:
                     nparraykeys = np.append(nparraykeys, np.array(keyd))
-                    values = np.array(dict_measures[key][keyd])
+                    values = np.array(value[keyd])
                     nparrayvalues = np.append(nparrayvalues, values)
             nparray = np.vstack((nparraykeys, nparrayvalues))
             out_file = op.abspath(self._gen_outfilename(key, "mat"))

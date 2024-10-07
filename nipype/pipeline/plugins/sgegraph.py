@@ -80,7 +80,7 @@ class SGEGraphPlugin(GraphPluginBase):
         if (
             self._dont_resubmit_completed_jobs
         ):  # A future parameter for controlling this behavior could be added here
-            for idx, pyscript in enumerate(pyfiles):
+            for idx, pyscript in enumerate(pyfiles):  # noqa: B007
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
 

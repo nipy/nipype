@@ -598,7 +598,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     roid = np.asanyarray(roi.dataobj)
     assert roid.shape[0] == wmmask.shape[0]
     pg = nx.read_graphml(pgpath)
-    for brk, brv in pg.nodes(data=True):
+    for brk, brv in pg.nodes(data=True):  # noqa: B007
         if brv["dn_region"] == "cortical":
             iflogger.info(
                 "Subtracting region %s with intensity value %s",
