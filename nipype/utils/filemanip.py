@@ -216,7 +216,9 @@ def _parse_mount_table(exit_code, output):
 
     # Keep line and match for error reporting (match == None on failure)
     # Ignore empty lines
-    matches = [(l, pattern.match(l)) for l in output.strip().splitlines() if l]
+    matches = [
+        (line, pattern.match(line)) for line in output.strip().splitlines() if line
+    ]
 
     # (path, fstype) tuples, sorted by path length (longest first)
     mount_info = sorted(

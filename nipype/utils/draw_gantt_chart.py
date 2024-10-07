@@ -101,7 +101,7 @@ def log_to_dict(logfile):
         # read file separating each line
         lines = content.readlines()
 
-    nodes_list = [json.loads(l) for l in lines]
+    nodes_list = [json.loads(line) for line in lines]
 
     def _convert_string_to_datetime(
         datestring: Union[str, datetime.datetime],
