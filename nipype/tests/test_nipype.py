@@ -19,7 +19,7 @@ def test_nipype_info():
 )
 def test_git_hash():
     # removing the first "g" from gitversion
-    get_nipype_gitversion()[1:] == get_info()["commit_hash"]
+    assert get_nipype_gitversion()[1:] == get_info()["commit_hash"]
 
 
 def _check_no_et():
