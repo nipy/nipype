@@ -68,7 +68,7 @@ class InterfaceDocstring(NipypeDocstring):
     def __init__(
         self, docstring, config=None, app=None, what="", name="", obj=None, options=None
     ):
-        # type: (Union[unicode, List[unicode]], SphinxConfig, Sphinx, unicode, unicode, Any, Any) -> None  # NOQA
+        # type: (Union[unicode, List[unicode]], SphinxConfig, Sphinx, unicode, unicode, Any, Any) -> None
         super().__init__(docstring, config, app, what, name, obj, options)
 
         cmd = getattr(obj, "_cmd", "")
