@@ -327,9 +327,7 @@ def generate_class(
             ]:
                 if not param.getElementsByTagName("channel"):
                     raise RuntimeError(
-                        "Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field.\n{}".format(
-                            traitsParams
-                        )
+                        f"Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field.\n{traitsParams}"
                     )
                 elif (
                     param.getElementsByTagName("channel")[0].firstChild.nodeValue
@@ -378,9 +376,7 @@ def generate_class(
                     )
                 else:
                     raise RuntimeError(
-                        "Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field to be in ['input','output'].\n{}".format(
-                            traitsParams
-                        )
+                        f"Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field to be in ['input','output'].\n{traitsParams}"
                     )
             else:  # For all other parameter types, they are implicitly only input types
                 inputTraits.append(

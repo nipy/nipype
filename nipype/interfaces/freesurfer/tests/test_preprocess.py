@@ -65,11 +65,7 @@ def test_fitmsparams(create_files_in_directory):
     # .inputs based parameters setting
     fit.inputs.in_files = filelist
     fit.inputs.out_dir = outdir
-    assert fit.cmdline == "mri_ms_fitparms  {} {} {}".format(
-        filelist[0],
-        filelist[1],
-        outdir,
-    )
+    assert fit.cmdline == f"mri_ms_fitparms  {filelist[0]} {filelist[1]} {outdir}"
 
     # constructor based parameter setting
     fit2 = freesurfer.FitMSParams(
@@ -184,9 +180,7 @@ def test_bbregister(create_files_in_directory):
         base, _ = os.path.splitext(base)
 
     assert bbr.cmdline == (
-        "bbregister --t2 --init-fsl "
-        "--reg {base}_bbreg_fsaverage.dat "
-        "--mov {full} --s fsaverage".format(full=filelist[0], base=base)
+        f"bbregister --t2 --init-fsl --reg {base}_bbreg_fsaverage.dat --mov {filelist[0]} --s fsaverage"
     )
 
 

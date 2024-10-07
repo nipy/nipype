@@ -257,10 +257,7 @@ class InterfaceChecker:
                     for key, value in sorted(trait.__dict__.items()):
                         if key in in_built or key == "desc":
                             continue
-                        input_fields += "{}={},\n    ".format(
-                            key,
-                            self._normalize_repr(value),
-                        )
+                        input_fields += f"{key}={self._normalize_repr(value)},\n    "
                     input_fields += "),\n    "
                 cmd += ["    input_map = dict(%s)" % input_fields]
                 cmd += ["    inputs = %s.input_spec()" % c]
@@ -348,10 +345,7 @@ class InterfaceChecker:
                     for key, value in sorted(trait.__dict__.items()):
                         if key in in_built or key == "desc":
                             continue
-                        input_fields += "{}={},\n    ".format(
-                            key,
-                            self._normalize_repr(value),
-                        )
+                        input_fields += f"{key}={self._normalize_repr(value)},\n    "
                     input_fields += "),\n    "
                 cmd += ["    output_map = dict(%s)" % input_fields]
                 cmd += ["    outputs = %s.output_spec()" % c]

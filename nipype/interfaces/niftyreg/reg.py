@@ -397,11 +397,7 @@ class RegF3D(NiftyRegCommand):
         if self.inputs.vel_flag is True and isdefined(self.inputs.aff_file):
             cpp_file = os.path.abspath(outputs["cpp_file"])
             flo_file = os.path.abspath(self.inputs.flo_file)
-            outputs["avg_output"] = "{} {} {}".format(
-                self.inputs.aff_file,
-                cpp_file,
-                flo_file,
-            )
+            outputs["avg_output"] = f"{self.inputs.aff_file} {cpp_file} {flo_file}"
         else:
             cpp_file = os.path.abspath(outputs["cpp_file"])
             flo_file = os.path.abspath(self.inputs.flo_file)

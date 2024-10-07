@@ -42,11 +42,10 @@ class DTITKRenameMixin:
         rename_idx = classes.index("DTITKRenameMixin")
         new_name = classes[rename_idx + 1]
         warnings.warn(
-            "The {} interface has been renamed to {}\n"
+            f"The {dep_name} interface has been renamed to {new_name}\n"
             "Please see the documentation for DTI-TK "
             "interfaces, as some inputs have been "
-            "added or renamed for clarity."
-            "".format(dep_name, new_name),
+            "added or renamed for clarity.",
             DeprecationWarning,
         )
         super().__init__(*args, **kwargs)

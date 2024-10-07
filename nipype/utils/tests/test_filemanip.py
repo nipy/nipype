@@ -207,8 +207,8 @@ def test_recopy(_temp_analyze_files):
                 img_stat = _ignore_atime(os.stat(new_img))
                 hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(orig_img, new_img, **kwargs)
-                err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
-                    os.name, copy, use_hardlink
+                err_msg = (
+                    f"Regular - OS: {os.name}; Copy: {copy}; Hardlink: {use_hardlink}"
                 )
                 assert img_stat == _ignore_atime(os.stat(new_img)), err_msg
                 assert hdr_stat == _ignore_atime(os.stat(new_hdr)), err_msg
@@ -219,8 +219,8 @@ def test_recopy(_temp_analyze_files):
                 img_stat = _ignore_atime(os.stat(new_img))
                 hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(img_link, new_img, **kwargs)
-                err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
-                    os.name, copy, use_hardlink
+                err_msg = (
+                    f"Symlink - OS: {os.name}; Copy: {copy}; Hardlink: {use_hardlink}"
                 )
                 assert img_stat == _ignore_atime(os.stat(new_img)), err_msg
                 assert hdr_stat == _ignore_atime(os.stat(new_hdr)), err_msg

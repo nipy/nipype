@@ -135,15 +135,11 @@ def _get_head_bucket(s3_resource, bucket_name):
             )
             raise Exception(err_msg)
         else:
-            err_msg = "Unable to connect to bucket: {}. Error message:\n{}".format(
-                bucket_name,
-                exc,
+            err_msg = (
+                f"Unable to connect to bucket: {bucket_name}. Error message:\n{exc}"
             )
     except Exception as exc:
-        err_msg = "Unable to connect to bucket: {}. Error message:\n{}".format(
-            bucket_name,
-            exc,
-        )
+        err_msg = f"Unable to connect to bucket: {bucket_name}. Error message:\n{exc}"
         raise Exception(err_msg)
 
 
@@ -961,10 +957,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
             if not args:
                 filelist = [fname for fname in bkt_files if re.match(template, fname)]
                 if len(filelist) == 0:
-                    msg = "Output key: {} Template: {} returned no files".format(
-                        key,
-                        template,
-                    )
+                    msg = f"Output key: {key} Template: {template} returned no files"
                     if self.inputs.raise_on_empty:
                         raise OSError(msg)
                     else:
@@ -1009,10 +1002,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         if re.match(filledtemplate, fname):
                             outfiles.append(fname)
                     if len(outfiles) == 0:
-                        msg = "Output key: {} Template: {} returned no files".format(
-                            key,
-                            filledtemplate,
-                        )
+                        msg = f"Output key: {key} Template: {filledtemplate} returned no files"
                         if self.inputs.raise_on_empty:
                             raise OSError(msg)
                         else:
@@ -1236,10 +1226,7 @@ class DataGrabber(IOBase):
             if not args:
                 filelist = glob.glob(template)
                 if len(filelist) == 0:
-                    msg = "Output key: {} Template: {} returned no files".format(
-                        key,
-                        template,
-                    )
+                    msg = f"Output key: {key} Template: {template} returned no files"
                     if self.inputs.raise_on_empty:
                         raise OSError(msg)
                     else:
@@ -1281,10 +1268,7 @@ class DataGrabber(IOBase):
                             )
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
-                        msg = "Output key: {} Template: {} returned no files".format(
-                            key,
-                            filledtemplate,
-                        )
+                        msg = f"Output key: {key} Template: {filledtemplate} returned no files"
                         if self.inputs.raise_on_empty:
                             raise OSError(msg)
                         else:
@@ -1454,9 +1438,8 @@ class SelectFiles(IOBase):
 
             # Handle the case where nothing matched
             if not filelist:
-                msg = "No files were found matching {} template: {}".format(
-                    field,
-                    filled_template,
+                msg = (
+                    f"No files were found matching {field} template: {filled_template}"
                 )
                 if self.inputs.raise_on_empty:
                     raise OSError(msg)
