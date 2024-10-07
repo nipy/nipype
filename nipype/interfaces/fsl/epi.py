@@ -1404,7 +1404,7 @@ class EPIDeWarp(FSLCommand):
             ),
             DeprecationWarning,
         )
-        return super().__init__(**inputs)
+        super().__init__(**inputs)
 
     def _run_interface(self, runtime):
         runtime = super()._run_interface(runtime)
@@ -1507,7 +1507,7 @@ class EddyCorrect(FSLCommand):
             ("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy instead"),
             DeprecationWarning,
         )
-        return super().__init__(**inputs)
+        super().__init__(**inputs)
 
     def _run_interface(self, runtime):
         runtime = super()._run_interface(runtime)

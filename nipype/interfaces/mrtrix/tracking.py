@@ -432,7 +432,7 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "DT_STREAM"
-        return super().__init__(command, **inputs)
+        super().__init__(command, **inputs)
 
 
 class ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec(
@@ -466,7 +466,7 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_PROB"
-        return super().__init__(command, **inputs)
+        super().__init__(command, **inputs)
 
 
 class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
@@ -491,4 +491,4 @@ class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_STREAM"
-        return super().__init__(command, **inputs)
+        super().__init__(command, **inputs)
