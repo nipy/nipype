@@ -71,12 +71,12 @@ def test_TraitedSpec_dynamic():
     a.foo = 1
     assign_a = lambda: setattr(a, "foo", "a")
     with pytest.raises(Exception):
-        assign_a
+        assign_a()
     pkld_a = dumps(a)
     unpkld_a = loads(pkld_a)
     assign_a_again = lambda: setattr(unpkld_a, "foo", "a")
     with pytest.raises(Exception):
-        assign_a_again
+        assign_a_again()
 
 
 def test_DynamicTraitedSpec_tab_completion():
@@ -276,7 +276,7 @@ def test_cycle_namesource1(setup_file):
     to0 = TestCycle()
     not_raised = True
     try:
-        to0.cmdline
+        to0.cmdline  # noqa: B018
     except nib.NipypeInterfaceError:
         not_raised = False
     assert not not_raised

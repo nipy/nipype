@@ -126,7 +126,7 @@ def test_mandatory_outvol(create_files_in_directory):
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
-        mni.cmdline
+        mni.cmdline  # noqa: B018
 
     # test with minimal args
     mni.inputs.in_file = filelist[0]
@@ -164,7 +164,7 @@ def test_bbregister(create_files_in_directory):
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
-        bbr.cmdline
+        bbr.cmdline  # noqa: B018
 
     bbr.inputs.subject_id = "fsaverage"
     bbr.inputs.source_file = filelist[0]
@@ -173,9 +173,9 @@ def test_bbregister(create_files_in_directory):
     # Check that 'init' is mandatory in FS < 6, but not in 6+
     if Info.looseversion() < LooseVersion("6.0.0"):
         with pytest.raises(ValueError):
-            bbr.cmdline
+            bbr.cmdline  # noqa: B018
     else:
-        bbr.cmdline
+        bbr.cmdline  # noqa: B018
 
     bbr.inputs.init = "fsl"
 
