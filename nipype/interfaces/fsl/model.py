@@ -819,7 +819,7 @@ threshold=10, results_dir='stats')
         input_spec = FILMGLSInputSpec505
 
     def __init__(self, **inputs):
-        super(FILMGLS, self).__init__(**inputs)
+        super().__init__(**inputs)
         if Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.6"):
             if "output_type" not in inputs:
                 if isdefined(self.inputs.mode) and self.inputs.mode == "surface":
