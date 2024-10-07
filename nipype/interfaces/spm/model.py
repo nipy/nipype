@@ -12,7 +12,7 @@ import numpy as np
 
 # Local imports
 from ... import logging
-from ...utils.filemanip import ensure_list, simplify_list, split_filename
+from ...utils.filemanip import ensure_list, simplify_list, split_filename, load_spm_mat
 from ..base import (
     Bunch,
     traits,
@@ -313,12 +313,10 @@ class EstimateModel(SPMCommand):
         return einputs
 
     def _list_outputs(self):
-        import scipy.io as sio
-
         outputs = self._outputs().get()
         pth = os.path.dirname(self.inputs.spm_mat_file)
         outtype = "nii" if "12" in self.version.split(".")[0] else "img"
-        spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
+        spm = load_spm_mat(self.inputs.spm_mat_file, struct_as_record=False)
 
         betas = [vbeta.fname[0] for vbeta in spm["SPM"][0, 0].Vbeta[0]]
         if (
@@ -503,6 +501,10 @@ jobs{1}.stats{1}.con.spmmat  = {'%s'};
 load(jobs{1}.stats{1}.con.spmmat{:});
 SPM.swd = '%s';
 save(jobs{1}.stats{1}.con.spmmat{:},'SPM');
+[msg,id] = lastwarn('');
+if strcmp(id,'MATLAB:save:sizeTooBigForMATFile')
+   save(jobs{1}.stats{1}.con.spmmat{:},'SPM','-v7.3');
+end
 names = SPM.xX.name;"""
             % (self.inputs.spm_mat_file, os.getcwd())
         ]
@@ -581,11 +583,9 @@ end;"""
         return "\n".join(script)
 
     def _list_outputs(self):
-        import scipy.io as sio
-
         outputs = self._outputs().get()
         pth, _ = os.path.split(self.inputs.spm_mat_file)
-        spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
+        spm = load_spm_mat(self.inputs.spm_mat_file, struct_as_record=False)
         con_images = []
         spmT_images = []
         for con in spm["SPM"][0, 0].xCon[0]:

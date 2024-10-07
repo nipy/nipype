@@ -102,7 +102,7 @@ def test_run_interface(tmpdir):
     # bypasses ubuntu dash issue
     mc = mlab.MatlabCommand(script="foo;", paths=[tmpdir.strpath], mfile=True)
     assert not os.path.exists(default_script_file), "scriptfile should not exist 4."
-    with pytest.raises(OSError):
+    with pytest.raises(RuntimeError):
         mc.run()
     assert os.path.exists(default_script_file), "scriptfile should exist 4."
     if os.path.exists(default_script_file):  # cleanup
