@@ -125,10 +125,10 @@ class GTMSeg(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.join(
+        outputs["out_file"] = os.path.join(
             self.inputs.subjects_dir,
             self.inputs.subject_id,
-            'mri',
+            "mri",
             self.inputs.out_file,
         )
         return outputs
@@ -516,7 +516,7 @@ class GTMPVC(FSCommand):
     def _format_arg(self, name, spec, val):
         # Values taken from
         # https://github.com/freesurfer/freesurfer/blob/fs-7.2/mri_gtmpvc/mri_gtmpvc.cpp#L115-L122
-        if name == 'optimization_schema':
+        if name == "optimization_schema":
             return (
                 spec.argstr
                 % {
@@ -530,8 +530,8 @@ class GTMPVC(FSCommand):
                     "MB3": 8,
                 }[val]
             )
-        if name == 'mg':
-            return spec.argstr % (val[0], ' '.join(val[1]))
+        if name == "mg":
+            return spec.argstr % (val[0], " ".join(val[1]))
         return super()._format_arg(name, spec, val)
 
     def _list_outputs(self):

@@ -489,7 +489,7 @@ class SPMCommand(BaseInterface):
                     jobstring += "%s = {...\n" % (prefix)
                 else:
                     jobstring += "{...\n"
-                for i, val in enumerate(contents):
+                for val in contents:
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None, contents=val)
                     elif isinstance(val, list):

@@ -82,9 +82,7 @@ class QJobInfo:
         time_diff = time.time() - self._job_info_creation_time
         if self.is_zombie():
             sge_debug_print(
-                "DONE! QJobInfo.IsPending found in 'zombie' list, returning False so claiming done!\n{}".format(
-                    self
-                )
+                f"DONE! QJobInfo.IsPending found in 'zombie' list, returning False so claiming done!\n{self}"
             )
             is_pending_status = False  # Job explicitly found as being completed!
         elif self.is_initializing() and (time_diff > 600):
@@ -154,9 +152,7 @@ class QstatSubstitute:
         from the qacct report
         """
         sge_debug_print(
-            "WARNING:  "
-            "CONTACTING qacct for finished jobs, "
-            "{}: {}".format(time.time(), "Verifying Completion")
+            f"WARNING: CONTACTING qacct for finished jobs, {time.time()}: Verifying Completion"
         )
 
         this_command = "qacct"
@@ -253,10 +249,7 @@ class QstatSubstitute:
                     self._task_dictionary[dictionary_job].set_state("zombie")
                 else:
                     sge_debug_print(
-                        "ERROR:  Job not in current parselist, "
-                        "and not in done list {}: {}".format(
-                            dictionary_job, self._task_dictionary[dictionary_job]
-                        )
+                        f"ERROR: Job not in current parselist, and not in done list {dictionary_job}: {self._task_dictionary[dictionary_job]}"
                     )
             if self._task_dictionary[dictionary_job].is_initializing():
                 is_completed = self._qacct_verified_complete(dictionary_job)
@@ -264,10 +257,7 @@ class QstatSubstitute:
                     self._task_dictionary[dictionary_job].set_state("zombie")
                 else:
                     sge_debug_print(
-                        "ERROR:  Job not in still in initialization mode, "
-                        "and not in done list {}: {}".format(
-                            dictionary_job, self._task_dictionary[dictionary_job]
-                        )
+                        f"ERROR: Job not in still in initialization mode, and not in done list {dictionary_job}: {self._task_dictionary[dictionary_job]}"
                     )
 
     def _run_qstat(self, reason_for_qstat, force_instant=True):
@@ -279,8 +269,7 @@ class QstatSubstitute:
         -s s suspended jobs
         """
         sge_debug_print(
-            "WARNING:  CONTACTING qmaster for jobs, "
-            "{}: {}".format(time.time(), reason_for_qstat)
+            f"WARNING: CONTACTING qmaster for jobs, {time.time()}: {reason_for_qstat}"
         )
         if force_instant:
             this_command = self._qstat_instant_executable
@@ -311,10 +300,7 @@ class QstatSubstitute:
                 self._parse_qstat_job_list(runjobs)
                 break
             except Exception as inst:
-                exception_message = "QstatParsingError:\n\t{}\n\t{}\n".format(
-                    type(inst),  # the exception instance
-                    inst,  # __str__ allows args to printed directly
-                )
+                exception_message = f"QstatParsingError:\n\t{type(inst)}\n\t{inst}\n"
                 sge_debug_print(exception_message)
                 time.sleep(5)
 
@@ -340,8 +326,7 @@ class QstatSubstitute:
                 job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
             else:
                 sge_debug_print(
-                    "ERROR: Job {} not in task list, "
-                    "even after forced qstat!".format(task_id)
+                    f"ERROR: Job {task_id} not in task list, even after forced qstat!"
                 )
                 job_is_pending = False
         if not job_is_pending:
@@ -352,8 +337,7 @@ class QstatSubstitute:
                 self._task_dictionary.pop(task_id)
             else:
                 sge_debug_print(
-                    "ERROR: Job {} not in task list, "
-                    "but attempted to be removed!".format(task_id)
+                    f"ERROR: Job {task_id} not in task list, but attempted to be removed!"
                 )
         return job_is_pending
 

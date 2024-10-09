@@ -215,7 +215,9 @@ def _parse_mount_table(exit_code, output):
 
     # Keep line and match for error reporting (match == None on failure)
     # Ignore empty lines
-    matches = [(l, pattern.match(l)) for l in output.strip().splitlines() if l]
+    matches = [
+        (line, pattern.match(line)) for line in output.strip().splitlines() if line
+    ]
 
     # (path, fstype) tuples, sorted by path length (longest first)
     mount_info = sorted(
@@ -588,11 +590,7 @@ def loadpkl(infile):
         fmlogger.debug(f"'{infile}' missing; waiting 2s")
         sleep(2)
     if timed_out:
-        error_message = (
-            "Result file {} expected, but "
-            "does not exist after ({}) "
-            "seconds.".format(infile, timeout)
-        )
+        error_message = f"Result file {infile} expected, but does not exist after {timeout} seconds."
         raise OSError(error_message)
 
     with pklopen(str(infile), "rb") as pkl_file:

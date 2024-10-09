@@ -15,8 +15,8 @@ import numpy as np
 import textwrap
 
 
-def human_order_sorted(l):
-    """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
+def human_order_sorted(strings):
+    """Sorts strings in human order (i.e. 'stat10' will go after 'stat2')"""
 
     def atoi(text):
         return int(text) if text.isdigit() else text
@@ -26,7 +26,7 @@ def human_order_sorted(l):
             text = text[0]
         return [atoi(c) for c in re.split(r"(\d+)", text)]
 
-    return sorted(l, key=natural_keys)
+    return sorted(strings, key=natural_keys)
 
 
 def trim(docstring, marker=None):

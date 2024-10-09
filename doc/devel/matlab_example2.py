@@ -4,7 +4,7 @@ from nipype.interfaces.matlab import MatlabCommand, MatlabInputSpec
 
 
 class HelloWorldInputSpec(MatlabInputSpec):
-    name = traits.Str(mandatory=True, desc='Name of person to say hello to')
+    name = traits.Str(mandatory=True, desc="Name of person to say hello to")
 
 
 class HelloWorldOutputSpec(TraitedSpec):
