@@ -1186,29 +1186,60 @@ def is_outlier(points, thresh=3.5):
     return timepoints_to_discard
 
 
-def cosine_filter(
-    data, timestep, period_cut, remove_mean=True, axis=-1, failure_mode="error"
+def _make_cosine_regressors(ntimepoints, timestep, period_cut):
+    return _full_rank(_cosine_drift(period_cut, timestep * np.arange(ntimepoints)))[0]
+
+
+def _make_legendre_regressors(ntimepoints, degree):
+    support = np.linspace([-1], [1], ntimepoints)
+    return np.hstack(
+        [
+            np.ones((ntimepoints, 1)),  # Degree 0 is a constant
+            *(Legendre.basis(i + 1)(support) for i in range(degree)),
+        ]
+    )
+
+
+def _high_pass_filter(
+    data, *args, filter_type, remove_mean=True, axis=-1, failure_mode="error"
 ):
     datashape = data.shape
     timepoints = datashape[axis]
     if datashape[0] == 0 and failure_mode != "error":
         return data, np.array([])
 
-    data = data.reshape((-1, timepoints))
+    filters = {
+        'cosine': _make_cosine_regressors,
+        'legendre': _make_legendre_regressors,
+    }
 
-    frametimes = timestep * np.arange(timepoints)
-    X = _full_rank(_cosine_drift(period_cut, frametimes))[0]
+    X = filters[filter_type](timepoints, *args)
     non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
 
-    betas = np.linalg.lstsq(X, data.T)[0]
+    data = data.reshape((-1, timepoints))
+
+    betas = np.linalg.pinv(X) @ data.T
 
     if not remove_mean:
-        X = X[:, :-1]
-        betas = betas[:-1]
+        X = X[:, 1:]
+        betas = betas[1:]
 
-    residuals = data - X.dot(betas).T
-
+    residuals = data - (X @ betas).T
     return residuals.reshape(datashape), non_constant_regressors
+
+
+def cosine_filter(
+    data, timestep, period_cut, remove_mean=True, axis=-1, failure_mode="error"
+):
+    return _high_pass_filter(
+        data,
+        timestep,
+        period_cut,
+        filter_type='cosine',
+        remove_mean=remove_mean,
+        axis=axis,
+        failure_mode=failure_mode,
+    )
 
 
 def regress_poly(degree, data, remove_mean=True, axis=-1, failure_mode="error"):
@@ -1222,36 +1253,14 @@ def regress_poly(degree, data, remove_mean=True, axis=-1, failure_mode="error"):
     IFLOGGER.debug(
         "Performing polynomial regression on data of shape %s", str(data.shape)
     )
-
-    datashape = data.shape
-    timepoints = datashape[axis]
-    if datashape[0] == 0 and failure_mode != "error":
-        return data, np.array([])
-
-    # Rearrange all voxel-wise time-series in rows
-    data = data.reshape((-1, timepoints))
-
-    # Generate design matrix
-    X = np.ones((timepoints, 1))  # quick way to calc degree 0
-    for i in range(degree):
-        polynomial_func = Legendre.basis(i + 1)
-        value_array = np.linspace(-1, 1, timepoints)
-        X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
-
-    non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
-
-    # Calculate coefficients
-    betas = np.linalg.pinv(X).dot(data.T)
-
-    # Estimation
-    if remove_mean:
-        datahat = X.dot(betas).T
-    else:  # disregard the first layer of X, which is degree 0
-        datahat = X[:, 1:].dot(betas[1:, ...]).T
-    regressed_data = data - datahat
-
-    # Back to original shape
-    return regressed_data.reshape(datashape), non_constant_regressors
+    return _high_pass_filter(
+        data,
+        degree,
+        filter_type='legendre',
+        remove_mean=remove_mean,
+        axis=axis,
+        failure_mode=failure_mode,
+    )
 
 
 def combine_mask_files(mask_files, mask_method=None, mask_index=None):
@@ -1524,7 +1533,6 @@ def _cosine_drift(period_cut, frametimes):
     Ref: http://en.wikipedia.org/wiki/Discrete_cosine_transform DCT-II
     """
     len_tim = len(frametimes)
-    n_times = np.arange(len_tim)
     hfcut = 1.0 / period_cut  # input parameter is the period
 
     # frametimes.max() should be (len_tim-1)*dt
@@ -1532,13 +1540,15 @@ def _cosine_drift(period_cut, frametimes):
     # hfcut = 1/(2*dt) yields len_time
     # If series is too short, return constant regressor
     order = max(int(np.floor(2 * len_tim * hfcut * dt)), 1)
-    cdrift = np.zeros((len_tim, order))
-    nfct = np.sqrt(2.0 / len_tim)
+    cdrift = np.ones((len_tim, order))
 
-    for k in range(1, order):
-        cdrift[:, k - 1] = nfct * np.cos((np.pi / len_tim) * (n_times + 0.5) * k)
+    if order > 1:
+        nfct = np.sqrt(2.0 / len_tim)
+        support = (np.pi / len_tim) * (np.arange(len_tim) + 0.5)
 
-    cdrift[:, order - 1] = 1.0  # or 1./sqrt(len_tim) to normalize
+        for k in range(1, order):
+            cdrift[:, k] = nfct * np.cos(support * k)
+
     return cdrift
 
 
