@@ -60,6 +60,9 @@ parameterize_dirs = true
 poll_sleep_duration = 2
 xvfb_max_wait = 10
 check_version = true
+input_tries = 1
+input_retry_delay = 5
+input_retry_exp_backoff_factor = 1
 
 [monitoring]
 enabled = false
