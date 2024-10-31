@@ -1,57 +1,60 @@
 import os
 import pytest
-import shutil
 
 from nipype.interfaces.dcm2nii import Dcm2niix
+
 no_dcm2niix = not bool(Dcm2niix().version)
 no_datalad = False
 try:
-    from datalad import api # to pull and grab data
+    from datalad import api  # to pull and grab data
     from datalad.support.exceptions import IncompleteResultsError
 except ImportError:
     no_datalad = True
 
-DICOM_DIR = 'http://datasets-tests.datalad.org/dicoms/dcm2niix-tests'
+DICOM_DIR = "http://datasets-tests.datalad.org/dicoms/dcm2niix-tests"
 
 
-def fetch_data(tmpdir, dicoms):
-    """Fetches some test DICOMs using datalad"""
-    data = os.path.join(tmpdir, 'data')
-    api.install(path=data, source=DICOM_DIR)
-    data = os.path.join(data, dicoms)
-    api.get(path=data)
-    return data
+@pytest.fixture
+def fetch_data():
+    def _fetch_data(datadir, dicoms):
+        try:
+            """Fetches some test DICOMs using datalad"""
+            api.install(path=datadir, source=DICOM_DIR)
+            data = os.path.join(datadir, dicoms)
+            api.get(path=data, dataset=datadir)
+        except IncompleteResultsError as exc:
+            pytest.skip("Failed to fetch test data: %s" % str(exc))
+        return data
+
+    return _fetch_data
+
 
 @pytest.mark.skipif(no_datalad, reason="Datalad required")
 @pytest.mark.skipif(no_dcm2niix, reason="Dcm2niix required")
-def test_dcm2niix_dwi(tmpdir):
+def test_dcm2niix_dti(fetch_data, tmpdir):
     tmpdir.chdir()
-    try:
-        datadir = fetch_data(tmpdir.strpath, 'Siemens_Sag_DTI_20160825_145811')
-    except IncompleteResultsError as exc:
-        pytest.skip("Failed to fetch test data: %s" % str(exc))
+    datadir = tmpdir.mkdir("data").strpath
+    dicoms = fetch_data(datadir, "Siemens_Sag_DTI_20160825_145811")
 
-    def assert_dwi(eg, bids):
+    def assert_dti(res):
         "Some assertions we will make"
-        assert eg.outputs.converted_files
-        assert eg.outputs.bvals
-        assert eg.outputs.bvecs
-        outputs = [y for x,y in eg.outputs.get().items()]
-        if bids:
+        assert res.outputs.converted_files
+        assert res.outputs.bvals
+        assert res.outputs.bvecs
+        outputs = [y for x, y in res.outputs.get().items()]
+        if res.inputs.get("bids_format"):
             # ensure all outputs are of equal lengths
             assert len(set(map(len, outputs))) == 1
         else:
-            assert not eg2.outputs.bids
+            assert not res.outputs.bids
 
     dcm = Dcm2niix()
-    dcm.inputs.source_dir = datadir
-    dcm.inputs.out_filename = '%u%z'
-    eg1 = dcm.run()
-    assert_dwi(eg1, True)
+    dcm.inputs.source_dir = dicoms
+    dcm.inputs.out_filename = "%u%z"
+    assert_dti(dcm.run())
 
     # now run specifying output directory and removing BIDS option
-    outdir = tmpdir.mkdir('conversion').strpath
+    outdir = tmpdir.mkdir("conversion").strpath
     dcm.inputs.output_dir = outdir
     dcm.inputs.bids_format = False
-    eg2 = dcm.run()
-    assert_dwi(eg2, False)
+    assert_dti(dcm.run())

@@ -22,13 +22,12 @@ src/
 .git
 
 # other
-docs/**/*
-docs/
+doc/**/*
+doc/
 .cache/
 .circle/**/*
 .circle/
 circle.yml
-rtd_requirements.txt
 Vagrantfile
 .travis.yml
 .mailmap

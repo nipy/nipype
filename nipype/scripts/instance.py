@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 Import lib and class meta programming utilities.
 """
+
 import inspect
 import importlib
 
@@ -29,8 +29,7 @@ def import_module(module_path):
     try:
         mod = importlib.import_module(module_path)
     except:
-        raise ImportError(
-            'Error when importing object {}.'.format(module_path))
+        raise ImportError(f"Error when importing object {module_path}.")
     else:
         return mod
 
@@ -40,7 +39,7 @@ def list_interfaces(module):
     the given module.
     """
     iface_names = []
-    for k, v in sorted(list(module.__dict__.items())):
+    for k, v in sorted(module.__dict__.items()):
         if inspect.isclass(v) and issubclass(v, Interface):
             iface_names.append(k)
     return iface_names

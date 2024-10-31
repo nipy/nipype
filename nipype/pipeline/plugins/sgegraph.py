@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
 """Parallel workflow execution via SGE
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import open
 
 import os
 import sys
 
 from ...interfaces.base import CommandLine
-from .base import (GraphPluginBase, logger)
+from .base import GraphPluginBase, logger
 
 
 def node_completed_status(checknode):
@@ -19,15 +15,15 @@ def node_completed_status(checknode):
     :return: boolean value True indicates that the node does not need to be run.
     """
     """ TODO: place this in the base.py file and refactor """
-    node_state_does_not_require_overwrite = (
-        checknode.overwrite is False or
-        (checknode.overwrite is None and not checknode._interface.always_run))
+    node_state_does_not_require_overwrite = checknode.overwrite is False or (
+        checknode.overwrite is None and not checknode._interface.always_run
+    )
     hash_exists = False
     try:
         hash_exists, _, _, _ = checknode.hash_exists()
     except Exception:
         hash_exists = False
-    return (hash_exists and node_state_does_not_require_overwrite)
+    return hash_exists and node_state_does_not_require_overwrite
 
 
 class SGEGraphPlugin(GraphPluginBase):
@@ -41,6 +37,7 @@ class SGEGraphPlugin(GraphPluginBase):
                   qsub call
 
     """
+
     _template = """
 #!/bin/bash
 #$ -V
@@ -48,20 +45,21 @@ class SGEGraphPlugin(GraphPluginBase):
 """
 
     def __init__(self, **kwargs):
-        self._qsub_args = ''
+        self._qsub_args = ""
         self._dont_resubmit_completed_jobs = False
-        if 'plugin_args' in kwargs and kwargs['plugin_args']:
-            plugin_args = kwargs['plugin_args']
-            if 'template' in plugin_args:
-                self._template = plugin_args['template']
+        if kwargs.get("plugin_args"):
+            plugin_args = kwargs["plugin_args"]
+            if "template" in plugin_args:
+                self._template = plugin_args["template"]
                 if os.path.isfile(self._template):
                     self._template = open(self._template).read()
-            if 'qsub_args' in plugin_args:
-                self._qsub_args = plugin_args['qsub_args']
-            if 'dont_resubmit_completed_jobs' in plugin_args:
+            if "qsub_args" in plugin_args:
+                self._qsub_args = plugin_args["qsub_args"]
+            if "dont_resubmit_completed_jobs" in plugin_args:
                 self._dont_resubmit_completed_jobs = plugin_args[
-                    'dont_resubmit_completed_jobs']
-        super(SGEGraphPlugin, self).__init__(**kwargs)
+                    "dont_resubmit_completed_jobs"
+                ]
+        super().__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         def make_job_name(jobnumber, nodeslist):
@@ -70,93 +68,97 @@ class SGEGraphPlugin(GraphPluginBase):
             - nodeslist: The name of the node being processed
             - return: A string representing this job to be displayed by SGE
             """
-            job_name = 'j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
+            job_name = f"j{jobnumber}_{nodeslist[jobnumber]._id}"
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
-            job_name = job_name.replace('-', '_').replace('.', '_').replace(
-                ':', '_')
+            job_name = job_name.replace("-", "_").replace(".", "_").replace(":", "_")
             return job_name
 
         batch_dir, _ = os.path.split(pyfiles[0])
-        submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
+        submitjobsfile = os.path.join(batch_dir, "submit_jobs.sh")
 
         cache_doneness_per_node = dict()
-        if self._dont_resubmit_completed_jobs:  # A future parameter for controlling this behavior could be added here
+        if (
+            self._dont_resubmit_completed_jobs
+        ):  # A future parameter for controlling this behavior could be added here
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
 
                 # if the node itself claims done, then check to ensure all
-                # dependancies are also done
+                # dependencies are also done
                 if node_status_done and idx in dependencies:
                     for child_idx in dependencies[idx]:
                         if child_idx in cache_doneness_per_node:
-                            child_status_done = cache_doneness_per_node[
-                                child_idx]
+                            child_status_done = cache_doneness_per_node[child_idx]
                         else:
-                            child_status_done = node_completed_status(
-                                nodes[child_idx])
+                            child_status_done = node_completed_status(nodes[child_idx])
                         node_status_done = node_status_done and child_status_done
 
                 cache_doneness_per_node[idx] = node_status_done
 
-        with open(submitjobsfile, 'wt') as fp:
-            fp.writelines('#!/usr/bin/env bash\n')
-            fp.writelines('# Condense format attempted\n')
+        with open(submitjobsfile, "w") as fp:
+            fp.writelines("#!/usr/bin/env bash\n")
+            fp.writelines("# Condense format attempted\n")
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
                 if cache_doneness_per_node.get(idx, False):
                     continue
                 else:
                     template, qsub_args = self._get_args(
-                        node, ["template", "qsub_args"])
+                        node, ["template", "qsub_args"]
+                    )
 
                     batch_dir, name = os.path.split(pyscript)
-                    name = '.'.join(name.split('.')[:-1])
-                    batchscript = '\n'.join(
-                        (template, '%s %s' % (sys.executable, pyscript)))
-                    batchscriptfile = os.path.join(batch_dir,
-                                                   'batchscript_%s.sh' % name)
+                    name = ".".join(name.split(".")[:-1])
+                    batchscript = "\n".join((template, f"{sys.executable} {pyscript}"))
+                    batchscriptfile = os.path.join(
+                        batch_dir, "batchscript_%s.sh" % name
+                    )
 
-                    batchscriptoutfile = batchscriptfile + '.o'
-                    batchscripterrfile = batchscriptfile + '.e'
+                    batchscriptoutfile = batchscriptfile + ".o"
+                    batchscripterrfile = batchscriptfile + ".e"
 
-                    with open(batchscriptfile, 'wt') as batchfp:
+                    with open(batchscriptfile, "w") as batchfp:
                         batchfp.writelines(batchscript)
                         batchfp.close()
-                    deps = ''
+                    deps = ""
                     if idx in dependencies:
-                        values = ' '
+                        values = " "
                         for jobid in dependencies[idx]:
-                            # Avoid dependancies of done jobs
-                            if not self._dont_resubmit_completed_jobs or not cache_doneness_per_node[jobid]:
-                                values += "${{{0}}},".format(
-                                    make_job_name(jobid, nodes))
-                        if values != ' ':  # i.e. if some jobs were added to dependency list
-                            values = values.rstrip(',')
-                            deps = '-hold_jid%s' % values
+                            # Avoid dependencies of done jobs
+                            if (
+                                not self._dont_resubmit_completed_jobs
+                                or not cache_doneness_per_node[jobid]
+                            ):
+                                values += f"${{{make_job_name(jobid, nodes)}}},"
+                        if (
+                            values != " "
+                        ):  # i.e. if some jobs were added to dependency list
+                            values = values.rstrip(",")
+                            deps = "-hold_jid%s" % values
                     jobname = make_job_name(idx, nodes)
                     # Do not use default output locations if they are set in self._qsub_args
-                    stderrFile = ''
-                    if self._qsub_args.count('-e ') == 0:
-                        stderrFile = '-e {errFile}'.format(
-                            errFile=batchscripterrfile)
-                    stdoutFile = ''
-                    if self._qsub_args.count('-o ') == 0:
-                        stdoutFile = '-o {outFile}'.format(
-                            outFile=batchscriptoutfile)
-                    full_line = '{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk \'{{print $3}}\')\n'.format(
+                    stderrFile = ""
+                    if self._qsub_args.count("-e ") == 0:
+                        stderrFile = f"-e {batchscripterrfile}"
+                    stdoutFile = ""
+                    if self._qsub_args.count("-o ") == 0:
+                        stdoutFile = f"-o {batchscriptoutfile}"
+                    full_line = "{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk '/^Your job/{{print $3}}')\n".format(
                         jobNm=jobname,
                         outFileOption=stdoutFile,
                         errFileOption=stderrFile,
                         extraQSubArgs=qsub_args,
                         dependantIndex=deps,
-                        batchscript=batchscriptfile)
+                        batchscript=batchscriptfile,
+                    )
                     fp.writelines(full_line)
         cmd = CommandLine(
-            'bash',
+            "bash",
             environ=dict(os.environ),
             resource_monitor=False,
-            terminal_output='allatonce')
-        cmd.inputs.args = '%s' % submitjobsfile
+            terminal_output="allatonce",
+        )
+        cmd.inputs.args = "%s" % submitjobsfile
         cmd.run()
-        logger.info('submitted all jobs to queue')
+        logger.info("submitted all jobs to queue")

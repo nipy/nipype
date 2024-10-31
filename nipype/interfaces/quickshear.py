@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-""" Quickshear is a simple geometric defacing algorithm
-"""
-from __future__ import unicode_literals
+"""Quickshear is a simple geometric defacing algorithm."""
 
 from .base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ..external.due import BibTeX
@@ -11,27 +8,26 @@ class QuickshearInputSpec(CommandLineInputSpec):
     in_file = File(
         exists=True,
         position=1,
-        argstr='%s',
+        argstr="%s",
         mandatory=True,
-        desc="neuroimage to deface")
+        desc="neuroimage to deface",
+    )
     mask_file = File(
-        exists=True,
-        position=2,
-        argstr='%s',
-        desc="brain mask",
-        mandatory=True)
+        exists=True, position=2, argstr="%s", desc="brain mask", mandatory=True
+    )
     out_file = File(
         name_template="%s_defaced",
-        name_source='in_file',
+        name_source="in_file",
         position=3,
-        argstr='%s',
+        argstr="%s",
         desc="defaced output image",
-        keep_extension=True)
+        keep_extension=True,
+    )
     buff = traits.Int(
         position=4,
-        argstr='%d',
-        desc='buffer size (in voxels) between shearing '
-        'plane and the brain')
+        argstr="%d",
+        desc="buffer size (in voxels) between shearing plane and the brain",
+    )
 
 
 class QuickshearOutputSpec(TraitedSpec):
@@ -73,19 +69,23 @@ class Quickshear(CommandLine):
     >>> inputnode.inputs.in_file = 'T1.nii'
     >>> res = deface_wf.run()  # doctest: +SKIP
     """
-    _cmd = 'quickshear'
+
+    _cmd = "quickshear"
     input_spec = QuickshearInputSpec
     output_spec = QuickshearOutputSpec
 
-    references_ = [{
-        'entry':
-        BibTeX('@inproceedings{Schimke2011,'
-               'address = {San Francisco},'
-               'author = {Schimke, Nakeisha and Hale, John},'
-               'booktitle = {Proceedings of the 2nd USENIX Conference on '
-               'Health Security and Privacy},'
-               'title = {{Quickshear Defacing for Neuroimages}},'
-               'year = {2011},'
-               'month = sep}'),
-        'tags': ['implementation'],
-    }]
+    _references = [
+        {
+            "entry": BibTeX(
+                "@inproceedings{Schimke2011,"
+                "address = {San Francisco},"
+                "author = {Schimke, Nakeisha and Hale, John},"
+                "booktitle = {Proceedings of the 2nd USENIX Conference on "
+                "Health Security and Privacy},"
+                "title = {{Quickshear Defacing for Neuroimages}},"
+                "year = {2011},"
+                "month = sep}"
+            ),
+            "tags": ["implementation"],
+        }
+    ]

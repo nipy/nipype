@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
-from nipype.interfaces.fsl import check_fsl, no_fsl
+from nipype.interfaces.fsl import no_fsl
 
 import pytest
 
@@ -13,8 +12,7 @@ import pytest
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_fslversion():
     ver = fsl.Info.version()
-    ver = ver.split('.')
-    assert ver[0] in ['4', '5']
+    assert ver.split(".", 1)[0].isdigit()
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -30,28 +28,28 @@ def test_outputtype_to_ext():
         assert res == ext
 
     with pytest.raises(KeyError):
-        fsl.Info.output_type_to_ext('JUNK')
+        fsl.Info.output_type_to_ext("JUNK")
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only
     # testing the one item that is not.
-    cmd = fsl.FSLCommand(command='ls')
+    cmd = fsl.FSLCommand(command="ls")
     res = cmd.run()
-    assert type(res) == InterfaceResult
+    assert type(res) is InterfaceResult
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_FSLCommand2():
     # Check default output type and environ
-    cmd = fsl.FSLCommand(command='junk')
+    cmd = fsl.FSLCommand(command="junk")
     assert cmd._output_type == fsl.Info.output_type()
-    assert cmd.inputs.environ['FSLOUTPUTTYPE'] == cmd._output_type
+    assert cmd.inputs.environ["FSLOUTPUTTYPE"] == cmd._output_type
     assert cmd._output_type in fsl.Info.ftypes
 
     cmd = fsl.FSLCommand
-    cmdinst = fsl.FSLCommand(command='junk')
+    cmdinst = fsl.FSLCommand(command="junk")
     for out_type in fsl.Info.ftypes:
         cmd.set_default_output_type(out_type)
         assert cmd._output_type == out_type
@@ -64,39 +62,24 @@ def test_FSLCommand2():
 @pytest.mark.parametrize(
     "args, desired_name",
     [
-        ({}, {
-            "file": 'foo.nii.gz'
-        }),  # just the filename
+        ({}, {"file": "foo.nii.gz"}),  # just the filename
         # filename with suffix
-        ({
-            "suffix": '_brain'
-        }, {
-            "file": 'foo_brain.nii.gz'
-        }),
+        ({"suffix": "_brain"}, {"file": "foo_brain.nii.gz"}),
         (
-            {
-                "suffix": '_brain',
-                "cwd": '/data'
-            },
+            {"suffix": "_brain", "cwd": "/data"},
             # filename with suffix and working directory
-            {
-                "dir": '/data',
-                "file": 'foo_brain.nii.gz'
-            }),
+            {"dir": "/data", "file": "foo_brain.nii.gz"},
+        ),
         # filename with suffix and no file extension change
-        ({
-            "suffix": '_brain.mat',
-            "change_ext": False
-        }, {
-            "file": 'foo_brain.mat'
-        })
-    ])
+        ({"suffix": "_brain.mat", "change_ext": False}, {"file": "foo_brain.mat"}),
+    ],
+)
 def test_gen_fname(args, desired_name):
     # Test _gen_fname method of FSLCommand
-    cmd = fsl.FSLCommand(command='junk', output_type='NIFTI_GZ')
+    cmd = fsl.FSLCommand(command="junk", output_type="NIFTI_GZ")
     pth = os.getcwd()
-    fname = cmd._gen_fname('foo.nii.gz', **args)
-    if "dir" in desired_name.keys():
+    fname = cmd._gen_fname("foo.nii.gz", **args)
+    if "dir" in desired_name:
         desired = os.path.join(desired_name["dir"], desired_name["file"])
     else:
         desired = os.path.join(pth, desired_name["file"])

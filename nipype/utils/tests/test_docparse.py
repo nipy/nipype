@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from nipype.utils.docparse import reverse_opt_map, build_doc, insert_doc
 
-foo_opt_map = {'outline': '-o', 'fun': '-f %.2f', 'flags': '%s'}
+foo_opt_map = {"outline": "-o", "fun": "-f %.2f", "flags": "%s"}
 
 foo_doc = """Usage: foo infile outfile [opts]
 
@@ -31,7 +30,7 @@ Others Parameters
 
 
 def test_rev_opt_map():
-    map = {'-f': 'fun', '-o': 'outline'}
+    map = {"-f": "fun", "-o": "outline"}
     rev_map = reverse_opt_map(foo_opt_map)
     assert rev_map == map
 
@@ -59,7 +58,7 @@ Others Parameters
 
 
 def test_insert_doc():
-    new_items = ['infile : str', '    The name of the input file']
-    new_items.extend(['outfile : str', '    The name of the output file'])
+    new_items = ["infile : str", "    The name of the input file"]
+    new_items.extend(["outfile : str", "    The name of the output file"])
     newdoc = insert_doc(fmtd_doc, new_items)
     assert newdoc == inserted_doc

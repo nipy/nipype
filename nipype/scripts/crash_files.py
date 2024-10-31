@@ -1,7 +1,5 @@
 """Utilities to manipulate and search through .pklz crash files."""
 
-import re
-import sys
 import os.path as op
 from glob import glob
 
@@ -18,7 +16,7 @@ def load_pklz_traceback(crash_filepath):
     except:
         raise
     else:
-        return '\n'.join(data['traceback'])
+        return "\n".join(data["traceback"])
 
 
 def iter_tracebacks(logdir):
@@ -38,7 +36,7 @@ def iter_tracebacks(logdir):
 
     traceback: str
     """
-    crash_files = sorted(glob(op.join(logdir, '*.pkl*')))
+    crash_files = sorted(glob(op.join(logdir, "*.pkl*")))
 
     for cf in crash_files:
         yield cf, load_pklz_traceback(cf)
@@ -50,9 +48,9 @@ def display_crash_file(crashfile, rerun, debug, directory):
 
     crash_data = loadcrash(crashfile)
     node = None
-    if 'node' in crash_data:
-        node = crash_data['node']
-    tb = crash_data['traceback']
+    if "node" in crash_data:
+        node = crash_data["node"]
+    tb = crash_data["traceback"]
     print("\n")
     print("File: %s" % crashfile)
 
@@ -67,7 +65,7 @@ def display_crash_file(crashfile, rerun, debug, directory):
         print(node.inputs)
         print("\n")
     print("Traceback: ")
-    print(''.join(tb))
+    print("".join(tb))
     print("\n")
 
     if rerun:
@@ -76,12 +74,13 @@ def display_crash_file(crashfile, rerun, debug, directory):
             return
         print("Rerunning node")
         node.base_dir = directory
-        node.config = {'execution': {'crashdump_dir': '/tmp'}}
+        node.config = {"execution": {"crashdump_dir": "/tmp"}}
         try:
             node.run()
         except:
-            if debug and debug != 'ipython':
+            if debug and debug != "ipython":
                 import pdb
+
                 pdb.post_mortem()
             else:
                 raise

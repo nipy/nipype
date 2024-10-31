@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -15,8 +14,6 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
 
 from ..niftyfit.base import NiftyFitCommand
 
@@ -25,12 +22,12 @@ class NiftySegCommand(NiftyFitCommand):
     """
     Base support interface for NiftySeg commands.
     """
-    _suffix = '_ns'
+
+    _suffix = "_ns"
     _min_version = None
 
     def __init__(self, **inputs):
-        super(NiftySegCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
 
     def get_version(self):
-        return super(NiftySegCommand, self).version_from_command(
-            cmd='seg_EM', flag='--version')
+        return super().version_from_command(cmd="seg_EM", flag="--version")

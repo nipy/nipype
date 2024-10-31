@@ -1,0 +1,173 @@
+name: Stable tests
+
+# This file tests the claimed support range of nipype including
+#
+# * Operating systems: Linux, OSX
+# * Dependencies: minimum requirements, optional requirements
+# * Installation methods: setup.py, sdist, wheel, archive
+
+on:
+  push:
+    branches:
+      - master
+      - maint/*
+    tags:
+      - "*"
+  pull_request:
+    branches:
+      - master
+      - maint/*
+  schedule:
+    # 8am EST / 9am EDT Mondays
+    - cron: "0 13 * * 1"
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+jobs:
+  build:
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3
+      - run: pip install --upgrade build twine
+      - name: Build sdist and wheel
+        run: python -m build
+      - run: twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  test-package:
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        package: ["wheel", "sdist"]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Update pip
+        run: pip install --upgrade pip
+      - name: Install wheel
+        run: pip install dist/nipype-*.whl
+        if: matrix.package == 'wheel'
+      - name: Install sdist
+        run: pip install dist/nipype-*.tar.gz
+        if: matrix.package == 'sdist'
+      - run: python -c 'import nipype; print(nipype.__version__)'
+      - name: Install test extras
+        run: pip install nipype[tests]
+      - name: Run tests
+        run: pytest --doctest-modules -v --pyargs nipype
+
+  stable:
+    # Check each OS, all supported Python, minimum versions and latest releases
+    permissions:
+      contents: read # to fetch code (actions/checkout)
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-22.04"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        check: ["test"]
+        pip-flags: [""]
+        depends: ["REQUIREMENTS"]
+        deb-depends: [false]
+        nipype-extras: ["doc,tests,profiler"]
+        include:
+          - os: ubuntu-22.04
+            python-version: "3.9"
+            check: test
+            pip-flags: ""
+            depends: REQUIREMENTS
+            deb-depends: true
+            nipype-extras: doc,tests,profiler,duecredit,ssh
+          - os: ubuntu-20.04
+            python-version: "3.9"
+            check: test
+            pip-flags: ""
+            depends: REQUIREMENTS
+            deb-depends: true
+            nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
+    env:
+      DEPENDS: ${{ matrix.depends }}
+      CHECK_TYPE: ${{ matrix.check }}
+      EXTRA_PIP_FLAGS: ${{ matrix.pip-flags }}
+      INSTALL_DEB_DEPENDENCIES: ${{ matrix.deb-depends }}
+      NIPYPE_EXTRAS: ${{ matrix.nipype-extras }}
+      INSTALL_TYPE: pip
+      CI_SKIP_TEST: 1
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Create virtual environment
+        run: tools/ci/create_venv.sh
+      - name: Build archive
+        run: |
+          source tools/ci/build_archive.sh
+          echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
+      - name: Install Debian dependencies
+        run: tools/ci/install_deb_dependencies.sh
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Install dependencies
+        run: tools/ci/install_dependencies.sh
+      - name: Install Nipype
+        run: tools/ci/install.sh
+      - name: Run tests
+        run: tools/ci/check.sh
+        if: ${{ matrix.check != 'skiptests' }}
+      - uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+        if: ${{ always() }}
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.deb-depends }}
+          path: test-results.xml
+        if: ${{ always() && matrix.check == 'test' }}
+
+  publish:
+    runs-on: ubuntu-latest
+    environment: "Package deployment"
+    needs: [stable, test-package]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

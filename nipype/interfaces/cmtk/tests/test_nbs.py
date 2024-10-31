@@ -1,14 +1,14 @@
-from __future__ import unicode_literals
 from ..nbs import NetworkBasedStatistic
 from ....utils.misc import package_check
 import numpy as np
 import networkx as nx
+import pickle
 import pytest
 
 have_cv = True
 try:
-    package_check('cviewer')
-except Exception as e:
+    package_check("cviewer")
+except Exception:
     have_cv = False
 
 
@@ -16,18 +16,18 @@ except Exception as e:
 def creating_graphs(tmpdir):
     graphlist = []
     graphnames = ["name" + str(i) for i in range(6)]
-    for idx, name in enumerate(graphnames):
+    for idx in range(len(graphnames)):
         graph = np.random.rand(10, 10)
-        G = nx.from_numpy_matrix(graph)
-        out_file = tmpdir.strpath + graphnames[idx] + '.pck'
+        G = nx.from_numpy_array(graph)
+        out_file = tmpdir.strpath + graphnames[idx] + ".pck"
         # Save as pck file
-        nx.write_gpickle(G, out_file)
+        with open(out_file, 'wb') as f:
+            pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
         graphlist.append(out_file)
     return graphlist
 
 
-@pytest.mark.skipif(
-    have_cv, reason="tests for import error, cviewer available")
+@pytest.mark.skipif(have_cv, reason="tests for import error, cviewer available")
 def test_importerror(creating_graphs, tmpdir):
     tmpdir.chdir()
     graphlist = creating_graphs
@@ -39,7 +39,7 @@ def test_importerror(creating_graphs, tmpdir):
     nbs.inputs.in_group2 = group2
     nbs.inputs.edge_key = "weight"
 
-    with pytest.raises(ImportError) as e:
+    with pytest.raises(ImportError):
         nbs.run()
 
 

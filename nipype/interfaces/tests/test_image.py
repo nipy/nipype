@@ -4,16 +4,15 @@ import numpy as np
 import nibabel as nb
 import pytest
 
+from looseversion import LooseVersion
 from nibabel.orientations import axcodes2ornt, ornt_transform
 
 from ..image import _as_reoriented_backport, _orientations
-from ... import LooseVersion
 
-nibabel22 = LooseVersion(nb.__version__) >= LooseVersion('2.2.0')
+nibabel24 = LooseVersion(nb.__version__) >= LooseVersion("2.4.0")
 
 
-@pytest.mark.skipif(not nibabel22,
-                    reason="Old nibabel - can't directly compare")
+@pytest.mark.skipif(not nibabel24, reason="Old nibabel - can't directly compare")
 def test_reorientation_backport():
     pixdims = ((1, 1, 1), (2, 2, 3))
     data = np.random.normal(size=(17, 18, 19, 2))
@@ -28,7 +27,7 @@ def test_reorientation_backport():
 
         # Create image
         img = nb.Nifti1Image(data, affine)
-        dim_info = {'freq': 0, 'phase': 1, 'slice': 2}
+        dim_info = {"freq": 0, "phase": 1, "slice": 2}
         img.header.set_dim_info(**dim_info)
 
         # Find a random, non-identity transform
@@ -51,14 +50,17 @@ def test_reorientation_backport():
 
         # Reorientation changes affine and data array
         assert not np.allclose(img.affine, reoriented_a.affine)
-        assert not (flips_only and
-                    np.allclose(img.get_data(), reoriented_a.get_data()))
+        assert not (
+            flips_only and np.allclose(img.get_fdata(), reoriented_a.get_fdata())
+        )
         # Dimension info changes iff axes are reordered
-        assert flips_only == np.array_equal(img.header.get_dim_info(),
-                                            reoriented_a.header.get_dim_info())
+        assert flips_only == np.array_equal(
+            img.header.get_dim_info(), reoriented_a.header.get_dim_info()
+        )
 
         # Both approaches produce equivalent images
         assert np.allclose(reoriented_a.affine, reoriented_b.affine)
-        assert np.array_equal(reoriented_a.get_data(), reoriented_b.get_data())
-        assert np.array_equal(reoriented_a.header.get_dim_info(),
-                              reoriented_b.header.get_dim_info())
+        assert np.array_equal(reoriented_a.get_fdata(), reoriented_b.get_fdata())
+        assert np.array_equal(
+            reoriented_a.header.get_dim_info(), reoriented_b.header.get_dim_info()
+        )

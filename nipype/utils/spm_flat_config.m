@@ -1,7 +1,7 @@
 function cfgstruct = spm_flat_config(print_names)
 % Get a flat spm_config structure, with option to print out names
 %
-% This calls spm_config() to get the the nested configuration
+% This calls spm_config() to get the nested configuration
 % structure from spm.  We use this to fetch documentation, the
 % flattened structure is much easier to search through.  If
 % print_names is true (value of 1) it will print out the configuration

@@ -1,29 +1,20 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """CSV Handling utilities
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import zip, range, str, open
-
-from future import standard_library
-standard_library.install_aliases()
-
-from ..base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                    BaseInterface)
+import csv
+from ..base import traits, TraitedSpec, DynamicTraitedSpec, File, BaseInterface
 from ..io import add_traits
 
 
 class CSVReaderInputSpec(DynamicTraitedSpec, TraitedSpec):
     in_file = File(
-        exists=True,
-        mandatory=True,
-        desc='Input comma-seperated value (CSV) file')
+        exists=True, mandatory=True, desc="Input comma-seperated value (CSV) file"
+    )
     header = traits.Bool(
-        False,
-        usedefault=True,
-        desc='True if the first line is a column header')
+        False, usedefault=True, desc="True if the first line is a column header"
+    )
+    delimiter = traits.String(",", usedefault=True, desc="Delimiter to use.")
 
 
 class CSVReader(BaseInterface):
@@ -53,6 +44,7 @@ class CSVReader(BaseInterface):
     True
 
     """
+
     input_spec = CSVReaderInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
@@ -62,19 +54,15 @@ class CSVReader(BaseInterface):
             outputs[key].append(value)
         return outputs
 
-    def _parse_line(self, line):
-        line = line.replace('\n', '')
-        entry = [x.strip() for x in line.split(',')]
-        return entry
-
     def _get_outfields(self):
-        with open(self.inputs.in_file, 'r') as fid:
-            entry = self._parse_line(fid.readline())
+        with open(self.inputs.in_file) as fid:
+            reader = csv.reader(fid, delimiter=self.inputs.delimiter)
+
+            entry = next(reader)
             if self.inputs.header:
                 self._outfields = tuple(entry)
             else:
-                self._outfields = tuple(
-                    ['column_' + str(x) for x in range(len(entry))])
+                self._outfields = tuple("column_" + str(x) for x in range(len(entry)))
         return self._outfields
 
     def _run_interface(self, runtime):
@@ -82,7 +70,7 @@ class CSVReader(BaseInterface):
         return runtime
 
     def _outputs(self):
-        return self._add_output_traits(super(CSVReader, self)._outputs())
+        return self._add_output_traits(super()._outputs())
 
     def _add_output_traits(self, base):
         return add_traits(base, self._get_outfields())
@@ -92,11 +80,11 @@ class CSVReader(BaseInterface):
         isHeader = True
         for key in self._outfields:
             outputs[key] = []  # initialize outfields
-        with open(self.inputs.in_file, 'r') as fid:
-            for line in fid.readlines():
+        with open(self.inputs.in_file) as fid:
+            reader = csv.reader(fid, delimiter=self.inputs.delimiter)
+            for entry in reader:
                 if self.inputs.header and isHeader:  # skip header line
                     isHeader = False
                     continue
-                entry = self._parse_line(line)
                 outputs = self._append_entry(outputs, entry)
         return outputs

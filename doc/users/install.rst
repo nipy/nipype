@@ -16,7 +16,7 @@ image from Docker hub::
     docker pull nipype/nipype
 
 You may also build custom docker containers with specific versions of software
-using Neurodocker_ (see the `Neurodocker tutorial
+using NeuroDocker_ (see the `Neurodocker tutorial
 <https://miykael.github.io/nipype_tutorial/notebooks/introduction_neurodocker.html>`_).
 
 Using conda
@@ -50,18 +50,24 @@ use the following command::
 While `all` installs everything, one can also install select components as
 listed below::
 
-    'doc': ['Sphinx>=1.4', 'matplotlib', 'pydotplus', 'pydot>=1.2.3'],
-    'tests': ['pytest-cov', 'codecov'],
-    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
-    'profiler': ['psutil'],
+    'data': ['datalad'],
+    'doc': ['dipy', 'ipython', 'matplotlib', 'nbsphinx', 'sphinx-argparse',
+            'sphinx>=2.1.2', 'sphinxcontrib-apidoc'],
     'duecredit': ['duecredit'],
+    'nipy': ['nitime', 'nilearn', 'dipy', 'nipy', 'matplotlib'],
+    'profiler': ['psutil>=5.0'],
+    'pybids': ['pybids>=0.7.0'],
+    'specs': ['black'],
+    'ssh': ['paramiko'],
+    'tests': ['codecov', 'coverage<5', 'pytest', 'pytest-cov', 'pytest-env',
+              'pytest-timeout'],
     'xvfbwrapper': ['xvfbwrapper'],
 
 
 Debian and Ubuntu
 ~~~~~~~~~~~~~~~~~
 
-Add the `NeuroDebian <http://neuro.debian.org>`_ repository and install
+Add the NeuroDebian_ repository and install
 the ``python-nipype`` package using ``apt-get`` or your favorite package
 manager.
 
@@ -111,12 +117,12 @@ Interface Dependencies
 Nipype provides wrappers around many neuroimaging tools and contains some
 algorithms. These tools will need to be installed for Nipype to run. You can
 create containers with different versions of these tools installed using
-Neurodocker_ (see the :doc:`neurodocker`).
+NeuroDocker_.
 
 Installation for developers
 ---------------------------
 
-Developers should start `here <../devel/testing_nipype.html>`_.
+Developers should start `here <../devel/testing_nipype.rst>`_.
 
 Developers can also use this docker container: `docker pull nipype/nipype:master`
 

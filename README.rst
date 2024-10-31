@@ -77,6 +77,24 @@ Information specific to Nipype is located here::
 
     http://nipy.org/nipype
 
+Python 2 Statement
+------------------
+
+Python 2.7 reaches its end-of-life in January 2020, which means it will
+*no longer be maintained* by Python developers. `Many projects
+<https://python3statement.org/>`__ are removing support in advance of this
+deadline, which will make it increasingly untenable to try to support
+Python 2, even if we wanted to.
+
+The final series with 2.7 support is 1.3.x. If you have a package using
+Python 2 and are unable or unwilling to upgrade to Python 3, then you
+should use the following `dependency
+<https://www.python.org/dev/peps/pep-0440/#version-specifiers>`__ for
+Nipype::
+
+    nipype<1.4
+
+Bug fixes will be accepted against the ``maint/1.3.x`` branch.
 
 Support and Communication
 -------------------------
@@ -91,7 +109,7 @@ To participate in the Nipype development related discussions please use the foll
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
-You can even hangout with the Nipype developers in their 
+You can even hangout with the Nipype developers in their
 `Gitter <https://gitter.im/nipy/nipype>`_ channel or in the BrainHack `Slack <https://brainhack.slack.com/messages/C1FR76RAL>`_ channel. (Click `here <https://brainhack-slack-invite.herokuapp.com>`_ to join the Slack workspace.)
 
 

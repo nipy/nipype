@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The spm module provides basic functions for interfacing with SPM  tools.
@@ -14,10 +13,6 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import range, object, str, bytes
-
 # Standard library imports
 import os
 from copy import deepcopy
@@ -28,15 +23,25 @@ import numpy as np
 
 # Local imports
 from ... import logging
-from ...utils import spm_docs as sd, NUMPY_MMAP
-from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined, ImageFile,
-                    PackageInfo)
+from ...utils import spm_docs as sd
+from ..base import (
+    BaseInterface,
+    traits,
+    Tuple,
+    isdefined,
+    InputMultiPath,
+    BaseInterfaceInputSpec,
+    Directory,
+    Undefined,
+    ImageFile,
+    PackageInfo,
+)
+from ..base.traits_extension import NoDefaultSpecified
 from ..matlab import MatlabCommand
-from ...external.due import due, Doi, BibTeX
+from ...external.due import BibTeX
 
-__docformat__ = 'restructuredtext'
-logger = logging.getLogger('nipype.interface')
+__docformat__ = "restructuredtext"
+logger = logging.getLogger("nipype.interface")
 
 
 def func_is_3d(in_file):
@@ -45,12 +50,9 @@ def func_is_3d(in_file):
     if isinstance(in_file, list):
         return func_is_3d(in_file[0])
     else:
-        img = load(in_file, mmap=NUMPY_MMAP)
+        img = load(in_file)
         shape = img.shape
-        if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
-            return True
-        else:
-            return False
+        return len(shape) == 3 or (len(shape) == 4 and shape[3] == 1)
 
 
 def get_first_3dfile(in_files):
@@ -69,18 +71,18 @@ def scans_for_fname(fname):
 
     """
     if isinstance(fname, list):
-        scans = np.zeros((len(fname), ), dtype=object)
+        scans = np.zeros((len(fname),), dtype=object)
         for sno, f in enumerate(fname):
-            scans[sno] = '%s,1' % f
+            scans[sno] = "%s,1" % f
         return scans
-    img = load(fname, mmap=NUMPY_MMAP)
+    img = load(fname)
     if len(img.shape) == 3:
-        return np.array(('%s,1' % fname, ), dtype=object)
+        return np.array(("%s,1" % fname,), dtype=object)
     else:
         n_scans = img.shape[3]
-        scans = np.zeros((n_scans, ), dtype=object)
+        scans = np.zeros((n_scans,), dtype=object)
         for sno in range(n_scans):
-            scans[sno] = '%s,%d' % (fname, sno + 1)
+            scans[sno] = "%s,%d" % (fname, sno + 1)
         return scans
 
 
@@ -101,7 +103,7 @@ def scans_for_fnames(fnames, keep4d=False, separate_sessions=False):
         if func_is_3d(fnames[0]):
             fnames = [fnames]
     if separate_sessions or keep4d:
-        flist = np.zeros((len(fnames), ), dtype=object)
+        flist = np.zeros((len(fnames),), dtype=object)
     for i, f in enumerate(fnames):
         if separate_sessions:
             if keep4d:
@@ -131,6 +133,7 @@ class Info(PackageInfo):
     to any call in the Info class to maintain memoization. Otherwise, it will
     default to the parameters in the `getinfo` function below.
     """
+
     _path = None
     _name = None
     _command = None
@@ -182,19 +185,21 @@ class Info(PackageInfo):
             returns None of path not found
         """
 
-        use_mcr = use_mcr or 'FORCE_SPMMCR' in os.environ
-        matlab_cmd = matlab_cmd or ((use_mcr and os.getenv('SPMMCRCMD'))
-                      or os.getenv('MATLABCMD', 'matlab -nodesktop -nosplash'))
+        use_mcr = use_mcr or "FORCE_SPMMCR" in os.environ
+        matlab_cmd = matlab_cmd or (
+            (use_mcr and os.getenv("SPMMCRCMD"))
+            or os.getenv("MATLABCMD", "matlab -nodesktop -nosplash")
+        )
 
-        if klass._name and klass._path and klass._version and \
-                klass._command == matlab_cmd and klass._paths == paths:
-
-            return {
-                'name': klass._name,
-                'path': klass._path,
-                'release': klass._version
-            }
-        logger.debug('matlab command or path has changed. recomputing version.')
+        if (
+            klass._name
+            and klass._path
+            and klass._version
+            and klass._command == matlab_cmd
+            and klass._paths == paths
+        ):
+            return {"name": klass._name, "path": klass._path, "release": klass._version}
+        logger.debug("matlab command or path has changed. recomputing version.")
         mlab = MatlabCommand(matlab_cmd=matlab_cmd, resource_monitor=False)
         mlab.inputs.mfile = False
         if paths:
@@ -216,10 +221,10 @@ exit;
         """
         try:
             out = mlab.run()
-        except (IOError, RuntimeError) as e:
+        except (OSError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
-            logger.debug('%s', e)
+            logger.debug("%s", e)
             klass._version = None
             klass._path = None
             klass._name = None
@@ -229,40 +234,37 @@ exit;
 
         out = sd._strip_header(out.runtime.stdout)
         out_dict = {}
-        for part in out.split('|'):
-            key, val = part.split(':')
+        for part in out.split("|"):
+            key, val = part.split(":")
             out_dict[key] = val
 
-        klass._version = out_dict['release']
-        klass._path = out_dict['path']
-        klass._name = out_dict['name']
+        klass._version = out_dict["release"]
+        klass._path = out_dict["path"]
+        klass._name = out_dict["name"]
         klass._command = matlab_cmd
         klass._paths = paths
         return out_dict
 
 
 def no_spm():
-    """ Checks if SPM is NOT installed
+    """Checks if SPM is NOT installed
     used with pytest.mark.skipif decorator to skip tests
     that will fail if spm is not installed"""
 
-    if 'NIPYPE_NO_MATLAB' in os.environ or Info.version() is None:
-        return True
-    else:
-        return False
+    return "NIPYPE_NO_MATLAB" in os.environ or Info.version() is None
 
 
 class SPMCommandInputSpec(BaseInterfaceInputSpec):
-    matlab_cmd = traits.Str(desc='matlab command to use')
-    paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
-    mfile = traits.Bool(True, desc='Run m-code using m-file', usedefault=True)
-    use_mcr = traits.Bool(desc='Run m-code using SPM MCR')
+    matlab_cmd = traits.Str(desc="matlab command to use")
+    paths = InputMultiPath(Directory(), desc="Paths to add to matlabpath")
+    mfile = traits.Bool(True, desc="Run m-code using m-file", usedefault=True)
+    use_mcr = traits.Bool(desc="Run m-code using SPM MCR")
     use_v8struct = traits.Bool(
         True,
-        min_ver='8',
+        min_ver="8",
         usedefault=True,
-        desc=('Generate SPM8 and higher '
-              'compatible jobs'))
+        desc=("Generate SPM8 and higher compatible jobs"),
+    )
 
 
 class SPMCommand(BaseInterface):
@@ -270,36 +272,38 @@ class SPMCommand(BaseInterface):
 
     WARNING: Pseudo prototype class, meant to be subclassed
     """
-    input_spec = SPMCommandInputSpec
-    _additional_metadata = ['field']
 
-    _jobtype = 'basetype'
-    _jobname = 'basename'
+    input_spec = SPMCommandInputSpec
+    _additional_metadata = ["field"]
+
+    _jobtype = "basetype"
+    _jobname = "basename"
 
     _matlab_cmd = None
     _paths = None
     _use_mcr = None
 
-    references_ = [{
-        'entry':
-        BibTeX(
-            "@book{FrackowiakFristonFrithDolanMazziotta1997,"
-            "author={R.S.J. Frackowiak, K.J. Friston, C.D. Frith, R.J. Dolan, and J.C. Mazziotta},"
-            "title={Human Brain Function},"
-            "publisher={Academic Press USA},"
-            "year={1997},"
-            "}"),
-        'description':
-        'The fundamental text on Statistical Parametric Mapping (SPM)',
-        # 'path': "nipype.interfaces.spm",
-        'tags': ['implementation'],
-    }]
+    _references = [
+        {
+            "entry": BibTeX(
+                "@book{FrackowiakFristonFrithDolanMazziotta1997,"
+                "author={R.S.J. Frackowiak, K.J. Friston, C.D. Frith, R.J. Dolan, and J.C. Mazziotta},"
+                "title={Human Brain Function},"
+                "publisher={Academic Press USA},"
+                "year={1997},"
+                "}"
+            ),
+            "description": "The fundamental text on Statistical Parametric Mapping (SPM)",
+            # 'path': "nipype.interfaces.spm",
+            "tags": ["implementation"],
+        }
+    ]
 
     def __init__(self, **inputs):
-        super(SPMCommand, self).__init__(**inputs)
+        super().__init__(**inputs)
         self.inputs.on_trait_change(
-            self._matlab_cmd_update,
-            ['matlab_cmd', 'mfile', 'paths', 'use_mcr'])
+            self._matlab_cmd_update, ["matlab_cmd", "mfile", "paths", "use_mcr"]
+        )
         self._find_mlab_cmd_defaults()
         self._check_mlab_inputs()
         self._matlab_cmd_update()
@@ -309,19 +313,16 @@ class SPMCommand(BaseInterface):
         cls._matlab_cmd = matlab_cmd
         cls._paths = paths
         cls._use_mcr = use_mcr
-        info_dict = Info.getinfo(
-            matlab_cmd=matlab_cmd,
-            paths=paths,
-            use_mcr=use_mcr)
+        info_dict = Info.getinfo(matlab_cmd=matlab_cmd, paths=paths, use_mcr=use_mcr)
 
     def _find_mlab_cmd_defaults(self):
         # check if the user has set environment variables to enforce
         # the standalone (MCR) version of SPM
-        if self._use_mcr or 'FORCE_SPMMCR' in os.environ:
+        if self._use_mcr or "FORCE_SPMMCR" in os.environ:
             self._use_mcr = True
             if self._matlab_cmd is None:
                 try:
-                    self._matlab_cmd = os.environ['SPMMCRCMD']
+                    self._matlab_cmd = os.environ["SPMMCRCMD"]
                 except KeyError:
                     pass
 
@@ -333,9 +334,11 @@ class SPMCommand(BaseInterface):
             matlab_cmd=self.inputs.matlab_cmd,
             mfile=self.inputs.mfile,
             paths=self.inputs.paths,
-            resource_monitor=False)
-        self.mlab.inputs.script_file = 'pyscript_%s.m' % \
-            self.__class__.__name__.split('.')[-1].lower()
+            resource_monitor=False,
+        )
+        self.mlab.inputs.script_file = (
+            "pyscript_%s.m" % self.__class__.__name__.split(".")[-1].lower()
+        )
         if isdefined(self.inputs.use_mcr) and self.inputs.use_mcr:
             self.mlab.inputs.nodesktop = Undefined
             self.mlab.inputs.nosplash = Undefined
@@ -348,10 +351,12 @@ class SPMCommand(BaseInterface):
         info_dict = Info.getinfo(
             matlab_cmd=self.inputs.matlab_cmd,
             paths=self.inputs.paths,
-            use_mcr=self.inputs.use_mcr)
+            use_mcr=self.inputs.use_mcr,
+        )
         if info_dict:
-            return '%s.%s' % (info_dict['name'].split('SPM')[-1],
-                              info_dict['release'])
+            return "{}.{}".format(
+                info_dict["name"].split("SPM")[-1], info_dict["release"]
+            )
 
     @property
     def jobtype(self):
@@ -372,11 +377,12 @@ class SPMCommand(BaseInterface):
     def _run_interface(self, runtime):
         """Executes the SPM function using MATLAB."""
         self.mlab.inputs.script = self._make_matlab_command(
-            deepcopy(self._parse_inputs()))
+            deepcopy(self._parse_inputs())
+        )
         results = self.mlab.run()
         runtime.returncode = results.runtime.returncode
         if self.mlab.inputs.uses_mcr:
-            if 'Skipped' in results.runtime.stdout:
+            if "Skipped" in results.runtime.stdout:
                 self.raise_exception(runtime)
         runtime.stdout = results.runtime.stdout
         runtime.stderr = results.runtime.stderr
@@ -392,7 +398,7 @@ class SPMCommand(BaseInterface):
         """Convert input to appropriate format for SPM."""
         if spec.is_trait_type(traits.Bool):
             return int(val)
-        elif spec.is_trait_type(traits.Tuple):
+        elif spec.is_trait_type(traits.BaseTuple):
             return list(val)
         else:
             return val
@@ -407,8 +413,8 @@ class SPMCommand(BaseInterface):
             if not isdefined(value):
                 continue
             field = spec.field
-            if '.' in field:
-                fields = field.split('.')
+            if "." in field:
+                fields = field.split(".")
                 dictref = spmdict
                 for f in fields[:-1]:
                     if f not in list(dictref.keys()):
@@ -446,9 +452,9 @@ class SPMCommand(BaseInterface):
 
             return [newdict]
         except TypeError:
-            print('Requires dict input')
+            print("Requires dict input")
 
-    def _generate_job(self, prefix='', contents=None):
+    def _generate_job(self, prefix="", contents=None):
         """Recursive function to generate spm job specification as a string
 
         Parameters
@@ -461,7 +467,7 @@ class SPMCommand(BaseInterface):
             matlab commands.
 
         """
-        jobstring = ''
+        jobstring = ""
         if contents is None:
             return jobstring
         if isinstance(contents, list):
@@ -474,7 +480,7 @@ class SPMCommand(BaseInterface):
             return jobstring
         if isinstance(contents, dict):
             for key, value in list(contents.items()):
-                newprefix = "%s.%s" % (prefix, key)
+                newprefix = f"{prefix}.{key}"
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if isinstance(contents, np.ndarray):
@@ -485,22 +491,20 @@ class SPMCommand(BaseInterface):
                     jobstring += "{...\n"
                 for i, val in enumerate(contents):
                     if isinstance(val, np.ndarray):
-                        jobstring += self._generate_job(
-                            prefix=None, contents=val)
+                        jobstring += self._generate_job(prefix=None, contents=val)
                     elif isinstance(val, list):
                         items_format = []
                         for el in val:
                             items_format += [
-                                '{}' if not isinstance(el, (str, bytes)) else
-                                '\'{}\''
+                                "{}" if not isinstance(el, (str, bytes)) else "'{}'"
                             ]
-                        val_format = ', '.join(items_format).format
-                        jobstring += '[{}];...\n'.format(val_format(*val))
+                        val_format = ", ".join(items_format).format
+                        jobstring += f"[{val_format(*val)}];...\n"
                     elif isinstance(val, (str, bytes)):
-                        jobstring += '\'{}\';...\n'.format(val)
+                        jobstring += f"'{val}';...\n"
                     else:
-                        jobstring += '%s;...\n' % str(val)
-                jobstring += '};\n'
+                        jobstring += "%s;...\n" % str(val)
+                jobstring += "};\n"
             else:
                 for i, val in enumerate(contents):
                     for field in val.dtype.fields:
@@ -511,9 +515,9 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix, val[field])
             return jobstring
         if isinstance(contents, (str, bytes)):
-            jobstring += "%s = '%s';\n" % (prefix, contents)
+            jobstring += f"{prefix} = '{contents}';\n"
             return jobstring
-        jobstring += "%s = %s;\n" % (prefix, str(contents))
+        jobstring += f"{prefix} = {contents};\n"
         return jobstring
 
     def _make_matlab_command(self, contents, postscript=None):
@@ -551,36 +555,45 @@ class SPMCommand(BaseInterface):
         end\n
         """
         if self.mlab.inputs.mfile:
-            if (isdefined(self.inputs.use_v8struct)
-                    and self.inputs.use_v8struct):
-                mscript += self._generate_job('jobs{1}.spm.%s.%s' %
-                                              (self.jobtype,
-                                               self.jobname), contents[0])
+            if isdefined(self.inputs.use_v8struct) and self.inputs.use_v8struct:
+                mscript += self._generate_job(
+                    f"jobs{{1}}.spm.{self.jobtype}.{self.jobname}", contents[0]
+                )
             else:
                 if self.jobname in [
-                        'st', 'smooth', 'preproc', 'preproc8', 'fmri_spec',
-                        'fmri_est', 'factorial_design', 'defs'
+                    "st",
+                    "smooth",
+                    "preproc",
+                    "preproc8",
+                    "fmri_spec",
+                    "fmri_est",
+                    "factorial_design",
+                    "defs",
                 ]:
                     # parentheses
-                    mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
-                                                  (self.jobtype,
-                                                   self.jobname), contents[0])
+                    mscript += self._generate_job(
+                        f"jobs{{1}}.{self.jobtype}{{1}}.{self.jobname}(1)",
+                        contents[0],
+                    )
                 else:
                     # curly brackets
-                    mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' %
-                                                  (self.jobtype,
-                                                   self.jobname), contents[0])
+                    mscript += self._generate_job(
+                        f"jobs{{1}}.{self.jobtype}{{1}}.{self.jobname}{{1}}",
+                        contents[0],
+                    )
         else:
             from scipy.io import savemat
+
             jobdef = {
-                'jobs': [{
-                    self.jobtype: [{
-                        self.jobname:
-                        self.reformat_dict_for_savemat(contents[0])
-                    }]
-                }]
+                "jobs": [
+                    {
+                        self.jobtype: [
+                            {self.jobname: self.reformat_dict_for_savemat(contents[0])}
+                        ]
+                    }
+                ]
             }
-            savemat(os.path.join(cwd, 'pyjobs_%s.mat' % self.jobname), jobdef)
+            savemat(os.path.join(cwd, "pyjobs_%s.mat" % self.jobname), jobdef)
             mscript += "load pyjobs_%s;\n\n" % self.jobname
         mscript += """
         spm_jobman(\'run\', jobs);\n
@@ -597,30 +610,17 @@ class SPMCommand(BaseInterface):
 
 
 class ImageFileSPM(ImageFile):
-    """
-    Defines an ImageFile trait specific to SPM interfaces.
-    """
+    """Defines a trait whose value must be a NIfTI file."""
 
-    def __init__(self,
-                 value='',
-                 filter=None,
-                 auto_set=False,
-                 entries=0,
-                 exists=False,
-                 types=['nifti1', 'nifti2'],
-                 allow_compressed=False,
-                 **metadata):
-        """ Trait handles neuroimaging files.
-
-        Parameters
-        ----------
-        types : list
-            Strings of file format types accepted
-        compressed : boolean
-            Indicates whether the file format can compressed
-        """
-        self.types = types
-        self.allow_compressed = allow_compressed
-        super(ImageFileSPM,
-              self).__init__(value, filter, auto_set, entries, exists, types,
-                             allow_compressed, **metadata)
+    def __init__(
+        self, value=NoDefaultSpecified, exists=False, resolve=False, **metadata
+    ):
+        """Create an ImageFileSPM trait."""
+        super().__init__(
+            value=value,
+            exists=exists,
+            types=["nifti1", "nifti2"],
+            allow_compressed=False,
+            resolve=resolve,
+            **metadata,
+        )

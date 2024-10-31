@@ -1,8 +1,6 @@
 #!python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from io import open
-
 import click
 
 from .instance import list_interfaces
@@ -27,13 +25,14 @@ def cli():
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('logdir', type=ExistingDirPath, callback=check_not_none)
+@click.argument("logdir", type=ExistingDirPath, callback=check_not_none)
 @click.option(
-    '-r',
-    '--regex',
+    "-r",
+    "--regex",
     type=RegularExpression(),
     callback=check_not_none,
-    help='Regular expression to be searched in each traceback.')
+    help="Regular expression to be searched in each traceback.",
+)
 def search(logdir, regex):
     """Search for tracebacks content.
 
@@ -54,26 +53,27 @@ def search(logdir, regex):
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('crashfile', type=ExistingFilePath, callback=check_not_none)
+@click.argument("crashfile", type=ExistingFilePath, callback=check_not_none)
 @click.option(
-    '-r', '--rerun', is_flag=True, flag_value=True, help='Rerun crashed node.')
+    "-r", "--rerun", is_flag=True, flag_value=True, help="Rerun crashed node."
+)
 @click.option(
-    '-d',
-    '--debug',
+    "-d",
+    "--debug",
     is_flag=True,
     flag_value=True,
-    help='Enable Python debugger when re-executing.')
+    help="Enable Python debugger when re-executing.",
+)
 @click.option(
-    '-i',
-    '--ipydebug',
+    "-i",
+    "--ipydebug",
     is_flag=True,
     flag_value=True,
-    help='Enable IPython debugger when re-executing.')
+    help="Enable IPython debugger when re-executing.",
+)
 @click.option(
-    '-w',
-    '--dir',
-    type=ExistingDirPath,
-    help='Directory where to run the node in.')
+    "-w", "--dir", type=ExistingDirPath, help="Directory where to run the node in."
+)
 def crash(crashfile, rerun, debug, ipydebug, dir):
     """Display Nipype crash files.
 
@@ -85,17 +85,19 @@ def crash(crashfile, rerun, debug, ipydebug, dir):
     """
     from .crash_files import display_crash_file
 
-    debug = 'ipython' if ipydebug else debug
-    if debug == 'ipython':
+    debug = "ipython" if ipydebug else debug
+    if debug == "ipython":
         import sys
         from IPython.core import ultratb
+
         sys.excepthook = ultratb.FormattedTB(
-            mode='Verbose', color_scheme='Linux', call_pdb=1)
+            mode="Verbose", color_scheme="Linux", call_pdb=1
+        )
     display_crash_file(crashfile, rerun, debug, dir)
 
 
 @cli.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('pklz_file', type=ExistingFilePath, callback=check_not_none)
+@click.argument("pklz_file", type=ExistingFilePath, callback=check_not_none)
 def show(pklz_file):
     """Print the content of Nipype node .pklz file.
 
@@ -110,20 +112,17 @@ def show(pklz_file):
 
 
 @cli.command(context_settings=UNKNOWN_OPTIONS)
-@click.argument(
-    'module', type=PythonModule(), required=False, callback=check_not_none)
-@click.argument('interface', type=str, required=False)
+@click.argument("module", type=PythonModule(), required=False, callback=check_not_none)
+@click.argument("interface", type=str, required=False)
 @click.option(
-    '--list',
+    "--list",
     is_flag=True,
     flag_value=True,
-    help='List the available Interfaces inside the given module.')
+    help="List the available Interfaces inside the given module.",
+)
 @click.option(
-    '-h',
-    '--help',
-    is_flag=True,
-    flag_value=True,
-    help='Show help message and exit.')
+    "-h", "--help", is_flag=True, flag_value=True, help="Show help message and exit."
+)
 @click.pass_context
 def run(ctx, module, interface, list, help):
     """Run a Nipype Interface.
@@ -144,18 +143,16 @@ def run(ctx, module, interface, list, help):
     # print the list of available interfaces for the given module
     elif (module_given and list) or (module_given and not interface):
         iface_names = list_interfaces(module)
-        click.echo('Available Interfaces:')
+        click.echo("Available Interfaces:")
         for if_name in iface_names:
-            click.echo('    {}'.format(if_name))
+            click.echo(f"    {if_name}")
 
     # check the interface
-    elif (module_given and interface):
+    elif module_given and interface:
         # create the argument parser
-        description = "Run {}".format(interface)
-        prog = " ".join(
-            [ctx.command_path, module.__name__, interface] + ctx.args)
-        iface_parser = argparse.ArgumentParser(
-            description=description, prog=prog)
+        description = f"Run {interface}"
+        prog = " ".join([ctx.command_path, module.__name__, interface] + ctx.args)
+        iface_parser = argparse.ArgumentParser(description=description, prog=prog)
 
         # instantiate the interface
         node = getattr(module, interface)()
@@ -166,8 +163,10 @@ def run(ctx, module, interface, list, help):
             try:
                 iface_parser.print_help()
             except:
-                print('An error ocurred when trying to print the full'
-                      'command help, printing usage.')
+                print(
+                    "An error occurred when trying to print the full"
+                    "command help, printing usage."
+                )
             finally:
                 iface_parser.print_usage()
         else:
@@ -194,65 +193,94 @@ def convert():
     "--interface",
     type=str,
     required=True,
-    help="Name of the Nipype interface to export.")
+    help="Name of the Nipype interface to export.",
+)
 @click.option(
     "-m",
     "--module",
     type=PythonModule(),
     required=True,
     callback=check_not_none,
-    help="Module where the interface is defined.")
+    help="Module where the interface is defined.",
+)
 @click.option(
     "-o",
     "--output",
     type=UnexistingFilePath,
     required=True,
     callback=check_not_none,
-    help="JSON file name where the Boutiques descriptor will be "
-    "written.")
+    help="JSON file name where the Boutiques descriptor will be written.",
+)
 @click.option(
-    "-t",
-    "--ignored-template-inputs",
+    "-c",
+    "--container-image",
+    required=True,
+    type=str,
+    help="Name of the container image where the tool is installed.",
+)
+@click.option(
+    "-p",
+    "--container-type",
+    required=True,
+    type=str,
+    help="Type of container image (Docker or Singularity).",
+)
+@click.option(
+    "-x",
+    "--container-index",
+    type=str,
+    help="Optional index where the image is available (e.g. "
+    "http://index.docker.io).",
+)
+@click.option(
+    "-g",
+    "--ignore-inputs",
     type=str,
     multiple=True,
-    help="Interface inputs ignored in path template creations.")
+    help="List of interface inputs to not include in the descriptor.",
+)
 @click.option(
-    "-d",
-    "--docker-image",
+    "-v", "--verbose", is_flag=True, flag_value=True, help="Print information messages."
+)
+@click.option(
+    "-a", "--author", type=str, help="Author of the tool (required for publishing)."
+)
+@click.option(
+    "-t",
+    "--tags",
     type=str,
-    help="Name of the Docker image where the Nipype interface is "
-    "available.")
-@click.option(
-    "-r",
-    "--docker-index",
-    type=str,
-    help="Docker index where the Docker image is stored (e.g. "
-    "http://index.docker.io).")
-@click.option(
-    "-n",
-    "--ignore-template-numbers",
-    is_flag=True,
-    flag_value=True,
-    help="Ignore all numbers in path template creations.")
-@click.option(
-    "-v",
-    "--verbose",
-    is_flag=True,
-    flag_value=True,
-    help="Enable verbose output.")
-def boutiques(interface, module, output, ignored_template_inputs, docker_image,
-              docker_index, ignore_template_numbers, verbose):
+    help="JSON string containing tags to include in the descriptor,"
+    'e.g. "{"key1": "value1"}"',
+)
+def boutiques(
+    module,
+    interface,
+    container_image,
+    container_type,
+    output,
+    container_index,
+    verbose,
+    author,
+    ignore_inputs,
+    tags,
+):
     """Nipype to Boutiques exporter.
 
     See Boutiques specification at https://github.com/boutiques/schema.
     """
     from nipype.utils.nipype2boutiques import generate_boutiques_descriptor
 
-    # Generates JSON string
-    json_string = generate_boutiques_descriptor(
-        module, interface, ignored_template_inputs, docker_image, docker_index,
-        verbose, ignore_template_numbers)
-
-    # Writes JSON string to file
-    with open(output, 'w') as f:
-        f.write(json_string)
+    # Generates JSON string and saves it to file
+    generate_boutiques_descriptor(
+        module,
+        interface,
+        container_image,
+        container_type,
+        container_index,
+        verbose,
+        True,
+        output,
+        author,
+        ignore_inputs,
+        tags,
+    )

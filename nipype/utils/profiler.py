@@ -1,33 +1,49 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 Utilities to keep track of performance
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-
 import os
+import numpy as np
 import threading
 from time import time
+
 try:
     import psutil
-except ImportError as exc:
+except ImportError:
     psutil = None
 
-from builtins import open, range
+
 from .. import config, logging
 
-proflogger = logging.getLogger('nipype.utils')
+proflogger = logging.getLogger("nipype.utils")
 resource_monitor = config.resource_monitor
 
 # Init variables
 _MB = 1024.0**2
 
 
+class ResourceMonitorMock:
+    """A mock class to use when the monitor is disabled."""
+
+    @property
+    def fname(self):
+        """Get/set the internal filename"""
+        return None
+
+    def __init__(self, pid, freq=5, fname=None, python=True):
+        pass
+
+    def start(self):
+        pass
+
+    def stop(self):
+        return {}
+
+
 class ResourceMonitor(threading.Thread):
     """
-    A ``Thread`` to monitor a specific PID with a certain frequence
+    A ``Thread`` to monitor a specific PID with a certain frequency
     to a file
     """
 
@@ -36,13 +52,12 @@ class ResourceMonitor(threading.Thread):
         import psutil
 
         if freq < 0.2:
-            raise RuntimeError(
-                'Frequency (%0.2fs) cannot be lower than 0.2s' % freq)
+            raise RuntimeError("Frequency (%0.2fs) cannot be lower than 0.2s" % freq)
 
         if fname is None:
-            fname = '.proc-%d_time-%s_freq-%0.2f' % (pid, time(), freq)
+            fname = ".proc-%d_time-%s_freq-%0.2f" % (pid, time(), freq)
         self._fname = os.path.abspath(fname)
-        self._logfile = open(self._fname, 'w')
+        self._logfile = open(self._fname, "w")
         self._freq = freq
         self._python = python
 
@@ -60,13 +75,32 @@ class ResourceMonitor(threading.Thread):
         return self._fname
 
     def stop(self):
-        """Stop monitoring"""
+        """Stop monitoring."""
         if not self._event.is_set():
             self._event.set()
             self.join()
             self._sample()
             self._logfile.flush()
             self._logfile.close()
+
+        retval = {
+            "mem_peak_gb": None,
+            "cpu_percent": None,
+        }
+
+        # Read .prof file in and set runtime values
+        vals = np.loadtxt(self._fname, delimiter=",")
+        if vals.size:
+            vals = np.atleast_2d(vals)
+            retval["mem_peak_gb"] = vals[:, 2].max() / 1024
+            retval["cpu_percent"] = vals[:, 1].max()
+            retval["prof_dict"] = {
+                "time": vals[:, 0].tolist(),
+                "cpus": vals[:, 1].tolist(),
+                "rss_GiB": (vals[:, 2] / 1024).tolist(),
+                "vms_GiB": (vals[:, 3] / 1024).tolist(),
+            }
+        return retval
 
     def _sample(self, cpu_interval=None):
         cpu = 0.0
@@ -97,9 +131,7 @@ class ResourceMonitor(threading.Thread):
             except psutil.NoSuchProcess:
                 pass
 
-        print(
-            '%f,%f,%f,%f' % (time(), cpu, rss / _MB, vms / _MB),
-            file=self._logfile)
+        print(f"{time():f},{cpu:f},{rss / _MB:f},{vms / _MB:f}", file=self._logfile)
         self._logfile.flush()
 
     def run(self):
@@ -132,7 +164,7 @@ def log_nodes_cb(node, status):
         status info to the callback logger
     """
 
-    if status != 'end':
+    if status != "end":
         return
 
     # Import packages
@@ -140,23 +172,22 @@ def log_nodes_cb(node, status):
     import json
 
     status_dict = {
-        'name': node.name,
-        'id': node._id,
-        'start': getattr(node.result.runtime, 'startTime'),
-        'finish': getattr(node.result.runtime, 'endTime'),
-        'duration': getattr(node.result.runtime, 'duration'),
-        'runtime_threads': getattr(node.result.runtime, 'cpu_percent', 'N/A'),
-        'runtime_memory_gb': getattr(node.result.runtime, 'mem_peak_gb',
-                                     'N/A'),
-        'estimated_memory_gb': node.mem_gb,
-        'num_threads': node.n_procs,
+        "name": node.name,
+        "id": node._id,
+        "start": node.result.runtime.startTime,
+        "finish": node.result.runtime.endTime,
+        "duration": node.result.runtime.duration,
+        "runtime_threads": getattr(node.result.runtime, "cpu_percent", "N/A"),
+        "runtime_memory_gb": getattr(node.result.runtime, "mem_peak_gb", "N/A"),
+        "estimated_memory_gb": node.mem_gb,
+        "num_threads": node.n_procs,
     }
 
-    if status_dict['start'] is None or status_dict['finish'] is None:
-        status_dict['error'] = True
+    if status_dict["start"] is None or status_dict["finish"] is None:
+        status_dict["error"] = True
 
     # Dump string to log
-    logging.getLogger('callback').debug(json.dumps(status_dict))
+    logging.getLogger("callback").debug(json.dumps(status_dict))
 
 
 # Get total system RAM
@@ -170,19 +201,17 @@ def get_system_total_memory_gb():
     import sys
 
     # Get memory
-    if 'linux' in sys.platform:
-        with open('/proc/meminfo', 'r') as f_in:
+    if "linux" in sys.platform:
+        with open("/proc/meminfo") as f_in:
             meminfo_lines = f_in.readlines()
-            mem_total_line = [
-                line for line in meminfo_lines if 'MemTotal' in line
-            ][0]
+            mem_total_line = [line for line in meminfo_lines if "MemTotal" in line][0]
             mem_total = float(mem_total_line.split()[1])
             memory_gb = mem_total / (1024.0**2)
-    elif 'darwin' in sys.platform:
-        mem_str = os.popen('sysctl hw.memsize').read().strip().split(' ')[-1]
+    elif "darwin" in sys.platform:
+        mem_str = os.popen("sysctl hw.memsize").read().strip().split(" ")[-1]
         memory_gb = float(mem_str) / (1024.0**3)
     else:
-        err_msg = 'System platform: %s is not supported'
+        err_msg = "System platform: %s is not supported"
         raise Exception(err_msg)
 
     # Return memory
@@ -212,14 +241,16 @@ def get_max_resources_used(pid, mem_mb, num_threads, pyfunc=False):
     """
 
     if not resource_monitor:
-        raise RuntimeError('Attempted to measure resources with option '
-                           '"monitoring.enabled" set off.')
+        raise RuntimeError(
+            "Attempted to measure resources with option "
+            '"monitoring.enabled" set off.'
+        )
 
     try:
         mem_mb = max(mem_mb, _get_ram_mb(pid, pyfunc=pyfunc))
         num_threads = max(num_threads, _get_num_threads(pid))
     except Exception as exc:
-        proflogger.info('Could not get resources used by process.\n%s', exc)
+        proflogger.info("Could not get resources used by process.\n%s", exc)
 
     return mem_mb, num_threads
 
@@ -249,8 +280,7 @@ def _get_num_threads(pid):
         elif proc.num_threads() > 1:
             tprocs = [psutil.Process(thr.id) for thr in proc.threads()]
             alive_tprocs = [
-                tproc for tproc in tprocs
-                if tproc.status() == psutil.STATUS_RUNNING
+                tproc for tproc in tprocs if tproc.status() == psutil.STATUS_RUNNING
             ]
             num_threads = len(alive_tprocs)
         else:
@@ -267,11 +297,10 @@ def _get_num_threads(pid):
                 # If its not necessarily running, but still multi-threaded
                 elif child.num_threads() > 1:
                     # Cast each thread as a process and check for only running
-                    tprocs = [
-                        psutil.Process(thr.id) for thr in child.threads()
-                    ]
+                    tprocs = [psutil.Process(thr.id) for thr in child.threads()]
                     alive_tprocs = [
-                        tproc for tproc in tprocs
+                        tproc
+                        for tproc in tprocs
                         if tproc.status() == psutil.STATUS_RUNNING
                     ]
                     child_thr = len(alive_tprocs)
@@ -352,18 +381,18 @@ def _use_resources(n_procs, mem_gb):
     from nipype import logging
     from nipype.utils.profiler import _use_cpu
 
-    iflogger = logging.getLogger('nipype.interface')
+    iflogger = logging.getLogger("nipype.interface")
 
     # Getsize of one character string
-    BSIZE = sys.getsizeof('  ') - sys.getsizeof(' ')
-    BOFFSET = sys.getsizeof('')
+    BSIZE = sys.getsizeof("  ") - sys.getsizeof(" ")
+    BOFFSET = sys.getsizeof("")
     _GB = 1024.0**3
 
     def _use_gb_ram(mem_gb):
         """A test function to consume mem_gb GB of RAM"""
         num_bytes = int(mem_gb * _GB)
         # Eat mem_gb GB of memory for 1 second
-        gb_str = ' ' * ((num_bytes - BOFFSET) // BSIZE)
+        gb_str = " " * ((num_bytes - BOFFSET) // BSIZE)
         assert sys.getsizeof(gb_str) == num_bytes
         return gb_str
 
@@ -374,8 +403,9 @@ def _use_resources(n_procs, mem_gb):
     _use_cpu(5)
     mem_total = p.memory_info().rss / _GB
     del big_str
-    iflogger.info('[%d] Memory offset %0.2fGB, total %0.2fGB', os.getpid(),
-                  mem_offset, mem_total)
+    iflogger.info(
+        "[%d] Memory offset %0.2fGB, total %0.2fGB", os.getpid(), mem_offset, mem_total
+    )
 
     if n_procs > 1:
         pool = Pool(n_procs)

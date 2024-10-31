@@ -13,4 +13,3 @@ Contents:
    set_up_fork
    configure_git
    development_workflow
-

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The minc module provides classes for interfacing with the `MINC
@@ -8,32 +7,27 @@ This module was written to work with MINC version 2.2.00.
 Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
-from __future__ import (print_function, division, unicode_literals,
-                        absolute_import)
-from builtins import object
 import os
 import os.path
 import warnings
 
 from ..base import CommandLine
 
-warnings.filterwarnings('always', category=UserWarning)
+warnings.filterwarnings("always", category=UserWarning)
 
 
 def check_minc():
-    """Returns True if and only if MINC is installed.'
-    """
+    """Returns True if and only if MINC is installed.'"""
 
     return Info.version() is not None
 
 
 def no_minc():
-    """Returns True if and only if MINC is *not* installed.
-    """
+    """Returns True if and only if MINC is *not* installed."""
     return not check_minc()
 
 
-class Info(object):
+class Info:
     """Handle MINC version information.
 
     version refers to the version of MINC on the system
@@ -55,47 +49,41 @@ class Info(object):
         """
         try:
             clout = CommandLine(
-                command='mincinfo',
-                args='-version',
-                terminal_output='allatonce').run()
-        except IOError:
+                command="mincinfo", args="-version", terminal_output="allatonce"
+            ).run()
+        except OSError:
             return None
 
         out = clout.runtime.stdout
 
         def read_program_version(s):
-            if 'program' in s:
-                return s.split(':')[1].strip()
+            if "program" in s:
+                return s.split(":")[1].strip()
             return None
 
         def read_libminc_version(s):
-            if 'libminc' in s:
-                return s.split(':')[1].strip()
+            if "libminc" in s:
+                return s.split(":")[1].strip()
             return None
 
         def read_netcdf_version(s):
-            if 'netcdf' in s:
-                return ' '.join(s.split(':')[1:]).strip()
+            if "netcdf" in s:
+                return " ".join(s.split(":")[1:]).strip()
             return None
 
         def read_hdf5_version(s):
-            if 'HDF5' in s:
-                return s.split(':')[1].strip()
+            if "HDF5" in s:
+                return s.split(":")[1].strip()
             return None
 
-        versions = {
-            'minc': None,
-            'libminc': None,
-            'netcdf': None,
-            'hdf5': None,
-        }
+        versions = {"minc": None, "libminc": None, "netcdf": None, "hdf5": None}
 
-        for l in out.split('\n'):
-            for (name, f) in [
-                ('minc', read_program_version),
-                ('libminc', read_libminc_version),
-                ('netcdf', read_netcdf_version),
-                ('hdf5', read_hdf5_version),
+        for l in out.split("\n"):
+            for name, f in [
+                ("minc", read_program_version),
+                ("libminc", read_libminc_version),
+                ("netcdf", read_netcdf_version),
+                ("hdf5", read_hdf5_version),
             ]:
                 if f(l) is not None:
                     versions[name] = f(l)
@@ -129,11 +117,13 @@ def aggregate_filename(files, new_suffix):
 
     path = os.getcwd()
 
-    if common_prefix == '':
+    if common_prefix == "":
         return os.path.abspath(
             os.path.join(
-                path,
-                os.path.splitext(files[0])[0] + '_' + new_suffix + '.mnc'))
+                path, os.path.splitext(files[0])[0] + "_" + new_suffix + ".mnc"
+            )
+        )
     else:
         return os.path.abspath(
-            os.path.join(path, common_prefix + '_' + new_suffix + '.mnc'))
+            os.path.join(path, common_prefix + "_" + new_suffix + ".mnc")
+        )

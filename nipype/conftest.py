@@ -6,16 +6,18 @@ import numpy
 import py.path as pp
 
 NIPYPE_DATADIR = os.path.realpath(
-    os.path.join(os.path.dirname(__file__), 'testing/data'))
+    os.path.join(os.path.dirname(__file__), "testing/data")
+)
 temp_folder = mkdtemp()
-data_dir = os.path.join(temp_folder, 'data')
+data_dir = os.path.join(temp_folder, "data")
 shutil.copytree(NIPYPE_DATADIR, data_dir)
 
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
-    doctest_namespace['np'] = numpy
-    doctest_namespace['os'] = os
+    doctest_namespace["np"] = numpy
+    doctest_namespace["os"] = os
+    doctest_namespace["pytest"] = pytest
     doctest_namespace["datadir"] = data_dir
 
 
@@ -25,7 +27,6 @@ def _docdir(request):
     # Trigger ONLY for the doctests.
     doctest_plugin = request.config.pluginmanager.getplugin("doctest")
     if isinstance(request.node, doctest_plugin.DoctestItem):
-
         # Get the fixture dynamically by its name.
         tmpdir = pp.local(data_dir)
 

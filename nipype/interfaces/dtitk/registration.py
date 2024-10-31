@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """DTITK registration interfaces
@@ -24,30 +23,65 @@ Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable
 
 """
 
-from ..base import TraitedSpec, CommandLineInputSpec, traits, File, isdefined
+from ..base import TraitedSpec, CommandLineInputSpec, traits, Tuple, File, isdefined
 from ...utils.filemanip import fname_presuffix, split_filename
 from .base import CommandLineDtitk, DTITKRenameMixin
 import os
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
 
 class RigidInputSpec(CommandLineInputSpec):
-    fixed_file = File(desc="fixed tensor volume", exists=True,
-                      mandatory=True, position=0, argstr="%s", copyfile=False)
-    moving_file = File(desc="moving tensor volume", exists=True,
-                       mandatory=True, position=1, argstr="%s", copyfile=False)
-    similarity_metric = traits.Enum('EDS', 'GDS', 'DDS', 'NMI',
-                                    mandatory=True, position=2, argstr="%s",
-                                    desc="similarity metric", usedefault=True)
-    sampling_xyz = traits.Tuple((4, 4, 4), mandatory=True, position=3,
-                                argstr="%g %g %g", usedefault=True,
-                                desc="dist between samp points (mm) (x,y,z)")
-    ftol = traits.Float(mandatory=True, position=4, argstr="%g",
-                        desc="cost function tolerance", default_value=0.01,
-                        usedefault=True)
-    initialize_xfm = File(copyfile=True, desc="Initialize w/DTITK-FORMAT"
-                          "affine", position=5, argstr="%s", exists=True)
+    fixed_file = File(
+        desc="fixed tensor volume",
+        exists=True,
+        mandatory=True,
+        position=0,
+        argstr="%s",
+        copyfile=False,
+    )
+    moving_file = File(
+        desc="moving tensor volume",
+        exists=True,
+        mandatory=True,
+        position=1,
+        argstr="%s",
+        copyfile=False,
+    )
+    similarity_metric = traits.Enum(
+        "EDS",
+        "GDS",
+        "DDS",
+        "NMI",
+        mandatory=True,
+        position=2,
+        argstr="%s",
+        desc="similarity metric",
+        usedefault=True,
+    )
+    sampling_xyz = Tuple(
+        (4, 4, 4),
+        mandatory=True,
+        position=3,
+        argstr="%g %g %g",
+        usedefault=True,
+        desc="dist between samp points (mm) (x,y,z)",
+    )
+    ftol = traits.Float(
+        mandatory=True,
+        position=4,
+        argstr="%g",
+        desc="cost function tolerance",
+        default_value=0.01,
+        usedefault=True,
+    )
+    initialize_xfm = File(
+        copyfile=True,
+        desc="Initialize w/DTITK-FORMAT affine",
+        position=5,
+        argstr="%s",
+        exists=True,
+    )
 
 
 class RigidOutputSpec(TraitedSpec):
@@ -72,27 +106,27 @@ class Rigid(CommandLineDtitk):
     'dti_rigid_reg im1.nii im2.nii EDS 4 4 4 0.01'
     >>> node.run() # doctest: +SKIP
     """
+
     input_spec = RigidInputSpec
     output_spec = RigidOutputSpec
-    _cmd = 'dti_rigid_reg'
+    _cmd = "dti_rigid_reg"
 
-    '''def _format_arg(self, name, spec, value):
+    """def _format_arg(self, name, spec, value):
         if name == 'initialize_xfm':
             value = 1
-        return super(Rigid, self)._format_arg(name, spec, value)'''
+        return super(Rigid, self)._format_arg(name, spec, value)"""
 
     def _run_interface(self, runtime):
-        runtime = super(Rigid, self)._run_interface(runtime)
-        if '''.aff doesn't exist or can't be opened''' in runtime.stderr:
+        runtime = super()._run_interface(runtime)
+        if """.aff doesn't exist or can't be opened""" in runtime.stderr:
             self.raise_exception(runtime)
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         moving = self.inputs.moving_file
-        outputs['out_file_xfm'] = fname_presuffix(moving, suffix='.aff',
-                                                  use_ext=False)
-        outputs['out_file'] = fname_presuffix(moving, suffix='_aff')
+        outputs["out_file_xfm"] = fname_presuffix(moving, suffix=".aff", use_ext=False)
+        outputs["out_file"] = fname_presuffix(moving, suffix="_aff")
         return outputs
 
 
@@ -114,24 +148,44 @@ class Affine(Rigid):
     'dti_affine_reg im1.nii im2.nii EDS 4 4 4 0.01 im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
-    _cmd = 'dti_affine_reg'
+
+    _cmd = "dti_affine_reg"
 
 
 class DiffeoInputSpec(CommandLineInputSpec):
-    fixed_file = File(desc="fixed tensor volume",
-                      exists=True, position=0, argstr="%s")
-    moving_file = File(desc="moving tensor volume",
-                       exists=True, position=1, argstr="%s", copyfile=False)
-    mask_file = File(desc="mask", exists=True,  position=2, argstr="%s")
-    legacy = traits.Enum(1, desc="legacy parameter; always set to 1",
-                         usedefault=True, mandatory=True,
-                         position=3, argstr="%d")
-    n_iters = traits.Int(6, desc="number of iterations",
-                         mandatory=True,
-                         position=4, argstr="%d", usedefault=True)
-    ftol = traits.Float(0.002, desc="iteration for the optimization to stop",
-                        mandatory=True, position=5, argstr="%g",
-                        usedefault=True)
+    fixed_file = File(desc="fixed tensor volume", exists=True, position=0, argstr="%s")
+    moving_file = File(
+        desc="moving tensor volume",
+        exists=True,
+        position=1,
+        argstr="%s",
+        copyfile=False,
+    )
+    mask_file = File(desc="mask", exists=True, position=2, argstr="%s")
+    legacy = traits.Enum(
+        1,
+        desc="legacy parameter; always set to 1",
+        usedefault=True,
+        mandatory=True,
+        position=3,
+        argstr="%d",
+    )
+    n_iters = traits.Int(
+        6,
+        desc="number of iterations",
+        mandatory=True,
+        position=4,
+        argstr="%d",
+        usedefault=True,
+    )
+    ftol = traits.Float(
+        0.002,
+        desc="iteration for the optimization to stop",
+        mandatory=True,
+        position=5,
+        argstr="%g",
+        usedefault=True,
+    )
 
 
 class DiffeoOutputSpec(TraitedSpec):
@@ -157,25 +211,27 @@ class Diffeo(CommandLineDtitk):
     'dti_diffeomorphic_reg im1.nii im2.nii mask.nii 1 6 0.002'
     >>> node.run() # doctest: +SKIP
     """
+
     input_spec = DiffeoInputSpec
     output_spec = DiffeoOutputSpec
-    _cmd = 'dti_diffeomorphic_reg'
+    _cmd = "dti_diffeomorphic_reg"
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         moving = self.inputs.moving_file
-        outputs['out_file_xfm'] = fname_presuffix(moving, suffix='_diffeo.df')
-        outputs['out_file'] = fname_presuffix(moving, suffix='_diffeo')
+        outputs["out_file_xfm"] = fname_presuffix(moving, suffix="_diffeo.df")
+        outputs["out_file"] = fname_presuffix(moving, suffix="_diffeo")
         return outputs
 
 
 class ComposeXfmInputSpec(CommandLineInputSpec):
-    in_df = File(desc='diffeomorphic warp file', exists=True,
-                 argstr="-df %s", mandatory=True)
-    in_aff = File(desc='affine transform file', exists=True,
-                  argstr="-aff %s", mandatory=True)
-    out_file = File(desc='output path',
-                    argstr="-out %s",  genfile=True)
+    in_df = File(
+        desc="diffeomorphic warp file", exists=True, argstr="-df %s", mandatory=True
+    )
+    in_aff = File(
+        desc="affine transform file", exists=True, argstr="-aff %s", mandatory=True
+    )
+    out_file = File(desc="output path", argstr="-out %s", genfile=True)
 
 
 class ComposeXfmOutputSpec(TraitedSpec):
@@ -198,60 +254,89 @@ class ComposeXfm(CommandLineDtitk):
      im_warp_affdf.df.nii'
     >>> node.run() # doctest: +SKIP
     """
+
     input_spec = ComposeXfmInputSpec
     output_spec = ComposeXfmOutputSpec
-    _cmd = 'dfRightComposeAffine'
+    _cmd = "dfRightComposeAffine"
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_file = self.inputs.out_file
         if not isdefined(out_file):
-            out_file = self._gen_filename('out_file')
-        outputs['out_file'] = os.path.abspath(out_file)
+            out_file = self._gen_filename("out_file")
+        outputs["out_file"] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        if name != 'out_file':
+        if name != "out_file":
             return
         path, base, ext = split_filename(self.inputs.in_df)
-        suffix = '_affdf'
-        if base.endswith('.df'):
-            suffix += '.df'
+        suffix = "_affdf"
+        if base.endswith(".df"):
+            suffix += ".df"
             base = base[:-3]
         return fname_presuffix(base, suffix=suffix + ext, use_ext=False)
 
 
 class AffSymTensor3DVolInputSpec(CommandLineInputSpec):
-    in_file = File(desc='moving tensor volume', exists=True,
-                   argstr="-in %s", mandatory=True)
-    out_file = File(desc='output filename',
-                    argstr="-out %s", name_source="in_file",
-                    name_template="%s_affxfmd", keep_extension=True)
-    transform = File(exists=True, argstr="-trans %s",
-                     xor=['target', 'translation', 'euler', 'deformation'],
-                     desc='transform to apply: specify an input transformation'
-                     ' file; parameters input will be ignored',)
-    interpolation = traits.Enum('LEI', 'EI', usedefault=True,
-                                argstr="-interp %s",
-                                desc='Log Euclidean/Euclidean Interpolation')
-    reorient = traits.Enum('PPD', 'NO', 'FS', argstr='-reorient %s',
-                           usedefault=True, desc='Reorientation strategy: '
-                           'preservation of principal direction, no '
-                           'reorientation, or finite strain')
-    target = File(exists=True, argstr="-target %s", xor=['transform'],
-                  desc='output volume specification read from the target '
-                  'volume if specified')
-    translation = traits.Tuple((traits.Float(), traits.Float(),
-                                traits.Float()),
-                               desc='translation (x,y,z) in mm',
-                               argstr='-translation %g %g %g',
-                               xor=['transform'])
-    euler = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                         desc='(theta, phi, psi) in degrees',
-                         xor=['transform'], argstr='-euler %g %g %g')
-    deformation = traits.Tuple((traits.Float(),) * 6,
-                               desc='(xx,yy,zz,xy,yz,xz)', xor=['transform'],
-                               argstr='-deformation %g %g %g %g %g %g')
+    in_file = File(
+        desc="moving tensor volume", exists=True, argstr="-in %s", mandatory=True
+    )
+    out_file = File(
+        desc="output filename",
+        argstr="-out %s",
+        name_source="in_file",
+        name_template="%s_affxfmd",
+        keep_extension=True,
+    )
+    transform = File(
+        exists=True,
+        argstr="-trans %s",
+        xor=["target", "translation", "euler", "deformation"],
+        desc="transform to apply: specify an input transformation"
+        " file; parameters input will be ignored",
+    )
+    interpolation = traits.Enum(
+        "LEI",
+        "EI",
+        usedefault=True,
+        argstr="-interp %s",
+        desc="Log Euclidean/Euclidean Interpolation",
+    )
+    reorient = traits.Enum(
+        "PPD",
+        "NO",
+        "FS",
+        argstr="-reorient %s",
+        usedefault=True,
+        desc="Reorientation strategy: "
+        "preservation of principal direction, no "
+        "reorientation, or finite strain",
+    )
+    target = File(
+        exists=True,
+        argstr="-target %s",
+        xor=["transform"],
+        desc="output volume specification read from the target volume if specified",
+    )
+    translation = Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="translation (x,y,z) in mm",
+        argstr="-translation %g %g %g",
+        xor=["transform"],
+    )
+    euler = Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="(theta, phi, psi) in degrees",
+        xor=["transform"],
+        argstr="-euler %g %g %g",
+    )
+    deformation = Tuple(
+        (traits.Float(),) * 6,
+        desc="(xx,yy,zz,xy,yz,xz)",
+        xor=["transform"],
+        argstr="-deformation %g %g %g %g %g %g",
+    )
 
 
 class AffSymTensor3DVolOutputSpec(TraitedSpec):
@@ -274,43 +359,65 @@ class AffSymTensor3DVol(CommandLineDtitk):
      -reorient PPD -trans im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
+
     input_spec = AffSymTensor3DVolInputSpec
     output_spec = AffSymTensor3DVolOutputSpec
-    _cmd = 'affineSymTensor3DVolume'
+    _cmd = "affineSymTensor3DVolume"
 
 
 class AffScalarVolInputSpec(CommandLineInputSpec):
-    in_file = File(desc='moving scalar volume', exists=True,
-                   argstr="-in %s", mandatory=True)
-    out_file = File(desc='output filename',
-                    argstr="-out %s", name_source="in_file",
-                    name_template="%s_affxfmd", keep_extension=True)
-    transform = File(exists=True, argstr="-trans %s",
-                     xor=['target', 'translation', 'euler', 'deformation'],
-                     desc='transform to apply: specify an input transformation'
-                     ' file; parameters input will be ignored',)
-    interpolation = traits.Enum('trilinear', 'NN',
-                                usedefault=True, argstr="-interp %s",
-                                desc='trilinear or nearest neighbor'
-                                ' interpolation')
-    target = File(exists=True, argstr="-target %s", xor=['transform'],
-                  desc='output volume specification read from the target '
-                  'volume if specified')
-    translation = traits.Tuple((traits.Float(), traits.Float(),
-                                traits.Float()),
-                               desc='translation (x,y,z) in mm',
-                               argstr='-translation %g %g %g',
-                               xor=['transform'])
-    euler = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                         desc='(theta, phi, psi) in degrees',
-                         xor=['transform'], argstr='-euler %g %g %g')
-    deformation = traits.Tuple((traits.Float(),) * 6,
-                               desc='(xx,yy,zz,xy,yz,xz)', xor=['transform'],
-                               argstr='-deformation %g %g %g %g %g %g')
+    in_file = File(
+        desc="moving scalar volume", exists=True, argstr="-in %s", mandatory=True
+    )
+    out_file = File(
+        desc="output filename",
+        argstr="-out %s",
+        name_source="in_file",
+        name_template="%s_affxfmd",
+        keep_extension=True,
+    )
+    transform = File(
+        exists=True,
+        argstr="-trans %s",
+        xor=["target", "translation", "euler", "deformation"],
+        desc="transform to apply: specify an input transformation"
+        " file; parameters input will be ignored",
+    )
+    interpolation = traits.Enum(
+        "trilinear",
+        "NN",
+        usedefault=True,
+        argstr="-interp %s",
+        desc="trilinear or nearest neighbor interpolation",
+    )
+    target = File(
+        exists=True,
+        argstr="-target %s",
+        xor=["transform"],
+        desc="output volume specification read from the target volume if specified",
+    )
+    translation = Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="translation (x,y,z) in mm",
+        argstr="-translation %g %g %g",
+        xor=["transform"],
+    )
+    euler = Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="(theta, phi, psi) in degrees",
+        xor=["transform"],
+        argstr="-euler %g %g %g",
+    )
+    deformation = Tuple(
+        (traits.Float(),) * 6,
+        desc="(xx,yy,zz,xy,yz,xz)",
+        xor=["transform"],
+        argstr="-deformation %g %g %g %g %g %g",
+    )
 
 
 class AffScalarVolOutputSpec(TraitedSpec):
-    out_file = File(desc='moved volume', exists=True)
+    out_file = File(desc="moved volume", exists=True)
 
 
 class AffScalarVol(CommandLineDtitk):
@@ -329,43 +436,67 @@ class AffScalarVol(CommandLineDtitk):
      im_affine.aff'
     >>> node.run() # doctest: +SKIP
     """
+
     input_spec = AffScalarVolInputSpec
     output_spec = AffScalarVolOutputSpec
-    _cmd = 'affineScalarVolume'
+    _cmd = "affineScalarVolume"
 
     def _format_arg(self, name, spec, value):
-        if name == 'interpolation':
-            value = {'trilinear': 0, 'NN': 1}[value]
-        return super(AffScalarVol, self)._format_arg(name, spec, value)
+        if name == "interpolation":
+            value = {"trilinear": 0, "NN": 1}[value]
+        return super()._format_arg(name, spec, value)
 
 
 class DiffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
-    in_file = File(desc='moving tensor volume', exists=True,
-                   argstr="-in %s", mandatory=True)
-    out_file = File(desc='output filename',
-                    argstr="-out %s", name_source="in_file",
-                    name_template="%s_diffeoxfmd", keep_extension=True)
-    transform = File(exists=True, argstr="-trans %s",
-                     mandatory=True, desc='transform to apply')
-    df = traits.Str('FD', argstr="-df %s", usedefault=True)
-    interpolation = traits.Enum('LEI', 'EI', usedefault=True,
-                                argstr="-interp %s",
-                                desc='Log Euclidean/Euclidean Interpolation')
-    reorient = traits.Enum('PPD', 'FS', argstr='-reorient %s',
-                           usedefault=True, desc='Reorientation strategy: '
-                           'preservation of principal direction or finite '
-                           'strain')
-    target = File(exists=True, argstr="-target %s", xor=['voxel_size'],
-                  desc='output volume specification read from the target '
-                  'volume if specified')
-    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                              desc='xyz voxel size (superseded by target)',
-                              argstr="-vsize %g %g %g", xor=['target'])
-    flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
-                        argstr="-flip %d %d %d")
-    resampling_type = traits.Enum('backward', 'forward',
-                                  desc='use backward or forward resampling',
-                                  argstr="-type %s")
+    in_file = File(
+        desc="moving tensor volume", exists=True, argstr="-in %s", mandatory=True
+    )
+    out_file = File(
+        desc="output filename",
+        argstr="-out %s",
+        name_source="in_file",
+        name_template="%s_diffeoxfmd",
+        keep_extension=True,
+    )
+    transform = File(
+        exists=True, argstr="-trans %s", mandatory=True, desc="transform to apply"
+    )
+    df = traits.Str("FD", argstr="-df %s", usedefault=True)
+    interpolation = traits.Enum(
+        "LEI",
+        "EI",
+        usedefault=True,
+        argstr="-interp %s",
+        desc="Log Euclidean/Euclidean Interpolation",
+    )
+    reorient = traits.Enum(
+        "PPD",
+        "FS",
+        argstr="-reorient %s",
+        usedefault=True,
+        desc="Reorientation strategy: "
+        "preservation of principal direction or finite "
+        "strain",
+    )
+    target = File(
+        exists=True,
+        argstr="-target %s",
+        xor=["voxel_size"],
+        desc="output volume specification read from the target volume if specified",
+    )
+    voxel_size = Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz voxel size (superseded by target)",
+        argstr="-vsize %g %g %g",
+        xor=["target"],
+    )
+    flip = Tuple((traits.Int(), traits.Int(), traits.Int()), argstr="-flip %d %d %d")
+    resampling_type = traits.Enum(
+        "backward",
+        "forward",
+        desc="use backward or forward resampling",
+        argstr="-type %s",
+    )
 
 
 class DiffeoSymTensor3DVolOutputSpec(TraitedSpec):
@@ -391,41 +522,58 @@ class DiffeoSymTensor3DVol(CommandLineDtitk):
 
     input_spec = DiffeoSymTensor3DVolInputSpec
     output_spec = DiffeoSymTensor3DVolOutputSpec
-    _cmd = 'deformationSymTensor3DVolume'
+    _cmd = "deformationSymTensor3DVolume"
 
     def _format_arg(self, name, spec, value):
-        if name == 'resampling_type':
-            value = {'forward': 0, 'backward': 1}[value]
-        return super(DiffeoSymTensor3DVol, self)._format_arg(name, spec, value)
+        if name == "resampling_type":
+            value = {"forward": 0, "backward": 1}[value]
+        return super()._format_arg(name, spec, value)
 
 
 class DiffeoScalarVolInputSpec(CommandLineInputSpec):
-    in_file = File(desc='moving scalar volume', exists=True,
-                   argstr="-in %s", mandatory=True)
-    out_file = File(desc='output filename',
-                    argstr="-out %s", name_source="in_file",
-                    name_template="%s_diffeoxfmd", keep_extension=True)
-    transform = File(exists=True, argstr="-trans %s",
-                     mandatory=True, desc='transform to apply')
-    target = File(exists=True, argstr="-target %s", xor=['voxel_size'],
-                  desc='output volume specification read from the target '
-                  'volume if specified')
-    voxel_size = traits.Tuple((traits.Float(), traits.Float(), traits.Float()),
-                              desc='xyz voxel size (superseded by target)',
-                              argstr="-vsize %g %g %g", xor=['target'])
-    flip = traits.Tuple((traits.Int(), traits.Int(), traits.Int()),
-                        argstr="-flip %d %d %d")
-    resampling_type = traits.Enum('backward', 'forward',
-                                  desc='use backward or forward resampling',
-                                  argstr="-type %s")
-    interpolation = traits.Enum('trilinear', 'NN',
-                                desc='trilinear, or nearest neighbor',
-                                argstr="-interp %s",
-                                usedefault=True)
+    in_file = File(
+        desc="moving scalar volume", exists=True, argstr="-in %s", mandatory=True
+    )
+    out_file = File(
+        desc="output filename",
+        argstr="-out %s",
+        name_source="in_file",
+        name_template="%s_diffeoxfmd",
+        keep_extension=True,
+    )
+    transform = File(
+        exists=True, argstr="-trans %s", mandatory=True, desc="transform to apply"
+    )
+    target = File(
+        exists=True,
+        argstr="-target %s",
+        xor=["voxel_size"],
+        desc="output volume specification read from the target volume if specified",
+    )
+    voxel_size = Tuple(
+        (traits.Float(), traits.Float(), traits.Float()),
+        desc="xyz voxel size (superseded by target)",
+        argstr="-vsize %g %g %g",
+        xor=["target"],
+    )
+    flip = Tuple((traits.Int(), traits.Int(), traits.Int()), argstr="-flip %d %d %d")
+    resampling_type = traits.Enum(
+        "backward",
+        "forward",
+        desc="use backward or forward resampling",
+        argstr="-type %s",
+    )
+    interpolation = traits.Enum(
+        "trilinear",
+        "NN",
+        desc="trilinear, or nearest neighbor",
+        argstr="-interp %s",
+        usedefault=True,
+    )
 
 
 class DiffeoScalarVolOutputSpec(TraitedSpec):
-    out_file = File(desc='moved volume', exists=True)
+    out_file = File(desc="moved volume", exists=True)
 
 
 class DiffeoScalarVol(CommandLineDtitk):
@@ -447,14 +595,14 @@ class DiffeoScalarVol(CommandLineDtitk):
 
     input_spec = DiffeoScalarVolInputSpec
     output_spec = DiffeoScalarVolOutputSpec
-    _cmd = 'deformationScalarVolume'
+    _cmd = "deformationScalarVolume"
 
     def _format_arg(self, name, spec, value):
-        if name == 'resampling_type':
-            value = {'forward': 0, 'backward': 1}[value]
-        elif name == 'interpolation':
-            value = {'trilinear': 0, 'NN': 1}[value]
-        return super(DiffeoScalarVol, self)._format_arg(name, spec, value)
+        if name == "resampling_type":
+            value = {"forward": 0, "backward": 1}[value]
+        elif name == "interpolation":
+            value = {"trilinear": 0, "NN": 1}[value]
+        return super()._format_arg(name, spec, value)
 
 
 class RigidTask(DTITKRenameMixin, Rigid):
