@@ -2799,7 +2799,7 @@ class MotionOutliersInputSpec(FSLCommandInputSpec):
 
 
 class MotionOutliersOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
+    out_file = File()
     out_metric_values = File(exists=True)
     out_metric_plot = File(exists=True)
 
