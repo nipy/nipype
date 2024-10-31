@@ -689,15 +689,10 @@ def evaluate_connect_function(function_source, args, first_arg):
     try:
         output_value = func(first_arg, *list(args))
     except NameError as e:
-        if e.args[0].startswith("global name") and e.args[0].endswith("is not defined"):
-            e.args = (
-                e.args[0],
-                (
-                    "Due to engine constraints all imports have to be done "
-                    "inside each function definition"
-                ),
-            )
-        raise e
+        raise NameError(
+            f"{e}: Due to engine constraints all imports have to be done inside each "
+            " function definition."
+        )
     return output_value
 
 
