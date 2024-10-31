@@ -934,24 +934,32 @@ def indirectory(path):
     finally:
         os.chdir(cwd)
 
+
 def load_spm_mat(spm_mat_file, **kwargs):
     try:
         mat = sio.loadmat(spm_mat_file, **kwargs)
     except NotImplementedError:
         import h5py
         import numpy as np
+
         mat = dict(SPM=np.array([[sio.matlab.mat_struct()]]))
 
         # Get Vbeta, Vcon, and Vspm file names
         with h5py.File(spm_mat_file, "r") as h5file:
             fnames = dict()
             try:
-                fnames["Vbeta"] = [u"".join(chr(c[0]) for c in h5file[obj_ref[0]]) for obj_ref in h5file["SPM"]["Vbeta"]["fname"]]
+                fnames["Vbeta"] = [
+                    u"".join(chr(c[0]) for c in h5file[obj_ref[0]])
+                    for obj_ref in h5file["SPM"]["Vbeta"]["fname"]
+                ]
             except Exception:
                 fnames["Vbeta"] = []
             for contr_type in ["Vcon", "Vspm"]:
                 try:
-                    fnames[contr_type] = [u"".join(chr(c[0]) for c in h5file[obj_ref[0]]["fname"]) for obj_ref in h5file["SPM"]["xCon"][contr_type]]
+                    fnames[contr_type] = [
+                        u"".join(chr(c[0]) for c in h5file[obj_ref[0]]["fname"])
+                        for obj_ref in h5file["SPM"]["xCon"][contr_type]
+                    ]
                 except Exception:
                     fnames[contr_type] = []
 
