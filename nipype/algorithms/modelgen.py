@@ -639,9 +639,11 @@ class SpecifySPMModel(SpecifyModel):
             # insert session regressors
             if not hasattr(infoout, "regressors") or not infoout.regressors:
                 infoout.regressors = []
+                infoout.regressor_names = []
             onelist = np.zeros((1, sum(nscans)))
             onelist[0, sum(nscans[0:i]) : sum(nscans[0 : (i + 1)])] = 1
             infoout.regressors.insert(len(infoout.regressors), onelist.tolist()[0])
+            infoout.regressor_names.append(f'run{i + 1}')
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
