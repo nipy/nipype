@@ -2741,7 +2741,7 @@ class NetCorr(AFNICommand):
         odir = os.path.dirname(os.path.abspath(prefix))
         outputs["out_corr_matrix"] = glob.glob(os.path.join(odir, "*.netcc"))[0]
 
-        if isdefined(self.inputs.ts_wb_corr) or isdefined(self.inputs.ts_Z_corr):
+        if self.inputs.ts_wb_corr or self.inputs.ts_wb_Z:
             corrdir = os.path.join(odir, prefix + "_000_INDIV")
             outputs["out_corr_maps"] = glob.glob(os.path.join(corrdir, "*.nii.gz"))
 
