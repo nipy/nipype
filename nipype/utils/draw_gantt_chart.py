@@ -302,7 +302,14 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
         # Left
         left = 60
         for core in range(len(end_times)):
-            if end_times[core] < node_start:
+            try:
+                end_time_condition = end_times[core] < node_start
+            except TypeError:
+                # if one has a timezone and one does not
+                end_time_condition = end_times[core].replace(
+                    tzinfo=None
+                ) < node_start.replace(tzinfo=None)
+            if end_time_condition:
                 left += core * 30
                 end_times[core] = datetime.datetime(
                     node_finish.year,
