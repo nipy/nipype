@@ -1,8 +1,21 @@
+1.9.1 (November 19, 2024)
+=========================
+
+Bug fix release in the 1.9.x series.
+
+This release adds support for Numpy 2 and Python 3.13.
+
+  * FIX: Restore generate_gantt_chart functionality (https://github.com/nipy/nipype/pull/3290)
+  * FIX: Address numpy and traits deprecations (https://github.com/nipy/nipype/pull/3699)
+  * FIX: `ts_Z_corr` → `ts_wb_Z` (https://github.com/nipy/nipype/pull/3697)
+  * ENH: Remove unused and recently unsupported antsRegistration flag (https://github.com/nipy/nipype/pull/3695)
+  * MAINT: Bump codecov/codecov-action from 4 to 5 (https://github.com/nipy/nipype/pull/3698)
+
 
 1.9.0 (October 31, 2024)
 ========================
 
-New feature release in the 1.9.0 series.
+New feature release in the 1.9.x series.
 
   * FIX: Remove exists=True from fsl.MotionOutliers output that might not exist (https://github.com/nipy/nipype/pull/1428)
   * FIX: Improve evaluate_connect_function errors across Python versions (https://github.com/nipy/nipype/pull/3655)
