@@ -145,6 +145,7 @@ REQUIRES = [
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
     "traits>=%s" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
+    "acres",
     "etelemetry>=0.3.1",
     "looseversion!=1.2",
     "puremagic",

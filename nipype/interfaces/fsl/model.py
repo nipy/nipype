@@ -9,6 +9,7 @@ from glob import glob
 from shutil import rmtree
 from string import Template
 
+import acres
 import numpy as np
 from looseversion import LooseVersion
 from nibabel import load
@@ -2547,12 +2548,5 @@ def load_template(name):
     template : string.Template
 
     """
-    from pkg_resources import resource_filename as pkgrf
-
-    full_fname = pkgrf(
-        "nipype", os.path.join("interfaces", "fsl", "model_templates", name)
-    )
-    with open(full_fname) as template_file:
-        template = Template(template_file.read())
-
-    return template
+    loader = acres.Loader('nipype.interfaces.fsl')
+    return Template(loader.readable('model_templates', name).read_text())
