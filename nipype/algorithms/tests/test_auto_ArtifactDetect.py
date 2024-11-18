@@ -48,8 +48,6 @@ def test_ArtifactDetect_inputs():
             xor=["norm_threshold"],
         ),
         use_differences=dict(
-            maxlen=2,
-            minlen=2,
             usedefault=True,
         ),
         use_norm=dict(

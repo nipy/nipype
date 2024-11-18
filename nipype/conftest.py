@@ -2,7 +2,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 import pytest
-import numpy
+import numpy as np
 import py.path as pp
 
 NIPYPE_DATADIR = os.path.realpath(
@@ -15,10 +15,15 @@ shutil.copytree(NIPYPE_DATADIR, data_dir)
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
-    doctest_namespace["np"] = numpy
+    doctest_namespace["np"] = np
     doctest_namespace["os"] = os
     doctest_namespace["pytest"] = pytest
     doctest_namespace["datadir"] = data_dir
+
+
+@pytest.fixture(scope='session', autouse=True)
+def legacy_printoptions():
+    np.set_printoptions(legacy='1.21')
 
 
 @pytest.fixture(autouse=True)

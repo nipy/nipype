@@ -99,8 +99,9 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc="input DWI image",
     )
-    axes = traits.ListInt(
-        default_value=[0, 1],
+    axes = traits.List(
+        traits.Int,
+        [0, 1],
         usedefault=True,
         sep=",",
         minlen=2,

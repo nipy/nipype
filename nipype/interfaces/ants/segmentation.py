@@ -1328,7 +1328,8 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc=("Constrain solution to non-negative weights."),
     )
-    patch_radius = traits.ListInt(
+    patch_radius = traits.List(
+        traits.Int,
         minlen=3,
         maxlen=3,
         argstr="-p %s",
