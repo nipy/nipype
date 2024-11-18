@@ -147,7 +147,6 @@ jobs:
         if: ${{ matrix.check != 'skiptests' }}
       - uses: codecov/codecov-action@v5
         with:
-          file: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
       - name: Upload pytest test results
