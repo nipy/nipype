@@ -8,6 +8,7 @@ Module to draw an html gantt chart from logfile produced by
 import random
 import datetime
 import simplejson as json
+from typing import Union
 
 from collections import OrderedDict
 from warnings import warn
@@ -103,7 +104,7 @@ def log_to_dict(logfile):
     nodes_list = [json.loads(l) for l in lines]
 
     def _convert_string_to_datetime(
-        datestring: str | datetime.datetime,
+        datestring: Union[str, datetime.datetime],
     ) -> datetime.datetime:
         """Convert a date string to a datetime object."""
         if isinstance(datestring, datetime.datetime):
