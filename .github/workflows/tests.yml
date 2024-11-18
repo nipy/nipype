@@ -80,10 +80,10 @@ jobs:
         os: ["ubuntu-latest"]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         dependencies: [none, full, pre]
-        # include:
-        #   - os: ubuntu-latest
-        #     python-version: "3.9"
-        #     dependencies: min
+        include:
+          - os: ubuntu-latest
+            python-version: "3.9"
+            dependencies: min
         exclude:
           # Skip some intermediate versions for full tests
           - python-version: "3.10"

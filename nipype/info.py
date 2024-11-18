@@ -101,9 +101,9 @@ existing pipeline systems.
 # versions
 NIBABEL_MIN_VERSION = "2.1.0"
 NETWORKX_MIN_VERSION = "2.0"
-NUMPY_MIN_VERSION = "1.17"
-SCIPY_MIN_VERSION = "0.14"
-TRAITS_MIN_VERSION = "4.6"
+NUMPY_MIN_VERSION = "1.21"
+SCIPY_MIN_VERSION = "1.8"
+TRAITS_MIN_VERSION = "6.2"
 DATEUTIL_MIN_VERSION = "2.2"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_MIN_VERSION = "1.5.2"
@@ -143,23 +143,22 @@ REQUIRES = [
     "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "traits>=%s,!=5.0" % TRAITS_MIN_VERSION,
+    "traits>=%s" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
-    "etelemetry>=0.2.0",
+    "etelemetry>=0.3.1",
     "looseversion!=1.2",
     "puremagic",
 ]
 
 TESTS_REQUIRES = [
-    "codecov",
-    "coverage",
+    "coverage >= 5.2.1",
     "pytest >= 6",
-    "pytest-cov",
+    "pytest-cov >=2.11",
     "pytest-env",
-    "pytest-timeout",
+    "pytest-timeout >=1.4",
     "pytest-doctestplus",
-    "pytest-xdist",
-    "sphinx",
+    "pytest-xdist >= 2.5",
+    "sphinx >=7",
 ]
 
 EXTRA_REQUIRES = {
