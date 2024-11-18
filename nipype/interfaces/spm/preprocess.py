@@ -273,7 +273,8 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
         desc="phase encode direction input data have been acquired with",
         usedefault=True,
     )
-    write_which = traits.ListInt(
+    write_which = traits.List(
+        traits.Int,
         [2, 1],
         field="roptions.which",
         minlen=2,
@@ -524,7 +525,8 @@ class RealignInputSpec(SPMCommandInputSpec):
         field="eoptions.wrap",
         desc="Check if interpolation should wrap in [x,y,z]",
     )
-    write_which = traits.ListInt(
+    write_which = traits.List(
+        traits.Int,
         [2, 1],
         field="roptions.which",
         minlen=2,
@@ -731,7 +733,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
             "maximization and smoothness maximization of the estimated field."
         ),
     )
-    est_reg_factor = traits.ListInt(
+    est_reg_factor = traits.List(
+        traits.Int,
         [100000],
         field="uweoptions.lambda",
         minlen=1,
@@ -769,7 +772,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         field="uweoptions.rem",
         desc="Re-estimate movement parameters at each unwarping iteration.",
     )
-    est_num_of_iterations = traits.ListInt(
+    est_num_of_iterations = traits.List(
+        traits.Int,
         [5],
         field="uweoptions.noi",
         minlen=1,
@@ -783,7 +787,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         usedefault=True,
         desc="Point in position space to perform Taylor-expansion around.",
     )
-    reslice_which = traits.ListInt(
+    reslice_which = traits.List(
+        traits.Int,
         [2, 1],
         field="uwroptions.uwwhich",
         minlen=2,

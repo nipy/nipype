@@ -2,6 +2,7 @@
 
 import os.path as op
 import inspect
+from functools import partial
 import numpy as np
 from ..base import (
     traits,
@@ -109,15 +110,15 @@ def convert_to_traits_type(dipy_type, is_file=False):
     dipy_type = dipy_type.lower()
     is_mandatory = bool("optional" not in dipy_type)
     if "variable" in dipy_type and "str" in dipy_type:
-        return traits.ListStr, is_mandatory
+        return partial(traits.List, traits.Str), is_mandatory
     elif "variable" in dipy_type and "int" in dipy_type:
-        return traits.ListInt, is_mandatory
+        return partial(traits.List, traits.Int), is_mandatory
     elif "variable" in dipy_type and "float" in dipy_type:
-        return traits.ListFloat, is_mandatory
+        return partial(traits.List, traits.Float), is_mandatory
     elif "variable" in dipy_type and "bool" in dipy_type:
-        return traits.ListBool, is_mandatory
+        return partial(traits.List, traits.Bool), is_mandatory
     elif "variable" in dipy_type and "complex" in dipy_type:
-        return traits.ListComplex, is_mandatory
+        return partial(traits.List, traits.Complex), is_mandatory
     elif "str" in dipy_type and not is_file:
         return traits.Str, is_mandatory
     elif "str" in dipy_type and is_file:

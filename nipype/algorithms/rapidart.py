@@ -189,7 +189,8 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
         desc="Source of movement parameters",
         mandatory=True,
     )
-    use_differences = traits.ListBool(
+    use_differences = traits.List(
+        traits.Bool,
         [True, False],
         minlen=2,
         maxlen=2,

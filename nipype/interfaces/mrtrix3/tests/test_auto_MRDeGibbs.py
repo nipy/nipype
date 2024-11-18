@@ -9,8 +9,6 @@ def test_MRDeGibbs_inputs():
         ),
         axes=dict(
             argstr="-axes %s",
-            maxlen=2,
-            minlen=2,
             sep=",",
             usedefault=True,
         ),
