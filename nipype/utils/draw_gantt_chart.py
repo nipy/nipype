@@ -102,15 +102,25 @@ def log_to_dict(logfile):
 
     nodes_list = [json.loads(l) for l in lines]
 
-    def _convert_string_to_datetime(datestring):
-        try:
-            datetime_object: datetime.datetime = datetime.datetime.strptime(
-                datestring, "%Y-%m-%dT%H:%M:%S.%f"
+    def _convert_string_to_datetime(
+        datestring: str | datetime.datetime,
+    ) -> datetime.datetime:
+        """Convert a date string to a datetime object."""
+        if isinstance(datestring, datetime.datetime):
+            datetime_object = datestring
+        elif isinstance(datestring, str):
+            date_format = (
+                "%Y-%m-%dT%H:%M:%S.%f%z"
+                if "+" in datestring
+                else "%Y-%m-%dT%H:%M:%S.%f"
             )
-            return datetime_object
-        except Exception as _:
-            pass
-        return datestring
+            datetime_object: datetime.datetime = datetime.datetime.strptime(
+                datestring, date_format
+            )
+        else:
+            msg = f"{datestring} is not a string or datetime object."
+            raise TypeError(msg)
+        return datetime_object
 
     date_object_node_list: list = list()
     for n in nodes_list:

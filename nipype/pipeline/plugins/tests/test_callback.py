@@ -1,8 +1,9 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Tests for workflow callbacks
-"""
+"""Tests for workflow callbacks."""
+from pathlib import Path
 from time import sleep
+import json
 import pytest
 import nipype.interfaces.utility as niu
 import nipype.pipeline.engine as pe
@@ -71,7 +72,7 @@ def test_callback_exception(tmpdir, plugin, stop_on_first_crash):
 
 @pytest.mark.parametrize("plugin", ["Linear", "MultiProc", "LegacyMultiProc"])
 @pytest.mark.skipif(not has_pandas, reason="Test requires pandas")
-def test_callback_gantt(tmpdir, plugin):
+def test_callback_gantt(tmp_path: Path, plugin: str) -> None:
     import logging
 
     from os import path
@@ -79,14 +80,14 @@ def test_callback_gantt(tmpdir, plugin):
     from nipype.utils.profiler import log_nodes_cb
     from nipype.utils.draw_gantt_chart import generate_gantt_chart
 
-    log_filename = path.join(tmpdir, "callback.log")
+    log_filename = tmp_path / "callback.log"
     logger = logging.getLogger("callback")
     logger.setLevel(logging.DEBUG)
     handler = logging.FileHandler(log_filename)
     logger.addHandler(handler)
 
     # create workflow
-    wf = pe.Workflow(name="test", base_dir=tmpdir.strpath)
+    wf = pe.Workflow(name="test", base_dir=str(tmp_path))
     f_node = pe.Node(
         niu.Function(function=func, input_names=[], output_names=[]), name="f_node"
     )
@@ -98,7 +99,21 @@ def test_callback_gantt(tmpdir, plugin):
         plugin_args["n_procs"] = 8
     wf.run(plugin=plugin, plugin_args=plugin_args)
 
-    generate_gantt_chart(
-        path.join(tmpdir, "callback.log"), 1 if plugin == "Linear" else 8
-    )
-    assert path.exists(path.join(tmpdir, "callback.log.html"))
+    with open(log_filename, "r") as _f:
+        loglines = _f.readlines()
+
+        # test missing duration
+        first_line = json.loads(loglines[0])
+        if "duration" in first_line:
+            del first_line["duration"]
+        loglines[0] = f"{json.dumps(first_line)}\n"
+
+        # test duplicate timestamp warning
+        loglines.append(loglines[-1])
+
+    with open(log_filename, "w") as _f:
+        _f.write("".join(loglines))
+
+    with pytest.warns(Warning):
+        generate_gantt_chart(str(log_filename), 1 if plugin == "Linear" else 8)
+    assert (tmp_path / "callback.log.html").exists()
