@@ -94,14 +94,14 @@ def test_callback_gantt(tmp_path: Path, plugin: str) -> None:
     with open(log_filename, "r") as _f:
         loglines = _f.readlines()
 
-        # test missing duration
-        first_line = json.loads(loglines[0])
-        if "duration" in first_line:
-            del first_line["duration"]
-        loglines[0] = f"{json.dumps(first_line)}\n"
+    # test missing duration
+    first_line = json.loads(loglines[0])
+    if "duration" in first_line:
+        del first_line["duration"]
+    loglines[0] = f"{json.dumps(first_line)}\n"
 
-        # test duplicate timestamp warning
-        loglines.append(loglines[-1])
+    # test duplicate timestamp warning
+    loglines.append(loglines[-1])
 
     with open(log_filename, "w") as _f:
         _f.write("".join(loglines))
