@@ -153,7 +153,7 @@ REQUIRES = [
 
 TESTS_REQUIRES = [
     "coverage >= 5.2.1",
-    "pandas > 1.5.0",
+    "pandas >= 1.5.0",
     "pytest >= 6",
     "pytest-cov >=2.11",
     "pytest-env",
