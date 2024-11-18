@@ -41,8 +41,6 @@ def test_ApplyVDM_inputs():
         ),
         write_which=dict(
             field="roptions.which",
-            maxlen=2,
-            minlen=2,
             usedefault=True,
         ),
         write_wrap=dict(

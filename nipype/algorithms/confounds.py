@@ -188,7 +188,7 @@ Bradley L. and Petersen, Steven E.},
 
         if self.inputs.save_std:
             out_file = self._gen_fname("dvars_std", ext="tsv")
-            np.savetxt(out_file, dvars[0], fmt=b"%0.6f")
+            np.savetxt(out_file, dvars[0], fmt="%0.6f")
             self._results["out_std"] = out_file
 
             if self.inputs.save_plot:
@@ -228,7 +228,7 @@ Bradley L. and Petersen, Steven E.},
 
         if self.inputs.save_vxstd:
             out_file = self._gen_fname("dvars_vxstd", ext="tsv")
-            np.savetxt(out_file, dvars[2], fmt=b"%0.6f")
+            np.savetxt(out_file, dvars[2], fmt="%0.6f")
             self._results["out_vxstd"] = out_file
 
             if self.inputs.save_plot:
@@ -251,8 +251,8 @@ Bradley L. and Petersen, Steven E.},
             np.savetxt(
                 out_file,
                 np.vstack(dvars).T,
-                fmt=b"%0.8f",
-                delimiter=b"\t",
+                fmt="%0.8f",
+                delimiter="\t",
                 header="std DVARS\tnon-std DVARS\tvx-wise std DVARS",
                 comments="",
             )
@@ -689,7 +689,7 @@ class CompCor(SimpleInterface):
         np.savetxt(
             components_file,
             components,
-            fmt=b"%.10f",
+            fmt="%.10f",
             delimiter="\t",
             header="\t".join(components_header),
             comments="",
@@ -729,7 +729,7 @@ class CompCor(SimpleInterface):
             np.savetxt(
                 self._results["pre_filter_file"],
                 filter_basis,
-                fmt=b"%.10f",
+                fmt="%.10f",
                 delimiter="\t",
                 header="\t".join(header),
                 comments="",

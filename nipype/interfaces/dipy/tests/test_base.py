@@ -16,7 +16,7 @@ from ..base import (
 
 def test_convert_to_traits_type():
     Params = namedtuple("Params", "traits_type is_file")
-    Res = namedtuple("Res", "traits_type is_mandatory")
+    Res = namedtuple("Res", "traits_type subtype is_mandatory")
     l_entries = [
         Params("variable string", False),
         Params("variable int", False),
@@ -42,35 +42,38 @@ def test_convert_to_traits_type():
         Params("complex, optional", False),
     ]
     l_expected = [
-        Res(traits.ListStr, True),
-        Res(traits.ListInt, True),
-        Res(traits.ListFloat, True),
-        Res(traits.ListBool, True),
-        Res(traits.ListComplex, True),
-        Res(traits.ListInt, False),
-        Res(traits.ListStr, False),
-        Res(traits.ListFloat, False),
-        Res(traits.ListBool, False),
-        Res(traits.ListComplex, False),
-        Res(traits.Str, True),
-        Res(traits.Int, True),
-        Res(File, True),
-        Res(traits.Float, True),
-        Res(traits.Bool, True),
-        Res(traits.Complex, True),
-        Res(traits.Str, False),
-        Res(traits.Int, False),
-        Res(File, False),
-        Res(traits.Float, False),
-        Res(traits.Bool, False),
-        Res(traits.Complex, False),
+        Res(traits.List, traits.Str, True),
+        Res(traits.List, traits.Int, True),
+        Res(traits.List, traits.Float, True),
+        Res(traits.List, traits.Bool, True),
+        Res(traits.List, traits.Complex, True),
+        Res(traits.List, traits.Int, False),
+        Res(traits.List, traits.Str, False),
+        Res(traits.List, traits.Float, False),
+        Res(traits.List, traits.Bool, False),
+        Res(traits.List, traits.Complex, False),
+        Res(traits.Str, None, True),
+        Res(traits.Int, None, True),
+        Res(File, None, True),
+        Res(traits.Float, None, True),
+        Res(traits.Bool, None, True),
+        Res(traits.Complex, None, True),
+        Res(traits.Str, None, False),
+        Res(traits.Int, None, False),
+        Res(File, None, False),
+        Res(traits.Float, None, False),
+        Res(traits.Bool, None, False),
+        Res(traits.Complex, None, False),
     ]
 
     for entry, res in zip(l_entries, l_expected):
         traits_type, is_mandatory = convert_to_traits_type(
             entry.traits_type, entry.is_file
         )
-        assert traits_type == res.traits_type
+        trait_instance = traits_type()
+        assert isinstance(trait_instance, res.traits_type)
+        if res.subtype:
+            assert isinstance(trait_instance.inner_traits()[0].trait_type, res.subtype)
         assert is_mandatory == res.is_mandatory
 
     with pytest.raises(IOError):

@@ -4,3 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [tool.black]
 skip-string-normalization = true
+
+[tool.pytest.ini_options]
+minversion = "6"
+testpaths = ["nipype"]
+log_cli_level = "INFO"
+xfail_strict = true
+norecursedirs = [".git"]
+addopts = [
+  "-svx",
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+  "--doctest-modules",
+  "--cov=nipype",
+  "--cov-report=xml",
+  "--cov-config=pyproject.toml",
+]
+doctest_optionflags = "ALLOW_UNICODE NORMALIZE_WHITESPACE ELLIPSIS"
+env = "PYTHONHASHSEED=0"
+filterwarnings = ["ignore::DeprecationWarning"]
+junit_family = "xunit2"

@@ -3,7 +3,7 @@
 import os
 import pytest
 
-from pkg_resources import resource_filename as pkgrf
+import acres
 
 from ....utils.filemanip import md5
 from ... import base as nib
@@ -42,14 +42,13 @@ def test_bunch_methods():
 def test_bunch_hash():
     # NOTE: Since the path to the json file is included in the Bunch,
     # the hash will be unique to each machine.
-    json_pth = pkgrf("nipype", os.path.join("testing", "data", "realign_json.json"))
+    json_pth = acres.Loader('nipype.testing').cached('data', 'realign_json.json')
 
-    b = nib.Bunch(infile=json_pth, otherthing="blue", yat=True)
+    b = nib.Bunch(infile=str(json_pth), otherthing="blue", yat=True)
     newbdict, bhash = b._get_bunch_hash()
     assert bhash == "d1f46750044c3de102efc847720fc35f"
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = md5()
-    with open(json_pth) as fp:
-        jshash.update(fp.read().encode("utf-8"))
+    jshash.update(json_pth.read_bytes())
     assert newbdict["infile"][0][1] == jshash.hexdigest()
     assert newbdict["yat"] is True

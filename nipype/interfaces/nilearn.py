@@ -105,7 +105,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
 
         # save output
         self._results["out_file"] = os.path.join(runtime.cwd, self.inputs.out_file)
-        np.savetxt(self._results["out_file"], output, fmt=b"%s", delimiter="\t")
+        np.savetxt(self._results["out_file"], output, fmt="%s", delimiter="\t")
         return runtime
 
     def _process_inputs(self):

@@ -70,8 +70,6 @@ def test_JointFusion_inputs():
         ),
         patch_radius=dict(
             argstr="-p %s",
-            maxlen=3,
-            minlen=3,
         ),
         retain_atlas_voting_images=dict(
             argstr="-f",
