@@ -534,13 +534,15 @@ def generate_gantt_chart(
     # Read in json-log to get list of node dicts
     nodes_list = log_to_dict(logfile)
 
-    # Only include nodes with timing information, and covert timestamps
+    # Only include nodes with timing information, and convert timestamps
     # from strings to datetimes
     nodes_list = [
         {
-            k: datetime.datetime.strptime(i[k], "%Y-%m-%dT%H:%M:%S.%f")
-            if k in {"start", "finish"}
-            else i[k]
+            k: (
+                datetime.datetime.strptime(i[k], "%Y-%m-%dT%H:%M:%S.%f")
+                if k in {"start", "finish"}
+                else i[k]
+            )
             for k in i
         }
         for i in nodes_list
