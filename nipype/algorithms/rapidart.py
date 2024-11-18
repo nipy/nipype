@@ -600,10 +600,10 @@ class ArtifactDetect(BaseInterface):
         outliers = np.unique(np.union1d(iidx, np.union1d(tidx, ridx)))
 
         # write output to outputfile
-        np.savetxt(artifactfile, outliers, fmt=b"%d", delimiter=" ")
-        np.savetxt(intensityfile, g, fmt=b"%.2f", delimiter=" ")
+        np.savetxt(artifactfile, outliers, fmt="%d", delimiter=" ")
+        np.savetxt(intensityfile, g, fmt="%.2f", delimiter=" ")
         if self.inputs.use_norm:
-            np.savetxt(normfile, normval, fmt=b"%.4f", delimiter=" ")
+            np.savetxt(normfile, normval, fmt="%.4f", delimiter=" ")
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             import matplotlib
