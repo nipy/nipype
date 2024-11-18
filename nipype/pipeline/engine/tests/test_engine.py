@@ -541,7 +541,9 @@ def test_write_graph_dotfile(tmpdir, graph_type, simple):
     pipe.write_graph(graph2use=graph_type, simple_form=simple, format="dot")
 
     with open("graph.dot") as f:
-        graph_str = f.read()
+        # Replace handles change in networkx behavior when graph is missing a name
+        # Probably around 3, but I haven't tracked it down.
+        graph_str = f.read().replace('  {', ' {')
 
     if simple:
         for line in dotfiles[graph_type]:
@@ -635,7 +637,9 @@ def test_write_graph_dotfile_iterables(tmpdir, graph_type, simple):
     pipe.write_graph(graph2use=graph_type, simple_form=simple, format="dot")
 
     with open("graph.dot") as f:
-        graph_str = f.read()
+        # Replace handles change in networkx behavior when graph is missing a name
+        # Probably around 3, but I haven't tracked it down.
+        graph_str = f.read().replace('  {', ' {')
 
     if simple:
         for line in dotfiles_iter[graph_type]:
