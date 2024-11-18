@@ -99,11 +99,12 @@ existing pipeline systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = "3.0"
-NETWORKX_MIN_VERSION = "2.5"
-NUMPY_MIN_VERSION = "1.21"
-SCIPY_MIN_VERSION = "1.8"
-TRAITS_MIN_VERSION = "6.2"
+NIBABEL_MIN_VERSION = "2.1.0"
+NETWORKX_MIN_VERSION = "2.0"
+NUMPY_MIN_VERSION = "1.17"
+NUMPY_MAX_VERSION = "2.0"
+SCIPY_MIN_VERSION = "0.14"
+TRAITS_MIN_VERSION = "4.6"
 DATEUTIL_MIN_VERSION = "2.2"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_MIN_VERSION = "1.5.2"
@@ -153,6 +154,7 @@ REQUIRES = [
 
 TESTS_REQUIRES = [
     "coverage >= 5.2.1",
+    "pandas > 1.5.0, <= 2.0",
     "pytest >= 6",
     "pytest-cov >=2.11",
     "pytest-env",
