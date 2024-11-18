@@ -540,7 +540,7 @@ def generate_gantt_chart(
         {
             k: (
                 datetime.datetime.strptime(i[k], "%Y-%m-%dT%H:%M:%S.%f")
-                if k in {"start", "finish"}
+                if k in {"start", "finish"} and isinstance(i[k], str)
                 else i[k]
             )
             for k in i
