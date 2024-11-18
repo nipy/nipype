@@ -158,6 +158,7 @@ TESTS_REQUIRES = [
     "pytest-env",
     "pytest-timeout",
     "pytest-doctestplus",
+    "pytest-xdist",
     "sphinx",
 ]
 
