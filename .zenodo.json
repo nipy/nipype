@@ -286,6 +286,11 @@
       "name": "Mordom, David"
     },
     {
+      "affiliation": "Child Mind Institute",
+      "name": "Cluce, Jon",
+      "orcid": "0000-0001-7590-5806"
+    },
+    {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
       "name": "Guillon, Jérémy",
       "orcid": "0000-0002-2672-7510"
@@ -919,11 +924,6 @@
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
       "name": "Mihai, Paul Glad",
       "orcid": "0000-0001-5715-6442"
-    },
-    {
-      "affiliation": "Child Mind Institute",
-      "name": "Cluce, Jon",
-      "orcid": "0000-0001-7590-5806"
     },
     {
       "affiliation": "Department of Psychology, Stanford University",
