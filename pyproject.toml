@@ -59,6 +59,7 @@ ignore = [
     "E402",
     "E722",
     "E731",    # TODO: enable rule
+    "E741",    # TODO: enable rule
     "F401",
     "F403",
     "F811",
