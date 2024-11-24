@@ -102,7 +102,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             if idx == 0:
                 track_points.append(value)
             else:
-                track_points.append(value - last_value - 1)
+                track_points.append(value - last_value - 1)  # noqa: F821
             last_value = value
         return track_points, nonfinite_list
 

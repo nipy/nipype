@@ -1387,7 +1387,7 @@ class L2Model(BaseInterface):
             "",
             "/Matrix",
         ]
-        grp_txt.extend(["1"] * self.inputs.num_copes)
+        mat_txt.extend(["1"] * self.inputs.num_copes)
         mat_txt = "\n".join(mat_txt)
 
         con_txt = [
