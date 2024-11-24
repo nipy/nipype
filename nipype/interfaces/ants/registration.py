@@ -1611,7 +1611,7 @@ class MeasureImageSimilarity(ANTSCommand):
                 moving_image_mask=self.inputs.moving_image_mask,
             )
         else:
-            retval = '--masks "{}"'.format(  # noqa: UP032
+            retval = '--masks "{fixed_image_mask}"'.format(  # noqa: UP032
                 fixed_image_mask=self.inputs.fixed_image_mask,
             )
         return retval
