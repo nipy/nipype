@@ -75,8 +75,6 @@ ignore = [
     "PIE790",
     "PIE794",
     "PT001",
-    "PT004",   # deprecated
-    "PT005",   # deprecated
     "PT011",
     "PT015",   # TODO: enable rule
     "PT017",   # TODO: enable rule
@@ -88,7 +86,6 @@ ignore = [
     "RUF005",
     "RUF012",  # requires annotations
     "RUF015",
-    "UP027",   # deprecated
     "UP031",   # TODO: enable rule
     "UP032",   # TODO: enable rule
     "UP038",   # https://github.com/astral-sh/ruff/issues/7871
