@@ -960,12 +960,12 @@ def load_spm_mat(spm_mat_file, **kwargs):
         obj_list = []
         for i in range(len(fnames["Vbeta"])):
             obj = sio.matlab.mat_struct()
-            setattr(obj, "fname", np.array([fnames["Vbeta"][i]]))
+            obj.fname = np.array([fnames["Vbeta"][i]])
             obj_list.append(obj)
         if len(obj_list) > 0:
-            setattr(mat["SPM"][0, 0], "Vbeta", np.array([obj_list]))
+            mat["SPM"][0, 0].Vbeta = np.array([obj_list])
         else:
-            setattr(mat["SPM"][0, 0], "Vbeta", np.empty((0, 0), dtype=object))
+            mat["SPM"][0, 0].Vbeta = np.empty((0, 0), dtype=object)
 
         # Structure Vcon and Vspm as returned by scipy.io.loadmat
         obj_list = []
@@ -973,12 +973,12 @@ def load_spm_mat(spm_mat_file, **kwargs):
             obj = sio.matlab.mat_struct()
             for contr_type in ["Vcon", "Vspm"]:
                 temp = sio.matlab.mat_struct()
-                setattr(temp, "fname", np.array([fnames[contr_type][i]]))
+                temp.fname = np.array([fnames[contr_type][i]])
                 setattr(obj, contr_type, np.array([[temp]]))
             obj_list.append(obj)
         if len(obj_list) > 0:
-            setattr(mat["SPM"][0, 0], "xCon", np.array([obj_list]))
+            mat["SPM"][0, 0].xCon = np.array([obj_list])
         else:
-            setattr(mat["SPM"][0, 0], "xCon", np.empty((0, 0), dtype=object))
+            mat["SPM"][0, 0].xCon = np.empty((0, 0), dtype=object)
 
     return mat
