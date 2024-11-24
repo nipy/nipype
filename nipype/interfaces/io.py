@@ -135,15 +135,11 @@ def _get_head_bucket(s3_resource, bucket_name):
             )
             raise Exception(err_msg)
         else:
-            err_msg = "Unable to connect to bucket: {}. Error message:\n{}".format(
-                bucket_name,
-                exc,
+            err_msg = (
+                f"Unable to connect to bucket: {bucket_name}. Error message:\n{exc}"
             )
     except Exception as exc:
-        err_msg = "Unable to connect to bucket: {}. Error message:\n{}".format(
-            bucket_name,
-            exc,
-        )
+        err_msg = f"Unable to connect to bucket: {bucket_name}. Error message:\n{exc}"
         raise Exception(err_msg)
 
 
@@ -609,7 +605,7 @@ class DataSink(IOBase):
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
             src_files = []
-            for root, dirs, files in os.walk(src):
+            for root, dirs, files in os.walk(src):  # noqa: B007
                 src_files.extend([os.path.join(root, fil) for fil in files])
             # Make the dst files have the dst folder as base dir
             dst_files = [os.path.join(dst, src_f.split(src)[1]) for src_f in src_files]
@@ -961,10 +957,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
             if not args:
                 filelist = [fname for fname in bkt_files if re.match(template, fname)]
                 if len(filelist) == 0:
-                    msg = "Output key: {} Template: {} returned no files".format(
-                        key,
-                        template,
-                    )
+                    msg = f"Output key: {key} Template: {template} returned no files"
                     if self.inputs.raise_on_empty:
                         raise OSError(msg)
                     else:
@@ -1009,10 +1002,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         if re.match(filledtemplate, fname):
                             outfiles.append(fname)
                     if len(outfiles) == 0:
-                        msg = "Output key: {} Template: {} returned no files".format(
-                            key,
-                            filledtemplate,
-                        )
+                        msg = f"Output key: {key} Template: {filledtemplate} returned no files"
                         if self.inputs.raise_on_empty:
                             raise OSError(msg)
                         else:
@@ -1236,10 +1226,7 @@ class DataGrabber(IOBase):
             if not args:
                 filelist = glob.glob(template)
                 if len(filelist) == 0:
-                    msg = "Output key: {} Template: {} returned no files".format(
-                        key,
-                        template,
-                    )
+                    msg = f"Output key: {key} Template: {template} returned no files"
                     if self.inputs.raise_on_empty:
                         raise OSError(msg)
                     else:
@@ -1281,10 +1268,7 @@ class DataGrabber(IOBase):
                             )
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
-                        msg = "Output key: {} Template: {} returned no files".format(
-                            key,
-                            filledtemplate,
-                        )
+                        msg = f"Output key: {key} Template: {filledtemplate} returned no files"
                         if self.inputs.raise_on_empty:
                             raise OSError(msg)
                         else:
@@ -1393,7 +1377,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in list(templates.items()):
+        for template in templates.values():
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None:
                     field_name = re.match(r"\w+", field_name).group()
@@ -1454,9 +1438,8 @@ class SelectFiles(IOBase):
 
             # Handle the case where nothing matched
             if not filelist:
-                msg = "No files were found matching {} template: {}".format(
-                    field,
-                    filled_template,
+                msg = (
+                    f"No files were found matching {field} template: {filled_template}"
                 )
                 if self.inputs.raise_on_empty:
                     raise OSError(msg)

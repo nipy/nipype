@@ -37,7 +37,7 @@ def test_cont_to_str():
 
 
 @pytest.mark.parametrize(
-    "string, expected",
+    ("string", "expected"),
     [
         ("yes", True),
         ("true", True),

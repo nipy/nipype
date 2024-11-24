@@ -19,7 +19,7 @@ def test_nipype_info():
 )
 def test_git_hash():
     # removing the first "g" from gitversion
-    get_nipype_gitversion()[1:] == get_info()["commit_hash"]
+    assert get_nipype_gitversion()[1:] == get_info()["commit_hash"]
 
 
 def _check_no_et():
@@ -70,8 +70,8 @@ def test_no_et_bare(tmp_path):
         assert next(iter(res.nodes)).result.outputs.out == et
 
 
-@pytest.mark.parametrize("plugin", ("MultiProc", "LegacyMultiProc"))
-@pytest.mark.parametrize("run_without_submitting", (True, False))
+@pytest.mark.parametrize("plugin", ["MultiProc", "LegacyMultiProc"])
+@pytest.mark.parametrize("run_without_submitting", [True, False])
 def test_no_et_multiproc(tmp_path, plugin, run_without_submitting):
     from unittest.mock import patch
     from nipype.pipeline import engine as pe

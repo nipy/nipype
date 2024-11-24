@@ -23,7 +23,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def _read_pickle(fname):
-    with open(fname, 'rb') as f:
+    with open(fname, "rb") as f:
         return pickle.load(f)
 
 
@@ -203,7 +203,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
 
     # Writes the networks and returns the name
     network_name = group_id + "_average.pck"
-    with open(op.abspath(network_name), 'wb') as f:
+    with open(op.abspath(network_name), "wb") as f:
         pickle.dump(avg_ntwk, f, pickle.HIGHEST_PROTOCOL)
     iflogger.info("Saving average network as %s", op.abspath(network_name))
     avg_ntwk = fix_keys_for_gexf(avg_ntwk)
@@ -351,7 +351,7 @@ def add_node_data(node_array, ntwk):
 def add_edge_data(edge_array, ntwk, above=0, below=0):
     edge_ntwk = ntwk.copy()
     data = {}
-    for x, row in enumerate(edge_array):
+    for x, row in enumerate(edge_array):  # noqa: B007
         for y in range(np.max(np.shape(edge_array[x]))):
             if edge_array[x, y] != 0:
                 data["value"] = edge_array[x, y]
@@ -487,7 +487,7 @@ class NetworkXMetrics(BaseInterface):
         for key in list(node_measures.keys()):
             newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            with open(out_file, 'wb') as f:
+            with open(out_file, "wb") as f:
                 pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             nodentwks.append(out_file)
         if isdefined(self.inputs.out_node_metrics_matlab):
@@ -502,7 +502,7 @@ class NetworkXMetrics(BaseInterface):
         for key in list(edge_measures.keys()):
             newntwk = add_edge_data(edge_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, "pck"))
-            with open(out_file, 'wb') as f:
+            with open(out_file, "wb") as f:
                 pickle.dump(newntwk, f, pickle.HIGHEST_PROTOCOL)
             edgentwks.append(out_file)
         if isdefined(self.inputs.out_edge_metrics_matlab):
@@ -527,7 +527,7 @@ class NetworkXMetrics(BaseInterface):
                 out_file = op.abspath(
                     self._gen_outfilename(self.inputs.out_k_crust, "pck")
                 )
-            with open(out_file, 'wb') as f:
+            with open(out_file, "wb") as f:
                 pickle.dump(ntwk_measures[key], f, pickle.HIGHEST_PROTOCOL)
             kntwks.append(out_file)
         gpickled.extend(kntwks)
@@ -550,14 +550,14 @@ class NetworkXMetrics(BaseInterface):
         # stacks them together, and saves them in a MATLAB .mat file via Scipy
         global dicts
         dicts = list()
-        for idx, key in enumerate(dict_measures.keys()):
-            for idxd, keyd in enumerate(dict_measures[key].keys()):
+        for key, value in dict_measures.items():
+            for idxd, keyd in enumerate(value.keys()):
                 if idxd == 0:
                     nparraykeys = np.array(keyd)
-                    nparrayvalues = np.array(dict_measures[key][keyd])
+                    nparrayvalues = np.array(value[keyd])
                 else:
                     nparraykeys = np.append(nparraykeys, np.array(keyd))
-                    values = np.array(dict_measures[key][keyd])
+                    values = np.array(value[keyd])
                     nparrayvalues = np.append(nparrayvalues, values)
             nparray = np.vstack((nparraykeys, nparrayvalues))
             out_file = op.abspath(self._gen_outfilename(key, "mat"))
