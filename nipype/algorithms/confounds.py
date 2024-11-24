@@ -608,7 +608,7 @@ class CompCor(SimpleInterface):
 
         if len(imgseries.shape) != 4:
             raise ValueError(
-                "{} expected a 4-D nifti file. Input {} has {} dimensions (shape {})".format(  # noqa: UP032
+                "{} expected a 4-D nifti file. Input {} has {} dimensions (shape {})".format(
                     self._header,
                     self.inputs.realigned_file,
                     len(imgseries.shape),

@@ -204,7 +204,7 @@ class ANTS(ANTSCommand):
         return "".join(retval)
 
     def _regularization_constructor(self):
-        return "--regularization {}[{},{}]".format(  # noqa: UP032
+        return "--regularization {}[{},{}]".format(
             self.inputs.regularization,
             self.inputs.regularization_gradient_field_sigma,
             self.inputs.regularization_deformation_field_sigma,
@@ -1241,7 +1241,7 @@ class Registration(ANTSCommand):
                 )
             )
         self._quantilesDone = True
-        return "--winsorize-image-intensities [ {}, {} ]".format(  # noqa: UP032
+        return "--winsorize-image-intensities [ {}, {} ]".format(
             self.inputs.winsorize_lower_quantile,
             self.inputs.winsorize_upper_quantile,
         )
@@ -1268,12 +1268,12 @@ class Registration(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == "fixed_image_mask":
             if isdefined(self.inputs.moving_image_mask):
-                return "--masks [ {}, {} ]".format(  # noqa: UP032
+                return "--masks [ {}, {} ]".format(
                     self.inputs.fixed_image_mask,
                     self.inputs.moving_image_mask,
                 )
             else:
-                return "--masks {}".format(self.inputs.fixed_image_mask)  # noqa: UP032
+                return "--masks {}".format(self.inputs.fixed_image_mask)
         elif opt == "transforms":
             return self._format_registration()
         elif opt == "initial_moving_transform":
@@ -1308,18 +1308,18 @@ class Registration(ANTSCommand):
             out_filename = self._get_outputfilenames(inverse=False)
             inv_out_filename = self._get_outputfilenames(inverse=True)
             if out_filename and inv_out_filename:
-                return "--output [ {}, {}, {} ]".format(  # noqa: UP032
+                return "--output [ {}, {}, {} ]".format(
                     self.inputs.output_transform_prefix,
                     out_filename,
                     inv_out_filename,
                 )
             elif out_filename:
-                return "--output [ {}, {} ]".format(  # noqa: UP032
+                return "--output [ {}, {} ]".format(
                     self.inputs.output_transform_prefix,
                     out_filename,
                 )
             else:
-                return "--output {}".format(  # noqa: UP032
+                return "--output {}".format(
                     self.inputs.output_transform_prefix,
                 )
         elif opt == "winsorize_upper_quantile" or opt == "winsorize_lower_quantile":
@@ -1592,7 +1592,7 @@ class MeasureImageSimilarity(ANTSCommand):
     def _metric_constructor(self):
         retval = (
             '--metric {metric}["{fixed_image}","{moving_image}",{metric_weight},'
-            "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(  # noqa: UP032
+            "{radius_or_number_of_bins},{sampling_strategy},{sampling_percentage}]".format(
                 metric=self.inputs.metric,
                 fixed_image=self.inputs.fixed_image,
                 moving_image=self.inputs.moving_image,
@@ -1606,12 +1606,12 @@ class MeasureImageSimilarity(ANTSCommand):
 
     def _mask_constructor(self):
         if self.inputs.moving_image_mask:
-            retval = '--masks ["{fixed_image_mask}","{moving_image_mask}"]'.format(  # noqa: UP032
+            retval = '--masks ["{fixed_image_mask}","{moving_image_mask}"]'.format(
                 fixed_image_mask=self.inputs.fixed_image_mask,
                 moving_image_mask=self.inputs.moving_image_mask,
             )
         else:
-            retval = '--masks "{fixed_image_mask}"'.format(  # noqa: UP032
+            retval = '--masks "{fixed_image_mask}"'.format(
                 fixed_image_mask=self.inputs.fixed_image_mask,
             )
         return retval
