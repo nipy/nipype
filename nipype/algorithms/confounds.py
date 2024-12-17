@@ -208,7 +208,7 @@ Bradley L. and Petersen, Steven E.},
 
         if self.inputs.save_nstd:
             out_file = self._gen_fname("dvars_nstd", ext="tsv")
-            np.savetxt(out_file, dvars[1], fmt=b"%0.6f")
+            np.savetxt(out_file, dvars[1], fmt="%0.6f")
             self._results["out_nstd"] = out_file
 
             if self.inputs.save_plot:
