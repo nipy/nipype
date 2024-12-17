@@ -5,7 +5,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 
 # nipype version information
 # Remove .dev0 for release
-__version__ = "1.9.2.dev0"
+__version__ = "1.9.2"
 
 
 def get_nipype_gitversion():
@@ -58,6 +58,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
 ]
 PYTHON_REQUIRES = ">= 3.9"
