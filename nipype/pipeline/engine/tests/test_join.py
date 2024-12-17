@@ -71,8 +71,7 @@ class SumInterface(nib.SimpleInterface):
     output_spec = SumOutputSpec
 
     def _run_interface(self, runtime):
-        global _sum
-        global _sum_operands
+        global _sum, _sum_operands
         runtime.returncode = 0
         self._results["operands"] = self.inputs.input1
         self._results["output1"] = sum(self.inputs.input1)
@@ -139,9 +138,7 @@ class ProductInterface(nib.BaseInterface):
 
 @pytest.mark.parametrize("needed_outputs", ["true", "false"])
 def test_join_expansion(tmpdir, needed_outputs):
-    global _sums
-    global _sum_operands
-    global _products
+    global _sums, _sum_operands, _products
     tmpdir.chdir()
 
     # Clean up, just in case some other test modified them

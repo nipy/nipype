@@ -60,7 +60,7 @@ def test_FSLCommand2():
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.parametrize(
-    "args, desired_name",
+    ("args", "desired_name"),
     [
         ({}, {"file": "foo.nii.gz"}),  # just the filename
         # filename with suffix

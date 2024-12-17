@@ -37,7 +37,7 @@ def test_rename(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "args, expected", [({}, ([0], [1, 2, 3])), ({"squeeze": True}, (0, [1, 2, 3]))]
+    ("args", "expected"), [({}, ([0], [1, 2, 3])), ({"squeeze": True}, (0, [1, 2, 3]))]
 )
 def test_split(tmpdir, args, expected):
     tmpdir.chdir()
@@ -52,14 +52,13 @@ def test_split(tmpdir, args, expected):
 
 
 @pytest.mark.parametrize(
-    "args, kwargs, in_lists, expected",
+    ("args", "kwargs", "in_lists", "expected"),
     [
         ([3], {}, [0, [1, 2], [3, 4, 5]], [0, 1, 2, 3, 4, 5]),
         ([0], {}, None, None),
         ([], {}, [], []),
         ([], {}, [0, [1, 2], [3, 4, 5]], [0, [1, 2], [3, 4, 5]]),
         ([3], {"axis": "hstack"}, [[0], [1, 2], [3, 4, 5]], [[0, 1, 3]]),
-        ([3], {"axis": "hstack"}, [[0, 1], [2, 3], [4, 5]], [[0, 2, 4], [1, 3, 5]]),
         ([3], {"axis": "hstack"}, [[0, 1], [2, 3], [4, 5]], [[0, 2, 4], [1, 3, 5]]),
     ],
 )

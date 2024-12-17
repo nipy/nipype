@@ -244,7 +244,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         if self.inputs.weighting == "area":
             faces = vtk1.polys.to_array().reshape(-1, 4).astype(int)[:, 1:]
 
-            for i, p1 in enumerate(points2):
+            for i, _ in enumerate(points2):
                 # compute surfaces, set in weight
                 w = 0.0
                 point_faces = faces[(faces[:, :] == i).any(axis=1)]
