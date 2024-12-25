@@ -78,15 +78,16 @@ class Info:
 
         versions = {"minc": None, "libminc": None, "netcdf": None, "hdf5": None}
 
-        for l in out.split("\n"):
+        for line in out.split("\n"):
             for name, f in [
                 ("minc", read_program_version),
                 ("libminc", read_libminc_version),
                 ("netcdf", read_netcdf_version),
                 ("hdf5", read_hdf5_version),
             ]:
-                if f(l) is not None:
-                    versions[name] = f(l)
+                version = f(line)
+                if version is not None:
+                    versions[name] = version
 
         return versions
 

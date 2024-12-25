@@ -168,10 +168,7 @@ def test_overlay(create_files_in_directory_plus_output_type):
     )
     assert (
         overlay2.cmdline
-        == "overlay 1 0 {} -a {} 2.50 10.00 foo2_overlay.nii".format(
-            filelist[1],
-            filelist[0],
-        )
+        == f"overlay 1 0 {filelist[1]} -a {filelist[0]} 2.50 10.00 foo2_overlay.nii"
     )
 
 
@@ -199,10 +196,7 @@ def test_slicer(create_files_in_directory_plus_output_type):
     slicer.inputs.out_file = "foo_bar.png"
     assert (
         slicer.cmdline
-        == "slicer {} {} -L -i 10.000 20.000  -A 750 foo_bar.png".format(
-            filelist[0],
-            filelist[1],
-        )
+        == f"slicer {filelist[0]} {filelist[1]} -L -i 10.000 20.000  -A 750 foo_bar.png"
     )
 
     # .run based parameter setting
@@ -317,9 +311,8 @@ def test_convertxfm(create_files_in_directory_plus_output_type):
     cvt2 = fsl.ConvertXFM(
         in_file=filelist[0], in_file2=filelist[1], concat_xfm=True, out_file="bar.mat"
     )
-    assert cvt2.cmdline == "convert_xfm -omat bar.mat -concat {} {}".format(
-        filelist[1],
-        filelist[0],
+    assert (
+        cvt2.cmdline == f"convert_xfm -omat bar.mat -concat {filelist[1]} {filelist[0]}"
     )
 
 

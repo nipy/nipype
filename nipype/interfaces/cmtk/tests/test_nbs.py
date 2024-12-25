@@ -21,7 +21,7 @@ def creating_graphs(tmpdir):
         G = nx.from_numpy_array(graph)
         out_file = tmpdir.strpath + graphnames[idx] + ".pck"
         # Save as pck file
-        with open(out_file, 'wb') as f:
+        with open(out_file, "wb") as f:
             pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
         graphlist.append(out_file)
     return graphlist

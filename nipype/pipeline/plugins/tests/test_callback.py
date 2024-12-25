@@ -91,7 +91,7 @@ def test_callback_gantt(tmp_path: Path, plugin: str) -> None:
         plugin_args["n_procs"] = 8
     wf.run(plugin=plugin, plugin_args=plugin_args)
 
-    with open(log_filename, "r") as _f:
+    with open(log_filename) as _f:
         loglines = _f.readlines()
 
     # test missing duration

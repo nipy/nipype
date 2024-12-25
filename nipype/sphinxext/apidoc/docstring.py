@@ -68,7 +68,7 @@ class InterfaceDocstring(NipypeDocstring):
     def __init__(
         self, docstring, config=None, app=None, what="", name="", obj=None, options=None
     ):
-        # type: (Union[unicode, List[unicode]], SphinxConfig, Sphinx, unicode, unicode, Any, Any) -> None  # NOQA
+        # type: (Union[unicode, List[unicode]], SphinxConfig, Sphinx, unicode, unicode, Any, Any) -> None
         super().__init__(docstring, config, app, what, name, obj, options)
 
         cmd = getattr(obj, "_cmd", "")
@@ -138,15 +138,11 @@ def _parse_spec(inputs, name, spec):
         pos = spec.position
         if pos is None:
             desc_lines += [
-                """Maps to a command-line argument: :code:`{arg}`.""".format(
-                    arg=argstr.strip()
-                )
+                f"""Maps to a command-line argument: :code:`{argstr.strip()}`."""
             ]
         else:
             desc_lines += [
-                """Maps to a command-line argument: :code:`{arg}` (position: {pos}).""".format(
-                    arg=argstr.strip(), pos=pos
-                )
+                f"""Maps to a command-line argument: :code:`{argstr.strip()}` (position: {pos})."""
             ]
 
     xor = spec.xor
