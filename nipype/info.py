@@ -5,7 +5,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 
 # nipype version information
 # Remove .dev0 for release
-__version__ = "1.8.7.dev0"
+__version__ = "1.9.3.dev0"
 
 
 def get_nipype_gitversion():
@@ -54,14 +54,14 @@ CLASSIFIERS = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
 ]
-PYTHON_REQUIRES = ">= 3.8"
+PYTHON_REQUIRES = ">= 3.9"
 
 description = "Neuroimaging in Python: Pipelines and Interfaces"
 
@@ -100,12 +100,11 @@ existing pipeline systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = "2.1.0"
-NETWORKX_MIN_VERSION = "2.0"
-NUMPY_MIN_VERSION = "1.17"
-SCIPY_MIN_VERSION = "0.14"
-TRAITS_MIN_VERSION = "4.6"
-TRAITS_MAX_VERSION = "6.4"
+NIBABEL_MIN_VERSION = "3.0"
+NETWORKX_MIN_VERSION = "2.5"
+NUMPY_MIN_VERSION = "1.21"
+SCIPY_MIN_VERSION = "1.8"
+TRAITS_MIN_VERSION = "6.2"
 DATEUTIL_MIN_VERSION = "2.2"
 SIMPLEJSON_MIN_VERSION = "3.8.0"
 PROV_MIN_VERSION = "1.5.2"
@@ -145,21 +144,24 @@ REQUIRES = [
     "rdflib>=%s" % RDFLIB_MIN_VERSION,
     "scipy>=%s" % SCIPY_MIN_VERSION,
     "simplejson>=%s" % SIMPLEJSON_MIN_VERSION,
-    "traits>=%s,<%s,!=5.0" % (TRAITS_MIN_VERSION, TRAITS_MAX_VERSION),
+    "traits>=%s" % TRAITS_MIN_VERSION,
     "filelock>=3.0.0",
-    "etelemetry>=0.2.0",
+    "acres",
+    "etelemetry>=0.3.1",
     "looseversion!=1.2",
+    "puremagic",
 ]
 
 TESTS_REQUIRES = [
-    "codecov",
-    "coverage",
-    "pytest",
-    "pytest-cov",
+    "coverage >= 5.2.1",
+    "pandas >= 1.5.0",
+    "pytest >= 6",
+    "pytest-cov >=2.11",
     "pytest-env",
-    "pytest-timeout",
+    "pytest-timeout >=1.4",
     "pytest-doctestplus",
-    "sphinx",
+    "pytest-xdist >= 2.5",
+    "sphinx >=7",
 ]
 
 EXTRA_REQUIRES = {
@@ -187,7 +189,7 @@ EXTRA_REQUIRES = {
 
 
 def _list_union(iterable):
-    return list(set(sum(iterable, [])))
+    return list(set(x for sublist in iterable for x in sublist))
 
 
 # Enable a handle to install all extra dependencies at once

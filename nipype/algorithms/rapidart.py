@@ -189,7 +189,8 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
         desc="Source of movement parameters",
         mandatory=True,
     )
-    use_differences = traits.ListBool(
+    use_differences = traits.List(
+        traits.Bool,
         [True, False],
         minlen=2,
         maxlen=2,
@@ -397,19 +398,13 @@ class ArtifactDetect(BaseInterface):
         else:
             raise Exception("Unknown type of file")
         _, filename, ext = split_filename(infile)
-        artifactfile = os.path.join(
-            output_dir, "".join(("art.", filename, "_outliers.txt"))
-        )
-        intensityfile = os.path.join(
-            output_dir, "".join(("global_intensity.", filename, ".txt"))
-        )
-        statsfile = os.path.join(output_dir, "".join(("stats.", filename, ".txt")))
-        normfile = os.path.join(output_dir, "".join(("norm.", filename, ".txt")))
-        plotfile = os.path.join(
-            output_dir, "".join(("plot.", filename, ".", self.inputs.plot_type))
-        )
-        displacementfile = os.path.join(output_dir, "".join(("disp.", filename, ext)))
-        maskfile = os.path.join(output_dir, "".join(("mask.", filename, ext)))
+        artifactfile = os.path.join(output_dir, f"art.{filename}_outliers.txt")
+        intensityfile = os.path.join(output_dir, f"global_intensity.{filename}.txt")
+        statsfile = os.path.join(output_dir, f"stats.{filename}.txt")
+        normfile = os.path.join(output_dir, f"norm.{filename}.txt")
+        plotfile = os.path.join(output_dir, f"plot.{filename}.{self.inputs.plot_type}")
+        displacementfile = os.path.join(output_dir, f"disp.{filename}{ext}")
+        maskfile = os.path.join(output_dir, f"mask.{filename}{ext}")
         return (
             artifactfile,
             intensityfile,
@@ -606,10 +601,10 @@ class ArtifactDetect(BaseInterface):
         outliers = np.unique(np.union1d(iidx, np.union1d(tidx, ridx)))
 
         # write output to outputfile
-        np.savetxt(artifactfile, outliers, fmt=b"%d", delimiter=" ")
-        np.savetxt(intensityfile, g, fmt=b"%.2f", delimiter=" ")
+        np.savetxt(artifactfile, outliers, fmt="%d", delimiter=" ")
+        np.savetxt(intensityfile, g, fmt="%.2f", delimiter=" ")
         if self.inputs.use_norm:
-            np.savetxt(normfile, normval, fmt=b"%.4f", delimiter=" ")
+            np.savetxt(normfile, normval, fmt="%.4f", delimiter=" ")
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
             import matplotlib
@@ -760,7 +755,7 @@ class StimulusCorrelation(BaseInterface):
         """
         (_, filename) = os.path.split(motionfile)
         (filename, _) = os.path.splitext(filename)
-        corrfile = os.path.join(output_dir, "".join(("qa.", filename, "_stimcorr.txt")))
+        corrfile = os.path.join(output_dir, f"qa.{filename}_stimcorr.txt")
         return corrfile
 
     def _stimcorr_core(self, motionfile, intensityfile, designmatrix, cwd=None):

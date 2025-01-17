@@ -457,9 +457,9 @@ def get_print_name(node, simple_form=True):
         if len(pkglist) > 2:
             destclass = ".%s" % pkglist[2]
         if simple_form:
-            name = node.fullname + destclass
+            name = f"{node.fullname}{destclass}"
         else:
-            name = ".".join([node.fullname, interface]) + destclass
+            name = f"{node.fullname}.{interface}{destclass}"
     if simple_form:
         parts = name.split(".")
         if len(parts) > 2:
@@ -689,15 +689,10 @@ def evaluate_connect_function(function_source, args, first_arg):
     try:
         output_value = func(first_arg, *list(args))
     except NameError as e:
-        if e.args[0].startswith("global name") and e.args[0].endswith("is not defined"):
-            e.args = (
-                e.args[0],
-                (
-                    "Due to engine constraints all imports have to be done "
-                    "inside each function definition"
-                ),
-            )
-        raise e
+        raise NameError(
+            f"{e}: Due to engine constraints all imports have to be done inside each "
+            " function definition."
+        )
     return output_value
 
 
@@ -852,7 +847,7 @@ def _identity_nodes(graph, include_iterables):
         node
         for node in nx.topological_sort(graph)
         if isinstance(node.interface, IdentityInterface)
-        and (include_iterables or getattr(node, "iterables") is None)
+        and (include_iterables or node.iterables is None)
     ]
 
 
@@ -1046,7 +1041,7 @@ def generate_expanded_graph(graph_in):
         logger.debug("node: %s iterables: %s", inode, iterables)
 
         # collect the subnodes to expand
-        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        subnodes = list(dfs_preorder(graph_in, inode))
         prior_prefix = [re.findall(r"\.(.)I", s._id) for s in subnodes if s._id]
         prior_prefix = sorted([l for item in prior_prefix for l in item])
         if not prior_prefix:
@@ -1479,23 +1474,21 @@ def clean_working_directory(
     needed_files = temp
     logger.debug("Needed files: %s", ";".join(needed_files))
     logger.debug("Needed dirs: %s", ";".join(needed_dirs))
-    files2remove = []
     if str2bool(config["execution"]["remove_unnecessary_outputs"]):
-        for f in walk_files(cwd):
-            if f not in needed_files:
-                if not needed_dirs:
-                    files2remove.append(f)
-                elif not any([f.startswith(dname) for dname in needed_dirs]):
-                    files2remove.append(f)
+        files2remove = [
+            f
+            for f in walk_files(cwd)
+            if f not in needed_files and not f.startswith(tuple(needed_dirs))
+        ]
+    elif not str2bool(config["execution"]["keep_inputs"]):
+        input_files = {
+            path for path, type in walk_outputs(inputs.trait_get()) if type == "f"
+        }
+        files2remove = [
+            f for f in walk_files(cwd) if f in input_files and f not in needed_files
+        ]
     else:
-        if not str2bool(config["execution"]["keep_inputs"]):
-            input_files = []
-            inputdict = inputs.trait_get()
-            input_files.extend(walk_outputs(inputdict))
-            input_files = [path for path, type in input_files if type == "f"]
-            for f in walk_files(cwd):
-                if f in input_files and f not in needed_files:
-                    files2remove.append(f)
+        files2remove = []
     logger.debug("Removing files: %s", ";".join(files2remove))
     for f in files2remove:
         os.remove(f)
@@ -1565,7 +1558,7 @@ def write_workflow_prov(graph, filename=None, format="all"):
         _, hashval, _, _ = node.hash_exists()
         attrs = {
             pm.PROV["type"]: nipype_ns[classname],
-            pm.PROV["label"]: "_".join((classname, node.name)),
+            pm.PROV["label"]: f"{classname}_{node.name}",
             nipype_ns["hashval"]: hashval,
         }
         process = ps.g.activity(get_id(), None, None, attrs)
@@ -1710,16 +1703,12 @@ def topological_sort(graph, depth_first=False):
     logger.debug("Performing depth first search")
     nodes = []
     groups = []
-    group = 0
     G = nx.Graph()
     G.add_nodes_from(graph.nodes())
     G.add_edges_from(graph.edges())
     components = nx.connected_components(G)
-    for desc in components:
-        group += 1
-        indices = []
-        for node in desc:
-            indices.append(nodesort.index(node))
+    for group, desc in enumerate(components, start=1):
+        indices = [nodesort.index(node) for node in desc]
         nodes.extend(
             np.array(nodesort)[np.array(indices)[np.argsort(indices)]].tolist()
         )

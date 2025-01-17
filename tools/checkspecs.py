@@ -124,10 +124,8 @@ class InterfaceChecker:
         if filename is None:
             # nothing that we could handle here.
             return ([], [])
-        f = open(filename)
-        functions, classes = self._parse_lines(f, uri)
-        f.close()
-        return functions, classes
+        with open(filename) as f:
+            return self._parse_lines(f, uri)
 
     def _parse_lines(self, linesource, module):
         """Parse lines of text for functions and classes"""
@@ -143,7 +141,7 @@ class InterfaceChecker:
                 # exclude private stuff
                 name = self._get_object_name(line)
                 if not name.startswith("_") and self._survives_exclude(
-                    ".".join((module, name)), "class"
+                    f"{module}.{name}", "class"
                 ):
                     classes.append(name)
             else:
@@ -287,7 +285,7 @@ class InterfaceChecker:
                         continue
                     parent_metadata = []
                     if "parent" in trait.__dict__:
-                        parent_metadata = list(getattr(trait, "parent").__dict__.keys())
+                        parent_metadata = list(trait.parent.__dict__)
                     if (
                         key
                         not in allowed_keys
@@ -303,7 +301,7 @@ class InterfaceChecker:
                         bad_specs.append(
                             [uri, c, "Inputs", traitname, "mandatory=False"]
                         )
-                    if key == "usedefault" and trait.__dict__[key] == False:
+                    if key == "usedefault" and trait.__dict__[key] is False:
                         bad_specs.append(
                             [uri, c, "Inputs", traitname, "usedefault=False"]
                         )
@@ -375,7 +373,7 @@ class InterfaceChecker:
                         continue
                     parent_metadata = []
                     if "parent" in trait.__dict__:
-                        parent_metadata = list(getattr(trait, "parent").__dict__.keys())
+                        parent_metadata = list(trait.parent.__dict__)
                     if (
                         key
                         not in allowed_keys
@@ -449,7 +447,7 @@ class InterfaceChecker:
             # Check directory names for packages
             root_uri = self._path2uri(os.path.join(self.root_path, dirpath))
             for dirname in dirnames[:]:  # copy list - we modify inplace
-                package_uri = ".".join((root_uri, dirname))
+                package_uri = f"{root_uri}.{dirname}"
                 if self._uri2path(package_uri) and self._survives_exclude(
                     package_uri, "package"
                 ):
@@ -459,7 +457,7 @@ class InterfaceChecker:
             # Check filenames for modules
             for filename in filenames:
                 module_name = filename[:-3]
-                module_uri = ".".join((root_uri, module_name))
+                module_uri = f"{root_uri}.{module_name}"
                 if self._uri2path(module_uri) and self._survives_exclude(
                     module_uri, "module"
                 ):

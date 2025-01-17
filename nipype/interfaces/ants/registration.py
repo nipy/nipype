@@ -5,7 +5,7 @@
 import os
 
 from ...utils.filemanip import ensure_list
-from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined
+from ..base import TraitedSpec, File, Str, traits, InputMultiPath, isdefined, Tuple
 from .base import ANTSCommand, ANTSCommandInputSpec, LOCAL_DEFAULT_NUMBER_OF_THREADS
 
 
@@ -190,10 +190,11 @@ class ANTS(ANTSCommand):
         delta_time = self.inputs.delta_time
         symmetry_type = self.inputs.symmetry_type
         retval = ["--transformation-model %s" % model]
-        parameters = []
-        for elem in (step_length, time_step, delta_time, symmetry_type):
-            if elem is not traits.Undefined:
-                parameters.append("%#.2g" % elem)
+        parameters = [
+            "%#.2g" % elem
+            for elem in (step_length, time_step, delta_time, symmetry_type)
+            if elem is not traits.Undefined
+        ]
         if len(parameters) > 0:
             if len(parameters) > 1:
                 parameters = ",".join(parameters)
@@ -423,11 +424,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         usedefault=True,
     )
     interpolation_parameters = traits.Either(
-        traits.Tuple(traits.Int()),  # BSpline (order)
-        traits.Tuple(
-            traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
-        ),
-        traits.Tuple(traits.Str()),  # GenericLabel (interpolator)
+        Tuple(traits.Int()),  # BSpline (order)
+        Tuple(traits.Float(), traits.Float()),  # Gaussian/MultiLabel (sigma, alpha)
+        Tuple(traits.Str()),  # GenericLabel (interpolator)
     )
 
     write_composite_transform = traits.Bool(
@@ -491,20 +490,20 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # Exponential, and BSplineExponential. EVEN DEFAULTS!
     transform_parameters = traits.List(
         traits.Either(
-            traits.Tuple(traits.Float()),  # Translation, Rigid, Affine,
+            Tuple(traits.Float()),  # Translation, Rigid, Affine,
             # CompositeAffine, Similarity
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # GaussianDisplacementField, SyN
                 traits.Float(),
                 traits.Float(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # BSplineSyn,
                 traits.Int(),  # BSplineDisplacementField,
                 traits.Int(),  # TimeVaryingBSplineVelocityField
                 traits.Int(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # TimeVaryingVelocityField
                 traits.Int(),
                 traits.Float(),
@@ -512,13 +511,13 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                 traits.Float(),
                 traits.Float(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # Exponential
                 traits.Float(),
                 traits.Float(),
                 traits.Int(),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),  # BSplineExponential
                 traits.Int(),
                 traits.Int(),
@@ -711,9 +710,9 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     >>> reg.run()  # doctest: +SKIP
 
@@ -727,9 +726,9 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
     >>> reg1.run()  # doctest: +SKIP
 
@@ -743,9 +742,9 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
 
     Clip extremely low intensity data points using winsorize_lower_quantile. All data points
@@ -760,9 +759,9 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
     Use float instead of double for computations (saves memory usage)
@@ -774,10 +773,10 @@ class Registration(ANTSCommand):
 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
---smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     Force to use double instead of float for computations (more precision and memory usage).
@@ -789,10 +788,10 @@ class Registration(ANTSCommand):
 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
---smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     'collapse_output_transforms' can be used to put all transformation in a single 'composite_transform'-
@@ -824,10 +823,10 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
---smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
 
@@ -858,10 +857,10 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
---smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 0'
 
     One can use multiple similarity metrics in a single registration stage.The Node below first
@@ -886,10 +885,10 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
 --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     ANTS Registration can also use multiple modalities to perform the registration. Here it is assumed
@@ -907,10 +906,10 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
 --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     Different methods can be used for the interpolation when applying transformations.
@@ -924,9 +923,9 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation BSpline[ 3 ] --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
+--use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test Interpolation Parameters (MultiLabel/Gaussian)
@@ -938,10 +937,10 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Gaussian[ 1.0, 1.0 ] \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
---smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     BSplineSyN non-linear registration with custom parameters.
@@ -955,9 +954,9 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] \
+--use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
---smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
+--smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     Mask the fixed image in the second stage of the registration (but not the first).
@@ -970,10 +969,10 @@ class Registration(ANTSCommand):
 --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
 --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ NULL, NULL ] \
+--use-histogram-matching 1 --masks [ NULL, NULL ] \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --masks [ fixed1.nii, NULL ] \
+--use-histogram-matching 1 --masks [ fixed1.nii, NULL ] \
 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     Here we use both a warpfield and a linear transformation, before registration commences.  Note that
@@ -989,10 +988,10 @@ class Registration(ANTSCommand):
 [ func_to_struct.mat, 0 ] [ ants_Warp.nii.gz, 0 ] --initialize-transforms-per-stage 0 --interpolation Linear \
 --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
---smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
+--smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
     """
 
@@ -1075,7 +1074,7 @@ class Registration(ANTSCommand):
         # from the non-list inputs.
         if isinstance(name_input, list):
             items = list(stage_inputs.items())
-            indexes = list(range(0, len(name_input)))
+            indexes = list(range(len(name_input)))
             specs = list()
             for i in indexes:
                 temp = {k: v[i] for k, v in items}
@@ -1127,21 +1126,16 @@ class Registration(ANTSCommand):
         return retval
 
     def _format_transform(self, index):
-        retval = []
-        retval.append("%s[ " % self.inputs.transforms[index])
         parameters = ", ".join(
             [str(element) for element in self.inputs.transform_parameters[index]]
         )
-        retval.append("%s" % parameters)
-        retval.append(" ]")
-        return "".join(retval)
+        return f"{self.inputs.transforms[index]}[ {parameters} ]"
 
     def _format_registration(self):
         retval = []
         for ii in range(len(self.inputs.transforms)):
             retval.append("--transform %s" % (self._format_transform(ii)))
-            for metric in self._format_metric(ii):
-                retval.append("--metric %s" % metric)
+            retval.extend("--metric %s" % metric for metric in self._format_metric(ii))
             retval.append("--convergence %s" % self._format_convergence(ii))
             if isdefined(self.inputs.sigma_units):
                 retval.append(
@@ -1161,10 +1155,9 @@ class Registration(ANTSCommand):
                 % self._format_xarray(self.inputs.shrink_factors[ii])
             )
             if isdefined(self.inputs.use_estimate_learning_rate_once):
-                retval.append(
-                    "--use-estimate-learning-rate-once %d"
-                    % self.inputs.use_estimate_learning_rate_once[ii]
-                )
+                # this flag was removed because it was never used in the ants codebase
+                # removed from Ants in commit e1e47994b on 2022-08-09
+                pass
             if isdefined(self.inputs.use_histogram_matching):
                 # use_histogram_matching is either a common flag for all transforms
                 # or a list of transform-specific flags

@@ -46,7 +46,7 @@ class ImageStatsInputSpec(CommandLineInputSpec):
         "double",
         argstr="-outputdatatype %s",
         usedefault=True,
-        desc=('A Camino data type string, default is "float". ' "Type must be signed."),
+        desc=('A Camino data type string, default is "float". Type must be signed.'),
     )
     output_root = File(
         argstr="-outputroot %s",

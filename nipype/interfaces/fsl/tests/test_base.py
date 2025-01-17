@@ -4,7 +4,7 @@ import os
 
 import nipype.interfaces.fsl as fsl
 from nipype.interfaces.base import InterfaceResult
-from nipype.interfaces.fsl import check_fsl, no_fsl
+from nipype.interfaces.fsl import no_fsl
 
 import pytest
 
@@ -37,7 +37,7 @@ def test_FSLCommand():
     # testing the one item that is not.
     cmd = fsl.FSLCommand(command="ls")
     res = cmd.run()
-    assert type(res) == InterfaceResult
+    assert type(res) is InterfaceResult
 
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
@@ -79,7 +79,7 @@ def test_gen_fname(args, desired_name):
     cmd = fsl.FSLCommand(command="junk", output_type="NIFTI_GZ")
     pth = os.getcwd()
     fname = cmd._gen_fname("foo.nii.gz", **args)
-    if "dir" in desired_name.keys():
+    if "dir" in desired_name:
         desired = os.path.join(desired_name["dir"], desired_name["file"])
     else:
         desired = os.path.join(pth, desired_name["file"])

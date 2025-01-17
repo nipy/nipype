@@ -1,0 +1,30 @@
+# Project available at https://github.com/nipy/nipype
+
+name: nipype
+
+headline: Neuroimaging in Python: Pipelines and Interfaces
+
+description: |
+    Nipype, an open-source, community-developed initiative under the umbrella of NiPy, is a Python project that
+    provides a uniform interface to existing neuroimaging software and facilitates interaction between these
+    packages within a single workflow. Nipype provides an environment that encourages interactive exploration of
+    algorithms from different packages (e.g., SPM, FSL, FreeSurfer, AFNI, Slicer, ANTS), eases the design of
+    workflows within and between packages, and reduces the learning curve necessary to use different packages.
+
+language: Python3
+
+documentation:
+  general: https://nipype.readthedocs.io/en/latest/
+  installation: https://nipype.readthedocs.io/en/latest/users/install.html
+  tutorial: https://miykael.github.io/nipype_tutorial/
+
+execution_environment: 
+  resource_managers:
+    - SLURM
+    - Condor
+    - DAGMan
+    - LSF
+    - OAR
+    - PBS
+    - SGE
+    - Soma-workflow

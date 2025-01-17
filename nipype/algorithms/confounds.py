@@ -24,6 +24,7 @@ from ..interfaces.base import (
     InputMultiPath,
     OutputMultiPath,
     SimpleInterface,
+    Tuple,
 )
 from ..utils.misc import normalize_mc_params
 
@@ -64,7 +65,7 @@ class ComputeDVARSInputSpec(BaseInterfaceInputSpec):
     series_tr = traits.Float(desc="repetition time in sec.")
     save_plot = traits.Bool(False, usedefault=True, desc="write DVARS plot")
     figdpi = traits.Int(100, usedefault=True, desc="output dpi for the plot")
-    figsize = traits.Tuple(
+    figsize = Tuple(
         traits.Float(11.7),
         traits.Float(2.3),
         usedefault=True,
@@ -187,7 +188,7 @@ Bradley L. and Petersen, Steven E.},
 
         if self.inputs.save_std:
             out_file = self._gen_fname("dvars_std", ext="tsv")
-            np.savetxt(out_file, dvars[0], fmt=b"%0.6f")
+            np.savetxt(out_file, dvars[0], fmt="%0.6f")
             self._results["out_std"] = out_file
 
             if self.inputs.save_plot:
@@ -207,7 +208,7 @@ Bradley L. and Petersen, Steven E.},
 
         if self.inputs.save_nstd:
             out_file = self._gen_fname("dvars_nstd", ext="tsv")
-            np.savetxt(out_file, dvars[1], fmt=b"%0.6f")
+            np.savetxt(out_file, dvars[1], fmt="%0.6f")
             self._results["out_nstd"] = out_file
 
             if self.inputs.save_plot:
@@ -227,7 +228,7 @@ Bradley L. and Petersen, Steven E.},
 
         if self.inputs.save_vxstd:
             out_file = self._gen_fname("dvars_vxstd", ext="tsv")
-            np.savetxt(out_file, dvars[2], fmt=b"%0.6f")
+            np.savetxt(out_file, dvars[2], fmt="%0.6f")
             self._results["out_vxstd"] = out_file
 
             if self.inputs.save_plot:
@@ -250,8 +251,8 @@ Bradley L. and Petersen, Steven E.},
             np.savetxt(
                 out_file,
                 np.vstack(dvars).T,
-                fmt=b"%0.8f",
-                delimiter=b"\t",
+                fmt="%0.8f",
+                delimiter="\t",
                 header="std DVARS\tnon-std DVARS\tvx-wise std DVARS",
                 comments="",
             )
@@ -286,7 +287,7 @@ class FramewiseDisplacementInputSpec(BaseInterfaceInputSpec):
     save_plot = traits.Bool(False, usedefault=True, desc="write FD plot")
     normalize = traits.Bool(False, usedefault=True, desc="calculate FD in mm/s")
     figdpi = traits.Int(100, usedefault=True, desc="output dpi for the FD plot")
-    figsize = traits.Tuple(
+    figsize = Tuple(
         traits.Float(11.7),
         traits.Float(2.3),
         usedefault=True,
@@ -688,7 +689,7 @@ class CompCor(SimpleInterface):
         np.savetxt(
             components_file,
             components,
-            fmt=b"%.10f",
+            fmt="%.10f",
             delimiter="\t",
             header="\t".join(components_header),
             comments="",
@@ -728,7 +729,7 @@ class CompCor(SimpleInterface):
             np.savetxt(
                 self._results["pre_filter_file"],
                 filter_basis,
-                fmt=b"%.10f",
+                fmt="%.10f",
                 delimiter="\t",
                 header="\t".join(header),
                 comments="",
@@ -1289,11 +1290,8 @@ def combine_mask_files(mask_files, mask_method=None, mask_index=None):
         raise ValueError(
             f"mask_index {mask_index} must be less than number of mask files {len(mask_files)}"
         )
-    masks = []
     if mask_method == "none":
-        for filename in mask_files:
-            masks.append(nb.load(filename))
-        return masks
+        return [nb.load(filename) for filename in mask_files]
 
     if mask_method == "union":
         mask = None

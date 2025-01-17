@@ -288,7 +288,7 @@ def get_boutiques_input(
     if handler_type == "TraitCompound":
         input_list = []
         # Recursively create an input for each trait
-        for i in range(0, len(trait_handler.handlers)):
+        for i in range(len(trait_handler.handlers)):
             inp = get_boutiques_input(
                 inputs,
                 interface,
@@ -473,13 +473,11 @@ def get_boutiques_output(outputs, name, spec, interface, tool_inputs):
         output["list"] = True
         if output_value:
             # Check if all extensions are the same
-            extensions = []
-            for val in output_value:
-                extensions.append(os.path.splitext(val)[1])
+            extensions = {os.path.splitext(val)[1] for val in output_value}
             # If extensions all the same, set path template as
             # wildcard + extension. Otherwise just use a wildcard
-            if len(set(extensions)) == 1:
-                output["path-template"] = "*" + extensions[0]
+            if len(extensions) == 1:
+                output["path-template"] = "*" + extensions.pop()
             else:
                 output["path-template"] = "*"
             return output
@@ -572,8 +570,9 @@ def generate_custom_inputs(desc_inputs):
         if desc_input["type"] == "Flag":
             custom_input_dicts.append({desc_input["id"]: True})
         elif desc_input.get("value-choices") and not desc_input.get("list"):
-            for value in desc_input["value-choices"]:
-                custom_input_dicts.append({desc_input["id"]: value})
+            custom_input_dicts.extend(
+                {desc_input["id"]: value} for value in desc_input["value-choices"]
+            )
     return custom_input_dicts
 
 

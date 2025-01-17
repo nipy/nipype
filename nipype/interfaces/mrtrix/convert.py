@@ -9,7 +9,7 @@ from nibabel.orientations import aff2axcodes
 from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import TraitedSpec, File, isdefined
-from ..dipy.base import DipyBaseInterface, HAVE_DIPY as have_dipy
+from ..dipy.base import DipyBaseInterface
 
 iflogger = logging.getLogger("nipype.interface")
 
@@ -116,7 +116,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             pts_str = fileobj.read(n_pts * bytesize)
             nan_str = fileobj.read(bytesize)
             if len(pts_str) < (n_pts * bytesize):
-                if not n_streams == stream_count:
+                if n_streams != stream_count:
                     raise nb.trackvis.HeaderError(
                         f"Expecting {stream_count} points, found only {n_streams}"
                     )

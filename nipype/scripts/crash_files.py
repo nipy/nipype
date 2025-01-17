@@ -1,7 +1,5 @@
 """Utilities to manipulate and search through .pklz crash files."""
 
-import re
-import sys
 import os.path as op
 from glob import glob
 

@@ -4,7 +4,7 @@
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import TraitedSpec, File, traits, isdefined, InputMultiObject
+from ..base import TraitedSpec, File, traits, Tuple, isdefined, InputMultiObject
 from ...utils.filemanip import split_filename
 
 
@@ -122,7 +122,7 @@ ants_Affine.txt'
             if isdefined(self.inputs.invert_affine):
                 diff_inv = set(self.inputs.invert_affine) - set(affine_invert)
                 if diff_inv:
-                    raise Exceptions(
+                    raise Exception(
                         "Review invert_affine, not all indexes from invert_affine were used, "
                         "check the description for the full definition"
                     )
@@ -134,7 +134,7 @@ ants_Affine.txt'
         outputs = self._outputs().get()
         _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
         outputs["output_image"] = os.path.join(
-            os.getcwd(), "".join((name, self.inputs.out_postfix, ext))
+            os.getcwd(), f"{name}{self.inputs.out_postfix}{ext}"
         )
         return outputs
 
@@ -254,7 +254,7 @@ ants_Affine.txt'
     def _gen_filename(self, name):
         if name == "output_image":
             _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
-            return "".join((name, self.inputs.out_postfix, ext))
+            return f"{name}{self.inputs.out_postfix}{ext}"
         return None
 
     def _format_arg(self, opt, spec, val):
@@ -275,7 +275,7 @@ ants_Affine.txt'
             if isdefined(self.inputs.invert_affine):
                 diff_inv = set(self.inputs.invert_affine) - set(affine_invert)
                 if diff_inv:
-                    raise Exceptions(
+                    raise Exception(
                         "Review invert_affine, not all indexes from invert_affine were used, "
                         "check the description for the full definition"
                     )
@@ -355,11 +355,9 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         usedefault=True,
     )
     interpolation_parameters = traits.Either(
-        traits.Tuple(traits.Int()),  # BSpline (order)
-        traits.Tuple(
-            traits.Float(), traits.Float()  # Gaussian/MultiLabel (sigma, alpha)
-        ),
-        traits.Tuple(traits.Str()),  # GenericLabel
+        Tuple(traits.Int()),  # BSpline (order)
+        Tuple(traits.Float(), traits.Float()),  # Gaussian/MultiLabel (sigma, alpha)
+        Tuple(traits.Str()),  # GenericLabel
     )
     transforms = InputMultiObject(
         traits.Either(File(exists=True), "identity"),

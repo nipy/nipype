@@ -486,7 +486,7 @@ Output trait(s) %s not available in version %s of interface %s.\
         if not overwrite:
             def_inputs = list(self.inputs.get_traitsfree().keys())
 
-        new_inputs = list(set(list(inputs_dict.keys())) - set(def_inputs))
+        new_inputs = set(inputs_dict) - set(def_inputs)
         for key in new_inputs:
             if hasattr(self.inputs, key):
                 setattr(self.inputs, key, inputs_dict[key])
@@ -709,7 +709,7 @@ class CommandLine(BaseInterface):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = sp.Popen(
-                " ".join((cmd, flag)),
+                f"{cmd} {flag}",
                 shell=True,
                 env=canonicalize_env(env),
                 stdout=sp.PIPE,
@@ -1045,12 +1045,13 @@ class LibraryBaseInterface(BaseInterface):
     def __init__(self, check_import=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if check_import:
-            import pkgutil
+            import importlib.util
 
-            failed_imports = []
-            for pkg in (self._pkg,) + tuple(self.imports):
-                if pkgutil.find_loader(pkg) is None:
-                    failed_imports.append(pkg)
+            failed_imports = [
+                pkg
+                for pkg in (self._pkg,) + tuple(self.imports)
+                if importlib.util.find_spec(pkg) is None
+            ]
             if failed_imports:
                 iflogger.warning(
                     "Unable to import %s; %s interface may fail to run",

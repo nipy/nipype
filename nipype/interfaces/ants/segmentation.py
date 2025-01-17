@@ -4,7 +4,15 @@ import os
 from glob import glob
 from ...external.due import BibTeX
 from ...utils.filemanip import split_filename, copyfile, which, fname_presuffix
-from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
+from ..base import (
+    TraitedSpec,
+    File,
+    traits,
+    Tuple,
+    InputMultiPath,
+    OutputMultiPath,
+    isdefined,
+)
 from ..mixins import CopyHeaderInterface
 from .base import ANTSCommand, ANTSCommandInputSpec
 
@@ -186,7 +194,7 @@ class Atropos(ANTSCommand):
                         priors_paths[0] % i for i in range(1, n_classes + 1)
                     ]
 
-                if not all([os.path.exists(p) for p in priors_paths]):
+                if not all(os.path.exists(p) for p in priors_paths):
                     raise FileNotFoundError(
                         "One or more prior images do not exist: "
                         "%s." % ", ".join(priors_paths)
@@ -401,7 +409,7 @@ The result is that the range can "drift" from the original at each iteration.
 This option rescales to the [min,max] range of the original image intensities
 within the user-specified mask.""",
     )
-    histogram_sharpening = traits.Tuple(
+    histogram_sharpening = Tuple(
         (0.15, 0.01, 200),
         traits.Float,
         traits.Float,
@@ -805,16 +813,15 @@ class CorticalThickness(ANTSCommand):
             os.getcwd(),
             self.inputs.out_prefix + "BrainSegmentation0N4." + self.inputs.image_suffix,
         )
-        posteriors = []
-        for i in range(len(self.inputs.segmentation_priors)):
-            posteriors.append(
-                os.path.join(
-                    os.getcwd(),
-                    self.inputs.out_prefix
-                    + "BrainSegmentationPosteriors%02d." % (i + 1)
-                    + self.inputs.image_suffix,
-                )
+        posteriors = [
+            os.path.join(
+                os.getcwd(),
+                self.inputs.out_prefix
+                + "BrainSegmentationPosteriors%02d." % (i + 1)
+                + self.inputs.image_suffix,
             )
+            for i in range(len(self.inputs.segmentation_priors))
+        ]
         outputs["BrainSegmentationPosteriors"] = posteriors
         outputs["CorticalThickness"] = os.path.join(
             os.getcwd(),
@@ -1321,7 +1328,8 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
         usedefault=True,
         desc=("Constrain solution to non-negative weights."),
     )
-    patch_radius = traits.ListInt(
+    patch_radius = traits.List(
+        traits.Int,
         minlen=3,
         maxlen=3,
         argstr="-p %s",
@@ -1480,15 +1488,13 @@ class JointFusion(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == "exclusion_image_label":
-            retval = []
-            for ii in range(len(self.inputs.exclusion_image_label)):
-                retval.append(
-                    "-e {}[{}]".format(
-                        self.inputs.exclusion_image_label[ii],
-                        self.inputs.exclusion_image[ii],
-                    )
+            return " ".join(
+                "-e {}[{}]".format(
+                    self.inputs.exclusion_image_label[ii],
+                    self.inputs.exclusion_image[ii],
                 )
-            return " ".join(retval)
+                for ii in range(len(self.inputs.exclusion_image_label))
+            )
         if opt == "patch_radius":
             return f"-p {self._format_xarray(val)}"
         if opt == "search_radius":

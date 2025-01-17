@@ -120,7 +120,7 @@ def _get_sorteddict(object, dictwithhash=False):
             else:
                 out = hash
         elif isinstance(object, float):
-            out = f"%.10f"
+            out = f"{object:.10f}"
         else:
             out = object
     return out
@@ -300,7 +300,7 @@ def write_provenance(results, filename="provenance", format="all"):
         import traceback
 
         err_msg = traceback.format_exc()
-        if getattr(e, "args"):
+        if e.args:
             err_msg += "\n\nException arguments:\n" + ", ".join(
                 ['"%s"' % arg for arg in e.args]
             )

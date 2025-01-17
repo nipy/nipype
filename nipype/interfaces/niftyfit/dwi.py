@@ -4,7 +4,7 @@
 The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from ..base import File, TraitedSpec, traits, isdefined, CommandLineInputSpec
+from ..base import File, TraitedSpec, traits, Tuple, isdefined, CommandLineInputSpec
 from .base import NiftyFitCommand
 from ..niftyreg.base import get_custom_path
 
@@ -226,7 +226,7 @@ no b-vectors]"
     desc = "Maximum number of non-linear LSQR iterations [100x2 passes])"
     maxit_val = traits.Int(desc=desc, argstr="-maxit %d", requires=["gn_flag"])
     desc = "LM parameters (initial value, decrease rate) [100,1.2]."
-    lm_vals = traits.Tuple(
+    lm_vals = Tuple(
         traits.Float, traits.Float, argstr="-lm %f %f", requires=["gn_flag"], desc=desc
     )
     desc = "Use Gauss-Newton algorithm [Levenberg-Marquardt]."
@@ -244,7 +244,7 @@ identity covariance...)."
     desc = "Use location-weighted least squares for DTI fitting [3x3 Gaussian]"
     swls_val = traits.Float(desc=desc, argstr="-swls %f")
     slice_no = traits.Int(desc="Fit to single slice number.", argstr="-slice %d")
-    voxel = traits.Tuple(
+    voxel = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,

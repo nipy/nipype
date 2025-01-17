@@ -85,7 +85,6 @@ class RESTORE(DipyDiffusionInterface):
     def _run_interface(self, runtime):
         from scipy.special import gamma
         from dipy.reconst.dti import TensorModel
-        import gc
 
         img = nb.load(self.inputs.in_file)
         hdr = img.header.copy()
@@ -124,7 +123,7 @@ class RESTORE(DipyDiffusionInterface):
         else:
             nodiff = np.where(~gtab.b0s_mask)
             nodiffidx = nodiff[0].tolist()
-            n = 20 if len(nodiffidx) >= 20 else len(nodiffidx)
+            n = min(20, len(nodiffidx))
             idxs = np.random.choice(nodiffidx, size=n, replace=False)
             noise_data = dsample.take(idxs, axis=-1)[noise_msk == 1, ...]
 
@@ -136,7 +135,6 @@ class RESTORE(DipyDiffusionInterface):
             )
         except:
             bias = 0.0
-            pass
 
         sigma = mean_std * (1 + bias)
 
@@ -223,7 +221,6 @@ class EstimateResponseSH(DipyDiffusionInterface):
     output_spec = EstimateResponseSHOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.core.gradients import GradientTable
         from dipy.reconst.dti import fractional_anisotropy, mean_diffusivity
         from dipy.reconst.csdeconv import recursive_response, auto_response
 

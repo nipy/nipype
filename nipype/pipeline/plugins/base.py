@@ -399,7 +399,7 @@ class DistributedPluginBase(PluginBase):
         if (
             cached
             and updated
-            and (overwrite is False or overwrite is None and not always_run)
+            and (overwrite is False or (overwrite is None and not always_run))
         ):
             logger.debug(
                 "Skipping cached node %s with ID %s.", self.procs[jobid], jobid
@@ -455,7 +455,7 @@ class DistributedPluginBase(PluginBase):
             dfs_preorder = nx.dfs_preorder
         except AttributeError:
             dfs_preorder = nx.dfs_preorder_nodes
-        subnodes = [s for s in dfs_preorder(graph, self.procs[jobid])]
+        subnodes = list(dfs_preorder(graph, self.procs[jobid]))
         for node in subnodes:
             idx = self.procs.index(node)
             self.proc_done[idx] = True
@@ -541,7 +541,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                     "Node working directory: ({}) ".format(taskid, timeout, node_dir)
                 )
                 raise OSError(error_message)
-            except OSError as e:
+            except OSError:
                 result_data["traceback"] = "\n".join(format_exception(*sys.exc_info()))
         else:
             results_file = glob(os.path.join(node_dir, "result_*.pklz"))[0]
@@ -618,7 +618,7 @@ class GraphPluginBase(PluginBase):
                 else:
                     tmp_value = node.plugin_args[keyword]
 
-                if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+                if node.plugin_args.get("overwrite"):
                     value = tmp_value
                 else:
                     value += tmp_value
@@ -628,7 +628,7 @@ class GraphPluginBase(PluginBase):
     def _submit_graph(self, pyfiles, dependencies, nodes):
         """
         pyfiles: list of files corresponding to a topological sort
-        dependencies: dictionary of dependencies based on the toplogical sort
+        dependencies: dictionary of dependencies based on the topological sort
         """
         raise NotImplementedError
 

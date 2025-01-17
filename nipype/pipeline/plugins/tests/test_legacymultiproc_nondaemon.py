@@ -40,7 +40,7 @@ def mytestFunction(insum=0):
         This function writes the value 45 to the given filename.
         """
         j = 0
-        for i in range(0, 10):
+        for i in range(10):
             j += i
 
         # j is now 45 (0+1+2+3+4+5+6+7+8+9)
@@ -122,7 +122,7 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
         plugin_args={"n_procs": 2, "non_daemon": nondaemon_flag},
     )
 
-    names = [".".join((node._hierarchy, node.name)) for node in execgraph.nodes()]
+    names = [f"{node._hierarchy}.{node.name}" for node in execgraph.nodes()]
     node = list(execgraph.nodes())[names.index("pipe.f2")]
     result = node.get_output("sum_out")
     os.chdir(cur_dir)

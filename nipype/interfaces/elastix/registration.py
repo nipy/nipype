@@ -82,7 +82,7 @@ class Registration(CommandLine):
             config = {}
 
             with open(params) as f:
-                for line in f.readlines():
+                for line in f:
                     line = line.strip()
                     if not line.startswith("//") and line:
                         m = regex.search(line)

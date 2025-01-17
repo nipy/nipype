@@ -9,6 +9,7 @@ from ..base import (
     CommandLineInputSpec,
     CommandLine,
     traits,
+    Tuple,
     TraitedSpec,
     File,
     Directory,
@@ -240,6 +241,49 @@ class Generate5ttInputSpec(MRTrix3BaseInputSpec):
         desc="input image / directory",
     )
     out_file = File(argstr="%s", mandatory=True, position=-1, desc="output image")
+    t2_image = File(
+        exists=True,
+        argstr="-t2 %s",
+        desc="Provide a T2-weighted image in addition to the default T1-weighted image. (Only for 'fsl' algorithm)",
+    )
+    mask_file = File(
+        exists=True,
+        argstr="-mask %s",
+        desc="Provide a brain mask image. (Only for 'fsl' algorithm)",
+    )
+    premasked = traits.Bool(
+        argstr="-premasked",
+        desc="Assume that the input image is already brain-masked. (Only for 'fsl' algorithm)",
+    )
+    nocrop = traits.Bool(
+        argstr="-nocrop",
+        desc="Do not crop the image to the region of interest.",
+    )
+    sgm_amyg_hipp = traits.Bool(
+        argstr="-sgm_amyg_hipp",
+        desc="Include the amygdala and hippocampus in the subcortical grey matter segment.",
+    )
+    template = File(
+        exists=True,
+        argstr="-template %s",
+        desc="Provide an image that will form the template for the generated 5TT image. (Only for 'hsvs' algorithm)",
+    )
+    hippocampi = traits.Enum(
+        "subfields",
+        "first",
+        "aseg",
+        argstr="-hippocampi %s",
+        desc="Choose the method used to segment the hippocampi. (Only for 'freesurfer' algorithm)",
+    )
+    white_stem = traits.Bool(
+        argstr="-white_stem",
+        desc="Classify the brainstem as white matter. (Only for 'hsvs' algorithm)",
+    )
+    lut_file = File(
+        exists=True,
+        argstr="-lut %s",
+        desc="Manually provide path to the lookup table on which the input parcellation image is based. (Only for 'freesurfer' algorithm)",
+    )
 
 
 class Generate5ttOutputSpec(TraitedSpec):
@@ -274,7 +318,7 @@ class Generate5tt(MRTrix3Base):
         return outputs
 
 
-class TensorMetricsInputSpec(CommandLineInputSpec):
+class TensorMetricsInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True,
         argstr="%s",
@@ -977,21 +1021,21 @@ class MRResizeInputSpec(MRTrix3BaseInputSpec):
     in_file = File(
         exists=True, argstr="%s", position=-2, mandatory=True, desc="input DWI image"
     )
-    image_size = traits.Tuple(
+    image_size = Tuple(
         (traits.Int, traits.Int, traits.Int),
         argstr="-size %d,%d,%d",
         mandatory=True,
         desc="Number of voxels in each dimension of output image",
         xor=["voxel_size", "scale_factor"],
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float, traits.Float, traits.Float),
         argstr="-voxel %g,%g,%g",
         mandatory=True,
         desc="Desired voxel size in mm for the output image",
         xor=["image_size", "scale_factor"],
     )
-    scale_factor = traits.Tuple(
+    scale_factor = Tuple(
         (traits.Float, traits.Float, traits.Float),
         argstr="-scale %g,%g,%g",
         mandatory=True,

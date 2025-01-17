@@ -11,7 +11,14 @@ Examples
 See the docstrings of the individual classes for examples.
 """
 
-from ..base import TraitedSpec, File, traits, CommandLineInputSpec, InputMultiPath
+from ..base import (
+    TraitedSpec,
+    File,
+    traits,
+    Tuple,
+    CommandLineInputSpec,
+    InputMultiPath,
+)
 from .base import NiftySegCommand
 from ..niftyreg.base import get_custom_path
 
@@ -97,16 +104,14 @@ matrix [above 1]"
 Mahalanobis threshold [recommended between 3 and 7] <fl2> is a convergence \
 ratio below which the outlier detection is going to be done [recommended 0.01]"
 
-    outlier_val = traits.Tuple(
+    outlier_val = Tuple(
         traits.Float(), traits.Float(), argstr="-outlier %s %s", desc=desc
     )
 
     desc = "Relax Priors [relaxation factor: 0<rf<1 (recommended=0.5), \
 gaussian regularization: gstd>0 (recommended=2.0)] /only 3D/"
 
-    relax_priors = traits.Tuple(
-        traits.Float(), traits.Float(), argstr="-rf %s %s", desc=desc
-    )
+    relax_priors = Tuple(traits.Float(), traits.Float(), argstr="-rf %s %s", desc=desc)
 
     # outputs
     out_file = File(

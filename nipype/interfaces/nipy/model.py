@@ -4,6 +4,7 @@ from .base import NipyBaseInterface
 from ..base import (
     TraitedSpec,
     traits,
+    Tuple,
     File,
     OutputMultiPath,
     BaseInterfaceInputSpec,
@@ -137,10 +138,7 @@ class FitGLM(NipyBaseInterface):
             hpf = 0
             drift_model = "Blank"
 
-        reg_names = []
-        for reg in session_info[0]["regress"]:
-            reg_names.append(reg["name"])
-
+        reg_names = [reg["name"] for reg in session_info[0]["regress"]]
         reg_vals = np.zeros((nscans, len(reg_names)))
         for i in range(len(reg_names)):
             reg_vals[:, i] = np.array(session_info[0]["regress"][i]["val"]).reshape(
@@ -246,31 +244,31 @@ class FitGLM(NipyBaseInterface):
 class EstimateContrastInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
                     traits.Either(
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
                             traits.List(traits.Float),
                         ),
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),

@@ -58,7 +58,7 @@ configure_traits, were failing because all of our inputs default to
 Undefined deep and down in traits/ui/wx/list_editor.py it checks for
 the len() of the elements of the list.  The _Undefined class in traits
 does not define the __len__ method and would error.  I tried defining
-our own Undefined and even sublassing Undefined, but both of those
+our own Undefined and even subclassing Undefined, but both of those
 failed with a TraitError in our initializer when we assign the
 Undefined to the inputs because of an incompatible type:
 
@@ -370,6 +370,14 @@ Unknown value(s) %s for metadata type of an ImageFile input.\
         )
 
 
+class Tuple(traits.BaseTuple):
+    def validate(self, objekt, name, value):
+        if isinstance(value, list):
+            value = tuple(value)
+
+        return super().validate(objekt, name, value)
+
+
 def isdefined(objekt):
     return not isinstance(objekt, _Undefined)
 
@@ -555,12 +563,10 @@ def _recurse_on_path_traits(func, thistrait, value, cwd):
             k: _recurse_on_path_traits(func, innertrait, v, cwd)
             for k, v in value.items()
         }
-    elif isinstance(value, tuple) and thistrait.is_trait_type(traits.Tuple):
+    elif isinstance(value, tuple) and thistrait.is_trait_type(traits.BaseTuple):
         value = tuple(
-            [
-                _recurse_on_path_traits(func, subtrait, v, cwd)
-                for subtrait, v in zip(thistrait.handler.types, value)
-            ]
+            _recurse_on_path_traits(func, subtrait, v, cwd)
+            for subtrait, v in zip(thistrait.handler.types, value)
         )
     elif thistrait.is_trait_type(traits.TraitCompound):
         is_str = [

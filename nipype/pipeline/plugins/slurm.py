@@ -40,7 +40,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         self._sbatch_args = None
         self._jobid_re = "Submitted batch job ([0-9]*)"
 
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             if "retry_timeout" in kwargs["plugin_args"]:
                 self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
             if "max_tries" in kwargs["plugin_args"]:
@@ -100,7 +100,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         if self._sbatch_args:
             sbatch_args = self._sbatch_args
         if "sbatch_args" in node.plugin_args:
-            if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+            if node.plugin_args.get("overwrite"):
                 sbatch_args = node.plugin_args["sbatch_args"]
             else:
                 sbatch_args += " " + node.plugin_args["sbatch_args"]

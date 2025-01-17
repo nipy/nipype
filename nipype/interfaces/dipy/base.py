@@ -2,8 +2,8 @@
 
 import os.path as op
 import inspect
+from functools import partial
 import numpy as np
-from ... import logging
 from ..base import (
     traits,
     File,
@@ -110,15 +110,15 @@ def convert_to_traits_type(dipy_type, is_file=False):
     dipy_type = dipy_type.lower()
     is_mandatory = bool("optional" not in dipy_type)
     if "variable" in dipy_type and "str" in dipy_type:
-        return traits.ListStr, is_mandatory
+        return partial(traits.List, traits.Str), is_mandatory
     elif "variable" in dipy_type and "int" in dipy_type:
-        return traits.ListInt, is_mandatory
+        return partial(traits.List, traits.Int), is_mandatory
     elif "variable" in dipy_type and "float" in dipy_type:
-        return traits.ListFloat, is_mandatory
+        return partial(traits.List, traits.Float), is_mandatory
     elif "variable" in dipy_type and "bool" in dipy_type:
-        return traits.ListBool, is_mandatory
+        return partial(traits.List, traits.Bool), is_mandatory
     elif "variable" in dipy_type and "complex" in dipy_type:
-        return traits.ListComplex, is_mandatory
+        return partial(traits.List, traits.Complex), is_mandatory
     elif "str" in dipy_type and not is_file:
         return traits.Str, is_mandatory
     elif "str" in dipy_type and is_file:
@@ -162,9 +162,17 @@ def create_interface_specs(class_name, params=None, BaseClass=TraitedSpec):
             traits_type, is_mandatory = convert_to_traits_type(dipy_type, is_file)
             # print(name, dipy_type, desc, is_file, traits_type, is_mandatory)
             if BaseClass.__name__ == BaseInterfaceInputSpec.__name__:
-                if len(p) > 3:
+                if len(p) > 3 and p[3] is not None:
+                    default_value = p[3]
+                    if isinstance(traits_type, traits.List) and not isinstance(
+                        default_value, list
+                    ):
+                        default_value = [default_value]
                     attr[name] = traits_type(
-                        p[3], desc=desc[-1], usedefault=True, mandatory=is_mandatory
+                        default_value,
+                        desc=desc[-1],
+                        usedefault=True,
+                        mandatory=is_mandatory,
                     )
                 else:
                     attr[name] = traits_type(desc=desc[-1], mandatory=is_mandatory)

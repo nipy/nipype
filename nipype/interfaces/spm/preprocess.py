@@ -20,6 +20,7 @@ from ..base import (
     TraitedSpec,
     isdefined,
     traits,
+    Tuple,
     InputMultiPath,
     InputMultiObject,
     File,
@@ -59,7 +60,7 @@ class FieldMapInputSpec(SPMCommandInputSpec):
         field="subj.data.presubphasemag.magnitude",
         desc="presubstracted magnitude file",
     )
-    echo_times = traits.Tuple(
+    echo_times = Tuple(
         traits.Float,
         traits.Float,
         mandatory=True,
@@ -272,7 +273,8 @@ class ApplyVDMInputSpec(SPMCommandInputSpec):
         desc="phase encode direction input data have been acquired with",
         usedefault=True,
     )
-    write_which = traits.ListInt(
+    write_which = traits.List(
+        traits.Int,
         [2, 1],
         field="roptions.which",
         minlen=2,
@@ -523,7 +525,8 @@ class RealignInputSpec(SPMCommandInputSpec):
         field="eoptions.wrap",
         desc="Check if interpolation should wrap in [x,y,z]",
     )
-    write_which = traits.ListInt(
+    write_which = traits.List(
+        traits.Int,
         [2, 1],
         field="roptions.which",
         minlen=2,
@@ -730,7 +733,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
             "maximization and smoothness maximization of the estimated field."
         ),
     )
-    est_reg_factor = traits.ListInt(
+    est_reg_factor = traits.List(
+        traits.Int,
         [100000],
         field="uweoptions.lambda",
         minlen=1,
@@ -768,7 +772,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         field="uweoptions.rem",
         desc="Re-estimate movement parameters at each unwarping iteration.",
     )
-    est_num_of_iterations = traits.ListInt(
+    est_num_of_iterations = traits.List(
+        traits.Int,
         [5],
         field="uweoptions.noi",
         minlen=1,
@@ -782,7 +787,8 @@ class RealignUnwarpInputSpec(SPMCommandInputSpec):
         usedefault=True,
         desc="Point in position space to perform Taylor-expansion around.",
     )
-    reslice_which = traits.ListInt(
+    reslice_which = traits.List(
+        traits.Int,
         [2, 1],
         field="uwroptions.uwwhich",
         minlen=2,
@@ -1262,7 +1268,7 @@ class Normalize(SPMCommand):
             outputs["normalized_source"] = self.inputs.source
         elif "write" in self.inputs.jobtype:
             if isdefined(self.inputs.write_preserve) and self.inputs.write_preserve:
-                prefixNorm = "".join(["m", self.inputs.out_prefix])
+                prefixNorm = f"m{self.inputs.out_prefix}"
             else:
                 prefixNorm = self.inputs.out_prefix
             outputs["normalized_files"] = []
@@ -1740,10 +1746,10 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
         field="channel",
         copyfile=False,
     )
-    channel_info = traits.Tuple(
+    channel_info = Tuple(
         traits.Float(),
         traits.Float(),
-        traits.Tuple(traits.Bool, traits.Bool),
+        Tuple(traits.Bool, traits.Bool),
         desc="""A tuple with the following fields:
             - bias reguralisation (0-10)
             - FWHM of Gaussian smoothness of bias
@@ -1751,11 +1757,11 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
         field="channel",
     )
     tissues = traits.List(
-        traits.Tuple(
-            traits.Tuple(ImageFileSPM(exists=True), traits.Int()),
+        Tuple(
+            Tuple(ImageFileSPM(exists=True), traits.Int()),
             traits.Int(),
-            traits.Tuple(traits.Bool, traits.Bool),
-            traits.Tuple(traits.Bool, traits.Bool),
+            Tuple(traits.Bool, traits.Bool),
+            Tuple(traits.Bool, traits.Bool),
         ),
         desc="""A list of tuples (one per tissue) with the following fields:
             - tissue probability map (4D), 1-based index to frame
@@ -1969,7 +1975,7 @@ class NewSegment(SPMCommand):
 
 class MultiChannelNewSegmentInputSpec(SPMCommandInputSpec):
     channels = traits.List(
-        traits.Tuple(
+        Tuple(
             InputMultiPath(
                 ImageFileSPM(exists=True),
                 mandatory=True,
@@ -1977,10 +1983,10 @@ class MultiChannelNewSegmentInputSpec(SPMCommandInputSpec):
                 field="channel",
                 copyfile=False,
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Float(),
                 traits.Float(),
-                traits.Tuple(traits.Bool, traits.Bool),
+                Tuple(traits.Bool, traits.Bool),
                 desc="""A tuple with the following fields:
                     - bias reguralisation (0-10)
                     - FWHM of Gaussian smoothness of bias
@@ -1997,11 +2003,11 @@ class MultiChannelNewSegmentInputSpec(SPMCommandInputSpec):
         field="channel",
     )
     tissues = traits.List(
-        traits.Tuple(
-            traits.Tuple(ImageFileSPM(exists=True), traits.Int()),
+        Tuple(
+            Tuple(ImageFileSPM(exists=True), traits.Int()),
             traits.Int(),
-            traits.Tuple(traits.Bool, traits.Bool),
-            traits.Tuple(traits.Bool, traits.Bool),
+            Tuple(traits.Bool, traits.Bool),
+            Tuple(traits.Bool, traits.Bool),
         ),
         desc="""A list of tuples (one per tissue) with the following fields:
             - tissue probability map (4D), 1-based index to frame
@@ -2313,9 +2319,9 @@ class DARTELInputSpec(SPMCommandInputSpec):
         desc=("Form of regularization energy term"),
     )
     iteration_parameters = traits.List(
-        traits.Tuple(
+        Tuple(
             traits.Range(1, 10),
-            traits.Tuple(traits.Float, traits.Float, traits.Float),
+            Tuple(traits.Float, traits.Float, traits.Float),
             traits.Enum(1, 2, 4, 8, 16, 32, 64, 128, 256, 512),
             traits.Enum(0, 0.5, 1, 2, 4, 8, 16, 32),
         ),
@@ -2332,7 +2338,7 @@ List of tuples for each iteration
 
 """,
     )
-    optimization_parameters = traits.Tuple(
+    optimization_parameters = Tuple(
         traits.Float,
         traits.Range(1, 8),
         traits.Range(1, 8),
@@ -2442,14 +2448,14 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
         mandatory=True,
         copyfile=False,
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         desc="Voxel sizes for output file",
         field="mni_norm.vox",
     )
-    bounding_box = traits.Tuple(
+    bounding_box = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2671,7 +2677,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
     tissues = ImageFileSPM(
         exists=True, field="estwrite.tpm", desc="tissue probability map"
     )
-    gaussians_per_class = traits.Tuple(
+    gaussians_per_class = Tuple(
         (2, 2, 2, 3, 4, 2),
         *([traits.Int()] * 6),
         usedefault=True,
@@ -2818,7 +2824,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         False, usedefault=True, field="estwrite.jacobian.warped"
     )
 
-    deformation_field = traits.Tuple(
+    deformation_field = Tuple(
         (0, 0),
         traits.Bool,
         traits.Bool,
