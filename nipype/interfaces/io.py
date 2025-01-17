@@ -36,6 +36,7 @@ from ..utils.misc import human_order_sorted, str2bool
 from .base import (
     TraitedSpec,
     traits,
+    Tuple,
     Str,
     File,
     Directory,
@@ -215,7 +216,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     )
     strip_dir = Str(desc="path to strip out of filename")
     substitutions = InputMultiPath(
-        traits.Tuple(Str, Str),
+        Tuple(Str, Str),
         desc=(
             "List of 2-tuples reflecting string "
             "to substitute and string to replace "
@@ -223,7 +224,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         ),
     )
     regexp_substitutions = InputMultiPath(
-        traits.Tuple(Str, Str),
+        Tuple(Str, Str),
         desc=(
             "List of 2-tuples reflecting a pair of a "
             "Python regexp pattern and a replacement "
@@ -529,7 +530,7 @@ class DataSink(IOBase):
         try:
             import boto3
             import botocore
-        except ImportError as exc:
+        except ImportError:
             err_msg = "Boto3 package is not installed - install boto3 and try again."
             raise Exception(err_msg)
 
@@ -571,7 +572,7 @@ class DataSink(IOBase):
         # And try fetch the bucket with the name argument
         try:
             _get_head_bucket(s3_resource, bucket_name)
-        except Exception as exc:
+        except Exception:
             # Try to connect anonymously
             s3_resource.meta.client.meta.events.register(
                 "choose-signer.s3.*", botocore.handlers.disable_signing
@@ -941,7 +942,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         # get list of all files in s3 bucket
         conn = boto.connect_s3(anon=self.inputs.anon)
         bkt = conn.get_bucket(self.inputs.bucket)
-        bkt_files = list(k.key for k in bkt.list(prefix=self.inputs.bucket_path))
+        bkt_files = [k.key for k in bkt.list(prefix=self.inputs.bucket_path)]
 
         # keys are outfields, args are template args for the outfield
         for key, args in list(self.inputs.template_args.items()):
@@ -958,10 +959,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
             if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:
-                filelist = []
-                for fname in bkt_files:
-                    if re.match(template, fname):
-                        filelist.append(fname)
+                filelist = [fname for fname in bkt_files if re.match(template, fname)]
                 if len(filelist) == 0:
                     msg = "Output key: {} Template: {} returned no files".format(
                         key,
@@ -975,7 +973,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
                     outputs[key] = simplify_list(filelist)
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -1024,7 +1022,7 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(simplify_list(outfiles))
-            if any([val is None for val in outputs[key]]):
+            if None in outputs[key]:
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -1055,9 +1053,9 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
         local_directory = str(self.inputs.local_directory)
         bucket_path = str(self.inputs.bucket_path)
         template = str(self.inputs.template)
-        if not os.path.basename(local_directory) == "":
+        if os.path.basename(local_directory) != "":
             local_directory += "/"
-        if not os.path.basename(bucket_path) == "":
+        if os.path.basename(bucket_path) != "":
             bucket_path += "/"
         if template[0] == "/":
             template = template[1:]
@@ -1250,7 +1248,7 @@ class DataGrabber(IOBase):
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
                     outputs[key] = simplify_list(filelist)
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -1299,7 +1297,7 @@ class DataGrabber(IOBase):
             if self.inputs.drop_blank_outputs:
                 outputs[key] = [x for x in outputs[key] if x is not None]
             else:
-                if any([val is None for val in outputs[key]]):
+                if None in outputs[key]:
                     outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -1820,7 +1818,7 @@ class FreeSurferSource(IOBase):
             else:
                 globprefix = "*"
         keys = ensure_list(altkey) if altkey else [key]
-        globfmt = os.path.join(path, dirval, "".join((globprefix, "{}", globsuffix)))
+        globfmt = os.path.join(path, dirval, f"{globprefix}{{}}{globsuffix}")
         return [
             os.path.abspath(f) for key in keys for f in glob.glob(globfmt.format(key))
         ]
@@ -1995,7 +1993,7 @@ class XNATSource(LibraryBaseInterface, IOBase):
                         if file_object.exists()
                     ]
                 )
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -2304,7 +2302,7 @@ class SQLiteSink(LibraryBaseInterface, IOBase):
         super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, self._input_names)
 
     def _list_outputs(self):
         """Execute this module."""
@@ -2366,7 +2364,7 @@ class MySQLSink(IOBase):
         super().__init__(**inputs)
 
         self._input_names = ensure_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, self._input_names)
 
     def _list_outputs(self):
         """Execute this module."""
@@ -2609,7 +2607,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
             if not args:
                 outputs[key] = self._get_files_over_ssh(template)
 
-            for argnum, arglist in enumerate(args):
+            for arglist in args:
                 maxlen = 1
                 for arg in arglist:
                     if isinstance(arg, (str, bytes)) and hasattr(self.inputs, arg):
@@ -2621,7 +2619,6 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                             )
                         if len(arg) > maxlen:
                             maxlen = len(arg)
-                outfiles = []
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
@@ -2644,7 +2641,7 @@ class SSHDataGrabber(LibraryBaseInterface, DataGrabber):
                     outputs[key].append(self._get_files_over_ssh(filledtemplate))
 
             # disclude where there was any invalid matches
-            if any([val is None for val in outputs[key]]):
+            if None in outputs[key]:
                 outputs[key] = []
 
             # no outputs is None, not empty list
@@ -2719,16 +2716,14 @@ class JSONFileGrabber(IOBase):
     def _list_outputs(self):
         import simplejson
 
-        outputs = {}
         if isdefined(self.inputs.in_file):
             with open(self.inputs.in_file) as f:
-                data = simplejson.load(f)
+                outputs = simplejson.load(f)
 
-            if not isinstance(data, dict):
+            if not isinstance(outputs, dict):
                 raise RuntimeError("JSON input has no dictionary structure")
-
-            for key, value in list(data.items()):
-                outputs[key] = value
+        else:
+            outputs = {}
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
@@ -2942,7 +2937,7 @@ class BIDSDataGrabber(LibraryBaseInterface, IOBase):
         undefined_traits = {}
         for key in self._infields:
             self.inputs.add_trait(key, traits.Any)
-            undefined_traits[key] = kwargs[key] if key in kwargs else Undefined
+            undefined_traits[key] = kwargs.get(key, Undefined)
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 

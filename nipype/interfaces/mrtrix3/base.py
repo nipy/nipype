@@ -5,11 +5,11 @@
 from looseversion import LooseVersion
 
 from ... import logging
-from ...utils.filemanip import which
 from ..base import (
     CommandLineInputSpec,
     CommandLine,
     traits,
+    Tuple,
     File,
     isdefined,
     PackageInfo,
@@ -58,7 +58,7 @@ class MRTrix3BaseInputSpec(CommandLineInputSpec):
         desc="dw gradient scheme (MRTrix format)",
         xor=["grad_fsl"],
     )
-    grad_fsl = traits.Tuple(
+    grad_fsl = Tuple(
         File(exists=True),
         File(exists=True),
         argstr="-fslgrad %s %s",
@@ -102,7 +102,6 @@ class MRTrix3Base(CommandLine):
                 value = cpu_count()
             except:
                 iflogger.warning("Number of threads could not be computed")
-                pass
             return trait_spec.argstr % value
 
         if name == "in_bvec":

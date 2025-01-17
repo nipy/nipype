@@ -25,7 +25,7 @@ from .test_base import EngineTestInterface
 def test_1mod(iterables, expected):
     pipe = pe.Workflow(name="pipe")
     mod1 = pe.Node(interface=EngineTestInterface(), name="mod1")
-    setattr(mod1, "iterables", iterables["1"])
+    mod1.iterables = iterables["1"]
     pipe.add_nodes([mod1])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -49,7 +49,7 @@ def test_2mods(iterables, expected):
     mod1 = pe.Node(interface=EngineTestInterface(), name="mod1")
     mod2 = pe.Node(interface=EngineTestInterface(), name="mod2")
     for nr in ["1", "2"]:
-        setattr(eval("mod" + nr), "iterables", iterables[nr])
+        eval("mod" + nr).iterables = iterables[nr]
     pipe.connect([(mod1, mod2, [("output1", "input2")])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -87,7 +87,7 @@ def test_3mods(iterables, expected, connect):
     mod2 = pe.Node(interface=EngineTestInterface(), name="mod2")
     mod3 = pe.Node(interface=EngineTestInterface(), name="mod3")
     for nr in ["1", "2", "3"]:
-        setattr(eval("mod" + nr), "iterables", iterables[nr])
+        eval("mod" + nr).iterables = iterables[nr]
     if connect == ("1-2", "2-3"):
         pipe.connect(
             [
@@ -356,7 +356,7 @@ def test_mapnode_json(tmpdir):
     # check that multiple json's don't trigger rerun
     with open(os.path.join(node.output_dir(), "test.json"), "w") as fp:
         fp.write("dummy file")
-    w1.config["execution"].update(**{"stop_on_first_rerun": True})
+    w1.config["execution"].update(stop_on_first_rerun=True)
 
     w1.run()
 
@@ -480,14 +480,9 @@ def test_deep_nested_write_graph_runs(tmpdir):
                 pass
 
 
-import networkx
-
-# Format of the graph has slightly changed
-graph_str = '""' if int(networkx.__version__.split(".")[0]) == 1 else ""
-
 # examples of dot files used in the following test
 dotfile_orig = [
-    "strict digraph " + graph_str + " {\n",
+    "strict digraph {\n",
     '"mod1 (engine)";\n',
     '"mod2 (engine)";\n',
     '"mod1 (engine)" -> "mod2 (engine)";\n',
@@ -546,7 +541,9 @@ def test_write_graph_dotfile(tmpdir, graph_type, simple):
     pipe.write_graph(graph2use=graph_type, simple_form=simple, format="dot")
 
     with open("graph.dot") as f:
-        graph_str = f.read()
+        # Replace handles change in networkx behavior when graph is missing a name
+        # Probably around 3, but I haven't tracked it down.
+        graph_str = f.read().replace('  {', ' {')
 
     if simple:
         for line in dotfiles[graph_type]:
@@ -640,7 +637,9 @@ def test_write_graph_dotfile_iterables(tmpdir, graph_type, simple):
     pipe.write_graph(graph2use=graph_type, simple_form=simple, format="dot")
 
     with open("graph.dot") as f:
-        graph_str = f.read()
+        # Replace handles change in networkx behavior when graph is missing a name
+        # Probably around 3, but I haven't tracked it down.
+        graph_str = f.read().replace('  {', ' {')
 
     if simple:
         for line in dotfiles_iter[graph_type]:

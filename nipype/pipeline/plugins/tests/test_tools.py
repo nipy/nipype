@@ -2,8 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine module
 """
-import numpy as np
-import scipy.sparse as ssp
 import re
 
 from unittest import mock

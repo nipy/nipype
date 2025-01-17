@@ -7,7 +7,8 @@ Nipype base interfaces
 This module defines the API of all nipype interfaces.
 
 """
-from traits.trait_handlers import TraitDictObject, TraitListObject
+from traits.trait_dict_object import TraitDictObject
+from traits.trait_list_object import TraitListObject
 from traits.trait_errors import TraitError
 
 from .core import (
@@ -45,6 +46,7 @@ from .traits_extension import (
     InputMultiObject,
     OutputMultiPath,
     InputMultiPath,
+    Tuple,
 )
 
 from .support import Bunch, InterfaceResult, NipypeInterfaceError

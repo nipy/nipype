@@ -4,7 +4,7 @@
 The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from ..base import File, TraitedSpec, traits, CommandLineInputSpec
+from ..base import File, TraitedSpec, traits, Tuple, CommandLineInputSpec
 from .base import NiftyFitCommand
 from ..niftyreg.base import get_custom_path
 
@@ -113,7 +113,7 @@ estimation and PV correction {WM,GM,CSF}."
 
     pv0 = traits.Int(desc=desc, argstr="-pv0 %d")
     pv2 = traits.Int(desc="In plane PV kernel size [3x3].", argstr="-pv2 %d")
-    pv3 = traits.Tuple(
+    pv3 = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,

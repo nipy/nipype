@@ -13,6 +13,7 @@ from ..base import (
     Directory,
     File,
     traits,
+    Tuple,
     OutputMultiPath,
     isdefined,
     CommandLine,
@@ -154,14 +155,14 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
         desc="source volume is in MNI152 space",
     )
 
-    apply_rot = traits.Tuple(
+    apply_rot = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--rot %.3f %.3f %.3f",
         desc="rotation angles (in degrees) to apply to reg matrix",
     )
-    apply_trans = traits.Tuple(
+    apply_trans = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -186,7 +187,7 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     )
     sampling_range = traits.Either(
         traits.Float,
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
         desc="sampling range - a point or a tuple of (min, max, step)",
     )
     sampling_units = traits.Enum(
@@ -863,8 +864,8 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
 
     overlay_range = traits.Either(
         traits.Float,
-        traits.Tuple(traits.Float, traits.Float),
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
         desc="overlay range--either min, (min, max) or (min, mid, max)",
         argstr="%s",
     )
@@ -1023,7 +1024,7 @@ class SurfaceSnapshots(FSCommand):
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
             if isdefined(stem_args):
-                args = tuple([getattr(self.inputs, arg) for arg in stem_args])
+                args = tuple(getattr(self.inputs, arg) for arg in stem_args)
                 stem = stem % args
         # Check if the DISPLAY variable is set -- should avoid crashes (might not?)
         if "DISPLAY" not in os.environ:
@@ -1093,7 +1094,7 @@ class SurfaceSnapshots(FSCommand):
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
             if isdefined(stem_args):
-                args = tuple([getattr(self.inputs, arg) for arg in stem_args])
+                args = tuple(getattr(self.inputs, arg) for arg in stem_args)
                 stem = stem % args
         snapshots = ["%s-lat.tif", "%s-med.tif", "%s-dor.tif", "%s-ven.tif"]
         if self.inputs.six_images:
@@ -1120,8 +1121,8 @@ class ImageInfoOutputSpec(TraitedSpec):
     TE = traits.String(desc="echo time (msec)")
     TR = traits.String(desc="repetition time(msec)")
     TI = traits.String(desc="inversion time (msec)")
-    dimensions = traits.Tuple(desc="image dimensions (voxels)")
-    vox_sizes = traits.Tuple(desc="voxel sizes (mm)")
+    dimensions = Tuple(desc="image dimensions (voxels)")
+    vox_sizes = Tuple(desc="voxel sizes (mm)")
     orientation = traits.String(desc="image orientation")
     ph_enc_dir = traits.String(desc="phase encode direction")
 
@@ -1155,7 +1156,7 @@ class ImageInfo(FSCommand):
         vox = tuple(vox.split(", "))
         outputs.vox_sizes = vox
         dim = self.info_regexp(info, "dimensions")
-        dim = tuple([int(d) for d in dim.split(" x ")])
+        dim = tuple(int(d) for d in dim.split(" x "))
         outputs.dimensions = dim
 
         outputs.orientation = self.info_regexp(info, "Orientation")
@@ -2093,7 +2094,7 @@ class CheckTalairachAlignmentInputSpec(FSTraitedSpec):
         usedefault=True,
         argstr="-T %.3f",
         desc="Talairach transforms for subjects with p-values <= T "
-        + "are considered as very unlikely default=0.010",
+        "are considered as very unlikely default=0.010",
     )
 
 
@@ -2482,8 +2483,7 @@ class FixTopologyInputSpec(FSTraitedSpec):
     copy_inputs = traits.Bool(
         mandatory=True,
         desc="If running as a node, set this to True "
-        + "otherwise, the topology fixing will be done "
-        + "in place.",
+        "otherwise, the topology fixing will be done in place.",
     )
 
     # optional
@@ -2736,9 +2736,8 @@ class MakeSurfacesInputSpec(FSTraitedSpec):
     )
     white = traits.String(argstr="-white %s", desc="White surface name")
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node  directory."
     )
 
 
@@ -2821,7 +2820,7 @@ class MakeSurfaces(FSCommand):
         if name in ["in_T1", "in_aseg"]:
             # These inputs do not take full paths as inputs or even basenames
             basename = os.path.basename(value)
-            # whent the -mgz flag is specified, it assumes the mgz extension
+            # when the -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
                 prefix = os.path.splitext(basename)[0]
             else:
@@ -2835,7 +2834,7 @@ class MakeSurfaces(FSCommand):
             suffix = basename.split(".")[1]
             return spec.argstr % suffix
         elif name == "in_orig":
-            if value.endswith("lh.orig") or value.endswith("rh.orig"):
+            if value.endswith(("lh.orig", "rh.orig")):
                 # {lh,rh}.orig inputs are not specified on command line
                 return
             else:
@@ -2908,7 +2907,7 @@ class CurvatureInputSpec(FSTraitedSpec):
         argstr="-w",
         desc="Save curvature files (will only generate screen output without this option)",
     )
-    distances = traits.Tuple(
+    distances = Tuple(
         traits.Int,
         traits.Int,
         argstr="-distances %d %d",
@@ -3011,9 +3010,8 @@ class CurvatureStatsInputSpec(FSTraitedSpec):
     )
     write = traits.Bool(argstr="--writeCurvatureFiles", desc="Write curvature files")
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node  directory."
     )
 
 
@@ -3236,7 +3234,7 @@ class VolumeMaskInputSpec(FSTraitedSpec):
         exists=True,
         xor=["in_aseg"],
         desc="Implicit aseg.mgz segmentation. "
-        + "Specify a different aseg by using the 'in_aseg' input.",
+        "Specify a different aseg by using the 'in_aseg' input.",
     )
     subject_id = traits.String(
         "subject_id",
@@ -3256,12 +3254,11 @@ class VolumeMaskInputSpec(FSTraitedSpec):
     save_ribbon = traits.Bool(
         argstr="--save_ribbon",
         desc="option to save just the ribbon for the "
-        + "hemispheres in the format ?h.ribbon.mgz",
+        "hemispheres in the format ?h.ribbon.mgz",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the implicit input files to the "
-        + "node directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the implicit input files to the node directory."
     )
 
 
@@ -3430,9 +3427,8 @@ class ParcellationStatsInputSpec(FSTraitedSpec):
         desc="Output annotation files's colortable to text file",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
     th3 = traits.Bool(
         argstr="-th3",
@@ -3622,9 +3618,8 @@ class ContrastInputSpec(FSTraitedSpec):
         exists=True, mandatory=True, desc="Implicit input file mri/rawavg.mgz"
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
 
 
@@ -4026,12 +4021,12 @@ class MRIsExpandInputSpec(FSTraitedSpec):
     )
     # # Requires dev version - Re-add when min_ver/max_ver support this
     # # https://github.com/freesurfer/freesurfer/blob/9730cb9/mris_expand/mris_expand.c
-    # navgs = traits.Tuple(
+    # navgs = Tuple(
     #     traits.Int, traits.Int,
     #     argstr='-navgs %d %d',
     #     desc=('Tuple of (n_averages, min_averages) parameters '
     #           '(implicit: (16, 0))'))
-    # target_intensity = traits.Tuple(
+    # target_intensity = Tuple(
     #     traits.Float, File(exists=True),
     #     argstr='-intensity %g %s',
     #     desc='Tuple of intensity and brain volume to crop to target intensity')

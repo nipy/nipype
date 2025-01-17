@@ -230,7 +230,7 @@ class StrPathConfuserInputSpec(nib.TraitedSpec):
 
 
 class StrPathConfuserOutputSpec(nib.TraitedSpec):
-    out_tuple = nib.traits.Tuple(nib.File, nib.traits.String)
+    out_tuple = nib.Tuple(nib.File, nib.traits.String)
     out_dict_path = nib.traits.Dict(nib.traits.String, nib.File(exists=True))
     out_dict_str = nib.traits.DictStrStr()
     out_list = nib.traits.List(nib.traits.String)

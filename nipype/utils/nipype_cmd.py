@@ -5,7 +5,6 @@ import sys
 
 from ..interfaces.base import Interface, InputMultiPath, traits
 from ..interfaces.base.support import get_trait_desc
-from .misc import str2bool
 
 
 def listClasses(module=None):
@@ -13,7 +12,7 @@ def listClasses(module=None):
         __import__(module)
         pkg = sys.modules[module]
         print("Available Interfaces:")
-        for k, v in sorted(list(pkg.__dict__.items())):
+        for k, v in sorted(pkg.__dict__.items()):
             if inspect.isclass(v) and issubclass(v, Interface):
                 print("\t%s" % k)
 
@@ -52,7 +51,7 @@ def run_instance(interface, options):
             try:
                 setattr(interface.inputs, input_name, value)
             except ValueError as e:
-                print(f"Error when setting the value of {input_name}: '{str(e)}'")
+                print(f"Error when setting the value of {input_name}: '{e}'")
 
     print(interface.inputs)
     res = interface.run()

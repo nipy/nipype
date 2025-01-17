@@ -12,25 +12,19 @@ See the docstrings of the individual classes for examples.
 import os
 
 from ..base import (
-    CommandLineInputSpec,
-    CommandLine,
-    Directory,
     TraitedSpec,
     traits,
     isdefined,
     File,
     InputMultiPath,
-    Undefined,
     Str,
+    Tuple,
 )
-from ...external.due import BibTeX
 
 from .base import (
-    AFNICommandBase,
     AFNICommand,
     AFNICommandInputSpec,
     AFNICommandOutputSpec,
-    Info,
 )
 
 
@@ -127,7 +121,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         "that 'gotforit' is needed to ignore.",
         argstr="-allzero_OK",
     )
-    dname = traits.Tuple(
+    dname = Tuple(
         Str, Str, desc="set environmental variable to provided value", argstr="-D%s=%s"
     )
     mask = File(
@@ -162,7 +156,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         "[default: 1]",
         argstr="-polort %d",
     )
-    ortvec = traits.Tuple(
+    ortvec = Tuple(
         File(desc="filename", exists=True),
         Str(desc="label"),
         desc="this option lets you input a rectangular array of 1 or more "
@@ -213,7 +207,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         desc="number of stimulus timing files", argstr="-num_stimts %d", position=-6
     )
     stim_times = traits.List(
-        traits.Tuple(
+        Tuple(
             traits.Int(desc="k-th response model"),
             File(desc="stimulus timing file", exists=True),
             Str(desc="model"),
@@ -223,9 +217,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         position=-5,
     )
     stim_label = traits.List(
-        traits.Tuple(
-            traits.Int(desc="k-th input stimulus"), Str(desc="stimulus label")
-        ),
+        Tuple(traits.Int(desc="k-th input stimulus"), Str(desc="stimulus label")),
         desc="label for kth input stimulus (e.g., Label1)",
         argstr="-stim_label %d %s...",
         requires=["stim_times"],
@@ -251,9 +243,7 @@ class DeconvolveInputSpec(AFNICommandInputSpec):
         position=-2,
     )
     glt_label = traits.List(
-        traits.Tuple(
-            traits.Int(desc="k-th general linear test"), Str(desc="GLT label")
-        ),
+        Tuple(traits.Int(desc="k-th general linear test"), Str(desc="GLT label")),
         desc="general linear test (i.e., contrast) labels",
         argstr="-glt_label %d %s...",
         requires=["gltsym"],
@@ -488,9 +478,7 @@ class RemlfitInputSpec(AFNICommandInputSpec):
         argstr="-nobout",
     )
     gltsym = traits.List(
-        traits.Either(
-            traits.Tuple(File(exists=True), Str()), traits.Tuple(Str(), Str())
-        ),
+        traits.Either(Tuple(File(exists=True), Str()), Tuple(Str(), Str())),
         desc="read a symbolic GLT from input file and associate it with a "
         "label. As in Deconvolve, you can also use the 'SYM:' method "
         "to provide the definition of the GLT directly as a string "
@@ -641,7 +629,7 @@ class Remlfit(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        for key in outputs.keys():
+        for key in outputs:
             if isdefined(self.inputs.get()[key]):
                 outputs[key] = os.path.abspath(self.inputs.get()[key])
 
@@ -727,7 +715,7 @@ class Synthesize(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        for key in outputs.keys():
+        for key in outputs:
             if isdefined(self.inputs.get()[key]):
                 outputs[key] = os.path.abspath(self.inputs.get()[key])
 

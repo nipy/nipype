@@ -8,7 +8,7 @@ The interfaces were written to work with niftyreg version 1.5.10
 """
 import os
 
-from ..base import TraitedSpec, File, traits, isdefined
+from ..base import TraitedSpec, File, traits, Tuple, isdefined
 from .base import get_custom_path, NiftyRegCommand, NiftyRegCommandInputSpec
 from ...utils.filemanip import split_filename
 
@@ -218,22 +218,22 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
 
     # Lower threshold for reference image
     desc = "Lower threshold for reference image at the specified time point"
-    rlwth2_thr_val = traits.Tuple(
+    rlwth2_thr_val = Tuple(
         traits.Range(low=0), traits.Float, desc=desc, argstr="-rLwTh %d %f"
     )
     # Upper threshold for reference image
     desc = "Upper threshold for reference image at the specified time point"
-    rupth2_thr_val = traits.Tuple(
+    rupth2_thr_val = Tuple(
         traits.Range(low=0), traits.Float, desc=desc, argstr="-rUpTh %d %f"
     )
     # Lower threshold for reference image
     desc = "Lower threshold for floating image at the specified time point"
-    flwth2_thr_val = traits.Tuple(
+    flwth2_thr_val = Tuple(
         traits.Range(low=0), traits.Float, desc=desc, argstr="-fLwTh %d %f"
     )
     # Upper threshold for reference image
     desc = "Upper threshold for floating image at the specified time point"
-    fupth2_thr_val = traits.Tuple(
+    fupth2_thr_val = Tuple(
         traits.Range(low=0), traits.Float, desc=desc, argstr="-fUpTh %d %f"
     )
 
@@ -263,14 +263,14 @@ only"
     desc = "Number of bins in the histogram for reference image for given \
 time point"
 
-    rbn2_val = traits.Tuple(
+    rbn2_val = Tuple(
         traits.Range(low=0), traits.Range(low=0), desc=desc, argstr="-rbn %d %d"
     )
 
     desc = "Number of bins in the histogram for reference image for given \
 time point"
 
-    fbn2_val = traits.Tuple(
+    fbn2_val = Tuple(
         traits.Range(low=0), traits.Range(low=0), desc=desc, argstr="-fbn %d %d"
     )
 
@@ -278,7 +278,7 @@ time point"
         desc="SD of the Gaussian for computing LNCC", argstr="--lncc %f"
     )
     desc = "SD of the Gaussian for computing LNCC for a given time point"
-    lncc2_val = traits.Tuple(
+    lncc2_val = Tuple(
         traits.Range(low=0), traits.Float, desc=desc, argstr="-lncc %d %f"
     )
 

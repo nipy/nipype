@@ -62,7 +62,7 @@ class InterfaceDocstring(NipypeDocstring):
     _name_rgx = re.compile(
         r"^\s*(:(?P<role>\w+):`(?P<name>[a-zA-Z0-9_.-]+)`|"
         r" (?P<name2>[a-zA-Z0-9_.-]+))\s*",
-        re.X,
+        re.VERBOSE,
     )
 
     def __init__(

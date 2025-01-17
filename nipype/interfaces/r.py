@@ -4,15 +4,12 @@
 import os
 from shutil import which
 
-from .. import config
 from .base import (
     CommandLineInputSpec,
-    InputMultiPath,
     isdefined,
     CommandLine,
     traits,
     File,
-    Directory,
 )
 
 

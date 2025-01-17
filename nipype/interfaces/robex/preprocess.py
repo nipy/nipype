@@ -1,15 +1,10 @@
-import os
-from pathlib import Path
-
 from nipype.interfaces.base import (
     TraitedSpec,
     CommandLineInputSpec,
     CommandLine,
     File,
     traits,
-    isdefined,
 )
-from nipype.utils.filemanip import split_filename
 
 
 class RobexInputSpec(CommandLineInputSpec):

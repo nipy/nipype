@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-import pytest
-from nipype.testing import example_data
 from nipype.algorithms.metrics import ErrorMap
 import nibabel as nb
 import numpy as np
-import os
 
 
 def test_errormap(tmpdir):

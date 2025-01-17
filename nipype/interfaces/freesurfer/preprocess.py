@@ -19,6 +19,7 @@ from ..base import (
     TraitedSpec,
     File,
     traits,
+    Tuple,
     Directory,
     InputMultiPath,
     OutputMultiPath,
@@ -100,7 +101,7 @@ class UnpackSDICOMDirInputSpec(FSTraitedSpec):
     output_dir = Directory(
         argstr="-targ %s", desc="top directory into which the files will be unpacked"
     )
-    run_info = traits.Tuple(
+    run_info = Tuple(
         traits.Int,
         traits.Str,
         traits.Str,
@@ -183,21 +184,21 @@ class MRIConvertInputSpec(FSTraitedSpec):
     force_ras = traits.Bool(
         argstr="--force_ras_good", desc="use default when orientation info absent"
     )
-    in_i_dir = traits.Tuple(
+    in_i_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--in_i_direction %f %f %f",
         desc="<R direction> <A direction> <S direction>",
     )
-    in_j_dir = traits.Tuple(
+    in_j_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--in_j_direction %f %f %f",
         desc="<R direction> <A direction> <S direction>",
     )
-    in_k_dir = traits.Tuple(
+    in_k_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -276,7 +277,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
     out_k_count = traits.Int(
         argstr="--out_k_count %d", desc="some count ?? in k direction"
     )
-    vox_size = traits.Tuple(
+    vox_size = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -286,21 +287,21 @@ class MRIConvertInputSpec(FSTraitedSpec):
     out_i_size = traits.Int(argstr="--out_i_size %d", desc="output i size")
     out_j_size = traits.Int(argstr="--out_j_size %d", desc="output j size")
     out_k_size = traits.Int(argstr="--out_k_size %d", desc="output k size")
-    out_i_dir = traits.Tuple(
+    out_i_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--out_i_direction %f %f %f",
         desc="<R direction> <A direction> <S direction>",
     )
-    out_j_dir = traits.Tuple(
+    out_j_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--out_j_direction %f %f %f",
         desc="<R direction> <A direction> <S direction>",
     )
-    out_k_dir = traits.Tuple(
+    out_k_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -312,7 +313,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
         argstr="--out_orientation %s",
         desc="specify the output orientation",
     )
-    out_center = traits.Tuple(
+    out_center = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -358,14 +359,14 @@ class MRIConvertInputSpec(FSTraitedSpec):
         desc="apply inverse transformation xfm file",
     )
     devolve_transform = traits.Str(argstr="--devolvexfm %s", desc="subject id")
-    crop_center = traits.Tuple(
+    crop_center = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
         argstr="--crop %d %d %d",
         desc="<x> <y> <z> crop to 256 around center (x, y, z)",
     )
-    crop_size = traits.Tuple(
+    crop_size = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -375,7 +376,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
     cut_ends = traits.Int(
         argstr="--cutends %d", desc="remove ncut slices from the ends"
     )
-    slice_crop = traits.Tuple(
+    slice_crop = Tuple(
         traits.Int,
         traits.Int,
         argstr="--slice-crop %d %d",
@@ -416,7 +417,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
     ascii = traits.Bool(
         argstr="--ascii", desc="save output as ascii col>row>slice>frame"
     )
-    reorder = traits.Tuple(
+    reorder = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -465,7 +466,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
     midframe = traits.Bool(argstr="--mid-frame", desc="keep only the middle frame")
     skip_n = traits.Int(argstr="--nskip %d", desc="skip the first n frames")
     drop_n = traits.Int(argstr="--ndrop %d", desc="drop the last n frames")
-    frame_subsample = traits.Tuple(
+    frame_subsample = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -579,7 +580,7 @@ class MRIConvert(FSCommand):
                 stem = ".".join(outfile.split(".")[:-1])
                 ext = "." + outfile.split(".")[-1]
             outfile = []
-            for idx in range(0, tp):
+            for idx in range(tp):
                 outfile.append(stem + "%04d" % idx + ext)
         if isdefined(self.inputs.out_type):
             if self.inputs.out_type in ["spm", "analyze"]:
@@ -593,10 +594,10 @@ class MRIConvert(FSCommand):
                     raise Exception(
                         "Not taking frame manipulations into account- please warn the developers"
                     )
-                outfiles = []
                 outfile = self._get_outfilename()
-                for i in range(tp):
-                    outfiles.append(fname_presuffix(outfile, suffix="%03d" % (i + 1)))
+                outfiles = [
+                    fname_presuffix(outfile, suffix="%03d" % (i + 1)) for i in range(tp)
+                ]
                 outfile = outfiles
         outputs["out_file"] = outfile
         return outputs
@@ -621,7 +622,7 @@ class DICOMConvertInputSpec(FSTraitedSpec):
     )
     subject_id = traits.Any(desc="subject identifier to insert into template")
     file_mapping = traits.List(
-        traits.Tuple(traits.Str, traits.Str),
+        Tuple(traits.Str, traits.Str),
         desc="defines the output fields of interface",
     )
     out_type = traits.Enum(
@@ -691,11 +692,11 @@ class DICOMConvert(FSCommand):
             if self.inputs.seq_list:
                 if self.inputs.ignore_single_slice:
                     if (int(s[8]) > 1) and any(
-                        [s[12].startswith(sn) for sn in self.inputs.seq_list]
+                        s[12].startswith(sn) for sn in self.inputs.seq_list
                     ):
                         runs.append(int(s[2]))
                 else:
-                    if any([s[12].startswith(sn) for sn in self.inputs.seq_list]):
+                    if any(s[12].startswith(sn) for sn in self.inputs.seq_list):
                         runs.append(int(s[2]))
             else:
                 runs.append(int(s[2]))
@@ -761,7 +762,7 @@ class ResampleInputSpec(FSTraitedSpec):
     resampled_file = File(
         argstr="-o %s", desc="output filename", genfile=True, position=-1
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -917,7 +918,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
         desc="segment hippocampal subfields using input T1 scan",
         requires=["subject_id"],
     )
-    hippocampal_subfields_T2 = traits.Tuple(
+    hippocampal_subfields_T2 = Tuple(
         File(exists=True),
         traits.Str(),
         argstr="-hippocampal-subfields-T2 %s %s",
@@ -2202,7 +2203,7 @@ class SmoothInputSpec(FSTraitedSpec):
         exists=True,
     )
     smoothed_file = File(desc="output volume", argstr="--o %s", genfile=True)
-    proj_frac_avg = traits.Tuple(
+    proj_frac_avg = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2540,7 +2541,7 @@ class FitMSParams(FSCommand):
                     cmd = " ".join((cmd, "-fa %.1f" % self.inputs.flip_list[i]))
                 if isdefined(self.inputs.xfm_list):
                     cmd = " ".join((cmd, "-at %s" % self.inputs.xfm_list[i]))
-                cmd = " ".join((cmd, file))
+                cmd = f"{cmd} {file}"
             return cmd
         return super()._format_arg(name, spec, value)
 
@@ -2644,20 +2645,20 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
         hash_files=False,
         keep_extension=True,
         desc="output volume. Output can be any format accepted by mri_convert. "
-        + "If the output format is COR, then the directory must exist.",
+        "If the output format is COR, then the directory must exist.",
     )
     iterations = traits.Int(
         4,
         usedefault=True,
         argstr="--n %d",
         desc="Number of iterations to run nu_correct. Default is 4. This is the number of times "
-        + "that nu_correct is repeated (ie, using the output from the previous run as the input for "
-        + "the next). This is different than the -iterations option to nu_correct.",
+        "that nu_correct is repeated (ie, using the output from the previous run as the input for "
+        "the next). This is different than the -iterations option to nu_correct.",
     )
     protocol_iterations = traits.Int(
         argstr="--proto-iters %d",
         desc="Passes Np as argument of the -iterations flag of nu_correct. This is different "
-        + "than the --n flag above. Default is not to pass nu_correct the -iterations flag.",
+        "than the --n flag above. Default is not to pass nu_correct the -iterations flag.",
     )
     distance = traits.Int(argstr="--distance %d", desc="N3 -distance option")
     no_rescale = traits.Bool(
@@ -3048,7 +3049,7 @@ class CALabelInputSpec(FSTraitedSpecOpenMP):
     no_big_ventricles = traits.Bool(argstr="-nobigventricles", desc="No big ventricles")
     align = traits.Bool(argstr="-align", desc="Align CALabel")
     prior = traits.Float(argstr="-prior %.1f", desc="Prior for CALabel")
-    relabel_unlikely = traits.Tuple(
+    relabel_unlikely = Tuple(
         traits.Int,
         traits.Float,
         argstr="-relabel_unlikely %d %.1f",
@@ -3166,8 +3167,8 @@ class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
     seed = traits.Int(argstr="-seed %d", desc="")
     copy_inputs = traits.Bool(
         desc="Copies implicit inputs to node directory "
-        + "and creates a temp subjects_directory. "
-        + "Use this when running as a node"
+        "and creates a temp subjects_directory. "
+        "Use this when running as a node"
     )
 
 
@@ -3285,9 +3286,8 @@ class SegmentCCInputSpec(FSTraitedSpec):
         desc="Subject name",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
 
 

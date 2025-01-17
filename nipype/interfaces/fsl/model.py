@@ -9,6 +9,7 @@ from glob import glob
 from shutil import rmtree
 from string import Template
 
+import acres
 import numpy as np
 from looseversion import LooseVersion
 from nibabel import load
@@ -19,6 +20,7 @@ from ...external.due import BibTeX
 from ..base import (
     File,
     traits,
+    Tuple,
     isdefined,
     TraitedSpec,
     BaseInterface,
@@ -73,31 +75,31 @@ repeat this option for FILMGLS by setting autocorr_noestimate to True",
     )
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
                     traits.Either(
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
                             traits.List(traits.Float),
                         ),
-                        traits.Tuple(
+                        Tuple(
                             traits.Str,
                             traits.Enum("T"),
                             traits.List(traits.Str),
@@ -141,13 +143,12 @@ class Level1Design(BaseInterface):
     output_spec = Level1DesignOutputSpec
 
     def _create_ev_file(self, evfname, evinfo):
-        f = open(evfname, "w")
-        for i in evinfo:
-            if len(i) == 3:
-                f.write(f"{i[0]:f} {i[1]:f} {i[2]:f}\n")
-            else:
-                f.write("%f\n" % i[0])
-        f.close()
+        with open(evfname, "w") as f:
+            for i in evinfo:
+                if len(i) == 3:
+                    f.write(f"{i[0]:f} {i[1]:f} {i[2]:f}\n")
+                else:
+                    f.write("%f\n" % i[0])
 
     def _create_ev_files(
         self,
@@ -258,7 +259,7 @@ class Level1Design(BaseInterface):
         # add ev orthogonalization
         for i in range(1, num_evs[0] + 1):
             initial = ev_ortho.substitute(c0=i, c1=0, orthogonal=1)
-            for j in range(0, num_evs[0] + 1):
+            for j in range(num_evs[0] + 1):
                 try:
                     orthogonal = int(orthogonalization[i][j])
                 except (KeyError, TypeError, ValueError, IndexError):
@@ -318,7 +319,7 @@ class Level1Design(BaseInterface):
 
                     for fconidx in ftest_idx:
                         fval = 0
-                        if con[0] in con_map.keys() and fconidx in con_map[con[0]]:
+                        if con[0] in con_map and fconidx in con_map[con[0]]:
                             fval = 1
                         ev_txt += contrast_ftest_element.substitute(
                             cnum=ftest_idx.index(fconidx) + 1,
@@ -402,9 +403,8 @@ class Level1Design(BaseInterface):
             fsf_txt += cond_txt
             fsf_txt += fsf_postscript.substitute(overwrite=1)
 
-            f = open(os.path.join(cwd, "run%d.fsf" % i), "w")
-            f.write(fsf_txt)
-            f.close()
+            with open(os.path.join(cwd, "run%d.fsf" % i), "w") as f:
+                f.write(fsf_txt)
 
         return runtime
 
@@ -813,43 +813,49 @@ threshold=10, results_dir='stats')
     _cmd = "film_gls"
     input_spec = FILMGLSInputSpec
     output_spec = FILMGLSOutputSpec
+
     if Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.6"):
         input_spec = FILMGLSInputSpec507
         output_spec = FILMGLSOutputSpec507
     elif Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.4"):
         input_spec = FILMGLSInputSpec505
 
+    def __init__(self, **inputs):
+        super(FILMGLS, self).__init__(**inputs)
+        if Info.version() and LooseVersion(Info.version()) > LooseVersion("5.0.6"):
+            if 'output_type' not in inputs:
+                if isdefined(self.inputs.mode) and self.inputs.mode == 'surface':
+                    self.inputs.output_type = 'GIFTI'
+
     def _get_pe_files(self, cwd):
         files = None
         if isdefined(self.inputs.design_file):
-            fp = open(self.inputs.design_file)
-            for line in fp.readlines():
-                if line.startswith("/NumWaves"):
-                    numpes = int(line.split()[-1])
-                    files = []
-                    for i in range(numpes):
-                        files.append(self._gen_fname("pe%d.nii" % (i + 1), cwd=cwd))
-                    break
-            fp.close()
+            with open(self.inputs.design_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumWaves"):
+                        numpes = int(line.split()[-1])
+                        files = [
+                            self._gen_fname(f"pe{i + 1}.nii", cwd=cwd)
+                            for i in range(numpes)
+                        ]
+                        break
         return files
 
     def _get_numcons(self):
         numtcons = 0
         numfcons = 0
         if isdefined(self.inputs.tcon_file):
-            fp = open(self.inputs.tcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numtcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.tcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numtcons = int(line.split()[-1])
+                        break
         if isdefined(self.inputs.fcon_file):
-            fp = open(self.inputs.fcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numfcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.fcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numfcons = int(line.split()[-1])
+                        break
         return numtcons, numfcons
 
     def _list_outputs(self):
@@ -947,9 +953,8 @@ class FEATRegister(BaseInterface):
         for i, rundir in enumerate(ensure_list(self.inputs.feat_dirs)):
             fsf_txt += fsf_dirs.substitute(runno=i + 1, rundir=os.path.abspath(rundir))
         fsf_txt += fsf_footer.substitute()
-        f = open(os.path.join(os.getcwd(), "register.fsf"), "w")
-        f.write(fsf_txt)
-        f.close()
+        with open(os.path.join(os.getcwd(), "register.fsf"), "w") as f:
+            f.write(fsf_txt)
 
         return runtime
 
@@ -1297,19 +1302,17 @@ class ContrastMgr(FSLCommand):
         numtcons = 0
         numfcons = 0
         if isdefined(self.inputs.tcon_file):
-            fp = open(self.inputs.tcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numtcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.tcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numtcons = int(line.split()[-1])
+                        break
         if isdefined(self.inputs.fcon_file):
-            fp = open(self.inputs.fcon_file)
-            for line in fp.readlines():
-                if line.startswith("/NumContrasts"):
-                    numfcons = int(line.split()[-1])
-                    break
-            fp.close()
+            with open(self.inputs.fcon_file) as fp:
+                for line in fp:
+                    if line.startswith("/NumContrasts"):
+                        numfcons = int(line.split()[-1])
+                        break
         return numtcons, numfcons
 
     def _list_outputs(self):
@@ -1417,9 +1420,8 @@ class L2Model(BaseInterface):
 
         # write design files
         for i, name in enumerate(["design.mat", "design.con", "design.grp"]):
-            f = open(os.path.join(cwd, name), "w")
-            f.write(txt[name])
-            f.close()
+            with open(os.path.join(cwd, name), "w") as f:
+                f.write(txt[name])
 
         return runtime
 
@@ -1433,17 +1435,17 @@ class L2Model(BaseInterface):
 class MultipleRegressDesignInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
         traits.Either(
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("T"),
                 traits.List(traits.Str),
                 traits.List(traits.Float),
             ),
-            traits.Tuple(
+            Tuple(
                 traits.Str,
                 traits.Enum("F"),
                 traits.List(
-                    traits.Tuple(
+                    Tuple(
                         traits.Str,
                         traits.Enum("T"),
                         traits.List(traits.Str),
@@ -1506,8 +1508,8 @@ class MultipleRegressDesign(BaseInterface):
         regs = sorted(self.inputs.regressors.keys())
         nwaves = len(regs)
         npoints = len(self.inputs.regressors[regs[0]])
-        ntcons = sum([1 for con in self.inputs.contrasts if con[1] == "T"])
-        nfcons = sum([1 for con in self.inputs.contrasts if con[1] == "F"])
+        ntcons = sum(1 for con in self.inputs.contrasts if con[1] == "T")
+        nfcons = sum(1 for con in self.inputs.contrasts if con[1] == "F")
         # write mat file
         mat_txt = ["/NumWaves       %d" % nwaves, "/NumPoints      %d" % npoints]
         ppheights = []
@@ -1586,15 +1588,14 @@ class MultipleRegressDesign(BaseInterface):
             if ("fts" in key) and (nfcons == 0):
                 continue
             filename = key.replace("_", ".")
-            f = open(os.path.join(cwd, filename), "w")
-            f.write(val)
-            f.close()
+            with open(os.path.join(cwd, filename), "w") as f:
+                f.write(val)
 
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        nfcons = sum([1 for con in self.inputs.contrasts if con[1] == "F"])
+        nfcons = sum(1 for con in self.inputs.contrasts if con[1] == "F")
         for field in list(outputs.keys()):
             if ("fts" in field) and (nfcons == 0):
                 continue
@@ -2369,8 +2370,8 @@ class GLMInputSpec(FSLCommandInputSpec):
         position=2,
         desc=(
             "file name of the GLM design matrix (text time"
-            + " courses for temporal regression or an image"
-            + " file for spatial regression)"
+            " courses for temporal regression or an image"
+            " file for spatial regression)"
         ),
     )
     contrasts = File(
@@ -2384,7 +2385,7 @@ class GLMInputSpec(FSLCommandInputSpec):
         argstr="--des_norm",
         desc=(
             "switch on normalization of the design"
-            + " matrix columns to unit std deviation"
+            " matrix columns to unit std deviation"
         ),
     )
     dat_norm = traits.Bool(
@@ -2547,12 +2548,5 @@ def load_template(name):
     template : string.Template
 
     """
-    from pkg_resources import resource_filename as pkgrf
-
-    full_fname = pkgrf(
-        "nipype", os.path.join("interfaces", "fsl", "model_templates", name)
-    )
-    with open(full_fname) as template_file:
-        template = Template(template_file.read())
-
-    return template
+    loader = acres.Loader('nipype.interfaces.fsl')
+    return Template(loader.readable('model_templates', name).read_text())

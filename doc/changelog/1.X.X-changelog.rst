@@ -1,3 +1,98 @@
+1.9.2 (December 17, 2024)
+=========================
+
+Bug fix release in the 1.9.x series.
+
+  * FIX: Missed np.savetxt bstring (https://github.com/nipy/nipype/pull/3704)
+  * MAINT: Bump astral-sh/setup-uv from 3 to 4 (https://github.com/nipy/nipype/pull/3702)
+  * MAINT: Bump codecov/codecov-action from 4 to 5 (https://github.com/nipy/nipype/pull/3703)
+
+
+1.9.1 (November 19, 2024)
+=========================
+
+Bug fix release in the 1.9.x series.
+
+This release adds support for Numpy 2 and Python 3.13.
+
+  * FIX: Restore generate_gantt_chart functionality (https://github.com/nipy/nipype/pull/3290)
+  * FIX: Address numpy and traits deprecations (https://github.com/nipy/nipype/pull/3699)
+  * FIX: `ts_Z_corr` → `ts_wb_Z` (https://github.com/nipy/nipype/pull/3697)
+  * ENH: Remove unused and recently unsupported antsRegistration flag (https://github.com/nipy/nipype/pull/3695)
+  * MAINT: Bump codecov/codecov-action from 4 to 5 (https://github.com/nipy/nipype/pull/3698)
+
+
+1.9.0 (October 31, 2024)
+========================
+
+New feature release in the 1.9.x series.
+
+  * FIX: Remove exists=True from fsl.MotionOutliers output that might not exist (https://github.com/nipy/nipype/pull/1428)
+  * FIX: Improve evaluate_connect_function errors across Python versions (https://github.com/nipy/nipype/pull/3655)
+  * FIX: Changed inheritance of TensorMetricsInputSpec (https://github.com/nipy/nipype/pull/3663)
+  * FIX: Add cropped files to dcm2niix output  (https://github.com/nipy/nipype/pull/3609)
+  * FIX: Deduplicate dcm2niix output (https://github.com/nipy/nipype/pull/3610)
+  * FIX: Parse commas in CSV fields (https://github.com/nipy/nipype/pull/3637)
+  * FIX: MRTrix3 change inputs position for MRTransform (https://github.com/nipy/nipype/pull/3611)
+  * FIX: Use out_prefix instead of "w" in spm.Normalize12 (https://github.com/nipy/nipype/pull/3600)
+  * FIX: Fix typo in spm.Normalize12 process (https://github.com/nipy/nipype/pull/3599)
+  * FIX: DWIPreproc issue (https://github.com/nipy/nipype/pull/3596)
+  * FIX: DWIPreproc issue (https://github.com/nipy/nipype/pull/3596)
+  * FIX: Fix bugs with ``fsl_out=True`` and ``lta_out=True`` (https://github.com/nipy/nipype/pull/3583)
+  * FIX: Test failures (https://github.com/nipy/nipype/pull/3587)
+  * FIX: update merge_imgs input type of dcm2niix Node (https://github.com/nipy/nipype/pull/3548)
+  * FIX: update sample_random_points and random_seed type of ProbTrackXBaseInputSpec (https://github.com/nipy/nipype/pull/3556)
+  * FIX: update self.inputs.optimization in outputs for GTMPVC (https://github.com/nipy/nipype/pull/3571)
+  * ENH: Support HDF5 (mat 7.3) SPM.mat files (https://github.com/nipy/nipype/pull/3650)
+  * ENH: FILMGLS gifti output support in surface mode (https://github.com/nipy/nipype/pull/3652)
+  * ENH: Added available inputs for MRTrix3's 5ttgen (https://github.com/nipy/nipype/pull/3658)
+  * ENH: Add functions to mrtrix3 interface (https://github.com/nipy/nipype/pull/3613)
+  * ENH: Update PETsurfer interface (https://github.com/nipy/nipype/pull/3602)
+  * ENH: Add 'hsvs' option to 5ttgen + mrtransform fix (https://github.com/nipy/nipype/pull/3630)
+  * ENH: add STC PVC to PETPVC interface (https://github.com/nipy/nipype/pull/3634)
+  * ENH: Add GenericLabel to ANTS ApplyTransforms. (https://github.com/nipy/nipype/pull/3617)
+  * ENH: Issue 3553 add mvecs to dcm2niix (https://github.com/nipy/nipype/pull/3554)
+  * ENH: add contrast outputs for EstimatedModel  (https://github.com/nipy/nipype/pull/3577)
+  * ENH: Issue 3345: Adding FreeSurfer longitudinal interfaces (https://github.com/nipy/nipype/pull/3529)
+  * ENH: Enable SPM voxel-based FDR (https://github.com/nipy/nipype/pull/3558)
+  * REF: Replace deprecated pkgutil.find_loader with importlib.util.find_spec (https://github.com/nipy/nipype/pull/3692)
+  * REF: io.open() → open() (https://github.com/nipy/nipype/pull/3575)
+  * REF: Stop using deprecated import internally (https://github.com/nipy/nipype/pull/3561)
+  * DOC: Patch doc/conf.py to work with latest ReadTheDocs (https://github.com/nipy/nipype/pull/3691)
+  * DOC/FIX: Fix wrong name, should be al_ea (https://github.com/nipy/nipype/pull/3629)
+  * DOC: Fix typos newly found by codespell (https://github.com/nipy/nipype/pull/3606)
+  * STY: Apply ruff/pycodestyle rules (E) (https://github.com/nipy/nipype/pull/3689)
+  * STY: Apply ruff rules (RUF) again (https://github.com/nipy/nipype/pull/3688)
+  * STY: Apply ruff/Pyflakes rules (F) (https://github.com/nipy/nipype/pull/3681)
+  * STY: Apply ruff/Perflint rules (PERF) again (https://github.com/nipy/nipype/pull/3687)
+  * STY: Apply ruff/flake8-comprehensions preview rules (C4) (https://github.com/nipy/nipype/pull/3686)
+  * STY: Apply ruff/flake8-simplify rules (SIM) (https://github.com/nipy/nipype/pull/3676)
+  * STY: Apply ruff/flake8-bugbear rules (B) (https://github.com/nipy/nipype/pull/3671)
+  * STY: Apply ruff/flake8-comprehensions rules (C4)  (https://github.com/nipy/nipype/pull/3680)
+  * STY: Apply ruff/Perflint rules (PERF) (https://github.com/nipy/nipype/pull/3674)
+  * STY: Apply ruff/flake8-implicit-str-concat rules (ISC) (https://github.com/nipy/nipype/pull/3679)
+  * STY: Apply ruff/flake8-pie rules (PIE) (https://github.com/nipy/nipype/pull/3678)
+  * STY: Apply ruff/flake8-raise rules (RSE) (https://github.com/nipy/nipype/pull/3677)
+  * STY: Apply ruff/flynt rules (FLY) (https://github.com/nipy/nipype/pull/3675)
+  * STY: Apply ruff rules (RUF) (https://github.com/nipy/nipype/pull/3673)
+  * STY: Codespell (https://github.com/nipy/nipype/pull/3672)
+  * STY: Apply ruff/refurb rules (https://github.com/nipy/nipype/pull/3648)
+  * STY: Apply ruff/pyupgrade rules (https://github.com/nipy/nipype/pull/3647)
+  * STY: Adjusted variable names for clarity and codespell false positives (https://github.com/nipy/nipype/pull/3627)
+  * STY: Remove duplicated trait in EddyOutputSpec (https://github.com/nipy/nipype/pull/3568)
+  * STY: Black edits (https://github.com/nipy/nipype/pull/1)
+  * MNT: Replace deprecated imghdr (https://github.com/nipy/nipype/pull/3659)
+  * MNT: Use regular ".now" instead of ".utcnow" with UTC zone (https://github.com/nipy/nipype/pull/3670)
+  * MNT: Apply assorted repo-review rules (https://github.com/nipy/nipype/pull/3682)
+  * MNT: Drop traits upper bound (https://github.com/nipy/nipype/pull/3685)
+  * MNT: Configure dependabot to update GH workflows (https://github.com/nipy/nipype/pull/3597)
+  * MNT: Replace deprecated locale.getdefaultlocale (https://github.com/nipy/nipype/pull/3590)
+  * MNT: Require Python 3.8+, auto-upgrade syntax (https://github.com/nipy/nipype/pull/3588)
+  * CI: Test Python 3.12 support (https://github.com/nipy/nipype/pull/3638)
+  * CI: Test on Python 3.11 (https://github.com/nipy/nipype/pull/3589)
+  * CI/FIX: configure codespell, add workflow, typos fixed (https://github.com/nipy/nipype/pull/3549)
+
+
 1.8.6 (April 05, 2023)
 ======================
 
