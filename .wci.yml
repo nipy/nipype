@@ -19,7 +19,12 @@ documentation:
   tutorial: https://miykael.github.io/nipype_tutorial/
 
 execution_environment: 
-  interfaces:
-  - docker
-  - conda
-  - pypi
+  resource_managers:
+    - SLURM
+    - Condor
+    - DAGMan
+    - LSF
+    - OAR
+    - PBS
+    - SGE
+    - Soma-workflow
