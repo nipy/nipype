@@ -51,7 +51,9 @@ def test_coherence_analysis(tmpdir):
 
     # This is the nitime analysis:
     TR = 1.89
-    data_rec = np.recfromcsv(example_data("fmri_timeseries.csv"))
+    data_rec = np.genfromtxt(
+        example_data("fmri_timeseries.csv"), delimiter=',', names=True
+    )
     roi_names = np.array(data_rec.dtype.names)
     n_samples = data_rec.shape[0]
     data = np.zeros((len(roi_names), n_samples))

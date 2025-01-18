@@ -3,7 +3,6 @@
 """Defines functionality for pipelined execution of interfaces."""
 from copy import deepcopy
 import re
-import numpy as np
 
 from ... import config
 from ...interfaces.base import DynamicTraitedSpec
@@ -87,7 +86,7 @@ class EngineBase:
 
         """
         if name == self.name:
-            raise ValueError('Cloning requires a new name, "%s" is ' "in use." % name)
+            raise ValueError('Cloning requires a new name, "%s" is in use.' % name)
         clone = deepcopy(self)
         clone.name = name
         if hasattr(clone, "_id"):

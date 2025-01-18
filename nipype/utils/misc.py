@@ -53,7 +53,7 @@ def trim(docstring, marker=None):
             if (
                 marker is not None
                 and stripped
-                and all([s == stripped[0] for s in stripped])
+                and all(s == stripped[0] for s in stripped)
                 and stripped[0] not in [":"]
             ):
                 line = line.replace(stripped[0], marker)
@@ -87,12 +87,7 @@ def is_container(item):
         True if container
         False if not (eg string)
     """
-    if isinstance(item, str):
-        return False
-    elif hasattr(item, "__iter__"):
-        return True
-    else:
-        return False
+    return not isinstance(item, str) and hasattr(item, "__iter__")
 
 
 def container_to_string(cont):
@@ -246,10 +241,7 @@ def unflatten(in_list, prev_structure):
     if not isinstance(prev_structure, list):
         return next(in_list)
 
-    out = []
-    for item in prev_structure:
-        out.append(unflatten(in_list, item))
-    return out
+    return [unflatten(in_list, item) for item in prev_structure]
 
 
 def normalize_mc_params(params, source):

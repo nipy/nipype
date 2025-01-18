@@ -29,7 +29,6 @@ def test_csvReader(tmpdir):
 
 
 def test_csvReader_quoted(tmpdir):
-    header = "files,labels,erosion\n"
     lines = ['foo,"hello, world",300.1\n']
 
     name = tmpdir.join("testfile.csv").strpath

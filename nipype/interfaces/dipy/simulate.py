@@ -7,6 +7,7 @@ import nibabel as nb
 from ... import logging
 from ..base import (
     traits,
+    Tuple,
     TraitedSpec,
     BaseInterfaceInputSpec,
     File,
@@ -38,7 +39,7 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
         usedefault=True,
         desc="Diffusivity of isotropic compartments",
     )
-    diff_sf = traits.Tuple(
+    diff_sf = Tuple(
         (1700e-6, 200e-6, 200e-6),
         traits.Float,
         traits.Float,
@@ -221,20 +222,17 @@ class SimulateMultiTensor(DipyBaseInterface):
         mevals = [sf_evals] * nsticks + [[ba_evals[d]] * 3 for d in range(nballs)]
 
         b0 = b0_im.get_fdata()[msk > 0]
-        args = []
-        for i in range(nvox):
-            args.append(
-                {
-                    "fractions": fracs[i, ...].tolist(),
-                    "sticks": [
-                        tuple(dirs[i, j : j + 3]) for j in range(nsticks + nballs)
-                    ],
-                    "gradients": gtab,
-                    "mevals": mevals,
-                    "S0": b0[i],
-                    "snr": self.inputs.snr,
-                }
-            )
+        args = [
+            {
+                "fractions": fracs[i, ...].tolist(),
+                "sticks": [tuple(dirs[i, j : j + 3]) for j in range(nsticks + nballs)],
+                "gradients": gtab,
+                "mevals": mevals,
+                "S0": b0[i],
+                "snr": self.inputs.snr,
+            }
+            for i in range(nvox)
+        ]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -326,7 +324,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
 
     """
     import numpy as np
-    from dipy.core.sphere import disperse_charges, Sphere, HemiSphere
+    from dipy.core.sphere import disperse_charges, HemiSphere
     from dipy.core.gradients import gradient_table
 
     theta = np.pi * np.random.rand(ndirs)
@@ -343,7 +341,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
         bvecs = np.vstack((bvecs, vertices))
         bvals = np.hstack((bvals, v * np.ones(vertices.shape[0])))
 
-    for i in range(0, nb0s):
+    for i in range(nb0s):
         bvals = bvals.tolist()
         bvals.insert(0, 0)
 

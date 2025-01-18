@@ -15,7 +15,8 @@ from warnings import warn
 from packaging.version import Version
 
 from traits.trait_errors import TraitError
-from traits.trait_handlers import TraitDictObject, TraitListObject
+from traits.trait_dict_object import TraitDictObject
+from traits.trait_list_object import TraitListObject
 from ...utils.filemanip import md5, hash_infile, hash_timestamp
 from .traits_extension import (
     traits,
@@ -136,7 +137,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 msg3 = "It has been replaced by %s." % trait_spec.new_name
             else:
                 msg3 = ""
-            msg = " ".join((msg1, msg2, msg3))
+            msg = f"{msg1} {msg2} {msg3}"
             if Version(str(trait_spec.deprecated)) < self.package_version:
                 raise TraitError(msg)
             else:
@@ -177,7 +178,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
     def _clean_container(self, objekt, undefinedval=None, skipundefined=False):
         """Convert a traited object into a pure python representation."""
-        if isinstance(objekt, TraitDictObject) or isinstance(objekt, dict):
+        if isinstance(objekt, (TraitDictObject, dict)):
             out = {}
             for key, val in list(objekt.items()):
                 if isdefined(val):
@@ -185,11 +186,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (
-            isinstance(objekt, TraitListObject)
-            or isinstance(objekt, list)
-            or isinstance(objekt, tuple)
-        ):
+        elif isinstance(objekt, (TraitListObject, list, tuple)):
             out = []
             for val in objekt:
                 if isdefined(val):
@@ -387,7 +384,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup_dict = deepcopy(self.trait_get(), memo)
         # access all keys
         for key in self.copyable_trait_names():
-            if key in self.__dict__.keys():
+            if key in self.__dict__:
                 _ = getattr(self, key)
         # clone once
         dup = self.clone_traits(memo=memo)

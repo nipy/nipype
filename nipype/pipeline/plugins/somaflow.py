@@ -22,14 +22,18 @@ class SomaFlowPlugin(GraphPluginBase):
         super().__init__(plugin_args=plugin_args)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
-        jobs = []
-        soma_deps = []
-        for idx, fname in enumerate(pyfiles):
-            name = os.path.splitext(os.path.split(fname)[1])[0]
-            jobs.append(Job(command=[sys.executable, fname], name=name))
-        for key, values in list(dependencies.items()):
-            for val in values:
-                soma_deps.append((jobs[val], jobs[key]))
+        jobs = [
+            Job(
+                command=[sys.executable, fname],
+                name=os.path.splitext(os.path.split(fname)[1])[0],
+            )
+            for fname in pyfiles
+        ]
+        soma_deps = [
+            (jobs[val], jobs[key])
+            for key, values in dependencies.items()
+            for val in values
+        ]
 
         wf = Workflow(jobs, soma_deps)
         logger.info("serializing workflow")

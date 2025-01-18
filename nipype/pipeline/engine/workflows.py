@@ -8,7 +8,6 @@ The `Workflow` class provides core functionality for batch processing.
 import os
 import os.path as op
 import sys
-from datetime import datetime
 from copy import deepcopy
 import pickle
 import shutil
@@ -16,6 +15,7 @@ import shutil
 import numpy as np
 
 from ... import config, logging
+from ...utils.datetime import utcnow
 from ...utils.misc import str2bool
 from ...utils.functions import getsource, create_function_from_source
 
@@ -191,10 +191,8 @@ connected.
                     and (
                         ".io" in str(destnode._interface.__class__)
                         or any(
-                            [
-                                ".io" in str(val)
-                                for val in destnode._interface.__class__.__bases__
-                            ]
+                            ".io" in str(val)
+                            for val in destnode._interface.__class__.__bases__
                         )
                     )
                 ):
@@ -205,10 +203,8 @@ connected.
                     and (
                         ".io" in str(srcnode._interface.__class__)
                         or any(
-                            [
-                                ".io" in str(val)
-                                for val in srcnode._interface.__class__.__bases__
-                            ]
+                            ".io" in str(val)
+                            for val in srcnode._interface.__class__.__bases__
                         )
                     )
                 ):
@@ -289,7 +285,7 @@ connected.
         for srcnode, dstnode, conn in connection_list:
             logger.debug("disconnect(): %s->%s %s", srcnode, dstnode, str(conn))
             if self in [srcnode, dstnode]:
-                raise IOError(
+                raise OSError(
                     "Workflow connect cannot contain itself as node: src[%s] "
                     "dest[%s] workflow[%s]"
                 ) % (srcnode, dstnode, self.name)
@@ -301,11 +297,12 @@ connected.
             edge_data = self._graph.get_edge_data(srcnode, dstnode, {"connect": []})
             ed_conns = [(c[0], c[1]) for c in edge_data["connect"]]
 
-            remove = []
-            for edge in conn:
-                if edge in ed_conns:
-                    # idx = ed_conns.index(edge)
-                    remove.append((edge[0], edge[1]))
+            remove = [
+                # idx = ed_conns.index(edge)
+                (edge[0], edge[1])
+                for edge in conn
+                if edge in ed_conns
+            ]
 
             logger.debug("disconnect(): remove list %s", str(remove))
             for el in remove:
@@ -394,10 +391,7 @@ connected.
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 outlist.extend(
-                    [
-                        ".".join((node.name, nodename))
-                        for nodename in node.list_node_names()
-                    ]
+                    f"{node.name}.{nodename}" for nodename in node.list_node_names()
                 )
             else:
                 outlist.append(node.name)
@@ -483,16 +477,11 @@ connected.
     def write_hierarchical_dotfile(
         self, dotfilename=None, colored=False, simple_form=True
     ):
-        dotlist = ["digraph %s{" % self.name]
-        dotlist.append(
-            self._get_dot(prefix="  ", colored=colored, simple_form=simple_form)
-        )
-        dotlist.append("}")
-        dotstr = "\n".join(dotlist)
+        dotlist = self._get_dot(prefix="  ", colored=colored, simple_form=simple_form)
+        dotstr = f"digraph {self.name}{{\n{dotlist}\n}}"
         if dotfilename:
-            fp = open(dotfilename, "w")
-            fp.writelines(dotstr)
-            fp.close()
+            with open(dotfilename, "w") as fp:
+                fp.writelines(dotstr)
         else:
             logger.info(dotstr)
 
@@ -532,7 +521,7 @@ connected.
             lines.append(wfdef)
             if include_config:
                 lines.append(f"{self.name}.config = {self.config}")
-            for idx, node in enumerate(nodes):
+            for node in nodes:
                 nodename = node.fullname.replace(".", "_")
                 # write nodes
                 nodelines = format_node(
@@ -560,7 +549,7 @@ connected.
                                 ][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
-                            args = tuple([arg for arg in args if arg])
+                            args = tuple(arg for arg in args if arg)
                             line_args = (
                                 u.fullname.replace(".", "_"),
                                 args,
@@ -579,8 +568,9 @@ connected.
                             )
                             lines.append(connect_template2 % line_args)
             functionlines = ["# Functions"]
-            for function in functions:
-                functionlines.append(pickle.loads(function).rstrip())
+            functionlines.extend(
+                pickle.loads(function).rstrip() for function in functions
+            )
             all_lines = importlines + functionlines + lines
 
             if not filename:
@@ -633,7 +623,7 @@ connected.
         if str2bool(self.config["execution"]["create_report"]):
             self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash, config=self.config)
-        datestr = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
+        datestr = utcnow().strftime("%Y%m%dT%H%M%S")
         if str2bool(self.config["execution"]["write_provenance"]):
             prov_base = op.join(self.base_dir, "workflow_provenance_%s" % datestr)
             logger.info("Provenance file prefix: %s" % prov_base)
@@ -851,10 +841,11 @@ connected.
             if isinstance(node, Workflow):
                 setattr(inputdict, node.name, node.inputs)
             else:
-                taken_inputs = []
-                for _, _, d in self._graph.in_edges(nbunch=node, data=True):
-                    for cd in d["connect"]:
-                        taken_inputs.append(cd[1])
+                taken_inputs = [
+                    cd[1]
+                    for _, _, d in self._graph.in_edges(nbunch=node, data=True)
+                    for cd in d["connect"]
+                ]
                 unconnectedinputs = TraitedSpec()
                 for key, trait in list(node.inputs.items()):
                     if key not in taken_inputs:
@@ -936,7 +927,7 @@ connected.
             if isinstance(node, Workflow):
                 node._reset_hierarchy()
                 for innernode in node._graph.nodes():
-                    innernode._hierarchy = ".".join((self.name, innernode._hierarchy))
+                    innernode._hierarchy = f"{self.name}.{innernode._hierarchy}"
             else:
                 node._hierarchy = self.name
 
@@ -1000,7 +991,7 @@ connected.
                 # logger.debug('expanding workflow: %s', node)
                 node._generate_flatgraph()
                 for innernode in node._graph.nodes():
-                    innernode._hierarchy = ".".join((self.name, innernode._hierarchy))
+                    innernode._hierarchy = f"{self.name}.{innernode._hierarchy}"
                 self._graph.add_nodes_from(node._graph.nodes())
                 self._graph.add_edges_from(node._graph.edges(data=True))
         if nodes2remove:
@@ -1054,7 +1045,7 @@ connected.
                 else:
                     if colored:
                         dotlist.append(
-                            ('%s[label="%s", style=filled,' ' fillcolor="%s"];')
+                            ('%s[label="%s", style=filled, fillcolor="%s"];')
                             % (nodename, node_class_name, colorset[level])
                         )
                     else:
@@ -1068,23 +1059,25 @@ connected.
                 nodename = fullname.replace(".", "_")
                 dotlist.append("subgraph cluster_%s {" % nodename)
                 if colored:
-                    dotlist.append(
-                        prefix + prefix + 'edge [color="%s"];' % (colorset[level + 1])
+                    dotlist.extend(
+                        (
+                            f'{prefix * 2}edge [color="{colorset[level + 1]}"];',
+                            f"{prefix * 2}style=filled;",
+                            f'{prefix * 2}fillcolor="{colorset[level + 2]}";',
+                        )
                     )
-                    dotlist.append(prefix + prefix + "style=filled;")
-                    dotlist.append(
-                        prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2])
-                    )
-                dotlist.append(
-                    node._get_dot(
-                        prefix=prefix + prefix,
-                        hierarchy=hierarchy + [self.name],
-                        colored=colored,
-                        simple_form=simple_form,
-                        level=level + 3,
+                dotlist.extend(
+                    (
+                        node._get_dot(
+                            prefix=prefix + prefix,
+                            hierarchy=hierarchy + [self.name],
+                            colored=colored,
+                            simple_form=simple_form,
+                            level=level + 3,
+                        ),
+                        "}",
                     )
                 )
-                dotlist.append("}")
             else:
                 for subnode in self._graph.successors(node):
                     if node._hierarchy != subnode._hierarchy:
@@ -1094,8 +1087,10 @@ connected.
                         subnodefullname = ".".join(hierarchy + [subnode.fullname])
                         nodename = nodefullname.replace(".", "_")
                         subnodename = subnodefullname.replace(".", "_")
-                        for _ in self._graph.get_edge_data(node, subnode)["connect"]:
-                            dotlist.append(f"{nodename} -> {subnodename};")
+                        dotlist.extend(
+                            f"{nodename} -> {subnodename};"
+                            for _ in self._graph.get_edge_data(node, subnode)["connect"]
+                        )
                         logger.debug("connection: %s", dotlist[-1])
         # add between workflow connections
         for u, v, d in self._graph.edges(data=True):

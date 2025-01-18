@@ -10,6 +10,7 @@ from ..base import (
     TraitedSpec,
     File,
     traits,
+    Tuple,
     Directory,
     InputMultiPath,
     isdefined,
@@ -59,7 +60,7 @@ class GTMSegInputSpec(FSTraitedSpec):
         desc="distance threshold to use when subsegmenting WM (default is 5)",
     )
 
-    ctx_annot = traits.Tuple(
+    ctx_annot = Tuple(
         traits.String,
         traits.Int,
         traits.Int,
@@ -67,7 +68,7 @@ class GTMSegInputSpec(FSTraitedSpec):
         desc="annot lhbase rhbase : annotation to use for cortical segmentation (default is aparc 1000 2000)",
     )
 
-    wm_annot = traits.Tuple(
+    wm_annot = Tuple(
         traits.String,
         traits.Int,
         traits.Int,
@@ -186,7 +187,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="ignore areas outside of the mask (in input vol space)",
     )
 
-    auto_mask = traits.Tuple(
+    auto_mask = Tuple(
         traits.Float,
         traits.Float,
         argstr="--auto-mask %f %f",
@@ -223,7 +224,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         argstr="--tt-reduce", desc="reduce segmentation to that of a tissue type"
     )
 
-    replace = traits.Tuple(
+    replace = Tuple(
         traits.Int,
         traits.Int,
         argstr="--replace %i %i",
@@ -292,7 +293,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="voxsize : set RBV voxel resolution (good for when standard res takes too much memory)",
     )
 
-    mg = traits.Tuple(
+    mg = Tuple(
         traits.Float,
         traits.List(traits.String),
         argstr="--mg %g %s",
@@ -323,7 +324,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="RefId1 RefId2 ... : compute HiBinding TAC for KM as mean of given RefIds",
     )
 
-    steady_state_params = traits.Tuple(
+    steady_state_params = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -358,7 +359,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="save signal estimate (yhat) smoothed with the PSF",
     )
 
-    save_yhat_with_noise = traits.Tuple(
+    save_yhat_with_noise = Tuple(
         traits.Int,
         traits.Int,
         argstr="--save-yhat-with-noise %i %i",
@@ -385,7 +386,7 @@ class GTMPVCInputSpec(FSTraitedSpec):
         desc="opt : optimization schema for applying adaptive GTM",
     )
 
-    opt_tol = traits.Tuple(
+    opt_tol = Tuple(
         traits.Int,
         traits.Float,
         traits.Float,
@@ -587,7 +588,7 @@ class GTMPVC(FSCommand):
 
 
 class MRTM1InputSpec(GLMFitInputSpec):
-    mrtm1 = traits.Tuple(
+    mrtm1 = Tuple(
         File(exists=True),
         File(exists=True),
         mandatory=True,
@@ -613,7 +614,7 @@ class MRTM1(GLMFit):
 
 
 class MRTM2InputSpec(GLMFitInputSpec):
-    mrtm2 = traits.Tuple(
+    mrtm2 = Tuple(
         File(exists=True),
         File(exists=True),
         traits.Float,
@@ -639,7 +640,7 @@ class MRTM2(GLMFit):
 
 
 class LoganInputSpec(GLMFitInputSpec):
-    logan = traits.Tuple(
+    logan = Tuple(
         File(exists=True),
         File(exists=True),
         traits.Float,

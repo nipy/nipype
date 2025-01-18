@@ -1,3 +1,4 @@
+import os
 from shutil import which
 
 import nipype.interfaces.base as nib
@@ -38,7 +39,7 @@ def test_run_oargraph(tmp_path):
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="OAR")
-    names = [".".join((node._hierarchy, node.name)) for node in execgraph.nodes()]
+    names = [f"{node._hierarchy}.{node.name}" for node in execgraph.nodes()]
     node = list(execgraph.nodes())[names.index("pipe.mod1")]
     result = node.get_output("output1")
     assert result == [1, 1]

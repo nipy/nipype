@@ -10,7 +10,7 @@ Please, check out the link for pertinent citations using POSSUM.
 """
 
 from .base import FSLCommand, FSLCommandInputSpec
-from ..base import TraitedSpec, File, traits
+from ..base import TraitedSpec, File, traits, Tuple
 
 
 class B0CalcInputSpec(FSLCommandInputSpec):
@@ -71,7 +71,7 @@ class B0CalcInputSpec(FSLCommandInputSpec):
         desc="Value for zeroth-order b0 field (z-component), in Tesla",
     )
 
-    xyz_b0 = traits.Tuple(
+    xyz_b0 = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,

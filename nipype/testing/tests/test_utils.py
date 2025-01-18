@@ -4,7 +4,6 @@
 """
 
 import os
-import warnings
 import subprocess
 from unittest.mock import patch, MagicMock
 from unittest import SkipTest

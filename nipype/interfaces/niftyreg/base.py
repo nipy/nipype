@@ -132,5 +132,5 @@ class NiftyRegCommand(CommandLine):
         if ext is not None:
             final_ext = ext
         if suffix is not None:
-            final_bn = "".join((final_bn, suffix))
+            final_bn = f"{final_bn}{suffix}"
         return os.path.abspath(os.path.join(out_dir, final_bn + final_ext))

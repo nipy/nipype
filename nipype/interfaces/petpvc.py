@@ -225,7 +225,7 @@ class PETPVC(CommandLine):
             cwd = os.getcwd()
         if change_ext:
             if suffix:
-                suffix = "".join((suffix, ext))
+                suffix = f"{suffix}{ext}"
             else:
                 suffix = ext
         if suffix is None:

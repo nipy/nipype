@@ -20,6 +20,7 @@ from ..base import (
     OutputMultiPath,
     Undefined,
     traits,
+    Tuple,
     isdefined,
 )
 from .base import FSLCommand, FSLCommandInputSpec, Info
@@ -1118,7 +1119,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         desc="sub-sampling scheme, list, default [4, 2, 1, 1]",
         sep=",",
     )
-    warp_resolution = traits.Tuple(
+    warp_resolution = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -1172,7 +1173,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         argstr="--ssqlambda=0",
         desc="If true, lambda is not weighted by current ssq, default false",
     )
-    jacobian_range = traits.Tuple(
+    jacobian_range = Tuple(
         traits.Float,
         traits.Float,
         argstr="--jacrange=%f,%f",
@@ -1196,7 +1197,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
         argstr="--intorder=%d",
         desc="Order of poynomial for mapping intensities, default 5",
     )
-    biasfield_resolution = traits.Tuple(
+    biasfield_resolution = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -1623,7 +1624,7 @@ class SUSANInputSpec(FSLCommandInputSpec):
         ),
     )
     usans = traits.List(
-        traits.Tuple(File(exists=True), traits.Float),
+        Tuple(File(exists=True), traits.Float),
         maxlen=2,
         argstr="",
         position=6,

@@ -13,18 +13,13 @@ from ..base import (
     InputMultiPath,
     OutputMultiPath,
     isdefined,
-    InputMultiObject,
-    Directory,
 )
 from .base import (
     FSCommand,
     FSTraitedSpec,
     FSCommandOpenMP,
     FSTraitedSpecOpenMP,
-    CommandLine,
 )
-from .preprocess import ReconAllInputSpec
-from ..io import FreeSurferSource
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")

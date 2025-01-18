@@ -8,7 +8,7 @@ import pytest
 have_cv = True
 try:
     package_check("cviewer")
-except Exception as e:
+except Exception:
     have_cv = False
 
 
@@ -16,7 +16,7 @@ except Exception as e:
 def creating_graphs(tmpdir):
     graphlist = []
     graphnames = ["name" + str(i) for i in range(6)]
-    for idx, name in enumerate(graphnames):
+    for idx in range(len(graphnames)):
         graph = np.random.rand(10, 10)
         G = nx.from_numpy_array(graph)
         out_file = tmpdir.strpath + graphnames[idx] + ".pck"
@@ -39,7 +39,7 @@ def test_importerror(creating_graphs, tmpdir):
     nbs.inputs.in_group2 = group2
     nbs.inputs.edge_key = "weight"
 
-    with pytest.raises(ImportError) as e:
+    with pytest.raises(ImportError):
         nbs.run()
 
 

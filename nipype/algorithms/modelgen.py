@@ -7,7 +7,9 @@ algorithms for generating regressors for sparse and sparse-clustered acquisition
 experiments.
 """
 from copy import deepcopy
-import csv, math, os
+import csv
+import math
+import os
 
 from nibabel import load
 import numpy as np
@@ -161,7 +163,7 @@ def bids_gen_info(
     for bids_event_file in bids_event_files:
         with open(bids_event_file) as f:
             f_events = csv.DictReader(f, skipinitialspace=True, delimiter="\t")
-            events = [{k: v for k, v in row.items()} for row in f_events]
+            events = list(f_events)
         if not condition_column:
             condition_column = "_trial_type"
             for i in events:
@@ -473,15 +475,15 @@ None])
         """Generate design specification for a typical fmri paradigm"""
         realignment_parameters = []
         if isdefined(self.inputs.realignment_parameters):
-            for parfile in self.inputs.realignment_parameters:
-                realignment_parameters.append(
-                    np.apply_along_axis(
-                        func1d=normalize_mc_params,
-                        axis=1,
-                        arr=np.loadtxt(parfile),
-                        source=self.inputs.parameter_source,
-                    )
+            realignment_parameters.extend(
+                np.apply_along_axis(
+                    func1d=normalize_mc_params,
+                    axis=1,
+                    arr=np.loadtxt(parfile),
+                    source=self.inputs.parameter_source,
                 )
+                for parfile in self.inputs.realignment_parameters
+            )
         outliers = []
         if isdefined(self.inputs.outlier_files):
             for filename in self.inputs.outlier_files:

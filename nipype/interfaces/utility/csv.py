@@ -62,7 +62,7 @@ class CSVReader(BaseInterface):
             if self.inputs.header:
                 self._outfields = tuple(entry)
             else:
-                self._outfields = tuple(["column_" + str(x) for x in range(len(entry))])
+                self._outfields = tuple("column_" + str(x) for x in range(len(entry)))
         return self._outfields
 
     def _run_interface(self, runtime):

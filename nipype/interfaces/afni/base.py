@@ -292,7 +292,7 @@ class AFNICommand(AFNICommandBase):
         if ext is None:
             ext = Info.output_type_to_ext(self.inputs.outputtype)
         if change_ext:
-            suffix = "".join((suffix, ext)) if suffix else ext
+            suffix = f"{suffix}{ext}" if suffix else ext
 
         if suffix is None:
             suffix = ""
@@ -326,6 +326,4 @@ class AFNIPythonCommand(AFNICommand):
 
 def no_afni():
     """Check whether AFNI is not available."""
-    if Info.version() is None:
-        return True
-    return False
+    return Info.version() is None

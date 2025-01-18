@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 import nibabel as nb
 
-from .base import NipyBaseInterface, have_nipy
+from .base import NipyBaseInterface
 from ..base import TraitedSpec, traits, BaseInterfaceInputSpec, File, isdefined
 
 

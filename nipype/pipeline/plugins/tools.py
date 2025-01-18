@@ -55,7 +55,7 @@ another exception occurred:\n\n{}.""".format(
         login_name = getpass.getuser()
     except KeyError:
         login_name = f"UID{os.getuid():d}"
-    crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{str(uuid.uuid4())}"
+    crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{uuid.uuid4()}"
     crashdir = node.config["execution"].get("crashdump_dir", os.getcwd())
 
     os.makedirs(crashdir, exist_ok=True)
@@ -83,10 +83,8 @@ def report_nodes_not_run(notrun):
     if notrun:
         logger.info("***********************************")
         for info in notrun:
-            logger.error(
-                "could not run node: %s"
-                % ".".join((info["node"]._hierarchy, info["node"]._id))
-            )
+            node = info["node"]
+            logger.error(f"could not run node: {node._hierarchy}.{node._id}")
             logger.info("crashfile: %s" % info["crashfile"])
             logger.debug("The following dependent nodes were not run")
             for subnode in info["dependents"]:

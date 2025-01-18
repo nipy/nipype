@@ -15,7 +15,6 @@ import atexit
 from warnings import warn
 from looseversion import LooseVersion
 import configparser
-import numpy as np
 
 from simplejson import load, dump
 
@@ -353,7 +352,7 @@ class NipypeConfig:
 
             # Older versions of xvfbwrapper used vdisplay_num
             if not hasattr(self._display, "new_display"):
-                setattr(self._display, "new_display", self._display.vdisplay_num)
+                self._display.new_display = self._display.vdisplay_num
             return self.get_display()
 
     def stop_display(self):
