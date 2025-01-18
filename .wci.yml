@@ -2,7 +2,7 @@
 
 name: nipype
 
-headline: Neuroimaging in Python: Pipelines and Interfaces
+headline: "Neuroimaging in Python: Pipelines and Interfaces"
 
 description: |
     Nipype, an open-source, community-developed initiative under the umbrella of NiPy, is a Python project that
