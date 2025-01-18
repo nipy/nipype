@@ -822,9 +822,8 @@ Error populating the inputs of node "%s": the results file of the source node \
         self.inputs.update(**opts)
 
     def is_gpu_node(self):
-        return (hasattr(self.inputs, 'use_cuda') and self.inputs.use_cuda) or (
-            hasattr(self.inputs, 'use_gpu') and self.inputs.use_gpu
-        )
+        return bool(getattr(self.inputs, 'use_cuda', False)) or bool(
+            getattr(self.inputs, 'use_gpu', False))
 
 
 class JoinNode(Node):
