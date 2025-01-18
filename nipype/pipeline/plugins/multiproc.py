@@ -140,9 +140,8 @@ class MultiProcPlugin(DistributedPluginBase):
         # total no. of processes allowed on all gpus
         if self.n_gpu_procs > self.n_gpus_visible:
             logger.info(
-                'Total number of GPUs proc requested (%d) exceeds the available number of GPUs (%d) on the system. Using requested GPU slots at your own risk!'
-                % (self.n_gpu_procs, self.n_gpus_visible)
-            )
+                'Total number of GPUs proc requested (%d) exceeds the available number of GPUs (%d) on the system. Using requested GPU slots at your own risk!',
+                self.n_gpu_procs, self.n_gpus_visible)
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug(
