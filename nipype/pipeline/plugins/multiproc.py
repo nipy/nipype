@@ -141,7 +141,9 @@ class MultiProcPlugin(DistributedPluginBase):
         if self.n_gpu_procs > self.n_gpus_visible:
             logger.info(
                 'Total number of GPUs proc requested (%d) exceeds the available number of GPUs (%d) on the system. Using requested GPU slots at your own risk!',
-                self.n_gpu_procs, self.n_gpus_visible)
+                self.n_gpu_procs,
+                self.n_gpus_visible,
+            )
 
         # Instantiate different thread pools for non-daemon processes
         logger.debug(
@@ -394,7 +396,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 free_memory_gb += next_job_gb
                 free_processors += next_job_th
                 if is_gpu_node:
-                    free_gpu_slots -= next_job_gpu_th
+                    free_gpu_slots += next_job_gpu_th
                 # Display stats next loop
                 self._stats = None
 
@@ -422,4 +424,3 @@ class MultiProcPlugin(DistributedPluginBase):
                 key=lambda item: (self.procs[item].mem_gb, self.procs[item].n_procs),
             )
         return jobids
-

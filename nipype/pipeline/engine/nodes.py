@@ -823,7 +823,8 @@ Error populating the inputs of node "%s": the results file of the source node \
 
     def is_gpu_node(self):
         return bool(getattr(self.inputs, 'use_cuda', False)) or bool(
-            getattr(self.inputs, 'use_gpu', False))
+            getattr(self.inputs, 'use_gpu', False)
+        )
 
 
 class JoinNode(Node):
