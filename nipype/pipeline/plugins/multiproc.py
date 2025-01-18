@@ -21,6 +21,7 @@ from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
+from .tools import gpu_count
 
 try:
     from textwrap import indent
@@ -132,7 +133,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self.raise_insufficient = self.plugin_args.get("raise_insufficient", True)
 
         # GPU found on system
-        self.n_gpus_visible = MultiProcPlugin.gpu_count()
+        self.n_gpus_visible = gpu_count()
         # proc per GPU set by user
         self.n_gpu_procs = self.plugin_args.get('n_gpu_procs', self.n_gpus_visible)
 
@@ -423,12 +424,3 @@ class MultiProcPlugin(DistributedPluginBase):
             )
         return jobids
 
-    @staticmethod
-    def gpu_count():
-        n_gpus = 1
-        try:
-            import GPUtil
-
-            return len(GPUtil.getGPUs())
-        except ImportError:
-            return n_gpus
