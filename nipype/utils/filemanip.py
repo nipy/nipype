@@ -19,6 +19,7 @@ import posixpath
 from pathlib import Path
 import simplejson as json
 from time import sleep, time
+import scipy.io as sio
 
 from .. import logging, config, __version__ as version
 from .misc import is_container
@@ -47,7 +48,7 @@ def split_filename(fname):
     fname : str
         filename from fname, without extension
     ext : str
-        file extension from fname
+        file extension from fname706
 
     Examples
     --------
@@ -126,10 +127,9 @@ def fname_presuffix(fname, prefix="", suffix="", newpath=None, use_ext=True):
 
 def fnames_presuffix(fnames, prefix="", suffix="", newpath=None, use_ext=True):
     """Calls fname_presuffix for a list of files."""
-    f2 = []
-    for fname in fnames:
-        f2.append(fname_presuffix(fname, prefix, suffix, newpath, use_ext))
-    return f2
+    return [
+        fname_presuffix(fname, prefix, suffix, newpath, use_ext) for fname in fnames
+    ]
 
 
 def hash_rename(filename, hashvalue):
@@ -137,7 +137,7 @@ def hash_rename(filename, hashvalue):
     and sets path to output_directory
     """
     path, name, ext = split_filename(filename)
-    newfilename = "".join((name, "_0x", hashvalue, ext))
+    newfilename = f"{name}_0x{hashvalue}{ext}"
     return op.join(path, newfilename)
 
 
@@ -445,14 +445,15 @@ def get_related_files(filename, include_this_file=True):
     include_this_file : bool
         If true, output includes the input filename.
     """
-    related_files = []
     path, name, this_type = split_filename(filename)
-    for type_set in related_filetype_sets:
-        if this_type in type_set:
-            for related_type in type_set:
-                if include_this_file or related_type != this_type:
-                    related_files.append(op.join(path, name + related_type))
-    if not len(related_files):
+    related_files = [
+        op.join(path, f"{name}{related_type}")
+        for type_set in related_filetype_sets
+        if this_type in type_set
+        for related_type in type_set
+        if include_this_file or related_type != this_type
+    ]
+    if not related_files:
         related_files = [filename]
     return related_files
 
@@ -499,7 +500,7 @@ def ensure_list(filename):
     elif isinstance(filename, list):
         return filename
     elif is_container(filename):
-        return [x for x in filename]
+        return list(filename)
     else:
         return None
 
@@ -566,7 +567,7 @@ def load_json(filename):
 
 
 def loadcrash(infile, *args):
-    if infile.endswith("pkl") or infile.endswith("pklz"):
+    if infile.endswith(("pkl", "pklz")):
         return loadpkl(infile)
     else:
         raise ValueError("Only pickled crashfiles are supported")
@@ -700,10 +701,11 @@ def savepkl(filename, record, versioning=False):
             os.rename(tmpfile, filename)
             break
         except FileNotFoundError as e:
+            last_e = e
             fmlogger.debug(str(e))
             sleep(2)
     else:
-        raise e
+        raise last_e
 
 
 rst_levels = ["=", "-", "~", "+"]
@@ -714,17 +716,11 @@ def write_rst_header(header, level=0):
 
 
 def write_rst_list(items, prefix=""):
-    out = []
-    for item in ensure_list(items):
-        out.append(f"{prefix} {str(item)}")
-    return "\n".join(out) + "\n\n"
+    return "\n".join(f"{prefix} {item}" for item in ensure_list(items)) + "\n\n"
 
 
 def write_rst_dict(info, prefix=""):
-    out = []
-    for key, value in sorted(info.items()):
-        out.append(f"{prefix}* {key} : {str(value)}")
-    return "\n".join(out) + "\n\n"
+    return "\n".join(f"{prefix}* {k} : {v}" for k, v in sorted(info.items())) + "\n\n"
 
 
 def dist_is_editable(dist):
@@ -932,3 +928,59 @@ def indirectory(path):
         yield
     finally:
         os.chdir(cwd)
+
+
+def load_spm_mat(spm_mat_file, **kwargs):
+    try:
+        mat = sio.loadmat(spm_mat_file, **kwargs)
+    except NotImplementedError:
+        import h5py
+        import numpy as np
+
+        mat = dict(SPM=np.array([[sio.matlab.mat_struct()]]))
+
+        # Get Vbeta, Vcon, and Vspm file names
+        with h5py.File(spm_mat_file, "r") as h5file:
+            fnames = dict()
+            try:
+                fnames["Vbeta"] = [
+                    u"".join(chr(c[0]) for c in h5file[obj_ref[0]])
+                    for obj_ref in h5file["SPM"]["Vbeta"]["fname"]
+                ]
+            except Exception:
+                fnames["Vbeta"] = []
+            for contr_type in ["Vcon", "Vspm"]:
+                try:
+                    fnames[contr_type] = [
+                        u"".join(chr(c[0]) for c in h5file[obj_ref[0]]["fname"])
+                        for obj_ref in h5file["SPM"]["xCon"][contr_type]
+                    ]
+                except Exception:
+                    fnames[contr_type] = []
+
+        # Structure Vbeta as returned by scipy.io.loadmat
+        obj_list = []
+        for i in range(len(fnames["Vbeta"])):
+            obj = sio.matlab.mat_struct()
+            setattr(obj, "fname", np.array([fnames["Vbeta"][i]]))
+            obj_list.append(obj)
+        if len(obj_list) > 0:
+            setattr(mat["SPM"][0, 0], "Vbeta", np.array([obj_list]))
+        else:
+            setattr(mat["SPM"][0, 0], "Vbeta", np.empty((0, 0), dtype=object))
+
+        # Structure Vcon and Vspm as returned by scipy.io.loadmat
+        obj_list = []
+        for i in range(len(fnames["Vcon"])):
+            obj = sio.matlab.mat_struct()
+            for contr_type in ["Vcon", "Vspm"]:
+                temp = sio.matlab.mat_struct()
+                setattr(temp, "fname", np.array([fnames[contr_type][i]]))
+                setattr(obj, contr_type, np.array([[temp]]))
+            obj_list.append(obj)
+        if len(obj_list) > 0:
+            setattr(mat["SPM"][0, 0], "xCon", np.array([obj_list]))
+        else:
+            setattr(mat["SPM"][0, 0], "xCon", np.empty((0, 0), dtype=object))
+
+    return mat

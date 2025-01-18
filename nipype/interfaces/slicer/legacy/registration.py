@@ -2,18 +2,13 @@
 If you spot a bug, please report it on the mailing list and/or change the generator."""
 
 from nipype.interfaces.base import (
-    CommandLine,
     CommandLineInputSpec,
     SEMLikeCommandLine,
     TraitedSpec,
     File,
-    Directory,
     traits,
-    isdefined,
     InputMultiPath,
-    OutputMultiPath,
 )
-import os
 
 
 class BSplineDeformableRegistrationInputSpec(CommandLineInputSpec):

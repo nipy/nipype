@@ -23,6 +23,7 @@ from ..interfaces.base import (
     isdefined,
     DynamicTraitedSpec,
     Undefined,
+    Tuple,
 )
 from ..utils.filemanip import fname_presuffix, split_filename, ensure_list
 
@@ -531,7 +532,7 @@ def remove_identical_paths(in_files):
         commonprefix = op.commonprefix(in_files)
         lastslash = commonprefix.rfind("/")
         commonpath = commonprefix[0 : (lastslash + 1)]
-        for fileidx, in_file in enumerate(in_files):
+        for in_file in in_files:
             path, name, ext = split_filename(in_file)
             in_file = op.join(path, name)
             name = in_file.replace(commonpath, "")
@@ -548,11 +549,9 @@ def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
     if rowheadings:
         typelist.append(("heading", "a40"))
     if len(shape) > 1:
-        for idx in range(1, (min(shape) + 1)):
-            typelist.append((str(idx), float))
+        typelist.extend((str(idx), float) for idx in range(1, (min(shape) + 1)))
     else:
-        for idx in range(1, (shape[0] + 1)):
-            typelist.append((str(idx), float))
+        typelist.extend((str(idx), float) for idx in range(1, (shape[0] + 1)))
     if extraheadingBool:
         typelist.append((extraheading, "a40"))
     iflogger.info(typelist)
@@ -668,7 +667,7 @@ class MergeCSVFiles(BaseInterface):
 
         if isdefined(self.inputs.row_headings):
             iflogger.info(
-                'Row headings have been provided. Adding "labels"' "column header."
+                'Row headings have been provided. Adding "labels" column header.'
             )
             prefix = f'"{self.inputs.row_heading_title}","'
             csv_headings = prefix + '","'.join(itertools.chain(headings)) + '"\n'
@@ -685,7 +684,7 @@ class MergeCSVFiles(BaseInterface):
 
         output_array = merge_csvs(self.inputs.in_files)
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
 
         out_file = op.abspath(name + ext)
@@ -713,8 +712,7 @@ class MergeCSVFiles(BaseInterface):
                 mx = shape[0]
             else:
                 mx = 1
-            for idx in range(0, mx):
-                extrafieldlist.append(self.inputs.extra_field)
+            extrafieldlist.extend(self.inputs.extra_field for idx in range(mx))
             iflogger.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist
         iflogger.info(output)
@@ -727,7 +725,7 @@ class MergeCSVFiles(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
         out_file = op.abspath(name + ext)
         outputs["csv_file"] = out_file
@@ -773,7 +771,7 @@ class AddCSVColumn(BaseInterface):
     def _run_interface(self, runtime):
         in_file = open(self.inputs.in_file)
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
         out_file = op.abspath(name + ext)
 
@@ -793,7 +791,7 @@ class AddCSVColumn(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".csv":
+        if ext != ".csv":
             ext = ".csv"
         out_file = op.abspath(name + ext)
         outputs["csv_file"] = out_file
@@ -1176,7 +1174,7 @@ class NormalizeProbabilityMapSet(BaseInterface):
 class SplitROIsInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True, desc="file to be split")
     in_mask = File(exists=True, desc="only process files inside mask")
-    roi_size = traits.Tuple(traits.Int, traits.Int, traits.Int, desc="desired ROI size")
+    roi_size = Tuple(traits.Int, traits.Int, traits.Int, desc="desired ROI size")
 
 
 class SplitROIsOutputSpec(TraitedSpec):
@@ -1347,7 +1345,7 @@ def split_rois(in_file, mask=None, roishape=None):
     """
     import nibabel as nb
     import numpy as np
-    from math import sqrt, ceil
+    from math import ceil
     import os.path as op
 
     if roishape is None:

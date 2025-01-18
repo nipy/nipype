@@ -15,7 +15,7 @@ class DebugPlugin(PluginBase):
         if (
             plugin_args
             and "callable" in plugin_args
-            and hasattr(plugin_args["callable"], "__call__")
+            and callable(plugin_args["callable"])
         ):
             self._callable = plugin_args["callable"]
         else:

@@ -1,22 +1,11 @@
-name: Stable tests
-
-# This file tests the claimed support range of nipype including
-#
-# * Operating systems: Linux, OSX
-# * Dependencies: minimum requirements, optional requirements
-# * Installation methods: setup.py, sdist, wheel, archive
+name: Tox
 
 on:
   push:
-    branches:
-      - master
-      - maint/*
-    tags:
-      - "*"
+    branches: [ master, main, 'maint/*' ]
+    tags: [ '*' ]
   pull_request:
-    branches:
-      - master
-      - maint/*
+    branches: [ master, main, 'maint/*' ]
   schedule:
     # 8am EST / 9am EDT Mondays
     - cron: "0 13 * * 1"
@@ -26,27 +15,28 @@ defaults:
     shell: bash
 
 concurrency:
-  group: tests-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read
+
+env:
+  # Force tox and pytest to use color
+  FORCE_COLOR: true
+
+
 jobs:
   build:
-    permissions:
-      contents: read # to fetch code (actions/checkout)
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3
-      - run: pip install --upgrade build twine
-      - name: Build sdist and wheel
-        run: python -m build
-      - run: twine check dist/*
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+      - run: uv build
+      - run: uvx twine check dist/*
       - uses: actions/upload-artifact@v4
         with:
           name: dist
@@ -82,72 +72,52 @@ jobs:
       - name: Run tests
         run: pytest --doctest-modules -v --pyargs nipype
 
-  stable:
+  test:
     # Check each OS, all supported Python, minimum versions and latest releases
-    permissions:
-      contents: read # to fetch code (actions/checkout)
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ["ubuntu-22.04"]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        check: ["test"]
-        pip-flags: [""]
-        depends: ["REQUIREMENTS"]
-        deb-depends: [false]
-        nipype-extras: ["doc,tests,profiler"]
+        os: ["ubuntu-latest"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        dependencies: [none, full, pre]
         include:
-          - os: ubuntu-22.04
-            python-version: "3.8"
-            check: test
-            pip-flags: ""
-            depends: REQUIREMENTS
-            deb-depends: true
-            nipype-extras: doc,tests,profiler,duecredit,ssh
-          - os: ubuntu-20.04
-            python-version: 3.8
-            check: test
-            pip-flags: ""
-            depends: REQUIREMENTS
-            deb-depends: true
-            nipype-extras: doc,tests,nipy,profiler,duecredit,ssh
+          - os: ubuntu-latest
+            python-version: "3.9"
+            dependencies: min
+        exclude:
+          # Skip some intermediate versions for full tests
+          - python-version: "3.10"
+            dependencies: full
+          - python-version: "3.11"
+            dependencies: full
+          # Do not test pre-releases for versions out of SPEC0
+          - python-version: "3.9"
+            dependencies: pre
+          - python-version: "3.10"
+            dependencies: pre
+
     env:
-      DEPENDS: ${{ matrix.depends }}
-      CHECK_TYPE: ${{ matrix.check }}
-      EXTRA_PIP_FLAGS: ${{ matrix.pip-flags }}
-      INSTALL_DEB_DEPENDENCIES: ${{ matrix.deb-depends }}
-      NIPYPE_EXTRAS: ${{ matrix.nipype-extras }}
-      INSTALL_TYPE: pip
-      CI_SKIP_TEST: 1
+      DEPENDS: ${{ matrix.dependencies }}
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
-      - name: Create virtual environment
-        run: tools/ci/create_venv.sh
-      - name: Build archive
+      - name: Install tox
         run: |
-          source tools/ci/build_archive.sh
-          echo "ARCHIVE=$ARCHIVE" >> $GITHUB_ENV
-      - name: Install Debian dependencies
-        run: tools/ci/install_deb_dependencies.sh
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-      - name: Install dependencies
-        run: tools/ci/install_dependencies.sh
-      - name: Install Nipype
-        run: tools/ci/install.sh
-      - name: Run tests
-        run: tools/ci/check.sh
-        if: ${{ matrix.check != 'skiptests' }}
-      - uses: codecov/codecov-action@v4
+          uv tool install tox --with=tox-uv --with=tox-gh-actions
+      - name: Show tox config
+        run: tox c
+      - name: Run tox
+        run: tox -v --exit-and-dump-after 1200
+      - uses: codecov/codecov-action@v5
         with:
-          file: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
       - name: Upload pytest test results
@@ -160,7 +130,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: "Package deployment"
-    needs: [stable, test-package]
+    needs: [test, test-package]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     steps:
       - uses: actions/download-artifact@v4
@@ -171,3 +141,21 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+  checks:
+    runs-on: 'ubuntu-latest'
+    continue-on-error: true
+    strategy:
+      matrix:
+        check: ['specs', 'style']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+      - name: Show tox config
+        run: uvx tox c
+      - name: Show tox config (this call)
+        run: uvx tox c -e ${{ matrix.check }}
+      - name: Run check
+        run: uvx tox -e ${{ matrix.check }}

@@ -17,7 +17,7 @@ from .base import (
     FSCommandOpenMP,
     FSTraitedSpecOpenMP,
 )
-from ..base import isdefined, TraitedSpec, File, traits, Directory
+from ..base import isdefined, TraitedSpec, File, traits, Tuple, Directory
 
 __docformat__ = "restructuredtext"
 iflogger = logging.getLogger("nipype.interface")
@@ -251,7 +251,7 @@ class RegisterInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-2,
         desc="The data to register to. In normal recon-all usage, "
-        + "this is a template file for average surface.",
+        "this is a template file for average surface.",
     )
     in_sulc = File(
         exists=True,
@@ -331,7 +331,7 @@ class PaintInputSpec(FSTraitedSpec):
         mandatory=True,
         position=-2,
         desc="Surface file with grid (vertices) onto which the "
-        + "template data is to be sampled or 'painted'",
+        "template data is to be sampled or 'painted'",
     )
     template = File(
         argstr="%s", exists=True, mandatory=True, position=-3, desc="Template file"
@@ -348,7 +348,7 @@ class PaintInputSpec(FSTraitedSpec):
         name_source=["in_surf"],
         keep_extension=False,
         desc="File containing a surface-worth of per-vertex values, "
-        + "saved in 'curvature' format.",
+        "saved in 'curvature' format.",
     )
 
 
@@ -462,28 +462,28 @@ class MRICoregInputSpec(FSTraitedSpec):
         maxlen=2,
         desc="set spatial scales, in voxels (default [2, 4])",
     )
-    initial_translation = traits.Tuple(
+    initial_translation = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--trans %g %g %g",
         desc="initial translation in mm (implies no_cras0)",
     )
-    initial_rotation = traits.Tuple(
+    initial_rotation = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--rot %g %g %g",
         desc="initial rotation in degrees",
     )
-    initial_scale = traits.Tuple(
+    initial_scale = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
         argstr="--scale %g %g %g",
         desc="initial scale",
     )
-    initial_shear = traits.Tuple(
+    initial_shear = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,

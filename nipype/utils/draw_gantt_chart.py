@@ -5,12 +5,13 @@ Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
 # Import packages
-import sys
 import random
 import datetime
 import simplejson as json
+from typing import Union
 
 from collections import OrderedDict
+from warnings import warn
 
 # Pandas
 try:
@@ -20,7 +21,6 @@ except ImportError:
         "Pandas not found; in order for full functionality of this module "
         "install the pandas package"
     )
-    pass
 
 
 def create_event_dict(start_time, nodes_list):
@@ -68,9 +68,9 @@ def create_event_dict(start_time, nodes_list):
         finish_delta = (node["finish"] - start_time).total_seconds()
 
         # Populate dictionary
-        if events.get(start_delta) or events.get(finish_delta):
+        if events.get(start_delta):
             err_msg = "Event logged twice or events started at exact same time!"
-            raise KeyError(err_msg)
+            warn(err_msg, category=Warning)
         events[start_delta] = start_node
         events[finish_delta] = finish_node
 
@@ -103,21 +103,31 @@ def log_to_dict(logfile):
 
     nodes_list = [json.loads(l) for l in lines]
 
-    def _convert_string_to_datetime(datestring):
-        try:
-            datetime_object: datetime.datetime = datetime.datetime.strptime(
-                datestring, "%Y-%m-%dT%H:%M:%S.%f"
+    def _convert_string_to_datetime(
+        datestring: Union[str, datetime.datetime],
+    ) -> datetime.datetime:
+        """Convert a date string to a datetime object."""
+        if isinstance(datestring, datetime.datetime):
+            datetime_object = datestring
+        elif isinstance(datestring, str):
+            date_format = (
+                "%Y-%m-%dT%H:%M:%S.%f%z"
+                if "+" in datestring
+                else "%Y-%m-%dT%H:%M:%S.%f"
             )
-            return datetime_object
-        except Exception as _:
-            pass
-        return datestring
+            datetime_object: datetime.datetime = datetime.datetime.strptime(
+                datestring, date_format
+            )
+        else:
+            msg = f"{datestring} is not a string or datetime object."
+            raise TypeError(msg)
+        return datetime_object
 
     date_object_node_list: list = list()
     for n in nodes_list:
-        if "start" in n.keys():
+        if "start" in n:
             n["start"] = _convert_string_to_datetime(n["start"])
-        if "finish" in n.keys():
+        if "finish" in n:
             n["finish"] = _convert_string_to_datetime(n["finish"])
         date_object_node_list.append(n)
 
@@ -156,12 +166,18 @@ def calculate_resource_timeseries(events, resource):
     # Iterate through the events
     for _, event in sorted(events.items()):
         if event["event"] == "start":
-            if resource in event and event[resource] != "Unknown":
-                all_res += float(event[resource])
+            if resource in event:
+                try:
+                    all_res += float(event[resource])
+                except ValueError:
+                    continue
             current_time = event["start"]
         elif event["event"] == "finish":
-            if resource in event and event[resource] != "Unknown":
-                all_res -= float(event[resource])
+            if resource in event:
+                try:
+                    all_res -= float(event[resource])
+                except ValueError:
+                    continue
             current_time = event["finish"]
         res[current_time] = all_res
 
@@ -286,7 +302,14 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
         # Left
         left = 60
         for core in range(len(end_times)):
-            if end_times[core] < node_start:
+            try:
+                end_time_condition = end_times[core] < node_start
+            except TypeError:
+                # if one has a timezone and one does not
+                end_time_condition = end_times[core].replace(
+                    tzinfo=None
+                ) < node_start.replace(tzinfo=None)
+            if end_time_condition:
                 left += core * 30
                 end_times[core] = datetime.datetime(
                     node_finish.year,
@@ -309,7 +332,7 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
             "offset": offset,
             "scale_duration": scale_duration,
             "color": color,
-            "node_name": node["name"],
+            "node_name": node.get("name", node.get("id", "")),
             "node_dur": node["duration"] / 60.0,
             "node_start": node_start.strftime("%Y-%m-%d %H:%M:%S"),
             "node_finish": node_finish.strftime("%Y-%m-%d %H:%M:%S"),
@@ -528,6 +551,25 @@ def generate_gantt_chart(
 
     # Read in json-log to get list of node dicts
     nodes_list = log_to_dict(logfile)
+
+    # Only include nodes with timing information, and convert timestamps
+    # from strings to datetimes
+    nodes_list = [
+        {
+            k: (
+                datetime.datetime.strptime(i[k], "%Y-%m-%dT%H:%M:%S.%f")
+                if k in {"start", "finish"} and isinstance(i[k], str)
+                else i[k]
+            )
+            for k in i
+        }
+        for i in nodes_list
+        if "start" in i and "finish" in i
+    ]
+
+    for node in nodes_list:
+        if "duration" not in node:
+            node["duration"] = (node["finish"] - node["start"]).total_seconds()
 
     # Create the header of the report with useful information
     start_node = nodes_list[0]

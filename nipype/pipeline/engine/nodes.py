@@ -36,7 +36,6 @@ from ...utils.filemanip import (
 from ...interfaces.base import (
     traits,
     InputMultiPath,
-    CommandLine,
     Undefined,
     DynamicTraitedSpec,
     Bunch,
@@ -240,7 +239,7 @@ class Node(EngineBase):
     @needed_outputs.setter
     def needed_outputs(self, new_outputs):
         """Needed outputs changes the hash, refresh if changed"""
-        new_outputs = sorted(list(set(new_outputs or [])))
+        new_outputs = sorted(set(new_outputs or []))
         if new_outputs != self._needed_outputs:
             # Reset hash
             self._hashvalue = None
@@ -1287,7 +1286,7 @@ class MapNode(Node):
                     )
                 setattr(finalresult.outputs, key, values)
 
-        if returncode and any([code is not None for code in returncode]):
+        if returncode and any(code is not None for code in returncode):
             msg = []
             for i, code in enumerate(returncode):
                 if code is not None:
@@ -1386,7 +1385,7 @@ class MapNode(Node):
                 )
             )
         except Exception as msg:
-            result.runtime.stderr = "%s\n\n%s".format(
+            result.runtime.stderr = "{}\n\n{}".format(
                 getattr(result.runtime, "stderr", ""), msg
             )
             _save_resultfile(

@@ -13,6 +13,7 @@ from ..base import (
     Directory,
     TraitedSpec,
     traits,
+    Tuple,
     isdefined,
     File,
     InputMultiObject,
@@ -233,7 +234,7 @@ class Autobox(AFNICommand):
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()
-                outputs.trait_set(**{k: int(d[k]) for k in d.keys()})
+                outputs.trait_set(**{k: int(v) for k, v in d.items()})
         return outputs
 
 
@@ -261,7 +262,7 @@ class BrickStatInputSpec(CommandLineInputSpec):
     mean = traits.Bool(desc="print the mean value in the dataset", argstr="-mean")
     sum = traits.Bool(desc="print the sum of values in the dataset", argstr="-sum")
     var = traits.Bool(desc="print the variance in the dataset", argstr="-var")
-    percentile = traits.Tuple(
+    percentile = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -330,7 +331,7 @@ class BrickStat(AFNICommandBase):
 
 class BucketInputSpec(AFNICommandInputSpec):
     in_file = traits.List(
-        traits.Tuple(
+        Tuple(
             (File(exists=True, copyfile=False), traits.Str(argstr="'%s'")),
             artstr="%s%s",
         ),
@@ -590,7 +591,7 @@ class Cat(AFNICommand):
 
 class CatMatvecInputSpec(AFNICommandInputSpec):
     in_file = traits.List(
-        traits.Tuple(traits.Str(), traits.Str()),
+        Tuple(traits.Str(), traits.Str()),
         desc="list of tuples of mfiles and associated opkeys",
         mandatory=True,
         argstr="%s",
@@ -683,7 +684,7 @@ class CenterMassInputSpec(CommandLineInputSpec):
         exists=True,
     )
     automask = traits.Bool(desc="Generate the mask automatically", argstr="-automask")
-    set_cm = traits.Tuple(
+    set_cm = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="After computing the center of mass, set the origin fields in "
         "the header so that the center of mass will be at (x,y,z) in "
@@ -711,7 +712,7 @@ class CenterMassOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output file")
     cm_file = File(desc="file with the center of mass coordinates")
     cm = traits.List(
-        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        Tuple(traits.Float(), traits.Float(), traits.Float()),
         desc="center of mass",
     )
 
@@ -889,7 +890,7 @@ class DotInputSpec(AFNICommandInputSpec):
     )
     out_file = File(desc="collect output to a file", argstr=" |& tee %s", position=-1)
     mask = File(desc="Use this dataset as a mask", argstr="-mask %s")
-    mrange = traits.Tuple(
+    mrange = Tuple(
         (traits.Float(), traits.Float()),
         desc="Means to further restrict the voxels from 'mset' so that"
         "only those mask values within this range (inclusive) willbe used.",
@@ -1214,7 +1215,7 @@ class FWHMxInputSpec(CommandLineInputSpec):
     acf = traits.Either(
         traits.Bool(),
         File(),
-        traits.Tuple(File(exists=True), traits.Float()),
+        Tuple(File(exists=True), traits.Float()),
         default=False,
         usedefault=True,
         argstr="-acf",
@@ -1227,13 +1228,13 @@ class FWHMxOutputSpec(TraitedSpec):
     out_subbricks = File(exists=True, desc="output file (subbricks)")
     out_detrend = File(desc="output file, detrended")
     fwhm = traits.Either(
-        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
-        traits.Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
+        Tuple(traits.Float(), traits.Float(), traits.Float()),
+        Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
         desc="FWHM along each axis",
     )
     acf_param = traits.Either(
-        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
-        traits.Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
+        Tuple(traits.Float(), traits.Float(), traits.Float()),
+        Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
         desc="fitted ACF model parameters",
     )
     out_acf = File(exists=True, desc="output acf file")
@@ -1429,10 +1430,10 @@ class LocalBistatInputSpec(AFNICommandInputSpec):
         desc="Filename of the second image",
     )
     neighborhood = traits.Either(
-        traits.Tuple(traits.Enum("SPHERE", "RHDD", "TOHD"), traits.Float()),
-        traits.Tuple(
+        Tuple(traits.Enum("SPHERE", "RHDD", "TOHD"), traits.Float()),
+        Tuple(
             traits.Enum("RECT"),
-            traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+            Tuple(traits.Float(), traits.Float(), traits.Float()),
         ),
         mandatory=True,
         desc="The region around each voxel that will be extracted for "
@@ -1557,10 +1558,10 @@ class LocalstatInputSpec(AFNICommandInputSpec):
         exists=True, mandatory=True, argstr="%s", position=-1, desc="input dataset"
     )
     neighborhood = traits.Either(
-        traits.Tuple(traits.Enum("SPHERE", "RHDD", "TOHD"), traits.Float()),
-        traits.Tuple(
+        Tuple(traits.Enum("SPHERE", "RHDD", "TOHD"), traits.Float()),
+        Tuple(
             traits.Enum("RECT"),
-            traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+            Tuple(traits.Float(), traits.Float(), traits.Float()),
         ),
         mandatory=True,
         desc="The region around each voxel that will be extracted for "
@@ -1594,9 +1595,9 @@ class LocalstatInputSpec(AFNICommandInputSpec):
     stat = InputMultiObject(
         traits.Either(
             traits.Enum(_stat_names),
-            traits.Tuple(
+            Tuple(
                 traits.Enum("perc"),
-                traits.Tuple(traits.Float, traits.Float, traits.Float),
+                Tuple(traits.Float, traits.Float, traits.Float),
             ),
         ),
         mandatory=True,
@@ -1669,7 +1670,7 @@ voxels.""",
     )
     reduce_grid = traits.Either(
         traits.Float,
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
         argstr="-reduce_grid %s",
         xor=["reduce_restore_grid", "reduce_max_vox"],
         desc="Compute output on a grid that is reduced by the specified "
@@ -1683,7 +1684,7 @@ voxels.""",
     )
     reduce_restore_grid = traits.Either(
         traits.Float,
-        traits.Tuple(traits.Float, traits.Float, traits.Float),
+        Tuple(traits.Float, traits.Float, traits.Float),
         argstr="-reduce_restore_grid %s",
         xor=["reduce_max_vox", "reduce_grid"],
         desc="Like reduce_grid, but also resample output back to input grid.",
@@ -2127,7 +2128,7 @@ class NwarpApply(AFNICommandBase):
 class NwarpCatInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
         traits.Either(
-            File(), traits.Tuple(traits.Enum("IDENT", "INV", "SQRT", "SQRTINV"), File())
+            File(), Tuple(traits.Enum("IDENT", "INV", "SQRT", "SQRTINV"), File())
         ),
         desc="list of tuples of 3D warps and associated functions",
         mandatory=True,
@@ -2273,7 +2274,7 @@ class OneDToolPyInputSpec(AFNIPythonCommandInputSpec):
         "file, and zeros are simply counted.",
         argstr="-show_censor_count",
     )
-    censor_motion = traits.Tuple(
+    censor_motion = Tuple(
         (traits.Float(), File()),
         desc="Tuple of motion limit and outfile prefix. need to also set set_nruns -r set_run_lengths",
         argstr="-censor_motion %f %s",
@@ -2381,7 +2382,7 @@ class RefitInputSpec(CommandLineInputSpec):
         desc="Associates the dataset with a specific template type, e.g. "
         "TLRC, MNI, ORIG",
     )
-    atrcopy = traits.Tuple(
+    atrcopy = Tuple(
         File(exists=True),
         traits.Str(),
         argstr="-atrcopy %s %s",
@@ -2392,7 +2393,7 @@ class RefitInputSpec(CommandLineInputSpec):
         "advanced users only. Do NOT use -atrcopy or -atrstring with "
         "other modification options. See also -copyaux.",
     )
-    atrstring = traits.Tuple(
+    atrstring = Tuple(
         traits.Str(),
         traits.Str(),
         argstr="-atrstring %s %s",
@@ -2400,7 +2401,7 @@ class RefitInputSpec(CommandLineInputSpec):
         "giving it the attribute name given by the last string."
         "To be safe, the last string should be in quotes.",
     )
-    atrfloat = traits.Tuple(
+    atrfloat = Tuple(
         traits.Str(),
         traits.Str(),
         argstr="-atrfloat %s %s",
@@ -2410,7 +2411,7 @@ class RefitInputSpec(CommandLineInputSpec):
         "'1 0.2 0 0 -0.2 1 0 0 0 0 1 0' or "
         "flipZ.1D or '1D:1,0.2,2@0,-0.2,1,2@0,2@0,1,0'",
     )
-    atrint = traits.Tuple(
+    atrint = Tuple(
         traits.Str(),
         traits.Str(),
         argstr="-atrint %s %s",
@@ -2524,7 +2525,7 @@ thing):
 
 but you can choose most any value.""",
     )
-    ellipsoid = traits.Tuple(
+    ellipsoid = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2618,7 +2619,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
         'for "Nearest Neighbor", "Linear", "Cubic" and "Blocky"'
         "interpolation, respectively. Default is NN.",
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         *[traits.Float()] * 3,
         argstr="-dxyz %f %f %f",
         desc="resample to new dx, dy and dz",
@@ -2711,7 +2712,7 @@ class TCat(AFNICommand):
 
 class TCatSBInputSpec(AFNICommandInputSpec):
     in_files = traits.List(
-        traits.Tuple(File(exists=True), Str()),
+        Tuple(File(exists=True), Str()),
         desc="List of tuples of file names and subbrick selectors as strings."
         "Don't forget to protect the single quotes in the subbrick selector"
         "so the contents are protected from the command line interpreter.",
@@ -2933,7 +2934,7 @@ class UndumpInputSpec(AFNICommandInputSpec):
         "then each input data line sets the value in only one voxel.",
         argstr="-srad %f",
     )
-    orient = traits.Tuple(
+    orient = Tuple(
         traits.Enum("R", "L"),
         traits.Enum("A", "P"),
         traits.Enum("I", "S"),
@@ -3057,7 +3058,7 @@ class UnifizeInputSpec(AFNICommandInputSpec):
         requires=["no_duplo", "t2"],
         xor=["gm"],
     )
-    rbt = traits.Tuple(
+    rbt = Tuple(
         traits.Float(),
         traits.Float(),
         traits.Float(),
@@ -3243,11 +3244,11 @@ class GCOR(CommandLine):
             for line in runtime.stdout.split("\n")
             if line.strip().startswith("GCOR = ")
         ][-1]
-        setattr(self, "_gcor", float(gcor_line[len("GCOR = ") :]))
+        self._gcor = float(gcor_line[len("GCOR = ") :])
         return runtime
 
     def _list_outputs(self):
-        return {"out": getattr(self, "_gcor")}
+        return {"out": self._gcor}
 
 
 class AxializeInputSpec(AFNICommandInputSpec):

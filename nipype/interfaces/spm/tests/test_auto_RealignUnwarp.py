@@ -15,8 +15,6 @@ def test_RealignUnwarp_inputs():
         ),
         est_num_of_iterations=dict(
             field="uweoptions.noi",
-            maxlen=1,
-            minlen=1,
             usedefault=True,
         ),
         est_re_est_mov_par=dict(
@@ -24,8 +22,6 @@ def test_RealignUnwarp_inputs():
         ),
         est_reg_factor=dict(
             field="uweoptions.lambda",
-            maxlen=1,
-            minlen=1,
             usedefault=True,
         ),
         est_reg_order=dict(
@@ -80,8 +76,6 @@ def test_RealignUnwarp_inputs():
         ),
         reslice_which=dict(
             field="uwroptions.uwwhich",
-            maxlen=2,
-            minlen=2,
             usedefault=True,
         ),
         reslice_wrap=dict(

@@ -28,6 +28,9 @@ def test_QwarpPlusMinus_inputs():
             argstr="-ballopt",
             xor=["workhard", "boxopt"],
         ),
+        bandpass=dict(
+            argstr="-bpass %f %f",
+        ),
         base_file=dict(
             argstr="-base %s",
             copyfile=False,

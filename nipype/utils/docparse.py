@@ -118,7 +118,7 @@ def format_params(paramlist, otherlist=None):
         otherlist.insert(0, hdr)
         otherlist.insert(0, "\n")
         otherparams = "\n".join(otherlist)
-        doc = "".join([doc, otherparams])
+        doc = f"{doc}{otherparams}"
     return doc
 
 
@@ -131,7 +131,7 @@ def insert_doc(doc, new_items):
     Parameters
     ----------
     doc : str
-        The existing docstring we're inserting docmentation into.
+        The existing docstring we're inserting documentation into.
     new_items : list
         List of strings to be inserted in the ``doc``.
 
@@ -166,13 +166,7 @@ def insert_doc(doc, new_items):
     # Add rest of documents
     tmpdoc.extend(doclist[2:])
     # Insert newlines
-    newdoc = []
-    for line in tmpdoc:
-        newdoc.append(line)
-        newdoc.append("\n")
-    # We add one too many newlines, remove it.
-    newdoc.pop(-1)
-    return "".join(newdoc)
+    return "\n".join(tmpdoc)
 
 
 def build_doc(doc, opts):
@@ -257,7 +251,7 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     if cmd_path == "":
         raise Exception("Command %s not found" % cmd.split(" ")[0])
     if help_flag:
-        cmd = " ".join((cmd, help_flag))
+        cmd = f"{cmd} {help_flag}"
     doc = grab_doc(cmd, trap_error)
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
@@ -289,7 +283,7 @@ def _parse_doc(doc, style=["--"]):
         flag = [
             item
             for i, item in enumerate(linelist)
-            if i < 2 and any([item.startswith(s) for s in style]) and len(item) > 1
+            if i < 2 and item.startswith(tuple(style)) and len(item) > 1
         ]
         if flag:
             if len(flag) == 1:
@@ -338,7 +332,7 @@ def get_params_from_doc(cmd, style="--", help_flag=None, trap_error=True):
     if cmd_path == "":
         raise Exception("Command %s not found" % cmd.split(" ")[0])
     if help_flag:
-        cmd = " ".join((cmd, help_flag))
+        cmd = f"{cmd} {help_flag}"
     doc = grab_doc(cmd, trap_error)
     return _parse_doc(doc, style)
 

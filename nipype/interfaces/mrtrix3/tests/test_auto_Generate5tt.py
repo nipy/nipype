@@ -28,6 +28,9 @@ def test_Generate5tt_inputs():
             argstr="-fslgrad %s %s",
             xor=["grad_file"],
         ),
+        hippocampi=dict(
+            argstr="-hippocampi %s",
+        ),
         in_bval=dict(
             extensions=None,
         ),
@@ -39,6 +42,17 @@ def test_Generate5tt_inputs():
             argstr="%s",
             mandatory=True,
             position=-2,
+        ),
+        lut_file=dict(
+            argstr="-lut %s",
+            extensions=None,
+        ),
+        mask_file=dict(
+            argstr="-mask %s",
+            extensions=None,
+        ),
+        nocrop=dict(
+            argstr="-nocrop",
         ),
         nthreads=dict(
             argstr="-nthreads %d",
@@ -56,6 +70,23 @@ def test_Generate5tt_inputs():
             extensions=None,
             mandatory=True,
             position=-1,
+        ),
+        premasked=dict(
+            argstr="-premasked",
+        ),
+        sgm_amyg_hipp=dict(
+            argstr="-sgm_amyg_hipp",
+        ),
+        t2_image=dict(
+            argstr="-t2 %s",
+            extensions=None,
+        ),
+        template=dict(
+            argstr="-template %s",
+            extensions=None,
+        ),
+        white_stem=dict(
+            argstr="-white_stem",
         ),
     )
     inputs = Generate5tt.input_spec()

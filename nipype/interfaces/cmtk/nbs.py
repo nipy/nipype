@@ -18,7 +18,6 @@ from ..base import (
     OutputMultiPath,
     isdefined,
 )
-from .base import have_cv
 
 iflogger = logging.getLogger("nipype.interface")
 

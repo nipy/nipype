@@ -56,7 +56,7 @@ def mlab_tempfile(dir=None):
     # infinite loop for some strange reason, we only try 100 times.
     for n in range(100):
         f = tempfile.NamedTemporaryFile(suffix=".m", prefix="tmp_matlab_", dir=dir)
-        # Check the file name for matlab compilance
+        # Check the file name for matlab compliance
         fname = os.path.splitext(os.path.basename(f.name))[0]
         if valid_name.match(fname):
             break

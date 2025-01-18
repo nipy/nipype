@@ -27,6 +27,7 @@ from ...utils import spm_docs as sd
 from ..base import (
     BaseInterface,
     traits,
+    Tuple,
     isdefined,
     InputMultiPath,
     BaseInterfaceInputSpec,
@@ -37,7 +38,7 @@ from ..base import (
 )
 from ..base.traits_extension import NoDefaultSpecified
 from ..matlab import MatlabCommand
-from ...external.due import due, Doi, BibTeX
+from ...external.due import BibTeX
 
 __docformat__ = "restructuredtext"
 logger = logging.getLogger("nipype.interface")
@@ -51,10 +52,7 @@ def func_is_3d(in_file):
     else:
         img = load(in_file)
         shape = img.shape
-        if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
-            return True
-        else:
-            return False
+        return len(shape) == 3 or (len(shape) == 4 and shape[3] == 1)
 
 
 def get_first_3dfile(in_files):
@@ -253,10 +251,7 @@ def no_spm():
     used with pytest.mark.skipif decorator to skip tests
     that will fail if spm is not installed"""
 
-    if "NIPYPE_NO_MATLAB" in os.environ or Info.version() is None:
-        return True
-    else:
-        return False
+    return "NIPYPE_NO_MATLAB" in os.environ or Info.version() is None
 
 
 class SPMCommandInputSpec(BaseInterfaceInputSpec):
@@ -403,7 +398,7 @@ class SPMCommand(BaseInterface):
         """Convert input to appropriate format for SPM."""
         if spec.is_trait_type(traits.Bool):
             return int(val)
-        elif spec.is_trait_type(traits.Tuple):
+        elif spec.is_trait_type(traits.BaseTuple):
             return list(val)
         else:
             return val
@@ -522,7 +517,7 @@ class SPMCommand(BaseInterface):
         if isinstance(contents, (str, bytes)):
             jobstring += f"{prefix} = '{contents}';\n"
             return jobstring
-        jobstring += f"{prefix} = {str(contents)};\n"
+        jobstring += f"{prefix} = {contents};\n"
         return jobstring
 
     def _make_matlab_command(self, contents, postscript=None):

@@ -71,12 +71,12 @@ def add_args_options(arg_parser, interface):
             if not spec.is_trait_type(traits.TraitCompound):
                 trait_type = type(spec.trait_type.default_value)
             if trait_type in (bytes, str, int, float):
-                if trait_type == bytes:
+                if trait_type is bytes:
                     trait_type = str
                 args["type"] = trait_type
         elif len(spec.inner_traits) == 1:
             trait_type = type(spec.inner_traits[0].trait_type.default_value)
-            if trait_type == bytes:
+            if trait_type is bytes:
                 trait_type = str
             if trait_type in (bytes, bool, str, int, float):
                 args["type"] = trait_type

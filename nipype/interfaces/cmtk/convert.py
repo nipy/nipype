@@ -2,7 +2,6 @@ import os
 import os.path as op
 import datetime
 import string
-import networkx as nx
 
 from ...utils.filemanip import split_filename
 from ..base import (
@@ -13,7 +12,7 @@ from ..base import (
     InputMultiPath,
     isdefined,
 )
-from .base import CFFBaseInterface, have_cfflib
+from .base import CFFBaseInterface
 
 
 def _read_pickle(fname):
@@ -194,17 +193,17 @@ class CFFConverter(CFFBaseInterface):
             for data in self.inputs.data_files:
                 _, data_name, _ = split_filename(data)
                 cda = cf.CData(name=data_name, src=data, fileformat="NumPy")
-                if not string.find(data_name, "lengths") == -1:
+                if 'lengths' in data_name:
                     cda.dtype = "FinalFiberLengthArray"
-                if not string.find(data_name, "endpoints") == -1:
+                if 'endpoints' in data_name:
                     cda.dtype = "FiberEndpoints"
-                if not string.find(data_name, "labels") == -1:
+                if 'labels' in data_name:
                     cda.dtype = "FinalFiberLabels"
                 a.add_connectome_data(cda)
 
         a.print_summary()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".cff":
+        if ext != '.cff':
             ext = ".cff"
         cf.save_to_cff(a, op.abspath(name + ext))
 
@@ -213,7 +212,7 @@ class CFFConverter(CFFBaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".cff":
+        if ext != '.cff':
             ext = ".cff"
         outputs["connectome_file"] = op.abspath(name + ext)
         return outputs
@@ -281,7 +280,7 @@ class MergeCNetworks(CFFBaseInterface):
         metadata.set_email("My Email")
 
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".cff":
+        if ext != '.cff':
             ext = ".cff"
         cf.save_to_cff(newcon, op.abspath(name + ext))
 
@@ -290,7 +289,7 @@ class MergeCNetworks(CFFBaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if not ext == ".cff":
+        if ext != '.cff':
             ext = ".cff"
         outputs["connectome_file"] = op.abspath(name + ext)
         return outputs

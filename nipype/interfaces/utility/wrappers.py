@@ -72,7 +72,7 @@ class Function(IOBase):
 
         super().__init__(**inputs)
         if function:
-            if hasattr(function, "__call__"):
+            if callable(function):
                 try:
                     self.inputs.function_str = getsource(function)
                 except OSError:
@@ -95,15 +95,13 @@ class Function(IOBase):
         self.inputs.on_trait_change(self._set_function_string, "function_str")
         self._input_names = ensure_list(input_names)
         self._output_names = ensure_list(output_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        add_traits(self.inputs, self._input_names)
         self.imports = imports
-        self._out = {}
-        for name in self._output_names:
-            self._out[name] = None
+        self._out = {name: None for name in self._output_names}
 
     def _set_function_string(self, obj, name, old, new):
         if name == "function_str":
-            if hasattr(new, "__call__"):
+            if callable(new):
                 function_source = getsource(new)
                 fninfo = new.__code__
             elif isinstance(new, (str, bytes)):

@@ -91,10 +91,8 @@ class QJobInfo:
             # if initializing for more than 5 minute, failure due to
             # initialization and completion before registration
             sge_debug_print(
-                "FAILURE! QJobInfo.IsPending found long running at {1} seconds"
-                "'initializing' returning False for to break loop!\n{0}".format(
-                    self, time_diff
-                )
+                f"FAILURE! QJobInfo.IsPending found long running at {time_diff} seconds "
+                f"'initializing' returning False for to break loop!\n{self}"
             )
             is_pending_status = True  # Job initialization took too long, so report!
         else:  # self.is_running() || self.is_pending():
@@ -186,7 +184,6 @@ class QstatSubstitute:
             except:
                 sge_debug_print("NOTE: qacct call failed")
                 time.sleep(5)
-                pass
         return is_complete
 
     def _parse_qstat_job_list(self, xml_job_list):
@@ -227,7 +224,7 @@ class QstatSubstitute:
                     time.mktime(time.strptime(job_time_text, "%Y-%m-%dT%H:%M:%S"))
                 )
             except:
-                job_time = float(0.0)
+                job_time = 0.0
                 # Make job entry
 
             task_id = int(job_num)
@@ -261,7 +258,6 @@ class QstatSubstitute:
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
                     )
-                    pass
             if self._task_dictionary[dictionary_job].is_initializing():
                 is_completed = self._qacct_verified_complete(dictionary_job)
                 if is_completed:
@@ -273,7 +269,6 @@ class QstatSubstitute:
                             dictionary_job, self._task_dictionary[dictionary_job]
                         )
                     )
-                    pass
 
     def _run_qstat(self, reason_for_qstat, force_instant=True):
         """request all job information for the current user in xmlformat.
@@ -322,7 +317,6 @@ class QstatSubstitute:
                 )
                 sge_debug_print(exception_message)
                 time.sleep(5)
-                pass
 
     def print_dictionary(self):
         """For debugging"""
@@ -402,7 +396,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         instant_qstat = "qstat"
         cached_qstat = "qstat"
 
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             if "retry_timeout" in kwargs["plugin_args"]:
                 self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
             if "max_tries" in kwargs["plugin_args"]:
@@ -430,7 +424,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         if self._qsub_args:
             qsubargs = self._qsub_args
         if "qsub_args" in node.plugin_args:
-            if "overwrite" in node.plugin_args and node.plugin_args["overwrite"]:
+            if node.plugin_args.get("overwrite"):
                 qsubargs = node.plugin_args["qsub_args"]
             else:
                 qsubargs += " " + node.plugin_args["qsub_args"]

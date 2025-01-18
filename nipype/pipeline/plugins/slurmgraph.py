@@ -42,7 +42,7 @@ class SLURMGraphPlugin(GraphPluginBase):
 
     def __init__(self, **kwargs):
         self._sbatch_args = ""
-        if "plugin_args" in kwargs and kwargs["plugin_args"]:
+        if kwargs.get("plugin_args"):
             if "retry_timeout" in kwargs["plugin_args"]:
                 self._retry_timeout = kwargs["plugin_args"]["retry_timeout"]
             if "max_tries" in kwargs["plugin_args"]:
@@ -130,9 +130,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                                 not self._dont_resubmit_completed_jobs
                                 or not cache_doneness_per_node[jobid]
                             ):
-                                values += "${{{0}}}:".format(
-                                    make_job_name(jobid, nodes)
-                                )
+                                values += f"${{{make_job_name(jobid, nodes)}}}:"
                         if (
                             values != ""
                         ):  # i.e. if some jobs were added to dependency list

@@ -11,6 +11,7 @@ from ..base import (
     TraitedSpec,
     File,
     traits,
+    Tuple,
     InputMultiPath,
     OutputMultiPath,
     Directory,
@@ -72,7 +73,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
         argstr="--surfdir %s", desc="alternative directory (instead of surf)"
     )
     vol_measure_file = InputMultiPath(
-        traits.Tuple(File(exists=True), File(exists=True)),
+        Tuple(File(exists=True), File(exists=True)),
         argstr="--iv %s %s...",
         desc="list of volume measure and reg file tuples",
     )
@@ -249,7 +250,7 @@ class GLMFitInputSpec(FSTraitedSpec):
         desc="input 4D file", argstr="--y %s", mandatory=True, copyfile=False
     )
     _design_xor = ("fsgd", "design", "one_sample")
-    fsgd = traits.Tuple(
+    fsgd = Tuple(
         File(exists=True),
         traits.Enum("doss", "dods"),
         argstr="--fsgd %s %s",
@@ -274,7 +275,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     per_voxel_reg = InputMultiPath(
         File(exists=True), argstr="--pvr %s...", desc="per-voxel regressors"
     )
-    self_reg = traits.Tuple(
+    self_reg = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -365,7 +366,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     surf_geo = traits.Str(
         "white", usedefault=True, desc="surface geometry name (e.g. white, pial)"
     )
-    simulation = traits.Tuple(
+    simulation = Tuple(
         traits.Enum("perm", "mc-full", "mc-z"),
         traits.Int(min=1),
         traits.Float,
@@ -376,7 +377,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     sim_sign = traits.Enum(
         "abs", "pos", "neg", argstr="--sim-sign %s", desc="abs, pos, or neg"
     )
-    uniform = traits.Tuple(
+    uniform = Tuple(
         traits.Float,
         traits.Float,
         argstr="--uniform %f %f",
@@ -389,7 +390,7 @@ class GLMFitInputSpec(FSTraitedSpec):
     save_cond = traits.Bool(
         argstr="--save-cond", desc="flag to save design matrix condition at each voxel"
     )
-    vox_dump = traits.Tuple(
+    vox_dump = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -400,20 +401,20 @@ class GLMFitInputSpec(FSTraitedSpec):
     synth = traits.Bool(argstr="--synth", desc="replace input with gaussian")
     resynth_test = traits.Int(argstr="--resynthtest %d", desc="test GLM by resynthsis")
     profile = traits.Int(argstr="--profile %d", desc="niters : test speed")
-    mrtm1 = traits.Tuple(
+    mrtm1 = Tuple(
         File(exists=True),
         File(exists=True),
         argstr="--mrtm1 %s %s",
         desc="RefTac TimeSec : perform MRTM1 kinetic modeling",
     )
-    mrtm2 = traits.Tuple(
+    mrtm2 = Tuple(
         File(exists=True),
         File(exists=True),
         traits.Float,
         argstr="--mrtm2 %s %s %f",
         desc="RefTac TimeSec k2prime : perform MRTM2 kinetic modeling",
     )
-    logan = traits.Tuple(
+    logan = Tuple(
         File(exists=True),
         File(exists=True),
         traits.Float,
@@ -673,7 +674,7 @@ class Binarize(FSCommand):
                 outfile = fname_presuffix(
                     self.inputs.in_file,
                     newpath=os.getcwd(),
-                    suffix=".".join(("_thresh", self.inputs.out_type)),
+                    suffix=f"_thresh.{self.inputs.out_type}",
                     use_ext=False,
                 )
             else:
@@ -833,7 +834,7 @@ class SegStatsInputSpec(FSTraitedSpec):
         mandatory=True,
         desc="segmentation volume path",
     )
-    annot = traits.Tuple(
+    annot = Tuple(
         traits.Str,
         traits.Enum("lh", "rh"),
         traits.Str,
@@ -842,7 +843,7 @@ class SegStatsInputSpec(FSTraitedSpec):
         mandatory=True,
         desc="subject hemi parc : use surface parcellation",
     )
-    surf_label = traits.Tuple(
+    surf_label = Tuple(
         traits.Str,
         traits.Enum("lh", "rh"),
         traits.Str,
@@ -1251,7 +1252,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     label_voxel_volume = traits.Float(
         argstr="--labvoxvol %f", desc="volume of each label point (def 1mm3)"
     )
-    proj = traits.Tuple(
+    proj = Tuple(
         traits.Enum("abs", "frac"),
         traits.Float,
         traits.Float,
@@ -1468,9 +1469,8 @@ class Label2LabelInputSpec(FSTraitedSpec):
         desc="Registration method",
     )
     copy_inputs = traits.Bool(
-        desc="If running as a node, set this to True."
-        + "This will copy the input files to the node "
-        + "directory."
+        desc="If running as a node, set this to True. "
+        "This will copy the input files to the node directory."
     )
 
 

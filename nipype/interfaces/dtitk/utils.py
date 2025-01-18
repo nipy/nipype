@@ -23,7 +23,7 @@ optimization, Medical Image Analysis, 10(5):764-785, October 2006. PMID:
 
 """
 
-from ..base import TraitedSpec, CommandLineInputSpec, File, traits, isdefined
+from ..base import TraitedSpec, CommandLineInputSpec, File, traits, Tuple, isdefined
 from ...utils.filemanip import fname_presuffix
 from .base import CommandLineDtitk, DTITKRenameMixin
 import os
@@ -45,13 +45,13 @@ class TVAdjustVoxSpInputSpec(CommandLineInputSpec):
     target_file = File(
         desc="target volume to match", argstr="-target %s", xor=["voxel_size", "origin"]
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz voxel size (superseded by target)",
         argstr="-vsize %g %g %g",
         xor=["target_file"],
     )
-    origin = traits.Tuple(
+    origin = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz origin (superseded by target)",
         argstr="-origin %g %g %g",
@@ -98,13 +98,13 @@ class SVAdjustVoxSpInputSpec(CommandLineInputSpec):
     target_file = File(
         desc="target volume to match", argstr="-target %s", xor=["voxel_size", "origin"]
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz voxel size (superseded by target)",
         argstr="-vsize %g %g %g",
         xor=["target_file"],
     )
-    origin = traits.Tuple(
+    origin = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz origin (superseded by target)",
         argstr="-origin %g %g %g",
@@ -162,19 +162,19 @@ class TVResampleInputSpec(CommandLineInputSpec):
     interpolation = traits.Enum(
         "LEI", "EI", argstr="-interp %s", desc="Log Euclidean Interpolation"
     )
-    array_size = traits.Tuple(
+    array_size = Tuple(
         (traits.Int(), traits.Int(), traits.Int()),
         desc="resampled array size",
         xor=["target_file"],
         argstr="-size %d %d %d",
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="resampled voxel size",
         xor=["target_file"],
         argstr="-vsize %g %g %g",
     )
-    origin = traits.Tuple(
+    origin = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz origin",
         xor=["target_file"],
@@ -229,19 +229,19 @@ class SVResampleInputSpec(CommandLineInputSpec):
         argstr="-align %s",
         desc="how to align output volume to input volume",
     )
-    array_size = traits.Tuple(
+    array_size = Tuple(
         (traits.Int(), traits.Int(), traits.Int()),
         desc="resampled array size",
         xor=["target_file"],
         argstr="-size %d %d %d",
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="resampled voxel size",
         xor=["target_file"],
         argstr="-vsize %g %g %g",
     )
-    origin = traits.Tuple(
+    origin = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz origin",
         xor=["target_file"],

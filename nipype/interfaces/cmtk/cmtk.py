@@ -72,12 +72,12 @@ def length(xyz, along=False):
 def get_rois_crossed(pointsmm, roiData, voxelSize):
     n_points = len(pointsmm)
     rois_crossed = []
-    for j in range(0, n_points):
+    for j in range(n_points):
         # store point
         x = int(pointsmm[j, 0] / float(voxelSize[0]))
         y = int(pointsmm[j, 1] / float(voxelSize[1]))
         z = int(pointsmm[j, 2] / float(voxelSize[2]))
-        if not roiData[x, y, z] == 0:
+        if roiData[x, y, z] != 0:
             rois_crossed.append(roiData[x, y, z])
     rois_crossed = list(
         dict.fromkeys(rois_crossed).keys()
@@ -91,7 +91,7 @@ def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
         for idx_i, roi_i in enumerate(rois_crossed):
             for idx_j, roi_j in enumerate(rois_crossed):
                 if idx_i > idx_j:
-                    if not roi_i == roi_j:
+                    if roi_i != roi_j:
                         connectivity_matrix[roi_i - 1, roi_j - 1] += 1
     connectivity_matrix = connectivity_matrix + connectivity_matrix.T
     return connectivity_matrix
@@ -248,7 +248,7 @@ def cmat(
                     axis=1,
                 )
             )
-            G.nodes[int(u)]["dn_position"] = tuple([xyz[0], xyz[2], -xyz[1]])
+            G.nodes[int(u)]["dn_position"] = (xyz[0], xyz[2], -xyz[1])
 
     if intersections:
         iflogger.info("Filtering tractography from intersections")
@@ -328,9 +328,11 @@ def cmat(
     else:
         final_fibers_indices = final_fibers_idx
 
-    for idx in final_fibers_indices:
+    finalfiberlength.extend(
         # compute length of fiber
-        finalfiberlength.append(length(fib[idx][0]))
+        length(fib[idx][0])
+        for idx in final_fibers_indices
+    )
 
     # convert to array
     final_fiberlength_array = np.array(finalfiberlength)
@@ -369,7 +371,7 @@ def cmat(
             di["fiber_length_mean"] = 0
             di["fiber_length_median"] = 0
             di["fiber_length_std"] = 0
-        if not u == v:  # Fix for self loop problem
+        if u != v:  # Fix for self loop problem
             G.add_edge(u, v, **di)
             if "fiblist" in d:
                 numfib.add_edge(u, v, weight=di["number_of_fibers"])
@@ -398,7 +400,7 @@ def cmat(
             pickle.dump(I, f, pickle.HIGHEST_PROTOCOL)
 
     path, name, ext = split_filename(matrix_mat_name)
-    if not ext == ".mat":
+    if ext != ".mat":
         ext = ".mat"
         matrix_mat_name = matrix_mat_name + ext
 
@@ -463,9 +465,7 @@ def cmat(
 def save_fibers(oldhdr, oldfib, fname, indices):
     """Stores a new trackvis file fname using only given indices"""
     hdrnew = oldhdr.copy()
-    outstreams = []
-    for i in indices:
-        outstreams.append(oldfib[i])
+    outstreams = [oldfib[i] for i in indices]
     n_fib_out = len(outstreams)
     hdrnew["n_count"] = n_fib_out
     iflogger.info("Writing final non-orphan fibers as %s", fname)
@@ -608,7 +608,7 @@ class CreateMatrix(BaseInterface):
 
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
-        if not ext == ".mat":
+        if ext != ".mat":
             ext = ".mat"
             matrix_mat_file = matrix_mat_file + ext
 
@@ -673,7 +673,7 @@ class CreateMatrix(BaseInterface):
 
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
-        if not ext == ".mat":
+        if ext != ".mat":
             ext = ".mat"
             matrix_mat_file = matrix_mat_file + ext
 
@@ -894,7 +894,7 @@ class ROIGen(BaseInterface):
             iflogger.info("Number of labels in LUT: %s", numLUTLabels)
             LUTlabelDict = {}
             """ Create dictionary for input LUT table"""
-            for labels in range(0, numLUTLabels):
+            for labels in range(numLUTLabels):
                 LUTlabelDict[LUTlabelsRGBA[labels][0]] = [
                     LUTlabelsRGBA[labels][1],
                     LUTlabelsRGBA[labels][2],
@@ -1070,7 +1070,7 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
                 np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1
             )
         )
-        G.nodes[int(u)]["dn_position"] = tuple([xyz[0], xyz[2], -xyz[1]])
+        G.nodes[int(u)]["dn_position"] = (xyz[0], xyz[2], -xyz[1])
     with open(out_filename, 'wb') as f:
         pickle.dump(G, f, pickle.HIGHEST_PROTOCOL)
     return out_filename

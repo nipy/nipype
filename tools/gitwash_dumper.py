@@ -129,7 +129,7 @@ def make_link_targets(
                 have_gh_url = True
     if not have_url or not have_ml_url:
         raise RuntimeError(
-            "Need command line or known project " "and / or mailing list URLs"
+            "Need command line or known project and / or mailing list URLs"
         )
     lines = []
     if url is not None:

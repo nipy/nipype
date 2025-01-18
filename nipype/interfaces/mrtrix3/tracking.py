@@ -4,12 +4,12 @@
 
 import os.path as op
 
-from ..base import traits, TraitedSpec, File
+from ..base import traits, Tuple, TraitedSpec, File
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 
 
 class TractographyInputSpec(MRTrix3BaseInputSpec):
-    sph_trait = traits.Tuple(
+    sph_trait = Tuple(
         traits.Float, traits.Float, traits.Float, traits.Float, argstr="%f,%f,%f,%f"
     )
 
@@ -151,7 +151,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
             "(default is to track in both directions)"
         ),
     )
-    init_dir = traits.Tuple(
+    init_dir = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -220,7 +220,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
     )
 
     # Tractography seeding options
-    seed_sphere = traits.Tuple(
+    seed_sphere = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -233,7 +233,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
         argstr="-seed_image %s",
         desc="seed streamlines entirely at random within mask",
     )
-    seed_rnd_voxel = traits.Tuple(
+    seed_rnd_voxel = Tuple(
         File(exists=True),
         traits.Int(),
         argstr="-seed_random_per_voxel %s %d",
@@ -243,7 +243,7 @@ class TractographyInputSpec(MRTrix3BaseInputSpec):
             "image; random placement of seeds in each voxel"
         ),
     )
-    seed_grid_voxel = traits.Tuple(
+    seed_grid_voxel = Tuple(
         File(exists=True),
         traits.Int(),
         argstr="-seed_grid_per_voxel %s %d",

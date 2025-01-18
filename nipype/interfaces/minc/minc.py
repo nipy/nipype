@@ -23,6 +23,7 @@ from ..base import (
     InputMultiPath,
     OutputMultiPath,
     traits,
+    Tuple,
     isdefined,
 )
 from .base import aggregate_filename
@@ -101,7 +102,7 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         desc="Write out unsigned data.", argstr="-unsigned", xor=_xor_signed
     )
 
-    write_range = traits.Tuple(
+    write_range = Tuple(
         traits.Float,
         traits.Float,
         argstr="-range %s %s",
@@ -120,7 +121,7 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         desc="Turn off pixel normalization.", argstr="-nonormalize", xor=_xor_normalize
     )
 
-    image_range = traits.Tuple(
+    image_range = Tuple(
         traits.Float,
         traits.Float,
         desc="Specify the range of real image values for normalization.",
@@ -320,7 +321,7 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
         desc="Write out unsigned data.", argstr="-unsigned", xor=_xor_signed
     )
 
-    write_range = traits.Tuple(
+    write_range = Tuple(
         traits.Float,
         traits.Float,
         argstr="-range %s %s",
@@ -647,7 +648,7 @@ class DumpInputSpec(StdOutCommandLineInputSpec):
 
     precision = traits.Either(
         traits.Int(),
-        traits.Tuple(traits.Int, traits.Int),
+        Tuple(traits.Int, traits.Int),
         desc="Display floating-point values with less precision",
         argstr="%s",
     )  # See _format_arg in Dump for actual formatting.
@@ -826,7 +827,7 @@ class AverageInputSpec(CommandLineInputSpec):
         xor=_xor_normalize,
     )
 
-    voxel_range = traits.Tuple(
+    voxel_range = Tuple(
         traits.Int,
         traits.Int,
         argstr="-range %d %d",
@@ -857,7 +858,7 @@ class AverageInputSpec(CommandLineInputSpec):
         argstr="-binarize",
     )
 
-    binrange = traits.Tuple(
+    binrange = Tuple(
         traits.Float,
         traits.Float,
         argstr="-binrange %s %s",
@@ -1073,7 +1074,7 @@ class CalcInputSpec(CommandLineInputSpec):
         xor=_xor_format,
     )
 
-    voxel_range = traits.Tuple(
+    voxel_range = Tuple(
         traits.Int,
         traits.Int,
         argstr="-range %d %d",
@@ -1146,7 +1147,7 @@ class CalcInputSpec(CommandLineInputSpec):
     # FIXME test this one, the argstr will probably need tweaking, see
     # _format_arg.
     outfiles = traits.List(
-        traits.Tuple(
+        Tuple(
             traits.Str,
             File,
             argstr="-outfile %s %s",
@@ -1528,7 +1529,7 @@ class PikInputSpec(CommandLineInputSpec):
     )
 
     # FIXME tuple of floats? Not voxel values? Man page doesn't specify.
-    minc_range = traits.Tuple(
+    minc_range = Tuple(
         traits.Float,
         traits.Float,
         desc="Valid range of values for MINC file.",
@@ -1537,7 +1538,7 @@ class PikInputSpec(CommandLineInputSpec):
 
     _xor_image_range = ("image_range", "auto_range")
 
-    image_range = traits.Tuple(
+    image_range = Tuple(
         traits.Float,
         traits.Float,
         desc="Range of image values to use for pixel intensity.",
@@ -1693,7 +1694,7 @@ class BlurInputSpec(CommandLineInputSpec):
         mandatory=True,
     )
 
-    fwhm3d = traits.Tuple(
+    fwhm3d = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -1914,7 +1915,7 @@ class MathInputSpec(CommandLineInputSpec):
         xor=_xor_format,
     )
 
-    voxel_range = traits.Tuple(
+    voxel_range = Tuple(
         traits.Int,
         traits.Int,
         argstr="-range %d %d",
@@ -2091,42 +2092,42 @@ class MathInputSpec(CommandLineInputSpec):
     square = traits.Bool(desc="Take square of a volume.", argstr="-square")
     abs = traits.Bool(desc="Take absolute value of a volume.", argstr="-abs")
 
-    exp = traits.Tuple(
+    exp = Tuple(
         traits.Float,
         traits.Float,
         argstr="-exp -const2 %s %s",
         desc="Calculate c2*exp(c1*x). Both constants must be specified.",
     )
 
-    log = traits.Tuple(
+    log = Tuple(
         traits.Float,
         traits.Float,
         argstr="-log -const2 %s %s",
         desc="Calculate log(x/c2)/c1. The constants c1 and c2 default to 1.",
     )
 
-    scale = traits.Tuple(
+    scale = Tuple(
         traits.Float,
         traits.Float,
         argstr="-scale -const2 %s %s",
         desc="Scale a volume: volume * c1 + c2.",
     )
 
-    clamp = traits.Tuple(
+    clamp = Tuple(
         traits.Float,
         traits.Float,
         argstr="-clamp -const2 %s %s",
         desc="Clamp a volume to lie between two values.",
     )
 
-    segment = traits.Tuple(
+    segment = Tuple(
         traits.Float,
         traits.Float,
         argstr="-segment -const2 %s %s",
         desc="Segment a volume using range of -const2: within range = 1, outside range = 0.",
     )
 
-    nsegment = traits.Tuple(
+    nsegment = Tuple(
         traits.Float,
         traits.Float,
         argstr="-nsegment -const2 %s %s",
@@ -2440,7 +2441,7 @@ class ResampleInputSpec(CommandLineInputSpec):
         xor=_xor_format,
     )
 
-    output_range = traits.Tuple(
+    output_range = Tuple(
         traits.Float,
         traits.Float,
         argstr="-range %s %s",
@@ -2505,7 +2506,7 @@ class ResampleInputSpec(CommandLineInputSpec):
     )
     talairach = traits.Bool(desc="Output is in Talairach space.", argstr="-talairach")
 
-    origin = traits.Tuple(
+    origin = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2530,7 +2531,7 @@ class ResampleInputSpec(CommandLineInputSpec):
     _xor_nelements = ("nelements", "nelements_x_y_or_z")
 
     # nr elements along each dimension
-    nelements = traits.Tuple(
+    nelements = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -2565,7 +2566,7 @@ class ResampleInputSpec(CommandLineInputSpec):
     # step size along each dimension
     _xor_step = ("step", "step_x_y_or_z")
 
-    step = traits.Tuple(
+    step = Tuple(
         traits.Int,
         traits.Int,
         traits.Int,
@@ -2599,7 +2600,7 @@ class ResampleInputSpec(CommandLineInputSpec):
     # start point along each dimension
     _xor_start = ("start", "start_x_y_or_z")
 
-    start = traits.Tuple(
+    start = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2636,7 +2637,7 @@ class ResampleInputSpec(CommandLineInputSpec):
     # dircos along each dimension
     _xor_dircos = ("dircos", "dircos_x_y_or_z")
 
-    dircos = traits.Tuple(
+    dircos = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -2898,7 +2899,7 @@ class VolcentreInputSpec(CommandLineInputSpec):
         argstr="-com",
     )
 
-    centre = traits.Tuple(
+    centre = Tuple(
         traits.Float,
         traits.Float,
         traits.Float,
@@ -3402,7 +3403,7 @@ class NlpFit(CommandLine):
                     + ".xfm"
                 )
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -3501,7 +3502,7 @@ class XfmAvg(CommandLine):
                     + ".xfm"
                 )
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _gen_outfilename(self):
         return self._gen_filename("output_file")
@@ -3572,7 +3573,7 @@ class XfmInvert(CommandLine):
                     + ".xfm"
                 )
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _gen_outfilename(self):
         return self._gen_filename("output_file")

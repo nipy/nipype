@@ -112,7 +112,7 @@ class WatershedBEM(FSCommand):
         keydir = op.join(path, dirval)
         if altkey:
             key = altkey
-        globpattern = op.join(keydir, "".join((globprefix, key, globsuffix)))
+        globpattern = op.join(keydir, f"{globprefix}{key}{globsuffix}")
         return glob.glob(globpattern)
 
     def _list_outputs(self):
@@ -132,15 +132,13 @@ class WatershedBEM(FSCommand):
                 if val:
                     value_list = simplify_list(val)
                     if isinstance(value_list, list):
-                        out_files = []
-                        for value in value_list:
-                            out_files.append(op.abspath(value))
+                        out_files = [op.abspath(value) for value in value_list]
                     elif isinstance(value_list, (str, bytes)):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError
                     outputs[k] = out_files
-                    if not k.rfind("surface") == -1:
+                    if k.rfind("surface") != -1:
                         mesh_paths.append(out_files)
         outputs["mesh_files"] = mesh_paths
         return outputs

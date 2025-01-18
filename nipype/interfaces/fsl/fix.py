@@ -105,11 +105,11 @@ class TrainingSetCreator(BaseInterface):
     _always_run = True
 
     def _run_interface(self, runtime):
-        mel_icas = []
-        for item in self.inputs.mel_icas_in:
-            if os.path.exists(os.path.join(item, "hand_labels_noise.txt")):
-                mel_icas.append(item)
-
+        mel_icas = [
+            item
+            for item in self.inputs.mel_icas_in
+            if os.path.exists(os.path.join(item, "hand_labels_noise.txt"))
+        ]
         if len(mel_icas) == 0:
             raise Exception(
                 "%s did not find any hand_labels_noise.txt files in the following directories: %s"
@@ -119,10 +119,11 @@ class TrainingSetCreator(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        mel_icas = []
-        for item in self.inputs.mel_icas_in:
-            if os.path.exists(os.path.join(item, "hand_labels_noise.txt")):
-                mel_icas.append(item)
+        mel_icas = [
+            item
+            for item in self.inputs.mel_icas_in
+            if os.path.exists(os.path.join(item, "hand_labels_noise.txt"))
+        ]
         outputs = self._outputs().get()
         outputs["mel_icas_out"] = mel_icas
         return outputs

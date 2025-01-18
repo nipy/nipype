@@ -12,8 +12,8 @@ from ..base import (
     InputMultiObject,
     TraitedSpec,
     Undefined,
-    isdefined,
     traits,
+    Tuple,
 )
 from .base import MRTrix3Base, MRTrix3BaseInputSpec
 
@@ -27,7 +27,7 @@ class DWIDenoiseInputSpec(MRTrix3BaseInputSpec):
         desc="input DWI image",
     )
     mask = File(exists=True, argstr="-mask %s", position=1, desc="mask image")
-    extent = traits.Tuple(
+    extent = Tuple(
         (traits.Int, traits.Int, traits.Int),
         argstr="-extent %d,%d,%d",
         desc="set the window size of the denoising filter. (default = 5,5,5)",
@@ -99,8 +99,9 @@ class MRDeGibbsInputSpec(MRTrix3BaseInputSpec):
         mandatory=True,
         desc="input DWI image",
     )
-    axes = traits.ListInt(
-        default_value=[0, 1],
+    axes = traits.List(
+        traits.Int,
+        [0, 1],
         usedefault=True,
         sep=",",
         minlen=2,
@@ -345,7 +346,7 @@ class DWIPreprocInputSpec(MRTrix3BaseInputSpec):
         argstr="-export_grad_mrtrix %s",
         desc="export new gradient files in mrtrix format",
     )
-    out_grad_fsl = traits.Tuple(
+    out_grad_fsl = Tuple(
         File("grad.bvecs", desc="bvecs"),
         File("grad.bvals", desc="bvals"),
         argstr="-export_grad_fsl %s, %s",

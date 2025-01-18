@@ -26,7 +26,6 @@ from ...utils.filemanip import (
     get_related_files,
     indirectory,
     loadpkl,
-    loadcrash,
     savepkl,
     path_resolve,
     write_rst_list,
@@ -87,7 +86,7 @@ def test_hash_rename(filename, newname):
 def test_check_forhash():
     fname = "foobar"
     orig_hash = "_0x4323dbcefdc51906decd8edcb3327943"
-    hashed_name = "".join((fname, orig_hash, ".nii"))
+    hashed_name = f"{fname}{orig_hash}.nii"
     result, hash = check_forhash(hashed_name)
     assert result
     assert hash == [orig_hash]
@@ -598,7 +597,7 @@ class Pickled:
 
 class PickledBreaker:
     def __setstate__(self, d):
-        raise Exception()
+        raise Exception
 
 
 def test_versioned_pklization(tmpdir):

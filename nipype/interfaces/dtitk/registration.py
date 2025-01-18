@@ -23,7 +23,7 @@ Zhang, H., Yushkevich, P.A., Alexander, D.C., Gee, J.C., Deformable
 
 """
 
-from ..base import TraitedSpec, CommandLineInputSpec, traits, File, isdefined
+from ..base import TraitedSpec, CommandLineInputSpec, traits, Tuple, File, isdefined
 from ...utils.filemanip import fname_presuffix, split_filename
 from .base import CommandLineDtitk, DTITKRenameMixin
 import os
@@ -59,7 +59,7 @@ class RigidInputSpec(CommandLineInputSpec):
         desc="similarity metric",
         usedefault=True,
     )
-    sampling_xyz = traits.Tuple(
+    sampling_xyz = Tuple(
         (4, 4, 4),
         mandatory=True,
         position=3,
@@ -319,19 +319,19 @@ class AffSymTensor3DVolInputSpec(CommandLineInputSpec):
         xor=["transform"],
         desc="output volume specification read from the target volume if specified",
     )
-    translation = traits.Tuple(
+    translation = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="translation (x,y,z) in mm",
         argstr="-translation %g %g %g",
         xor=["transform"],
     )
-    euler = traits.Tuple(
+    euler = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="(theta, phi, psi) in degrees",
         xor=["transform"],
         argstr="-euler %g %g %g",
     )
-    deformation = traits.Tuple(
+    deformation = Tuple(
         (traits.Float(),) * 6,
         desc="(xx,yy,zz,xy,yz,xz)",
         xor=["transform"],
@@ -396,19 +396,19 @@ class AffScalarVolInputSpec(CommandLineInputSpec):
         xor=["transform"],
         desc="output volume specification read from the target volume if specified",
     )
-    translation = traits.Tuple(
+    translation = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="translation (x,y,z) in mm",
         argstr="-translation %g %g %g",
         xor=["transform"],
     )
-    euler = traits.Tuple(
+    euler = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="(theta, phi, psi) in degrees",
         xor=["transform"],
         argstr="-euler %g %g %g",
     )
-    deformation = traits.Tuple(
+    deformation = Tuple(
         (traits.Float(),) * 6,
         desc="(xx,yy,zz,xy,yz,xz)",
         xor=["transform"],
@@ -484,15 +484,13 @@ class DiffeoSymTensor3DVolInputSpec(CommandLineInputSpec):
         xor=["voxel_size"],
         desc="output volume specification read from the target volume if specified",
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz voxel size (superseded by target)",
         argstr="-vsize %g %g %g",
         xor=["target"],
     )
-    flip = traits.Tuple(
-        (traits.Int(), traits.Int(), traits.Int()), argstr="-flip %d %d %d"
-    )
+    flip = Tuple((traits.Int(), traits.Int(), traits.Int()), argstr="-flip %d %d %d")
     resampling_type = traits.Enum(
         "backward",
         "forward",
@@ -552,15 +550,13 @@ class DiffeoScalarVolInputSpec(CommandLineInputSpec):
         xor=["voxel_size"],
         desc="output volume specification read from the target volume if specified",
     )
-    voxel_size = traits.Tuple(
+    voxel_size = Tuple(
         (traits.Float(), traits.Float(), traits.Float()),
         desc="xyz voxel size (superseded by target)",
         argstr="-vsize %g %g %g",
         xor=["target"],
     )
-    flip = traits.Tuple(
-        (traits.Int(), traits.Int(), traits.Int()), argstr="-flip %d %d %d"
-    )
+    flip = Tuple((traits.Int(), traits.Int(), traits.Int()), argstr="-flip %d %d %d")
     resampling_type = traits.Enum(
         "backward",
         "forward",

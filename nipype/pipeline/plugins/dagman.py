@@ -78,7 +78,7 @@ getenv = True
         ):
             if (
                 "plugin_args" in kwargs
-                and not kwargs["plugin_args"] is None
+                and kwargs["plugin_args"] is not None
                 and id_ in kwargs["plugin_args"]
             ):
                 if id_ == "wrapper_cmd":
@@ -89,7 +89,7 @@ getenv = True
                     val = self._get_str_or_file(kwargs["plugin_args"][id_])
             setattr(self, var, val)
         # TODO remove after some time
-        if "plugin_args" in kwargs and not kwargs["plugin_args"] is None:
+        if "plugin_args" in kwargs and kwargs["plugin_args"] is not None:
             plugin_args = kwargs["plugin_args"]
             if "template" in plugin_args:
                 warn(

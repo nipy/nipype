@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 from copy import deepcopy
-import os
 
 from nibabel import Nifti1Image
 import numpy as np
@@ -122,7 +121,7 @@ def test_modelgen_spm_concat(tmpdir):
     s = SpecifySPMModel()
     s.inputs.input_units = "secs"
     s.inputs.concatenate_runs = True
-    setattr(s.inputs, "output_units", "secs")
+    s.inputs.output_units = "secs"
     assert s.inputs.output_units == "secs"
     s.inputs.functional_runs = [filename1, filename2]
     s.inputs.time_repetition = 6
@@ -147,7 +146,7 @@ def test_modelgen_spm_concat(tmpdir):
     )
 
     # Test case of scans as output units instead of seconds
-    setattr(s.inputs, "output_units", "scans")
+    s.inputs.output_units = "scans"
     assert s.inputs.output_units == "scans"
     s.inputs.subject_info = deepcopy(info)
     res = s.run()

@@ -4,7 +4,6 @@ import os
 from copy import deepcopy
 
 import pytest
-import pdb
 from nipype.utils.filemanip import split_filename, ensure_list
 from .. import preprocess as fsl
 from nipype.interfaces.fsl import Info
@@ -306,12 +305,12 @@ def test_flirt(setup_flirt):
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
         outfile = fsl_name(fsl.FLIRT(), "%s_flirt" % fname)
-        outfile = " ".join(["-out", outfile])
+        outfile = f"-out {outfile}"
         # Handle autogeneration of outmatrix
         outmatrix = "%s_flirt.mat" % fname
-        outmatrix = " ".join(["-omat", outmatrix])
+        outmatrix = f"-omat {outmatrix}"
         # Build command line
-        cmdline = " ".join([cmdline, outfile, outmatrix, param])
+        cmdline = f"{cmdline} {outfile} {outmatrix} {param}"
         flirter = fsl.FLIRT(in_file=infile, reference=reffile)
         setattr(flirter.inputs, key, value)
         assert flirter.cmdline == cmdline
@@ -319,8 +318,8 @@ def test_flirt(setup_flirt):
     # Test OutputSpec
     flirter = fsl.FLIRT(in_file=infile, reference=reffile)
     pth, fname, ext = split_filename(infile)
-    flirter.inputs.out_file = "".join(["foo", ext])
-    flirter.inputs.out_matrix_file = "".join(["bar", ext])
+    flirter.inputs.out_file = f"foo{ext}"
+    flirter.inputs.out_matrix_file = f"bar{ext}"
     outs = flirter._list_outputs()
     assert outs["out_file"] == os.path.join(os.getcwd(), flirter.inputs.out_file)
     assert outs["out_matrix_file"] == os.path.join(
@@ -579,7 +578,6 @@ def test_applywarp(setup_flirt):
 def setup_fugue(tmpdir):
     import nibabel as nb
     import numpy as np
-    import os.path as op
 
     d = np.ones((80, 80, 80))
     infile = tmpdir.join("dumbfile.nii.gz").strpath

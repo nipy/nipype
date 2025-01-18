@@ -14,6 +14,7 @@ from ..interfaces.base import (
     TraitedSpec,
     File,
     BaseInterfaceInputSpec,
+    Tuple,
 )
 from ..interfaces.vtkbase import tvtk
 from ..interfaces import vtkbase as VTKInfo
@@ -289,7 +290,7 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
     )
     float_trait = traits.Either(
         traits.Float(1.0),
-        traits.Tuple(traits.Float(1.0), traits.Float(1.0), traits.Float(1.0)),
+        Tuple(traits.Float(1.0), traits.Float(1.0), traits.Float(1.0)),
     )
 
     operator = traits.Either(
