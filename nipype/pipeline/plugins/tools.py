@@ -186,4 +186,3 @@ def gpu_count():
         return 1
     else:
         return len(GPUtil.getGPUs())
-    
