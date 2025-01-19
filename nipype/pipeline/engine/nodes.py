@@ -452,7 +452,7 @@ class Node(EngineBase):
         cached, updated = self.is_cached()
 
         # If the node is cached, check on pklz files and finish
-        if cached and not force_run and (updated or (not updated and updatehash)):
+        if cached and not force_run and (updated or updatehash):
             logger.debug("Only updating node hashes or skipping execution")
             inputs_file = op.join(outdir, "_inputs.pklz")
             if not op.exists(inputs_file):
