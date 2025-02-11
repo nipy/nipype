@@ -1490,18 +1490,13 @@ def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
 
         for cname, iname in zip(in_files, in_idxs):
             f = np.load(iname)
-            idxs = np.squeeze(f["arr_0"])
+            idxs = np.atleast_1d(np.squeeze(f["arr_0"]))
+            nels = len(idxs)
 
             for d, fname in enumerate(nii):
                 data = np.asanyarray(nb.load(fname).dataobj).reshape(-1)
                 cdata = nb.load(cname).dataobj[..., d].reshape(-1)
-                try:
-                    nels = len(idxs)
-                except TypeError:
-                    nels = 1
-
-                idata = (idxs,)
-                data[idata] = cdata[0:nels]
+                data[idxs] = cdata[:nels]
                 nb.Nifti1Image(data.reshape(rsh[:3]), aff, hdr).to_filename(fname)
 
         imgs = [nb.load(im) for im in nii]
