@@ -51,22 +51,22 @@ else
 fi
 
 # Clean working copy
-TMP=`mktemp -d`
-hub clone conda-forge/$FEEDSTOCK $TMP/$FEEDSTOCK
-pushd $TMP/$FEEDSTOCK
+TMP=$(mktemp -d)
+hub clone conda-forge/"$FEEDSTOCK" "$TMP"/"$FEEDSTOCK"
+pushd "$TMP"/"$FEEDSTOCK"
 
 # Get user fork, move to a candidate release branch, detecting if new branch
 hub fork
 git fetch --all
-if git checkout -t $GITHUB_USER/$BRANCH; then
+if git checkout -t "$GITHUB_USER"/"$BRANCH"; then
     NEW_PR=false
 else
     NEW_PR=true
-    git checkout -b $BRANCH origin/main
+    git checkout -b "$BRANCH" origin/main
 fi
 
 # Calculate hash
-SHA256=`curl -sSL https://github.com/$SRCREPO/archive/$REF.tar.gz | sha256sum | cut -d\  -f 1`
+SHA256=$(curl -sSL https://github.com/"$SRCREPO"/archive/"$REF".tar.gz | sha256sum | cut -d\  -f 1)
 
 URL_BASE="https://github.com/$CIRCLE_PROJECT_USERNAME/{{ name }}/archive"
 if $RELEASE; then
@@ -87,7 +87,7 @@ sed -i \
 # Bump branch
 git add recipe/meta.yaml
 git commit -m "$COMMIT_MSG"
-git push -u $GITHUB_USER $BRANCH
+git push -u "$GITHUB_USER" "$BRANCH"
 
 if $NEW_PR; then
     hub pull-request -b conda-forge:main -F - <<END
@@ -117,4 +117,4 @@ fi
 
 # Remove working copy
 popd
-rm -rf $TMP/$FEEDSTOCK
+rm -rf "$TMP"/"$FEEDSTOCK"
