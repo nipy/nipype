@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Tests for the engine utils module
-"""
+"""Tests for the engine utils module"""
 import os
 from copy import deepcopy
 import pytest

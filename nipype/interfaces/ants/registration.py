@@ -1,5 +1,5 @@
 """The ants module provides basic functions for interfacing with ants
-   functions.
+functions.
 """
 
 import os

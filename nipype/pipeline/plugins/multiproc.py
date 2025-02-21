@@ -379,8 +379,11 @@ class MultiProcPlugin(DistributedPluginBase):
             if self._local_hash_check(jobid, graph):
                 continue
 
+            cached, updated = self.procs[jobid].is_cached()
             # updatehash and run_without_submitting are also run locally
-            if updatehash or self.procs[jobid].run_without_submitting:
+            if (cached and updatehash and not updated) or self.procs[
+                jobid
+            ].run_without_submitting:
                 logger.debug("Running node %s on master thread", self.procs[jobid])
                 try:
                     self.procs[jobid].run(updatehash=updatehash)
