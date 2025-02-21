@@ -1,4 +1,4 @@
-""" Base interfaces for dipy """
+"""Base interfaces for dipy"""
 
 import os.path as op
 import inspect

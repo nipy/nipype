@@ -1,5 +1,4 @@
-"""Parallel workflow execution via SLURM
-"""
+"""Parallel workflow execution via SLURM"""
 
 import os
 import sys

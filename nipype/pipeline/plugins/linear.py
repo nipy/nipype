@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Local serial workflow execution
-"""
+"""Local serial workflow execution"""
 
 import os
 from .base import PluginBase, logger, report_crash, report_nodes_not_run, str2bool

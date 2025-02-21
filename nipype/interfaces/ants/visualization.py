@@ -1,5 +1,4 @@
-"""The ants visualisation module provides basic functions based on ITK.
-"""
+"""The ants visualisation module provides basic functions based on ITK."""
 
 import os
 

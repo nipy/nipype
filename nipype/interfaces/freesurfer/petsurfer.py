@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Provides interfaces to various commands for running PET analyses provided by FreeSurfer
-"""
+"""Provides interfaces to various commands for running PET analyses provided by FreeSurfer"""
 
 import os
 

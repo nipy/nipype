@@ -1,5 +1,4 @@
-"""Parallel workflow execution via PBS/Torque
-"""
+"""Parallel workflow execution via PBS/Torque"""
 
 import os
 from time import sleep

@@ -9,7 +9,7 @@
 #   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #   License for the specific language governing permissions and limitations
 #   under the License.
-""" cloghandler.py:  A smart replacement for the standard RotatingFileHandler
+"""cloghandler.py:  A smart replacement for the standard RotatingFileHandler
 
 ConcurrentRotatingFileHandler:  This class is a log handler which is a drop-in
 replacement for the python standard log handler 'RotateFileHandler', the primary

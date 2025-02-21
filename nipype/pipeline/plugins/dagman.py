@@ -1,5 +1,4 @@
-"""Parallel workflow execution via Condor DAGMan
-"""
+"""Parallel workflow execution via Condor DAGMan"""
 
 import os
 import sys
