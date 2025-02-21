@@ -8,8 +8,8 @@ source tools/ci/env.sh
 set -eu
 
 # Required variables
-echo EXTRA_PIP_FLAGS = $EXTRA_PIP_FLAGS
-echo DEPENDS = $DEPENDS
+echo EXTRA_PIP_FLAGS = "$EXTRA_PIP_FLAGS"
+echo DEPENDS = "$DEPENDS"
 
 set -x
 
@@ -18,7 +18,7 @@ if [ -n "$EXTRA_PIP_FLAGS" ]; then
 fi
 
 if [ -n "$DEPENDS" ]; then
-    pip install ${EXTRA_PIP_FLAGS} --prefer-binary ${!DEPENDS}
+    pip install "${EXTRA_PIP_FLAGS}" --prefer-binary "${!DEPENDS}"
 fi
 
 set +eux

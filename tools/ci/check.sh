@@ -8,7 +8,7 @@ source tools/ci/env.sh
 set -eu
 
 # Required variables
-echo CHECK_TYPE = $CHECK_TYPE
+echo CHECK_TYPE = "$CHECK_TYPE"
 
 set -x
 
