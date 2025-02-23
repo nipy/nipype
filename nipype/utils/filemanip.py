@@ -215,7 +215,9 @@ def _parse_mount_table(exit_code, output):
 
     # Keep line and match for error reporting (match == None on failure)
     # Ignore empty lines
-    matches = [(l, pattern.match(l)) for l in output.strip().splitlines() if l]
+    matches = [
+        (line, pattern.match(line)) for line in output.strip().splitlines() if line
+    ]
 
     # (path, fstype) tuples, sorted by path length (longest first)
     mount_info = sorted(
@@ -588,11 +590,7 @@ def loadpkl(infile):
         fmlogger.debug(f"'{infile}' missing; waiting 2s")
         sleep(2)
     if timed_out:
-        error_message = (
-            "Result file {} expected, but "
-            "does not exist after ({}) "
-            "seconds.".format(infile, timeout)
-        )
+        error_message = f"Result file {infile} expected, but does not exist after {timeout} seconds."
         raise OSError(error_message)
 
     with pklopen(str(infile), "rb") as pkl_file:
@@ -943,7 +941,7 @@ def load_spm_mat(spm_mat_file, **kwargs):
             fnames = dict()
             try:
                 fnames["Vbeta"] = [
-                    u"".join(chr(c[0]) for c in h5file[obj_ref[0]])
+                    "".join(chr(c[0]) for c in h5file[obj_ref[0]])
                     for obj_ref in h5file["SPM"]["Vbeta"]["fname"]
                 ]
             except Exception:
@@ -951,7 +949,7 @@ def load_spm_mat(spm_mat_file, **kwargs):
             for contr_type in ["Vcon", "Vspm"]:
                 try:
                     fnames[contr_type] = [
-                        u"".join(chr(c[0]) for c in h5file[obj_ref[0]]["fname"])
+                        "".join(chr(c[0]) for c in h5file[obj_ref[0]]["fname"])
                         for obj_ref in h5file["SPM"]["xCon"][contr_type]
                     ]
                 except Exception:
@@ -961,12 +959,12 @@ def load_spm_mat(spm_mat_file, **kwargs):
         obj_list = []
         for i in range(len(fnames["Vbeta"])):
             obj = sio.matlab.mat_struct()
-            setattr(obj, "fname", np.array([fnames["Vbeta"][i]]))
+            obj.fname = np.array([fnames["Vbeta"][i]])
             obj_list.append(obj)
         if len(obj_list) > 0:
-            setattr(mat["SPM"][0, 0], "Vbeta", np.array([obj_list]))
+            mat["SPM"][0, 0].Vbeta = np.array([obj_list])
         else:
-            setattr(mat["SPM"][0, 0], "Vbeta", np.empty((0, 0), dtype=object))
+            mat["SPM"][0, 0].Vbeta = np.empty((0, 0), dtype=object)
 
         # Structure Vcon and Vspm as returned by scipy.io.loadmat
         obj_list = []
@@ -974,12 +972,12 @@ def load_spm_mat(spm_mat_file, **kwargs):
             obj = sio.matlab.mat_struct()
             for contr_type in ["Vcon", "Vspm"]:
                 temp = sio.matlab.mat_struct()
-                setattr(temp, "fname", np.array([fnames[contr_type][i]]))
+                temp.fname = np.array([fnames[contr_type][i]])
                 setattr(obj, contr_type, np.array([[temp]]))
             obj_list.append(obj)
         if len(obj_list) > 0:
-            setattr(mat["SPM"][0, 0], "xCon", np.array([obj_list]))
+            mat["SPM"][0, 0].xCon = np.array([obj_list])
         else:
-            setattr(mat["SPM"][0, 0], "xCon", np.empty((0, 0), dtype=object))
+            mat["SPM"][0, 0].xCon = np.empty((0, 0), dtype=object)
 
     return mat

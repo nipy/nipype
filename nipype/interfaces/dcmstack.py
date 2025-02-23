@@ -186,7 +186,7 @@ class GroupAndStack(DcmStack):
         stacks = dcmstack.parse_and_stack(src_paths)
 
         self.out_list = []
-        for key, stack in list(stacks.items()):
+        for stack in stacks.values():
             nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
             const_meta = nw.meta_ext.get_class_dict(("global", "const"))
             out_path = self._get_out_path(const_meta)

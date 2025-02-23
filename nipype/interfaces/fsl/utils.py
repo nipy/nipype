@@ -1070,11 +1070,9 @@ class Overlay(FSLCommand):
             else:
                 return "1"
         if name == "show_negative_stats":
-            return "{} {:.2f} {:.2f}".format(
-                self.inputs.stat_image,
-                self.inputs.stat_thresh[0] * -1,
-                self.inputs.stat_thresh[1] * -1,
-            )
+            thresh0 = self.inputs.stat_thresh[0] * -1
+            thresh1 = self.inputs.stat_thresh[1] * -1
+            return "{self.inputs.stat_image} {thresh0:.2f} {thresh1:.2f}"
         return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -1085,10 +1083,9 @@ class Overlay(FSLCommand):
                 not isdefined(self.inputs.show_negative_stats)
                 or not self.inputs.show_negative_stats
             ):
-                stem = "{}_and_{}".format(
-                    split_filename(self.inputs.stat_image)[1],
-                    split_filename(self.inputs.stat_image2)[1],
-                )
+                image = split_filename(self.inputs.stat_image)[1]
+                image2 = split_filename(self.inputs.stat_image2)[1]
+                stem = f"{image}_and_{image2}"
             else:
                 stem = split_filename(self.inputs.stat_image)[1]
             out_file = self._gen_fname(stem, suffix="_overlay")
@@ -1455,11 +1452,7 @@ class PlotMotionParams(FSLCommand):
             titledict = dict(fsl="MCFLIRT", spm="Realign")
             unitdict = dict(rot="radians", tra="mm")
 
-            title = "'{} estimated {} ({})'".format(
-                titledict[source],
-                value,
-                unitdict[value[:3]],
-            )
+            title = f"'{titledict[source]} estimated {value} ({unitdict[value[:3]]})'"
 
             return f"-t {title} {sfstr} -a x,y,z"
         elif name == "plot_size":
@@ -2580,7 +2573,7 @@ class WarpPoints(CommandLine):
 
     def _overload_extension(self, value, name):
         if name == "out_file":
-            return "{}.{}".format(value, self._outformat)
+            return f"{value}.{self._outformat}"
 
     def _run_interface(self, runtime):
         fname = self._in_file

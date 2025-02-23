@@ -15,7 +15,7 @@ from .test_base import EngineTestInterface
 # XXX - SG I'll create a graphical version of these tests and actually
 # ensure that all connections are tested later
 @pytest.mark.parametrize(
-    "iterables, expected",
+    ("iterables", "expected"),
     [
         ({"1": None}, (1, 0)),  # test1
         ({"1": dict(input1=lambda: [1, 2], input2=lambda: [1, 2])}, (4, 0)),  # test2
@@ -33,7 +33,7 @@ def test_1mod(iterables, expected):
 
 
 @pytest.mark.parametrize(
-    "iterables, expected",
+    ("iterables", "expected"),
     [
         ({"1": {}, "2": dict(input1=lambda: [1, 2])}, (3, 2)),  # test3
         ({"1": dict(input1=lambda: [1, 2]), "2": {}}, (4, 2)),  # test4
@@ -57,7 +57,7 @@ def test_2mods(iterables, expected):
 
 
 @pytest.mark.parametrize(
-    "iterables, expected, connect",
+    ("iterables", "expected", "connect"),
     [
         (
             {"1": {}, "2": dict(input1=lambda: [1, 2]), "3": {}},

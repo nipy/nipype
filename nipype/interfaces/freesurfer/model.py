@@ -451,9 +451,9 @@ class GLMFitInputSpec(FSTraitedSpec):
     sim_done_file = File(
         argstr="--sim-done %s", desc="create file when simulation finished"
     )
-    _ext_xor = ['nii', 'nii_gz']
-    nii = traits.Bool(argstr='--nii', desc='save outputs as nii', xor=_ext_xor)
-    nii_gz = traits.Bool(argstr='--nii.gz', desc='save outputs as nii.gz', xor=_ext_xor)
+    _ext_xor = ["nii", "nii_gz"]
+    nii = traits.Bool(argstr="--nii", desc="save outputs as nii", xor=_ext_xor)
+    nii_gz = traits.Bool(argstr="--nii.gz", desc="save outputs as nii.gz", xor=_ext_xor)
 
 
 class GLMFitOutputSpec(TraitedSpec):
@@ -511,11 +511,11 @@ class GLMFit(FSCommand):
         outputs["glm_dir"] = glmdir
 
         if isdefined(self.inputs.nii_gz):
-            ext = 'nii.gz'
+            ext = "nii.gz"
         elif isdefined(self.inputs.nii):
-            ext = 'nii'
+            ext = "nii"
         else:
-            ext = 'mgh'
+            ext = "mgh"
 
         # Assign the output files that always get created
         outputs["beta_file"] = os.path.join(glmdir, f"beta.{ext}")

@@ -1273,7 +1273,7 @@ class Registration(ANTSCommand):
                     self.inputs.moving_image_mask,
                 )
             else:
-                return "--masks %s" % self.inputs.fixed_image_mask
+                return "--masks {}".format(self.inputs.fixed_image_mask)
         elif opt == "transforms":
             return self._format_registration()
         elif opt == "initial_moving_transform":
@@ -1319,7 +1319,9 @@ class Registration(ANTSCommand):
                     out_filename,
                 )
             else:
-                return "--output %s" % self.inputs.output_transform_prefix
+                return "--output {}".format(
+                    self.inputs.output_transform_prefix,
+                )
         elif opt == "winsorize_upper_quantile" or opt == "winsorize_lower_quantile":
             if not self._quantilesDone:
                 return self._format_winsorize_image_intensities()
@@ -1610,7 +1612,7 @@ class MeasureImageSimilarity(ANTSCommand):
             )
         else:
             retval = '--masks "{fixed_image_mask}"'.format(
-                fixed_image_mask=self.inputs.fixed_image_mask
+                fixed_image_mask=self.inputs.fixed_image_mask,
             )
         return retval
 
@@ -1870,9 +1872,7 @@ class CompositeTransformUtil(ANTSCommand):
                 f"00_{self.inputs.output_prefix}_AffineTransform.mat"
             )
             outputs["displacement_field"] = os.path.abspath(
-                "01_{}_DisplacementFieldTransform.nii.gz".format(
-                    self.inputs.output_prefix
-                )
+                f"01_{self.inputs.output_prefix}_DisplacementFieldTransform.nii.gz"
             )
         if self.inputs.process == "assemble":
             outputs["out_file"] = os.path.abspath(self.inputs.out_file)

@@ -124,7 +124,7 @@ def write_node_report(node, result=None, is_mapnode=False):
 
     if result is None:
         logger.debug('[Node] Writing pre-exec report to "%s"', report_file)
-        report_file.write_text("\n".join(lines), encoding='utf-8')
+        report_file.write_text("\n".join(lines), encoding="utf-8")
         return
 
     logger.debug('[Node] Writing post-exec report to "%s"', report_file)
@@ -137,7 +137,7 @@ def write_node_report(node, result=None, is_mapnode=False):
     outputs = result.outputs
     if outputs is None:
         lines += ["None"]
-        report_file.write_text("\n".join(lines), encoding='utf-8')
+        report_file.write_text("\n".join(lines), encoding="utf-8")
         return
 
     if isinstance(outputs, Bunch):
@@ -162,7 +162,7 @@ def write_node_report(node, result=None, is_mapnode=False):
             subnode_report_files.append("subnode %d : %s" % (i, subnode_file))
 
         lines.append(write_rst_list(subnode_report_files))
-        report_file.write_text("\n".join(lines), encoding='utf-8')
+        report_file.write_text("\n".join(lines), encoding="utf-8")
         return
 
     lines.append(write_rst_header("Runtime info", level=1))
@@ -204,7 +204,7 @@ def write_node_report(node, result=None, is_mapnode=False):
             write_rst_dict(result.runtime.environ),
         ]
 
-    report_file.write_text("\n".join(lines), encoding='utf-8')
+    report_file.write_text("\n".join(lines), encoding="utf-8")
 
 
 def write_report(node, report_type=None, is_mapnode=False):
@@ -369,13 +369,7 @@ def format_node(node, format="python", include_config=False):
         args = ", ".join(filled_args)
         klass_name = klass.__class__.__name__
         if isinstance(node, MapNode):
-            nodedef = '{} = MapNode({}({}), iterfield={}, name="{}")'.format(
-                name,
-                klass_name,
-                args,
-                node.iterfield,
-                name,
-            )
+            nodedef = f'{name} = MapNode({klass_name}({args}), iterfield={node.iterfield}, name="{name}")'
         else:
             nodedef = f'{name} = Node({klass_name}({args}), name="{name}")'
         lines = [importline, comment, nodedef]
@@ -537,7 +531,7 @@ def _write_detailed_dot(graph, dotfilename):
             + ["}"]
         )
         outports = []
-        for u, v, d in graph.out_edges(nbunch=n, data=True):
+        for u, v, d in graph.out_edges(nbunch=n, data=True):  # noqa: B007
             for cd in d["connect"]:
                 if isinstance(cd[0], (str, bytes)):
                     outport = cd[0]
@@ -777,9 +771,7 @@ def _merge_graphs(
         rootnode = list(Gc.nodes())[nodeidx]
         paramstr = ""
         for key, val in sorted(params.items()):
-            paramstr = "{}_{}_{}".format(
-                paramstr, _get_valid_pathstr(key), _get_valid_pathstr(val)
-            )
+            paramstr = f"{paramstr}_{_get_valid_pathstr(key)}_{_get_valid_pathstr(val)}"
             rootnode.set_input(key, val)
 
         logger.debug("Parameterization: paramstr=%s", paramstr)
@@ -911,10 +903,8 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
                 src_func = src_port[1].split("\\n")[0]
                 dst_func = src[1].split("\\n")[0]
                 raise ValueError(
-                    "Does not support two inline functions "
-                    "in series ('{}'  and '{}'), found when "
-                    "connecting {} to {}. Please use a Function "
-                    "node.".format(src_func, dst_func, srcnode, destnode)
+                    f"Does not support two inline functions in series ('{src_func}'  and '{dst_func}'), "
+                    f"found when connecting {srcnode} to {destnode}. Please use a Function node."
                 )
 
             connect = graph.get_edge_data(srcnode, destnode, default={"connect": []})
@@ -1599,7 +1589,7 @@ def write_workflow_prov(graph, filename=None, format="all"):
 
     # add dependencies (edges)
     # Process->Process
-    for idx, edgeinfo in enumerate(graph.in_edges()):
+    for edgeinfo in graph.in_edges():
         ps.g.wasStartedBy(
             processes[list(nodes).index(edgeinfo[1])],
             starter=processes[list(nodes).index(edgeinfo[0])],
