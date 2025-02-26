@@ -2,6 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Settings for sphinxext.interfaces and connection to sphinx-apidoc."""
 import re
+from packaging.version import Version
+
+import sphinx
 from sphinx.ext.napoleon import (
     Config as NapoleonConfig,
     _patch_python_domain,
@@ -39,13 +42,24 @@ class Config(NapoleonConfig):
 
     """
 
-    _config_values = {
-        "nipype_skip_classes": (
-            ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester"],
-            "env",
-        ),
-        **NapoleonConfig._config_values,
-    }
+    if Version(sphinx.__version__) >= Version("8.2.1"):
+        _config_values = (
+            (
+                "nipype_skip_classes",
+                ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester"],
+                "env",
+                frozenset({list[str]}),
+            ),
+            *NapoleonConfig._config_values,
+        )
+    else:
+        _config_values = {
+            "nipype_skip_classes": (
+                ["Tester", "InputSpec", "OutputSpec", "Numpy", "NipypeTester"],
+                "env",
+            ),
+            **NapoleonConfig._config_values,
+        }
 
 
 def setup(app):
@@ -82,8 +96,12 @@ def setup(app):
     app.connect("autodoc-process-docstring", _process_docstring)
     app.connect("autodoc-skip-member", _skip_member)
 
-    for name, (default, rebuild) in Config._config_values.items():
-        app.add_config_value(name, default, rebuild)
+    if Version(sphinx.__version__) >= Version("8.2.1"):
+        for name, default, rebuild, types in Config._config_values:
+            app.add_config_value(name, default, rebuild, types=types)
+    else:
+        for name, (default, rebuild) in Config._config_values.items():
+            app.add_config_value(name, default, rebuild)
     return {"version": __version__, "parallel_read_safe": True}
 
 
