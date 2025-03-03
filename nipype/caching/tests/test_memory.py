@@ -1,5 +1,4 @@
-""" Test the nipype interface caching mechanism
-"""
+"""Test the nipype interface caching mechanism"""
 
 from .. import Memory
 from ...pipeline.engine.tests.test_engine import EngineTestInterface

@@ -1,5 +1,4 @@
-"""Parallel workflow execution via Condor
-"""
+"""Parallel workflow execution via Condor"""
 
 import os
 from time import sleep

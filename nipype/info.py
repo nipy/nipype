@@ -1,4 +1,4 @@
-""" This file contains defines parameters for nipy that we use to fill
+"""This file contains defines parameters for nipy that we use to fill
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
@@ -149,6 +149,7 @@ REQUIRES = [
     "acres",
     "etelemetry>=0.3.1",
     "looseversion!=1.2",
+    "gputil>=1.4.0",
     "puremagic",
 ]
 

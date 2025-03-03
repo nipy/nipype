@@ -1,5 +1,4 @@
-"""ANTS Apply Transforms interface
-"""
+"""ANTS Apply Transforms interface"""
 
 import os
 

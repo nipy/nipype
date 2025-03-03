@@ -1,5 +1,4 @@
-"""Parallel workflow execution via OAR http://oar.imag.fr
-"""
+"""Parallel workflow execution via OAR http://oar.imag.fr"""
 
 import os
 import stat

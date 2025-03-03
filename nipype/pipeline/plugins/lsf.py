@@ -1,5 +1,4 @@
-"""Parallel workflow execution via LSF
-"""
+"""Parallel workflow execution via LSF"""
 
 import os
 import re

@@ -1,5 +1,4 @@
-"""The bru2nii module provides basic functions for dicom conversion
-"""
+"""The bru2nii module provides basic functions for dicom conversion"""
 
 import os
 from .base import (
