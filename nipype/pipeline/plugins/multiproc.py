@@ -21,7 +21,7 @@ from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
-from .tools import gpu_count
+from ...utils.gpu_count import gpu_count
 
 try:
     from textwrap import indent

@@ -175,13 +175,3 @@ except Exception as e:
     with open(pyscript, "w") as fp:
         fp.writelines(cmdstr)
     return pyscript
-
-
-def gpu_count():
-    n_gpus = 1
-    try:
-        import GPUtil
-    except ImportError:
-        return 1
-    else:
-        return len(GPUtil.getGPUs())

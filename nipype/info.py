@@ -149,7 +149,6 @@ REQUIRES = [
     "acres",
     "etelemetry>=0.3.1",
     "looseversion!=1.2",
-    "gputil>=1.4.0",
     "puremagic",
 ]
 
