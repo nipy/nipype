@@ -25,31 +25,22 @@
 
 import platform
 import shutil
-from subprocess import Popen, PIPE
+import subprocess
 import os
 
 
 def gpu_count():
-    try:
-        if platform.system() == "Windows":
-            nvidia_smi = shutil.which('nvidia-smi')
-            if nvidia_smi is None:
-                nvidia_smi = (
-                    "%s\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe"
-                    % os.environ['systemdrive']
-                )
-        else:
-            nvidia_smi = "nvidia-smi"
-
-        p = Popen(
-            [nvidia_smi, "--query-gpu=name", "--format=csv,noheader,nounits"],
-            stdout=PIPE,
-        )
-        stdout, stderror = p.communicate()
-
-        output = stdout.decode('UTF-8')
-        lines = output.split(os.linesep)
-        num_devices = len(lines) - 1
-        return num_devices
-    except:
+    nvidia_smi = shutil.which('nvidia-smi')
+    if nvidia_smi is None and platform.system() == "Windows":
+        nvidia_smi = f'{os.environ["systemdrive"]}\\Program Files\\NVIDIA Corporation\\NVSMI\\nvidia-smi.exe'
+    if nvidia_smi is None:
         return 0
+    try:
+        p = subprocess.run(
+            [nvidia_smi, "--query-gpu=name", "--format=csv,noheader,nounits"],
+            stdout=subprocess.PIPE,
+            text=True,
+        )
+    except (OSError, UnicodeDecodeError):
+        return 0
+    return len(p.stdout.splitlines())
