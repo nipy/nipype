@@ -1,3 +1,24 @@
+1.10.0 (March 19, 2025)
+=======================
+
+New feature release in the 1.10.x series.
+
+This release adds GPUs to multiprocess resource management.
+In general, no changes to existing code should be required if the GPU-enabled
+interface has a ``use_gpu`` input.
+The ``n_gpu_procs`` can be used to set the number of GPU processes that may
+be run in parallel, which will override the default of GPUs identified by
+``nvidia-smi``, or 1 if no GPUs are detected.
+
+  * FIX: Reimplement ``gpu_count()`` (https://github.com/nipy/nipype/pull/3718)
+  * FIX: Avoid 0D array in ``algorithms.misc.merge_rois`` (https://github.com/nipy/nipype/pull/3713)
+  * FIX: Allow nipype.sphinx.ext.apidoc Config to work with Sphinx 8.2.1+ (https://github.com/nipy/nipype/pull/3716)
+  * FIX: Resolve crashes when running workflows with updatehash=True (https://github.com/nipy/nipype/pull/3709)
+  * ENH: Support for gpu queue (https://github.com/nipy/nipype/pull/3642)
+  * ENH: Update to .wci.yml (https://github.com/nipy/nipype/pull/3708)
+  * ENH: Add Workflow Community Initiative (WCI) descriptor (https://github.com/nipy/nipype/pull/3608)
+
+
 1.9.2 (December 17, 2024)
 =========================
 
