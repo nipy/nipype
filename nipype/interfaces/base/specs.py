@@ -142,10 +142,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 raise TraitError(msg)
             else:
                 if trait_spec.new_name:
-                    msg += "Unsetting old value {}; setting new value {}.".format(
-                        name,
-                        trait_spec.new_name,
-                    )
+                    msg += f"Unsetting old value {name}; setting new value {trait_spec.new_name}."
                 warn(msg)
                 if trait_spec.new_name:
                     self.trait_set(

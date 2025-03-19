@@ -79,7 +79,7 @@ class SLURMGraphPlugin(GraphPluginBase):
         if (
             self._dont_resubmit_completed_jobs
         ):  # A future parameter for controlling this behavior could be added here
-            for idx, pyscript in enumerate(pyfiles):
+            for idx, pyscript in enumerate(pyfiles):  # noqa: B007
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
 
@@ -143,14 +143,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                     stdoutFile = ""
                     if self._sbatch_args.count("-o ") == 0:
                         stdoutFile = f"-o {batchscriptoutfile}"
-                    full_line = "{jobNm}=$(sbatch {outFileOption} {errFileOption} {extraSBatchArgs} {dependantIndex} -J {jobNm} {batchscript} | awk '/^Submitted/ {{print $4}}')\n".format(
-                        jobNm=jobname,
-                        outFileOption=stdoutFile,
-                        errFileOption=stderrFile,
-                        extraSBatchArgs=sbatch_args,
-                        dependantIndex=deps,
-                        batchscript=batchscriptfile,
-                    )
+                    full_line = f"{jobname}=$(sbatch {stdoutFile} {stderrFile} {sbatch_args} {deps} -J {jobname} {batchscriptfile} | awk '/^Submitted/ {{print $4}}')\n"
                     fp.writelines(full_line)
         cmd = CommandLine(
             "bash",

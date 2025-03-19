@@ -77,7 +77,7 @@ class TempFATFS:
             self.fusefat.send_signal(signal.SIGINT)
 
             # Allow 1s to return without sending terminate
-            for count in range(10):
+            for _ in range(10):
                 time.sleep(0.1)
                 if self.fusefat.poll() is not None:
                     break

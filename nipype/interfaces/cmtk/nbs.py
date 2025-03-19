@@ -23,7 +23,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def _read_pickle(fname):
-    with open(fname, 'rb') as f:
+    with open(fname, "rb") as f:
         return pickle.load(f)
 
 
@@ -174,13 +174,13 @@ class NetworkBasedStatistic(LibraryBaseInterface):
 
         path = op.abspath("NBS_Result_" + details)
         iflogger.info(path)
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             pickle.dump(nbsgraph, f, pickle.HIGHEST_PROTOCOL)
         iflogger.info("Saving output NBS edge network as %s", path)
 
         pval_path = op.abspath("NBS_P_vals_" + details)
         iflogger.info(pval_path)
-        with open(pval_path, 'wb') as f:
+        with open(pval_path, "wb") as f:
             pickle.dump(nbs_pval_graph, f, pickle.HIGHEST_PROTOCOL)
         iflogger.info("Saving output p-value network as %s", pval_path)
         return runtime
