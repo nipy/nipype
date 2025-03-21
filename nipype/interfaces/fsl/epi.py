@@ -5,11 +5,13 @@
 was written to work with FSL version 5.0.4.
 """
 import os
+from shutil import which
 import numpy as np
 import nibabel as nb
 import warnings
 
 from ...utils.filemanip import split_filename, fname_presuffix
+from ...utils.gpu_count import gpu_count
 
 from ..base import traits, TraitedSpec, InputMultiPath, File, isdefined
 from .base import FSLCommand, FSLCommandInputSpec, Info
@@ -793,9 +795,12 @@ class EddyInputSpec(FSLCommandInputSpec):
         requires=["estimate_move_by_susceptibility"],
         min_ver="6.0.1",
     )
-
     num_threads = traits.Int(
-        1, usedefault=True, nohash=True, desc="Number of openmp threads to use"
+        argstr="--nthr=%d",
+        default_value=1,
+        usedefault=True,
+        nohash=True,
+        desc="Number of openmp threads to use"
     )
     is_shelled = traits.Bool(
         False,
@@ -937,7 +942,7 @@ class Eddy(FSLCommand):
 
     """
 
-    _cmd = "eddy_openmp"
+    _cmd = "eddy_openmp" if which("eddy_openmp") else "eddy_cpu"
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -963,17 +968,22 @@ class Eddy(FSLCommand):
             self.inputs.environ["OMP_NUM_THREADS"] = str(self.inputs.num_threads)
 
     def _use_cuda(self):
-        self._cmd = "eddy_cuda" if self.inputs.use_cuda else "eddy_openmp"
+        if self.inputs.use_cuda and gpu_count()>0:
+            # eddy_cuda usually link to eddy_cudaX.X but some versions miss the symlink
+            # anyway in newer fsl versions eddy automatically use cuda on cuda-capable systems
+            self._cmd = "eddy_cuda" if which("eddy_cuda") else "eddy"
+        else:
+            # older fsl versions has cuda_openmp, newer versions has eddy_cpu
+            _cmd = "eddy_openmp" if which("eddy_openmp") else "eddy_cpu"
 
     def _run_interface(self, runtime):
-        # If 'eddy_openmp' is missing, use 'eddy'
+        # If selected command is missing, use generic 'eddy'
         FSLDIR = os.getenv("FSLDIR", "")
         cmd = self._cmd
         if all(
             (
                 FSLDIR != "",
-                cmd == "eddy_openmp",
-                not os.path.exists(os.path.join(FSLDIR, "bin", cmd)),
+                not os.path.exists(os.path.join(FSLDIR, "bin", self._cmd)),
             )
         ):
             self._cmd = "eddy"
