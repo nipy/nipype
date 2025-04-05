@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -z "$1" ]; then
-  echo "Usage: $(basename $0) <input_filepath>"
+  echo "Usage: $(basename "$0") <input_filepath>"
   exit 1
 fi
 

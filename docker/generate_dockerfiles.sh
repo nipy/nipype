@@ -4,7 +4,7 @@
 
 set -e
 
-USAGE="usage: $(basename $0) [-h] [-b] [-m]"
+USAGE="usage: $(basename "$0") [-h] [-b] [-m]"
 
 function Help {
   cat <<USAGE
@@ -12,7 +12,7 @@ Generate base and/or main Dockerfiles for Nipype.
 
 Usage:
 
-$(basename $0) [-h] [-b] [-m]
+$(basename "$0") [-h] [-b] [-m]
 
 Options:
 
