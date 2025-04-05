@@ -11,7 +11,7 @@ from string import Template
 
 class ConmapTxt2MatInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
-    out_file = File('cmatrix.mat', usedefault=True)
+    out_file = File("cmatrix.mat", usedefault=True)
 
 
 class ConmapTxt2MatOutputSpec(TraitedSpec):
@@ -48,5 +48,5 @@ class ConmapTxt2Mat(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs

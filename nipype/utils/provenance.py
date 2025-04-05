@@ -361,7 +361,7 @@ class ProvStore:
         )
         self.g.used(a0, id)
         # write environment entities
-        for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
+        for key, val in sorted(runtime.environ.items()):
             if key not in PROV_ENVVARS:
                 continue
             in_attr = {
@@ -380,7 +380,7 @@ class ProvStore:
                 {pm.PROV["type"]: nipype_ns["Inputs"], pm.PROV["label"]: "Inputs"}
             )
             # write input entities
-            for idx, (key, val) in enumerate(sorted(inputs.items())):
+            for key, val in sorted(inputs.items()):
                 in_entity = prov_encode(self.g, val).identifier
                 self.g.hadMember(input_collection, in_entity)
                 used_attr = {pm.PROV["label"]: key, nipype_ns["inPort"]: key}
@@ -396,7 +396,7 @@ class ProvStore:
             )
             self.g.wasGeneratedBy(output_collection, a0)
             # write output entities
-            for idx, (key, val) in enumerate(sorted(outputs.items())):
+            for key, val in sorted(outputs.items()):
                 out_entity = prov_encode(self.g, val).identifier
                 self.g.hadMember(output_collection, out_entity)
                 gen_attr = {pm.PROV["label"]: key, nipype_ns["outPort"]: key}

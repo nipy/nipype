@@ -6,7 +6,7 @@ import pytest
 from ..imagemanip import copy_header
 
 
-@pytest.mark.parametrize("keep_dtype", (True, False))
+@pytest.mark.parametrize("keep_dtype", [True, False])
 def test_copy_header(tmp_path, keep_dtype):
     """Cover copy_header."""
     fname1 = tmp_path / "reference.nii.gz"

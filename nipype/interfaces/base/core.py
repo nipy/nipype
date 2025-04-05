@@ -849,8 +849,8 @@ class CommandLine(BaseInterface):
 
             if not isinstance(ns, (str, bytes)):
                 raise ValueError(
-                    "name_source of '{}' trait should be an input trait "
-                    "name, but a type {} object was found".format(name, type(ns))
+                    f"name_source of '{name}' trait should be an input trait "
+                    f"name, but a type {type(ns)} object was found"
                 )
 
             if isdefined(getattr(self.inputs, ns)):

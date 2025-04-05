@@ -158,7 +158,7 @@ def _test_function3(arg):
 
 
 @pytest.mark.parametrize(
-    "plugin, remove_unnecessary_outputs, keep_inputs",
+    ("plugin", "remove_unnecessary_outputs", "keep_inputs"),
     list(product(["Linear", "MultiProc"], [False, True], [True, False])),
 )
 def test_outputs_removal_wf(tmpdir, plugin, remove_unnecessary_outputs, keep_inputs):

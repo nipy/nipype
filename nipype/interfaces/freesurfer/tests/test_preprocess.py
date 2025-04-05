@@ -65,11 +65,7 @@ def test_fitmsparams(create_files_in_directory):
     # .inputs based parameters setting
     fit.inputs.in_files = filelist
     fit.inputs.out_dir = outdir
-    assert fit.cmdline == "mri_ms_fitparms  {} {} {}".format(
-        filelist[0],
-        filelist[1],
-        outdir,
-    )
+    assert fit.cmdline == f"mri_ms_fitparms  {filelist[0]} {filelist[1]} {outdir}"
 
     # constructor based parameter setting
     fit2 = freesurfer.FitMSParams(
@@ -126,7 +122,7 @@ def test_mandatory_outvol(create_files_in_directory):
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
-        mni.cmdline
+        mni.cmdline  # noqa: B018
 
     # test with minimal args
     mni.inputs.in_file = filelist[0]
@@ -164,7 +160,7 @@ def test_bbregister(create_files_in_directory):
 
     # test raising error with mandatory args absent
     with pytest.raises(ValueError):
-        bbr.cmdline
+        bbr.cmdline  # noqa: B018
 
     bbr.inputs.subject_id = "fsaverage"
     bbr.inputs.source_file = filelist[0]
@@ -173,9 +169,9 @@ def test_bbregister(create_files_in_directory):
     # Check that 'init' is mandatory in FS < 6, but not in 6+
     if Info.looseversion() < LooseVersion("6.0.0"):
         with pytest.raises(ValueError):
-            bbr.cmdline
+            bbr.cmdline  # noqa: B018
     else:
-        bbr.cmdline
+        bbr.cmdline  # noqa: B018
 
     bbr.inputs.init = "fsl"
 
@@ -184,9 +180,7 @@ def test_bbregister(create_files_in_directory):
         base, _ = os.path.splitext(base)
 
     assert bbr.cmdline == (
-        "bbregister --t2 --init-fsl "
-        "--reg {base}_bbreg_fsaverage.dat "
-        "--mov {full} --s fsaverage".format(full=filelist[0], base=base)
+        f"bbregister --t2 --init-fsl --reg {base}_bbreg_fsaverage.dat --mov {filelist[0]} --s fsaverage"
     )
 
 

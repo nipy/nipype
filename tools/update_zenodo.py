@@ -78,5 +78,5 @@ if __name__ == "__main__":
     zenodo["creators"] = creators
 
     zenodo_file.write_text(
-        "%s\n" % json.dumps(zenodo, indent=2, ensure_ascii=False), encoding='utf-8'
+        "%s\n" % json.dumps(zenodo, indent=2, ensure_ascii=False), encoding="utf-8"
     )
