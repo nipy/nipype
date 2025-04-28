@@ -93,13 +93,18 @@ class RCommand(CommandLine):
     def _gen_r_command(self, argstr, script_lines):
         """Generates commands and, if rfile specified, writes it to disk."""
         if not self.inputs.rfile:
-            # replace newlines with ;, strip comments
+            # replace newlines with ;
             script = "; ".join(
-                [
-                    line
-                    for line in script_lines.split("\n")
-                    if not line.strip().startswith("#")
-                ]
+                list(
+                    filter(
+                        None,  # drop empty lines
+                        [
+                            line
+                            for line in script_lines.split("\n")
+                            if not line.strip().startswith("#")  # strip comments
+                        ],
+                    )
+                )
             )
             # escape " and $
             script = script.replace('"', '\\"')
