@@ -12,18 +12,18 @@ from nipype.interfaces.base import (
 
 
 class BRAINSResampleInputSpec(CommandLineInputSpec):
-    inputVolume = File(desc="Image To Warp", exists=True, argstr="--inputVolume %s")
+    inputVolume = File(desc="Image To Warp", exists=True, argstr="--inputVolume \"%s\"")
     referenceVolume = File(
         desc="Reference image used only to define the output space. If not specified, the warping is done in the same space as the image to warp.",
         exists=True,
-        argstr="--referenceVolume %s",
+        argstr="--referenceVolume \"%s\"",
     )
     outputVolume = traits.Either(
         traits.Bool,
         File(),
         hash_files=False,
         desc="Resulting deformed image",
-        argstr="--outputVolume %s",
+        argstr="--outputVolume \"%s\"",
     )
     pixelType = traits.Enum(
         "float",
@@ -34,17 +34,17 @@ class BRAINSResampleInputSpec(CommandLineInputSpec):
         "uchar",
         "binary",
         desc="Specifies the pixel type for the input/output images.  The 'binary' pixel type uses a modified algorithm whereby the image is read in as unsigned char, a signed distance map is created, signed distance map is resampled, and then a thresholded image of type unsigned char is written to disk.",
-        argstr="--pixelType %s",
+        argstr="--pixelType \"%s\"",
     )
     deformationVolume = File(
         desc="Displacement Field to be used to warp the image",
         exists=True,
-        argstr="--deformationVolume %s",
+        argstr="--deformationVolume \"%s\"",
     )
     warpTransform = File(
         desc="Filename for the BRAINSFit transform used in place of the deformation field",
         exists=True,
-        argstr="--warpTransform %s",
+        argstr="--warpTransform \"%s\"",
     )
     interpolationMode = traits.Enum(
         "NearestNeighbor",
@@ -103,5 +103,5 @@ class BRAINSResample(SEMLikeCommandLine):
 
     input_spec = BRAINSResampleInputSpec
     output_spec = BRAINSResampleOutputSpec
-    _cmd = "BRAINSResample "
+    _cmd = "Slicer --launch BRAINSResample "
     _outputs_filenames = {"outputVolume": "outputVolume.nii"}
