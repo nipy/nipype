@@ -146,10 +146,8 @@ getenv = True
                 )
                 if wrapper_cmd is not None:
                     specs["executable"] = wrapper_cmd
-                    specs["nodescript"] = "{} {} {}".format(
-                        wrapper_args % specs,  # give access to variables
-                        sys.executable,
-                        pyscript,
+                    specs["nodescript"] = (
+                        f"{wrapper_args % specs} {sys.executable} {pyscript}"
                     )
                 submitspec = template % specs
                 # write submit spec for this job

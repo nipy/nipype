@@ -416,63 +416,52 @@ class FAST(FSLCommand):
 
         outputs["tissue_class_map"] = self._gen_fname(suffix="_seg", **_gen_fname_opts)
         if self.inputs.segments:
-            outputs["tissue_class_files"] = []
-            for i in range(nclasses):
-                outputs["tissue_class_files"].append(
-                    self._gen_fname(suffix="_seg_%d" % i, **_gen_fname_opts)
-                )
+            outputs["tissue_class_files"] = [
+                self._gen_fname(suffix=f"_seg_{i}", **_gen_fname_opts)
+                for i in range(nclasses)
+            ]
         if isdefined(self.inputs.output_biascorrected):
-            outputs["restored_image"] = []
             if len(self.inputs.in_files) > 1:
                 # for multi-image segmentation there is one corrected image
                 # per input
-                for val, f in enumerate(self.inputs.in_files):
-                    # image numbering is 1-based
-                    outputs["restored_image"].append(
-                        self._gen_fname(
-                            suffix="_restore_%d" % (val + 1), **_gen_fname_opts
-                        )
-                    )
+                outputs["restored_image"] = [
+                    self._gen_fname(suffix=f"_restore_{i}", **_gen_fname_opts)
+                    for i in range(1, len(self.inputs.in_files) + 1)
+                ]
             else:
                 # single image segmentation has unnumbered output image
-                outputs["restored_image"].append(
+                outputs["restored_image"] = [
                     self._gen_fname(suffix="_restore", **_gen_fname_opts)
-                )
+                ]
 
         outputs["mixeltype"] = self._gen_fname(suffix="_mixeltype", **_gen_fname_opts)
         if not self.inputs.no_pve:
             outputs["partial_volume_map"] = self._gen_fname(
                 suffix="_pveseg", **_gen_fname_opts
             )
-            outputs["partial_volume_files"] = []
-            for i in range(nclasses):
-                outputs["partial_volume_files"].append(
-                    self._gen_fname(suffix="_pve_%d" % i, **_gen_fname_opts)
-                )
+            outputs["partial_volume_files"] = [
+                self._gen_fname(suffix=f"_pve_{i}", **_gen_fname_opts)
+                for i in range(nclasses)
+            ]
         if self.inputs.output_biasfield:
-            outputs["bias_field"] = []
             if len(self.inputs.in_files) > 1:
                 # for multi-image segmentation there is one bias field image
                 # per input
-                for val, f in enumerate(self.inputs.in_files):
-                    # image numbering is 1-based
-                    outputs["bias_field"].append(
-                        self._gen_fname(
-                            suffix="_bias_%d" % (val + 1), **_gen_fname_opts
-                        )
-                    )
+                outputs["bias_field"] = [
+                    self._gen_fname(suffix=f"_bias_{i}", **_gen_fname_opts)
+                    for i in range(1, len(self.inputs.in_files) + 1)
+                ]
             else:
                 # single image segmentation has unnumbered output image
-                outputs["bias_field"].append(
+                outputs["bias_field"] = [
                     self._gen_fname(suffix="_bias", **_gen_fname_opts)
-                )
+                ]
 
         if self.inputs.probability_maps:
-            outputs["probability_maps"] = []
-            for i in range(nclasses):
-                outputs["probability_maps"].append(
-                    self._gen_fname(suffix="_prob_%d" % i, **_gen_fname_opts)
-                )
+            outputs["probability_maps"] = [
+                self._gen_fname(suffix="_prob_{i}", **_gen_fname_opts)
+                for i in range(nclasses)
+            ]
         return outputs
 
 
@@ -1330,9 +1319,9 @@ class FNIRT(FSLCommand):
             if name == "out_intensitymap_file":
                 value = self._list_outputs()[name]
             value = [FNIRT.intensitymap_file_basename(v) for v in value]
-            assert len(set(value)) == 1, "Found different basenames for {}: {}".format(
-                name, value
-            )
+            assert (
+                len(set(value)) == 1
+            ), f"Found different basenames for {name}: {value}"
             return spec.argstr % value[0]
         if name in list(self.filemap.keys()):
             return spec.argstr % self._list_outputs()[name]

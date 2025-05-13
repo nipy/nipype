@@ -38,7 +38,7 @@ def _ignore_atime(stat):
 
 
 @pytest.mark.parametrize(
-    "filename, split",
+    ("filename", "split"),
     [
         ("foo.nii", ("", "foo", ".nii")),
         ("foo.nii.gz", ("", "foo", ".nii.gz")),
@@ -72,7 +72,7 @@ def test_fnames_presuffix():
 
 
 @pytest.mark.parametrize(
-    "filename, newname",
+    ("filename", "newname"),
     [
         ("foobar.nii", "foobar_0xabc123.nii"),
         ("foobar.nii.gz", "foobar_0xabc123.nii.gz"),
@@ -207,8 +207,8 @@ def test_recopy(_temp_analyze_files):
                 img_stat = _ignore_atime(os.stat(new_img))
                 hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(orig_img, new_img, **kwargs)
-                err_msg = "Regular - OS: {}; Copy: {}; Hardlink: {}".format(
-                    os.name, copy, use_hardlink
+                err_msg = (
+                    f"Regular - OS: {os.name}; Copy: {copy}; Hardlink: {use_hardlink}"
                 )
                 assert img_stat == _ignore_atime(os.stat(new_img)), err_msg
                 assert hdr_stat == _ignore_atime(os.stat(new_hdr)), err_msg
@@ -219,8 +219,8 @@ def test_recopy(_temp_analyze_files):
                 img_stat = _ignore_atime(os.stat(new_img))
                 hdr_stat = _ignore_atime(os.stat(new_hdr))
                 copyfile(img_link, new_img, **kwargs)
-                err_msg = "Symlink - OS: {}; Copy: {}; Hardlink: {}".format(
-                    os.name, copy, use_hardlink
+                err_msg = (
+                    f"Symlink - OS: {os.name}; Copy: {copy}; Hardlink: {use_hardlink}"
                 )
                 assert img_stat == _ignore_atime(os.stat(new_img)), err_msg
                 assert hdr_stat == _ignore_atime(os.stat(new_hdr)), err_msg
@@ -280,7 +280,7 @@ def test_get_related_files_noninclusive(_temp_analyze_files):
 
 
 @pytest.mark.parametrize(
-    "filename, expected",
+    ("filename", "expected"),
     [
         ("foo.nii", ["foo.nii"]),
         (["foo.nii"], ["foo.nii"]),
@@ -294,7 +294,7 @@ def test_ensure_list(filename, expected):
 
 
 @pytest.mark.parametrize(
-    "list, expected", [(["foo.nii"], "foo.nii"), (["foo", "bar"], ["foo", "bar"])]
+    ("list", "expected"), [(["foo.nii"], "foo.nii"), (["foo", "bar"], ["foo", "bar"])]
 )
 def test_simplify_list(list, expected):
     x = simplify_list(list)
@@ -343,7 +343,7 @@ def test_json(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "file, length, expected_files",
+    ("file", "length", "expected_files"),
     [
         ("/path/test.img", 3, ["/path/test.hdr", "/path/test.img", "/path/test.mat"]),
         ("/path/test.hdr", 3, ["/path/test.hdr", "/path/test.img", "/path/test.mat"]),
@@ -515,7 +515,7 @@ devpts on /dev/ptmx type devpts (rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmo
 )
 
 
-@pytest.mark.parametrize("output, exit_code, expected", MOUNT_OUTPUTS)
+@pytest.mark.parametrize(("output", "exit_code", "expected"), MOUNT_OUTPUTS)
 def test_parse_mount_table(output, exit_code, expected):
     assert _parse_mount_table(exit_code, output) == expected
 
@@ -654,7 +654,7 @@ def test_pickle(tmp_path, save_versioning):
 
 
 @pytest.mark.parametrize(
-    "items,expected",
+    ("items", "expected"),
     [
         ("", " \n\n"),
         ("A string", " A string\n\n"),

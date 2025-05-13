@@ -151,7 +151,7 @@ class FitGLM(NipyBaseInterface):
         onsets = []
         duration = []
 
-        for i, cond in enumerate(session_info[0]["cond"]):
+        for cond in session_info[0]["cond"]:
             onsets += cond["onset"]
             conditions += [cond["name"]] * len(cond["onset"])
             if len(cond["duration"]) == 1:

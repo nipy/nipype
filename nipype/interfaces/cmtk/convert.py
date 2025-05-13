@@ -18,7 +18,7 @@ from .base import CFFBaseInterface
 def _read_pickle(fname):
     import pickle
 
-    with open(fname, 'rb') as f:
+    with open(fname, "rb") as f:
         return pickle.load(f)
 
 
@@ -193,17 +193,17 @@ class CFFConverter(CFFBaseInterface):
             for data in self.inputs.data_files:
                 _, data_name, _ = split_filename(data)
                 cda = cf.CData(name=data_name, src=data, fileformat="NumPy")
-                if 'lengths' in data_name:
+                if "lengths" in data_name:
                     cda.dtype = "FinalFiberLengthArray"
-                if 'endpoints' in data_name:
+                if "endpoints" in data_name:
                     cda.dtype = "FiberEndpoints"
-                if 'labels' in data_name:
+                if "labels" in data_name:
                     cda.dtype = "FinalFiberLabels"
                 a.add_connectome_data(cda)
 
         a.print_summary()
         _, name, ext = split_filename(self.inputs.out_file)
-        if ext != '.cff':
+        if ext != ".cff":
             ext = ".cff"
         cf.save_to_cff(a, op.abspath(name + ext))
 
@@ -212,7 +212,7 @@ class CFFConverter(CFFBaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if ext != '.cff':
+        if ext != ".cff":
             ext = ".cff"
         outputs["connectome_file"] = op.abspath(name + ext)
         return outputs
@@ -280,7 +280,7 @@ class MergeCNetworks(CFFBaseInterface):
         metadata.set_email("My Email")
 
         _, name, ext = split_filename(self.inputs.out_file)
-        if ext != '.cff':
+        if ext != ".cff":
             ext = ".cff"
         cf.save_to_cff(newcon, op.abspath(name + ext))
 
@@ -289,7 +289,7 @@ class MergeCNetworks(CFFBaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(self.inputs.out_file)
-        if ext != '.cff':
+        if ext != ".cff":
             ext = ".cff"
         outputs["connectome_file"] = op.abspath(name + ext)
         return outputs

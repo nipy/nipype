@@ -2,6 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import pytest
 
+import numpy as np
+
 from nipype.interfaces import utility
 import nipype.pipeline.engine as pe
 
@@ -52,7 +54,7 @@ def test_function(tmpdir):
 
 
 def make_random_array(size):
-    return np.random.randn(size, size)  # noqa
+    return np.random.randn(size, size)
 
 
 def should_fail(tmp):

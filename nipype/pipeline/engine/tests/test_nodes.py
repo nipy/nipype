@@ -114,7 +114,7 @@ def test_mapnode_iterfield_check():
 
 
 @pytest.mark.parametrize(
-    "x_inp, f_exp",
+    ("x_inp", "f_exp"),
     [
         (3, [6]),
         ([2, 3], [4, 6]),
@@ -181,7 +181,7 @@ def test_mapnode_expansion(tmpdir):
     )
     mapnode.inputs.in1 = [1, 2]
 
-    for idx, node in mapnode._make_nodes():
+    for idx, node in mapnode._make_nodes():  # noqa: B007
         for attr in ("overwrite", "run_without_submitting", "plugin_args"):
             assert getattr(node, attr) == getattr(mapnode, attr)
         for attr in ("_n_procs", "_mem_gb"):
@@ -339,7 +339,7 @@ def test_mapnode_single(tmpdir):
 class FailCommandLine(nib.CommandLine):
     input_spec = nib.CommandLineInputSpec
     output_spec = nib.TraitedSpec
-    _cmd = 'nipype-node-execution-fail'
+    _cmd = "nipype-node-execution-fail"
 
 
 def test_NodeExecutionError(tmp_path, monkeypatch):
@@ -348,18 +348,18 @@ def test_NodeExecutionError(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
     # create basic executable and add to PATH
-    exebin = tmp_path / 'bin'
+    exebin = tmp_path / "bin"
     exebin.mkdir()
-    exe = exebin / 'nipype-node-execution-fail'
+    exe = exebin / "nipype-node-execution-fail"
     exe.write_text(
         '#!/bin/bash\necho "Running"\necho "This should fail" >&2\nexit 1',
-        encoding='utf-8',
+        encoding="utf-8",
     )
     exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
     monkeypatch.setenv("PATH", str(exe.parent.absolute()), prepend=os.pathsep)
 
     # Test with cmdline interface
-    cmd = pe.Node(FailCommandLine(), name="cmd-fail", base_dir='cmd')
+    cmd = pe.Node(FailCommandLine(), name="cmd-fail", base_dir="cmd")
     with pytest.raises(pe.nodes.NodeExecutionError) as exc:
         cmd.run()
     error_msg = str(exc.value)
@@ -372,7 +372,7 @@ def test_NodeExecutionError(tmp_path, monkeypatch):
     def fail():
         raise Exception("Functions can fail too")
 
-    func = pe.Node(niu.Function(function=fail), name='func-fail', base_dir='func')
+    func = pe.Node(niu.Function(function=fail), name="func-fail", base_dir="func")
     with pytest.raises(pe.nodes.NodeExecutionError) as exc:
         func.run()
     error_msg = str(exc.value)

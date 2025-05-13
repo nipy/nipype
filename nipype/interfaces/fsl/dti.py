@@ -813,7 +813,7 @@ class ProbTrackX(FSLCommand):
             ("Deprecated: Please use create_bedpostx_pipeline instead"),
             DeprecationWarning,
         )
-        return super().__init__(**inputs)
+        super().__init__(**inputs)
 
     def _run_interface(self, runtime):
         for i in range(1, len(self.inputs.thsamples) + 1):

@@ -229,23 +229,18 @@ def test_flirt(setup_flirt):
     flirter = fsl.FLIRT()
     # infile not specified
     with pytest.raises(ValueError):
-        flirter.cmdline
+        flirter.cmdline  # noqa: B018
     flirter.inputs.in_file = infile
     # reference not specified
     with pytest.raises(ValueError):
-        flirter.cmdline
+        flirter.cmdline  # noqa: B018
     flirter.inputs.reference = reffile
 
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
     outfile = fsl_name(flirter, "%s_flirt" % fname)
     outmat = "%s_flirt.mat" % fname
-    realcmd = "flirt -in {} -ref {} -out {} -omat {}".format(
-        infile,
-        reffile,
-        outfile,
-        outmat,
-    )
+    realcmd = f"flirt -in {infile} -ref {reffile} -out {outfile} -omat {outmat}"
     assert flirter.cmdline == realcmd
 
     # test apply_xfm option
@@ -253,7 +248,7 @@ def test_flirt(setup_flirt):
     axfm.inputs.apply_xfm = True
     # in_matrix_file or uses_qform must be defined
     with pytest.raises(RuntimeError):
-        axfm.cmdline
+        axfm.cmdline  # noqa: B018
     axfm2 = deepcopy(axfm)
     # test uses_qform
     axfm.inputs.uses_qform = True
@@ -433,14 +428,7 @@ def test_fnirt(setup_flirt):
                 " --iout=%s" % (infile, log, flag, strval, reffile, iout)
             )
         elif item in ("in_fwhm", "intensity_mapping_model"):
-            cmd = "fnirt --in={} {}={} --logout={} --ref={} --iout={}".format(
-                infile,
-                flag,
-                strval,
-                log,
-                reffile,
-                iout,
-            )
+            cmd = f"fnirt --in={infile} {flag}={strval} --logout={log} --ref={reffile} --iout={iout}"
         elif item.startswith("apply"):
             cmd = (
                 "fnirt %s=%s "
@@ -588,7 +576,7 @@ def setup_fugue(tmpdir):
 
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 @pytest.mark.parametrize(
-    "attr, out_file",
+    ("attr", "out_file"),
     [
         (
             {

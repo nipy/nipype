@@ -54,7 +54,7 @@ def mlab_tempfile(dir=None):
     # return names that aren't valid matlab names, but we can't control that
     # directly, we just keep trying until we get a valid name.  To avoid an
     # infinite loop for some strange reason, we only try 100 times.
-    for n in range(100):
+    for _ in range(100):
         f = tempfile.NamedTemporaryFile(suffix=".m", prefix="tmp_matlab_", dir=dir)
         # Check the file name for matlab compliance
         fname = os.path.splitext(os.path.basename(f.name))[0]

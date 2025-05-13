@@ -5,7 +5,7 @@ from nipype.interfaces import dcm2nii
 
 
 @pytest.mark.parametrize(
-    "fname, extension, search_crop",
+    ("fname", "extension", "search_crop"),
     [
         ("output_1", ".txt", False),
         ("output_w_[]_meta_1", ".json", False),

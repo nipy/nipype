@@ -135,24 +135,20 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         # check label list size
         if not np.isclose(int(n_labels), n_labels):
             raise ValueError(
-                "The label files {} contain invalid value {}. Check input.".format(
-                    self.inputs.label_files, n_labels
-                )
+                f"The label files {self.inputs.label_files} contain invalid value {n_labels}. Check input."
             )
 
         if len(self.inputs.class_labels) != n_labels:
             raise ValueError(
-                "The length of class_labels {} does not "
-                "match the number of regions {} found in "
-                "label_files {}".format(
-                    self.inputs.class_labels, n_labels, self.inputs.label_files
-                )
+                f"The length of class_labels {self.inputs.class_labels} does not "
+                f"match the number of regions {n_labels} found in "
+                f"label_files {self.inputs.label_files}"
             )
 
         if self.inputs.include_global:
             global_label_data = label_data.dataobj.sum(axis=3)  # sum across all regions
             global_label_data = (
-                np.rint(global_label_data).clip(0, 1).astype('u1')
+                np.rint(global_label_data).clip(0, 1).astype("u1")
             )  # binarize
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = nl.NiftiLabelsMasker(

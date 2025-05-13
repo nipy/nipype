@@ -401,9 +401,7 @@ def test_binarymaths(create_files_in_directory_plus_output_type):
                 assert maths.cmdline == f"fslmaths a.nii -{op} b.nii c.nii"
             else:
                 maths.inputs.operand_value = ent
-                assert maths.cmdline == "fslmaths a.nii -{} {:.8f} c.nii".format(
-                    op, ent
-                )
+                assert maths.cmdline == f"fslmaths a.nii -{op} {ent:.8f} c.nii"
 
     # Test that we don't need to ask for an out file
     for op in ops:
@@ -461,9 +459,7 @@ def test_tempfilt(create_files_in_directory_plus_output_type):
     for win in windows:
         filt.inputs.highpass_sigma = win[0]
         filt.inputs.lowpass_sigma = win[1]
-        assert filt.cmdline == "fslmaths a.nii -bptf {:.6f} {:.6f} b.nii".format(
-            win[0], win[1]
-        )
+        assert filt.cmdline == f"fslmaths a.nii -bptf {win[0]:.6f} {win[1]:.6f} b.nii"
 
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma=64)

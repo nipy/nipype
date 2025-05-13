@@ -105,22 +105,17 @@ class CalcCoregAffine(SPMCommand):
             self.inputs.mat = self._make_mat_file()
         if not isdefined(self.inputs.invmat):
             self.inputs.invmat = self._make_inv_file()
-        script = """
-        target = '{}';
-        moving = '{}';
+        script = f"""
+        target = '{self.inputs.target}';
+        moving = '{self.inputs.moving}';
         targetv = spm_vol(target);
         movingv = spm_vol(moving);
         x = spm_coreg(targetv, movingv);
         M = spm_matrix(x);
-        save('{}' , 'M' );
+        save('{self.inputs.mat}' , 'M' );
         M = inv(M);
-        save('{}','M')
-        """.format(
-            self.inputs.target,
-            self.inputs.moving,
-            self.inputs.mat,
-            self.inputs.invmat,
-        )
+        save('{self.inputs.invmat}','M')
+        """
         return script
 
     def _list_outputs(self):
@@ -166,10 +161,10 @@ class ApplyTransform(SPMCommand):
         """checks for SPM, generates script"""
         outputs = self._list_outputs()
         self.inputs.out_file = outputs["out_file"]
-        script = """
-        infile = '{}';
-        outfile = '{}'
-        transform = load('{}');
+        script = f"""
+        infile = '{self.inputs.in_file}';
+        outfile = '{self.inputs.out_file}'
+        transform = load('{self.inputs.mat}');
 
         V = spm_vol(infile);
         X = spm_read_vols(V);
@@ -178,11 +173,7 @@ class ApplyTransform(SPMCommand):
         V.fname = fullfile(outfile);
         spm_write_vol(V,X);
 
-        """.format(
-            self.inputs.in_file,
-            self.inputs.out_file,
-            self.inputs.mat,
-        )
+        """
         # img_space = spm_get_space(infile);
         # spm_get_space(infile, transform.M * img_space);
         return script

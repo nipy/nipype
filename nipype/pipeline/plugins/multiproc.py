@@ -65,7 +65,7 @@ def run_node(node, updatehash, taskid):
     # Try and execute the node via node.run()
     try:
         result["result"] = node.run(updatehash=updatehash)
-    except:  # noqa: E722, intendedly catch all here
+    except:
         result["traceback"] = format_exception(*sys.exc_info())
         result["result"] = node.result
 

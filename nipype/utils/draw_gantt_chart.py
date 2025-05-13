@@ -101,7 +101,7 @@ def log_to_dict(logfile):
         # read file separating each line
         lines = content.readlines()
 
-    nodes_list = [json.loads(l) for l in lines]
+    nodes_list = [json.loads(line) for line in lines]
 
     def _convert_string_to_datetime(
         datestring: Union[str, datetime.datetime],
@@ -222,7 +222,7 @@ def draw_lines(start, total_duration, minute_scale, scale):
     num_lines = int(((total_duration // 60) // minute_scale) + 2)
 
     # Iterate through the lines and create html line markers string
-    for line in range(num_lines):
+    for _ in range(num_lines):
         # Line object
         new_line = "<hr class='line' width='98%%' style='top:%dpx;'>" % next_line
         result += new_line

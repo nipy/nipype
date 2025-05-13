@@ -354,8 +354,7 @@ class SampleToSurface(FSCommand):
                 if ext != filemap[value]:
                     if ext in filemap.values():
                         raise ValueError(
-                            "Cannot create {} file with extension "
-                            "{}".format(value, ext)
+                            f"Cannot create {value} file with extension {ext}"
                         )
                     else:
                         logger.warning(
@@ -594,8 +593,7 @@ class SurfaceTransform(FSCommand):
                 if ext != filemap[value]:
                     if ext in filemap.values():
                         raise ValueError(
-                            "Cannot create {} file with extension "
-                            "{}".format(value, ext)
+                            f"Cannot create {value} file with extension {ext}"
                         )
                     else:
                         logger.warning(
@@ -997,10 +995,8 @@ class SurfaceSnapshots(FSCommand):
                 if len(value) == 2:
                     return "-fminmax %.3f %.3f" % value
                 else:
-                    return "-fminmax {:.3f} {:.3f} -fmid {:.3f}".format(
-                        value[0],
-                        value[2],
-                        value[1],
+                    return (
+                        f"-fminmax {value[0]:.3f} {value[2]:.3f} -fmid {value[1]:.3f}"
                     )
         elif name == "annot_name" and isdefined(value):
             # Matching annot by name needs to strip the leading hemi and trailing
@@ -1014,11 +1010,7 @@ class SurfaceSnapshots(FSCommand):
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.screenshot_stem):
-            stem = "{}_{}_{}".format(
-                self.inputs.subject_id,
-                self.inputs.hemi,
-                self.inputs.surface,
-            )
+            stem = f"{self.inputs.subject_id}_{self.inputs.hemi}_{self.inputs.surface}"
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
@@ -1084,11 +1076,7 @@ class SurfaceSnapshots(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.screenshot_stem):
-            stem = "{}_{}_{}".format(
-                self.inputs.subject_id,
-                self.inputs.hemi,
-                self.inputs.surface,
-            )
+            stem = f"{self.inputs.subject_id}_{self.inputs.hemi}_{self.inputs.surface}"
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args
@@ -1966,7 +1954,7 @@ class Tkregister2(FSCommand):
         if name == "lta_in" and self.inputs.invert_lta_in:
             spec = "--lta-inv %s"
         if name in ("fsl_out", "lta_out") and value is True:
-            value = self._list_outputs()[f'{name[:3]}_file']
+            value = self._list_outputs()[f"{name[:3]}_file"]
         return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):

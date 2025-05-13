@@ -427,7 +427,7 @@ class WorkflowDirective(Directive):
 
         # copy image files to builder's output directory, if necessary
         os.makedirs(dest_dir, exist_ok=True)
-        for code_piece, images in results:
+        for code_piece, images in results:  # noqa: B007
             for img in images:
                 for fn in img.filenames():
                     destimg = os.path.join(dest_dir, os.path.basename(fn))
@@ -731,7 +731,7 @@ def render_figures(
     run_code(code, code_path, ns, function_name)
     img = ImageFile(output_base, output_dir)
 
-    for fmt, dpi in formats:
+    for fmt, dpi in formats:  # noqa: B007
         try:
             img_path = img.filename(fmt)
             imgname, ext = os.path.splitext(os.path.basename(img_path))

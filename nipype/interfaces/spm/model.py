@@ -348,17 +348,17 @@ class EstimateModel(SPMCommand):
 
             if contrast:
                 outputs["con_images"] = [
-                    os.path.join(pth, cont) for cont in contrast if 'con' in cont
+                    os.path.join(pth, cont) for cont in contrast if "con" in cont
                 ]
                 outputs["ess_images"] = [
-                    os.path.join(pth, cont) for cont in contrast if 'ess' in cont
+                    os.path.join(pth, cont) for cont in contrast if "ess" in cont
                 ]
             if contrast_spm:
                 outputs["spmT_images"] = [
-                    os.path.join(pth, cont) for cont in contrast_spm if 'spmT' in cont
+                    os.path.join(pth, cont) for cont in contrast_spm if "spmT" in cont
                 ]
                 outputs["spmF_images"] = [
-                    os.path.join(pth, cont) for cont in contrast_spm if 'spmF' in cont
+                    os.path.join(pth, cont) for cont in contrast_spm if "spmF" in cont
                 ]
 
         outputs["mask_image"] = os.path.join(pth, f"mask.{outtype}")

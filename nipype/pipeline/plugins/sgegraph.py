@@ -79,7 +79,7 @@ class SGEGraphPlugin(GraphPluginBase):
         if (
             self._dont_resubmit_completed_jobs
         ):  # A future parameter for controlling this behavior could be added here
-            for idx, pyscript in enumerate(pyfiles):
+            for idx, pyscript in enumerate(pyfiles):  # noqa: B007
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
 
@@ -143,14 +143,7 @@ class SGEGraphPlugin(GraphPluginBase):
                     stdoutFile = ""
                     if self._qsub_args.count("-o ") == 0:
                         stdoutFile = f"-o {batchscriptoutfile}"
-                    full_line = "{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk '/^Your job/{{print $3}}')\n".format(
-                        jobNm=jobname,
-                        outFileOption=stdoutFile,
-                        errFileOption=stderrFile,
-                        extraQSubArgs=qsub_args,
-                        dependantIndex=deps,
-                        batchscript=batchscriptfile,
-                    )
+                    full_line = f"{jobname}=$(qsub {stdoutFile} {stderrFile} {qsub_args} {deps} -N {jobname} {batchscriptfile} | awk '/^Your job/{{print $3}}')\n"
                     fp.writelines(full_line)
         cmd = CommandLine(
             "bash",

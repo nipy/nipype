@@ -22,7 +22,7 @@ def test_ActivationCount(tmpdir):
 
 
 @pytest.mark.parametrize(
-    "threshold, above_thresh",
+    ("threshold", "above_thresh"),
     [
         (1, 15.865),  # above one standard deviation (one side)
         (2, 2.275),  # above two standard deviations (one side)

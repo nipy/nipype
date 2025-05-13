@@ -31,12 +31,10 @@ to the node could not be found.""".splitlines(
             keepends=True
         )
     except Exception as exc:
-        traceback += """
+        traceback += f"""
 
 During the creation of this crashfile triggered by the above exception,
-another exception occurred:\n\n{}.""".format(
-            exc
-        ).splitlines(
+another exception occurred:\n\n{exc}.""".splitlines(
             keepends=True
         )
     else:

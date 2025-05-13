@@ -20,6 +20,6 @@ Compiled: I don't still have this so not going to pretend
 # fmt: on
 
 
-@pytest.mark.parametrize("raw_info, version", ANTS_VERSIONS)
+@pytest.mark.parametrize(("raw_info", "version"), ANTS_VERSIONS)
 def test_version_parser(raw_info, version):
     assert Info.parse_version(raw_info) == version

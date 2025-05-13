@@ -55,7 +55,9 @@ class UseResources(CommandLine):
 
 @pytest.mark.skip(reason="inconsistent readings")
 @pytest.mark.skipif(os.getenv("CI_SKIP_TEST", False), reason="disabled in CI tests")
-@pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)])
+@pytest.mark.parametrize(
+    ("mem_gb", "n_procs"), [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)]
+)
 def test_cmdline_profiling(tmpdir, mem_gb, n_procs, use_resource_monitor):
     """
     Test runtime profiler correctly records workflow RAM/CPUs consumption
@@ -80,7 +82,9 @@ def test_cmdline_profiling(tmpdir, mem_gb, n_procs, use_resource_monitor):
 @pytest.mark.skipif(
     True, reason="test disabled temporarily, until function profiling works"
 )
-@pytest.mark.parametrize("mem_gb,n_procs", [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)])
+@pytest.mark.parametrize(
+    ("mem_gb", "n_procs"), [(0.5, 3), (2.2, 8), (0.8, 4), (1.5, 1)]
+)
 def test_function_profiling(tmpdir, mem_gb, n_procs, use_resource_monitor):
     """
     Test runtime profiler correctly records workflow RAM/CPUs consumption

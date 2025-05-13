@@ -389,7 +389,7 @@ None])
             if hasattr(info, "conditions") and info.conditions is not None:
                 for cid, cond in enumerate(info.conditions):
                     sessinfo[i]["cond"].insert(cid, dict())
-                    sessinfo[i]["cond"][cid]["name"] = info.conditions[cid]
+                    sessinfo[i]["cond"][cid]["name"] = cond
                     scaled_onset = scale_timings(
                         info.onsets[cid],
                         self.inputs.input_units,
@@ -434,12 +434,11 @@ None])
                         sessinfo[i]["regress"][j]["name"] = info.regressor_names[j]
                     else:
                         sessinfo[i]["regress"][j]["name"] = "UR%d" % (j + 1)
-                    sessinfo[i]["regress"][j]["val"] = info.regressors[j]
+                    sessinfo[i]["regress"][j]["val"] = r
             sessinfo[i]["scans"] = functional_runs[i]
 
         if realignment_parameters is not None:
-            for i, rp in enumerate(realignment_parameters):
-                mc = realignment_parameters[i]
+            for i, mc in enumerate(realignment_parameters):
                 for col in range(mc.shape[1]):
                     colidx = len(sessinfo[i]["regress"])
                     sessinfo[i]["regress"].insert(colidx, dict(name="", val=[]))
@@ -597,14 +596,14 @@ class SpecifySPMModel(SpecifyModel):
         for i, info in enumerate(infolist[1:]):
             # info.[conditions, tmod] remain the same
             if info.onsets:
-                for j, val in enumerate(info.onsets):
+                for j, onsets in enumerate(info.onsets):
                     if self.inputs.input_units == "secs":
-                        onsets = np.array(
-                            info.onsets[j]
-                        ) + self.inputs.time_repetition * sum(nscans[0 : (i + 1)])
+                        onsets = np.array(onsets) + self.inputs.time_repetition * sum(
+                            nscans[0 : (i + 1)]
+                        )
                         infoout.onsets[j].extend(onsets.tolist())
                     else:
-                        onsets = np.array(info.onsets[j]) + sum(nscans[0 : (i + 1)])
+                        onsets = np.array(onsets) + sum(nscans[0 : (i + 1)])
                         infoout.onsets[j].extend(onsets.tolist())
 
                 for j, val in enumerate(info.durations):
@@ -621,8 +620,8 @@ class SpecifySPMModel(SpecifyModel):
                         )
 
                 if hasattr(info, "amplitudes") and info.amplitudes:
-                    for j, val in enumerate(info.amplitudes):
-                        infoout.amplitudes[j].extend(info.amplitudes[j])
+                    for j, amplitudes in enumerate(info.amplitudes):
+                        infoout.amplitudes[j].extend(amplitudes)
 
                 if hasattr(info, "pmod") and info.pmod:
                     for j, val in enumerate(info.pmod):
@@ -633,8 +632,8 @@ class SpecifySPMModel(SpecifyModel):
             if hasattr(info, "regressors") and info.regressors:
                 # assumes same ordering of regressors across different
                 # runs and the same names for the regressors
-                for j, v in enumerate(info.regressors):
-                    infoout.regressors[j].extend(info.regressors[j])
+                for j, regressors in enumerate(info.regressors):
+                    infoout.regressors[j].extend(regressors)
 
             # insert session regressors
             if not hasattr(infoout, "regressors") or not infoout.regressors:
