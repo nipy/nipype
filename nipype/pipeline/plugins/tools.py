@@ -52,7 +52,7 @@ another exception occurred:\n\n{}.""".format(
     timeofcrash = strftime("%Y%m%d-%H%M%S")
     try:
         login_name = getpass.getuser()
-    except KeyError:
+    except (KeyError, OSError):
         login_name = f"UID{os.getuid():d}"
     crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{uuid.uuid4()}"
     crashdir = node.config["execution"].get("crashdump_dir", os.getcwd())
