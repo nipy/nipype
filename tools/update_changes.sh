@@ -16,12 +16,12 @@ ROOT=$( git rev-parse --show-toplevel )
 CHANGES=$ROOT/doc/changelog/1.X.X-changelog.rst
 
 # Check whether the Upcoming release header is present
-head -1 $CHANGES | grep -q Upcoming
+head -1 "$CHANGES" | grep -q Upcoming
 UPCOMING=$?
 
 # Elaborate today's release header
 HEADER="$1 ($(date '+%B %d, %Y'))"
-echo $HEADER >> newchanges
+echo "$HEADER" >> newchanges
 echo $( printf "%${#HEADER}s" | tr " " "=" ) >> newchanges
 echo >> newchanges
 
@@ -32,17 +32,17 @@ if [[ "x$MILESTONE" != "x" ]]; then
 fi
 
 # Search for PRs since previous release
-MERGE_COMMITS=$( git log --grep="Merge pull request\|(#.*)$" `git describe --tags --abbrev=0`..HEAD --pretty='format:%h' )
+MERGE_COMMITS=$( git log --grep="Merge pull request\|(#.*)$" $(git describe --tags --abbrev=0)..HEAD --pretty='format:%h' )
 for COMMIT in ${MERGE_COMMITS//\n}; do
-    SUB=$( git log -n 1 --pretty="format:%s" $COMMIT )
-    if ( echo $SUB | grep "^Merge pull request" ); then
+    SUB=$( git log -n 1 --pretty="format:%s" "$COMMIT" )
+    if ( echo "$SUB" | grep "^Merge pull request" ); then
         # Merge commit
-        PR=$( echo $SUB | sed -e "s/Merge pull request \#\([0-9]*\).*/\1/" )
-        TITLE=$( git log -n 1 --pretty="format:%b" $COMMIT )
+        PR=$( echo "$SUB" | sed -e "s/Merge pull request \#\([0-9]*\).*/\1/" )
+        TITLE=$( git log -n 1 --pretty="format:%b" "$COMMIT" )
     else
         # Squashed merge
-        PR=$( echo $SUB | sed -e "s/.*(\#\([0-9]*\))$/\1/" )
-        TITLE=$( echo $SUB | sed -e "s/\(.*\)(\#[0-9]*)$/\1/" )
+        PR=$( echo "$SUB" | sed -e "s/.*(\#\([0-9]*\))$/\1/" )
+        TITLE=$( echo "$SUB" | sed -e "s/\(.*\)(\#[0-9]*)$/\1/" )
     fi
     echo "  * $TITLE (https://github.com/nipy/nipype/pull/$PR)" >> newchanges
 done
@@ -52,10 +52,10 @@ echo >> newchanges
 # Append old CHANGES
 if [[ "$UPCOMING" == "0" ]]; then
     # Drop the Upcoming title if present
-    tail -n+4 $CHANGES >> newchanges
+    tail -n+4 "$CHANGES" >> newchanges
 else
-    cat $CHANGES >> newchanges
+    cat "$CHANGES" >> newchanges
 fi
 
 # Replace old CHANGES with new file
-mv newchanges $CHANGES
+mv newchanges "$CHANGES"

@@ -8,10 +8,10 @@ source tools/ci/env.sh
 set -eu
 
 # Required variables
-echo INSTALL_TYPE = $INSTALL_TYPE
-echo CHECK_TYPE = $CHECK_TYPE
-echo NIPYPE_EXTRAS = $NIPYPE_EXTRAS
-echo EXTRA_PIP_FLAGS = $EXTRA_PIP_FLAGS
+echo INSTALL_TYPE = "$INSTALL_TYPE"
+echo CHECK_TYPE = "$CHECK_TYPE"
+echo NIPYPE_EXTRAS = "$NIPYPE_EXTRAS"
+echo EXTRA_PIP_FLAGS = "$EXTRA_PIP_FLAGS"
 
 set -x
 
@@ -22,7 +22,7 @@ fi
 if [ "$INSTALL_TYPE" == "setup" ]; then
     python setup.py install
 else
-    pip install $EXTRA_PIP_FLAGS $ARCHIVE
+    pip install "$EXTRA_PIP_FLAGS" "$ARCHIVE"
 fi
 
 # Basic import check
@@ -32,7 +32,7 @@ if [ "$CHECK_TYPE" == "skiptests" ]; then
     exit 0
 fi
 
-pip install $EXTRA_PIP_FLAGS "nipype[$NIPYPE_EXTRAS]"
+pip install "$EXTRA_PIP_FLAGS" "nipype[$NIPYPE_EXTRAS]"
 
 set +eux
 

@@ -26,11 +26,11 @@ for ARG; do
 done
 
 RET=0
-for i in `seq $NLOOPS`; do
+for i in $(seq "$NLOOPS"); do
     sh -c "$CMD"
     RET="$?"
     if [ "$RET" -eq 0 ]; then break; fi
-    if [ "$i" -ne "$NLOOPS" ]; then sleep $TOSLEEP; fi
+    if [ "$i" -ne "$NLOOPS" ]; then sleep "$TOSLEEP"; fi
 done
 
 exit $RET
