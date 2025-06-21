@@ -14,6 +14,7 @@ import socket
 from copy import deepcopy
 from glob import glob
 from logging import INFO
+import time
 
 from tempfile import mkdtemp
 
@@ -613,11 +614,28 @@ Error populating the inputs of node "%s": the results file of the source node \
                         output_value = outputs.dictcopy()[output_name]
                     logger.debug("output: %s", output_name)
 
-                try:
-                    self.set_input(key, deepcopy(output_value))
-                except traits.TraitError as e:
+                traits_err = None
+                # input_tries = 1 # Default no reties
+                # input_retry_delay = 5
+                # input_retry_exponential_backoff_factor = 1
+                input_tries = int(self.config["execution"]["input_tries"])
+                input_retry_delay = int(self.config["execution"]["input_retry_delay"])
+                input_retry_exp_backoff_factor = int(self.config["execution"]["input_retry_exp_backoff_factor"])
+                for try_n in range(input_tries):
+                    try:
+                        self.set_input(key, deepcopy(output_value))
+                        break
+                    except traits.TraitError as e:
+                        traits_err = e
+                    if input_tries != 1:
+                        sleep_time = input_retry_delay*try_n*input_retry_exp_backoff_factor
+                        logger.warning("Input set failed for : {0} -> {1}. Retrying in {2} secs. ".format(key,
+                                                                                                          results_fname,
+                                                                                                          sleep_time))
+                        time.sleep(sleep_time)
+                if traits_err is not None:
                     msg = (
-                        e.args[0],
+                        traits_err.args[0],
                         "",
                         "Error setting node input:",
                         "Node: %s" % self.name,
@@ -625,7 +643,7 @@ Error populating the inputs of node "%s": the results file of the source node \
                         "results_file: %s" % results_fname,
                         "value: %s" % str(output_value),
                     )
-                    e.args = ("\n".join(msg),)
+                    traits_err.args = ("\n".join(msg),)
                     raise
 
         # Successfully set inputs
