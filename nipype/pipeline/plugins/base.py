@@ -6,6 +6,7 @@ import sys
 from copy import deepcopy
 from glob import glob
 import os
+import shlex
 import shutil
 from time import sleep, time
 from traceback import format_exception
@@ -565,7 +566,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
         batchscript = "\n".join(
-            (self._template.rstrip("\n"), f"{sys.executable} {pyscript}")
+            (self._template.rstrip("\n"), shlex.join([sys.executable, pyscript]))
         )
         batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
         with open(batchscriptfile, "w") as fp:
