@@ -1,6 +1,5 @@
 import os
-from .. import get_info
-from ..info import get_nipype_gitversion
+from .. import get_info, get_nipype_gitversion
 import pytest
 
 

@@ -31,3 +31,4 @@ __pycache__/
 .pytest_cache
 .vscode/
 venv/
+/nipype/_version.py

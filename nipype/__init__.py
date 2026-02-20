@@ -15,7 +15,49 @@ import os
 # No longer used internally but could be used externally.
 from looseversion import LooseVersion
 
-from .info import URL as __url__, STATUS as __status__, __version__
+try:
+    from ._version import __version__
+except ImportError:
+    try:
+        from importlib.metadata import version as get_version
+        __version__ = get_version("nipype")
+    except Exception:
+        __version__ = "unknown"
+
+__url__ = "http://nipy.org/nipype"
+__status__ = "stable"
+
+
+def get_nipype_gitversion():
+    """Nipype version as reported by the last commit in git
+
+    Returns
+    -------
+    None or str
+      Version of Nipype according to git.
+    """
+    import os
+    import subprocess
+
+    gitpath = os.path.realpath(
+        os.path.join(os.path.dirname(__file__), os.path.pardir)
+    )
+    gitpathgit = os.path.join(gitpath, ".git")
+    if not os.path.exists(gitpathgit):
+        return None
+
+    ver = None
+    try:
+        o, _ = subprocess.Popen(
+            "git describe", shell=True, cwd=gitpath, stdout=subprocess.PIPE
+        ).communicate()
+    except Exception:
+        pass
+    else:
+        ver = o.decode().strip().split("-")[-1]
+    return ver
+
+
 from .utils.config import NipypeConfig
 from .utils.logger import Logging
 from .refs import due
