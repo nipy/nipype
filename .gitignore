@@ -32,3 +32,6 @@ __pycache__/
 .vscode/
 venv/
 /nipype/_version.py
+uv.lock
+ .venv/
+ .tox/
