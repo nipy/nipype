@@ -162,7 +162,6 @@ source = "vcs"
 version-file = "nipype/_version.py"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/nipype/_version.py"]
 include = [
     "/nipype",
     "/doc",

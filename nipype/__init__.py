@@ -18,11 +18,7 @@ from looseversion import LooseVersion
 try:
     from ._version import __version__
 except ImportError:
-    try:
-        from importlib.metadata import version as get_version
-        __version__ = get_version("nipype")
-    except Exception:
-        __version__ = "unknown"
+    __version__ = "unknown"
 
 __url__ = "http://nipy.org/nipype"
 __status__ = "stable"
