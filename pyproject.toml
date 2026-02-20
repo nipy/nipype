@@ -7,7 +7,7 @@ name = "nipype"
 dynamic = ["version"]
 description = "Neuroimaging in Python: Pipelines and Interfaces"
 readme = "README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [
     { name = "nipype developers", email = "neuroimaging@python.org" },
@@ -22,7 +22,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -34,7 +33,7 @@ dependencies = [
     "networkx>=2.5",
     "nibabel>=3.0",
     "numpy>=1.21",
-    "packaging",
+    "packaging>=21.0",
     "prov>=1.5.2",
     "pydot>=1.2.3",
     "python-dateutil>=2.2",
@@ -43,11 +42,11 @@ dependencies = [
     "simplejson>=3.8.0",
     "traits>=6.2",
     "filelock>=3.0.0",
-    "acres",
+    "acres>=0.3.0",
     "etelemetry>=0.3.1",
-    "looseversion!=1.2",
-    "lxml",
-    "puremagic",
+    "looseversion!=1.2,>=1.0.1",
+    "lxml>=4.9.1",
+    "puremagic>=1.15",
 ]
 
 [project.optional-dependencies]
@@ -73,9 +72,9 @@ tests = [
     "pandas >= 1.5.0",
     "pytest >= 6",
     "pytest-cov >=2.11",
-    "pytest-env",
     "pytest-timeout >=1.4",
-    "pytest-doctestplus",
+    "pytest-doctestplus>=1.1.0",
+    "pytest-env>=1.1.0",
     "pytest-xdist >= 2.5",
     "sphinx >=7",
 ]
