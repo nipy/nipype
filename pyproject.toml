@@ -166,12 +166,12 @@ include = [
     "/nipype",
     "/doc",
     "/tools",
-    "/INSTALL",
+    "/CODE_OF_CONDUCT.md",
+    "/CONTRIBUTING.md",
     "/LICENSE",
     "/README.rst",
     "/THANKS.rst",
     "/Makefile",
-    "/.circleci",
 ]
 
 [tool.hatch.build.targets.wheel]
