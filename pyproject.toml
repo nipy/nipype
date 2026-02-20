@@ -1,6 +1,182 @@
 [build-system]
-requires = ["setuptools >= 30.3.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nipype"
+dynamic = ["version"]
+description = "Neuroimaging in Python: Pipelines and Interfaces"
+readme = "README.rst"
+requires-python = ">=3.9"
+license = "Apache-2.0"
+authors = [
+    { name = "nipype developers", email = "neuroimaging@python.org" },
+]
+maintainers = [
+    { name = "nipype developers", email = "neuroimaging@python.org" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "click>=6.6.0",
+    "networkx>=2.5",
+    "nibabel>=3.0",
+    "numpy>=1.21",
+    "packaging",
+    "prov>=1.5.2",
+    "pydot>=1.2.3",
+    "python-dateutil>=2.2",
+    "rdflib>=5.0.0",
+    "scipy>=1.8",
+    "simplejson>=3.8.0",
+    "traits>=6.2",
+    "filelock>=3.0.0",
+    "acres",
+    "etelemetry>=0.3.1",
+    "looseversion!=1.2",
+    "puremagic",
+]
+
+[project.optional-dependencies]
+data = ["datalad"]
+doc = [
+    "dipy",
+    "ipython",
+    "matplotlib",
+    "nbsphinx",
+    "sphinx-argparse",
+    "sphinx>=2.1.2",
+    "sphinxcontrib-apidoc",
+]
+duecredit = ["duecredit"]
+maint = ["GitPython", "fuzzywuzzy"]
+nipy = ["nitime", "nilearn", "dipy", "nipy", "matplotlib"]
+profiler = ["psutil>=5.0"]
+pybids = ["pybids>=0.7.0"]
+specs = ["black"]
+ssh = ["paramiko"]
+tests = [
+    "coverage >= 5.2.1",
+    "pandas >= 1.5.0",
+    "pytest >= 6",
+    "pytest-cov >=2.11",
+    "pytest-env",
+    "pytest-timeout >=1.4",
+    "pytest-doctestplus",
+    "pytest-xdist >= 2.5",
+    "sphinx >=7",
+]
+xvfbwrapper = ["xvfbwrapper"]
+all = [
+    "acres",
+    "black",
+    "click>=6.6.0",
+    "coverage>=5.2.1",
+    "datalad",
+    "dipy",
+    "duecredit",
+    "etelemetry>=0.3.1",
+    "filelock>=3.0.0",
+    "fuzzywuzzy",
+    "GitPython",
+    "ipython",
+    "looseversion!=1.2",
+    "matplotlib",
+    "nbsphinx",
+    "networkx>=2.5",
+    "nibabel>=3.0",
+    "nilearn",
+    "nipy",
+    "nitime",
+    "numpy>=1.21",
+    "packaging",
+    "pandas>=1.5.0",
+    "paramiko",
+    "prov>=1.5.2",
+    "psutil>=5.0",
+    "puremagic",
+    "pybids>=0.7.0",
+    "pydot>=1.2.3",
+    "pytest-cov>=2.11",
+    "pytest-doctestplus",
+    "pytest-env",
+    "pytest-timeout>=1.4",
+    "pytest-xdist>=2.5",
+    "pytest>=6",
+    "python-dateutil>=2.2",
+    "rdflib>=5.0.0",
+    "scipy>=1.8",
+    "simplejson>=3.8.0",
+    "sphinx-argparse",
+    "sphinx>=7",
+    "sphinx>=2.1.2",
+    "sphinxcontrib-apidoc",
+    "traits>=6.2",
+    "xvfbwrapper",
+]
+dev = [
+    "black",
+    "coverage>=5.2.1",
+    "dipy",
+    "ipython",
+    "matplotlib",
+    "nbsphinx",
+    "pandas>=1.5.0",
+    "pytest-cov>=2.11",
+    "pytest-doctestplus",
+    "pytest-env",
+    "pytest-timeout>=1.4",
+    "pytest-xdist>=2.5",
+    "pytest>=6",
+    "sphinx-argparse",
+    "sphinx>=7",
+    "sphinx>=2.1.2",
+    "sphinxcontrib-apidoc",
+]
+
+[project.urls]
+Homepage = "http://nipy.org/nipype"
+Documentation = "http://nipy.org/nipype"
+Source = "http://github.com/nipy/nipype"
+Download = "http://github.com/nipy/nipype/archives/master"
+
+[project.scripts]
+nipypecli = "nipype.scripts.cli:cli"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "nipype/_version.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/nipype/_version.py"]
+include = [
+    "/nipype",
+    "/doc",
+    "/tools",
+    "/INSTALL",
+    "/LICENSE",
+    "/README.rst",
+    "/THANKS.rst",
+    "/Makefile",
+    "/.circleci",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["nipype"]
 
 [tool.black]
 skip-string-normalization = true
