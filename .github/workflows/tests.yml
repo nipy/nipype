@@ -52,21 +52,23 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: dist
-          path: dist/
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
+          path: .
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
       - name: Display Python version
-        run: uv run python -c "import sys; print(sys.version)"
+        run: python -c "import sys; print(sys.version)"
       - name: Install wheel
-        run: uv pip install --system dist/nipype-*.whl[tests]
+        run: pip install dist/nipype-*.whl[tests]
         if: matrix.package == 'wheel'
       - name: Install sdist
-        run: uv pip install --system dist/nipype-*.tar.gz[tests]
+        run: pip install dist/nipype-*.tar.gz[tests]
         if: matrix.package == 'sdist'
       - name: Display nipype version
-        run: uv run python -c 'import nipype; print(nipype.__version__)'
+        run: python -c 'import nipype; print(nipype.__version__)'
       - name: Run tests
-        run: uv run pytest --doctest-modules -v --pyargs nipype
+        run: pytest --doctest-modules -v --pyargs nipype
 
   test:
     # Check each OS, all supported Python, minimum versions and latest releases
