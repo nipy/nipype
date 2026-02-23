@@ -55,12 +55,8 @@ jobs:
           path: dist/
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.10" # Use a stable supported version for package testing
-          cache: uv
       - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+        run: uv run python -c "import sys; print(sys.version)"
       - name: Install wheel
         run: uv pip install dist/nipype-*.whl[tests]
         if: matrix.package == 'wheel'
@@ -99,10 +95,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v7
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -111,9 +107,9 @@ jobs:
         run: |
           uv tool install --with=tox-uv --with=tox-gh-actions tox
       - name: Show tox config
-        run: tox c
+        run: uvx tox c
       - name: Run tox
-        run: tox -v --exit-and-dump-after 1200
+        run: uvx tox -v --exit-and-dump-after 1200
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
