@@ -52,7 +52,15 @@ jobs:
       - uses: actions/download-artifact@v7
         with:
           name: dist
-          path: .
+          path: dist/
+      - name: Verify artifacts are present
+        run: |
+          ls -l . dist/
+          wheel_file=$(find dist -name 'nipype-*.whl' | head -n 1)
+          tar_file=$(find dist -name 'nipype-*.tar.gz' | head -n 1)
+
+          echo "WHEEL=$wheel_file" >> $GITHUB_ENV
+          echo "SDIST=$tar_file" >> $GITHUB_ENV
       - name: Install Python
         uses: actions/setup-python@v6
         with:
@@ -60,10 +68,10 @@ jobs:
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
       - name: Install wheel
-        run: pip install dist/nipype-*.whl[tests]
+        run: pip install $WHEEL[tests]
         if: matrix.package == 'wheel'
       - name: Install sdist
-        run: pip install dist/nipype-*.tar.gz[tests]
+        run: pip install $SDIST[tests]
         if: matrix.package == 'sdist'
       - name: Display nipype version
         run: python -c 'import nipype; print(nipype.__version__)'
