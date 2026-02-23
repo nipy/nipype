@@ -58,10 +58,10 @@ jobs:
       - name: Display Python version
         run: uv run python -c "import sys; print(sys.version)"
       - name: Install wheel
-        run: uv pip install dist/nipype-*.whl[tests]
+        run: uv pip install --system dist/nipype-*.whl[tests]
         if: matrix.package == 'wheel'
       - name: Install sdist
-        run: uv pip install dist/nipype-*.tar.gz[tests]
+        run: uv pip install --system dist/nipype-*.tar.gz[tests]
         if: matrix.package == 'sdist'
       - name: Display nipype version
         run: uv run python -c 'import nipype; print(nipype.__version__)'
