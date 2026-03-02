@@ -12,6 +12,10 @@ temp_folder = mkdtemp()
 data_dir = os.path.join(temp_folder, "data")
 shutil.copytree(NIPYPE_DATADIR, data_dir)
 
+if "SUBJECTS_DIR" not in os.environ:
+    os.environ["SUBJECTS_DIR"] = temp_folder
+
+
 
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
