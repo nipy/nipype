@@ -183,8 +183,12 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
 
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_mrisexpand(tmpdir):
+    subjects_dir = fs.Info.subjectsdir()
+    if subjects_dir is None or not os.path.exists(os.path.join(subjects_dir, "fsaverage")):
+        pytest.skip("fsaverage subject not found in SUBJECTS_DIR")
+
     fssrc = FreeSurferSource(
-        subjects_dir=fs.Info.subjectsdir(), subject_id="fsaverage", hemi="lh"
+        subjects_dir=subjects_dir, subject_id="fsaverage", hemi="lh"
     )
 
     fsavginfo = fssrc.run().outputs.get()
@@ -230,8 +234,12 @@ def test_mrisexpand(tmpdir):
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_eulernumber(tmpdir):
     # grab a surface from fsaverage
+    subjects_dir = fs.Info.subjectsdir()
+    if subjects_dir is None or not os.path.exists(os.path.join(subjects_dir, "fsaverage")):
+        pytest.skip("fsaverage subject not found in SUBJECTS_DIR")
+
     fssrc = FreeSurferSource(
-        subjects_dir=fs.Info.subjectsdir(), subject_id="fsaverage", hemi="lh"
+        subjects_dir=subjects_dir, subject_id="fsaverage", hemi="lh"
     )
     pial = fssrc.run().outputs.pial
     assert isinstance(pial, str), "Problem when fetching surface file"
