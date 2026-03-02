@@ -99,6 +99,8 @@ jobs:
           # Do not test pre-releases for versions out of SPEC0
           - python-version: "3.10"
             dependencies: pre
+          - python-version: "3.11"
+            dependencies: pre
 
     env:
       DEPENDS: ${{ matrix.dependencies }}
@@ -117,9 +119,9 @@ jobs:
         run: |
           uv tool install --with=tox-uv --with=tox-gh-actions tox
       - name: Show tox config
-        run: uvx tox c
+        run: tox c
       - name: Run tox
-        run: uvx tox -v --exit-and-dump-after 1200
+        run: tox -v --exit-and-dump-after 1200
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
