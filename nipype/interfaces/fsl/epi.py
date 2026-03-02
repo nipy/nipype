@@ -913,7 +913,7 @@ class Eddy(FSLCommand):
     'eddy_cpu --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
+--interp=spline --resamp=jac --niter=5 --nthr=1 --nvoxhp=1000 \
 --out=.../eddy_corrected --slm=none'
 
     Running eddy on an Nvidia GPU using cuda:
@@ -922,7 +922,7 @@ class Eddy(FSLCommand):
     'eddy_cuda --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --niter=5 --nthr=1 --nvoxhp=1000 \
+--interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
 --out=.../eddy_corrected --slm=none'
 
     Running eddy with slice-to-volume motion correction:
