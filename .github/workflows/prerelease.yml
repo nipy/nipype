@@ -56,6 +56,7 @@ jobs:
       - name: Show tox config
         run: tox c
       - name: Run tox
+        id: pre
         run: tox -v --exit-and-dump-after 1200
       - uses: codecov/codecov-action@v5
         with:
@@ -67,3 +68,20 @@ jobs:
           name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.dependencies }}
           path: test-results.xml
         if: always()
+      - name: Create issue
+        # Workflows triggered by schedule only notify the workflow creator
+        # So let's open an issue to make sure this is visible to all
+        if: ${{ steps.pre.outcome != 'success' }}
+        uses: JasonEtco/create-an-issue@v2.9.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run_id: ${{ github.run_id }}
+          repository: ${{ github.repository }}
+          workflow_name: PRE-RELEASE TESTS
+        with:
+          filename: .github/workflow_failure.md
+          update_existing: true
+          search_existing: open
+      - name: Return failure
+        if: ${{ steps.pre.outcome != 'success' }}
+        run: exit 1
