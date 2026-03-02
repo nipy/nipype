@@ -39,7 +39,6 @@ See the README file for an example usage of this module.
 
 """
 
-
 __version__ = "$Id: cloghandler.py 6175 2009-11-02 18:40:35Z lowell $"
 __author__ = "Lowell Alleman"
 __all__ = ["ConcurrentRotatingFileHandler"]

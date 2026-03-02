@@ -6,6 +6,7 @@ The reg module provides classes for interfacing with the `niftyreg
 
 The interfaces were written to work with niftyreg version 1.5.10
 """
+
 import os
 
 from ..base import TraitedSpec, File, traits, Tuple, isdefined

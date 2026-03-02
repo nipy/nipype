@@ -22,7 +22,9 @@ def test_FSSurfaceCommand_inputs():
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_associated_file(tmpdir):
     subjects_dir = fs.Info.subjectsdir()
-    if subjects_dir is None or not os.path.exists(os.path.join(subjects_dir, "fsaverage")):
+    if subjects_dir is None or not os.path.exists(
+        os.path.join(subjects_dir, "fsaverage")
+    ):
         pytest.skip("fsaverage subject not found in SUBJECTS_DIR")
 
     fssrc = FreeSurferSource(

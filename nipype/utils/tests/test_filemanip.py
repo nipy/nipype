@@ -607,9 +607,10 @@ def test_versioned_pklization(tmpdir):
     savepkl("./pickled.pkz", obj, versioning=True)
 
     with pytest.raises(Exception):
-        with mock.patch(
-            "nipype.utils.tests.test_filemanip.Pickled", PickledBreaker
-        ), mock.patch("nipype.__version__", "0.0.0"):
+        with (
+            mock.patch("nipype.utils.tests.test_filemanip.Pickled", PickledBreaker),
+            mock.patch("nipype.__version__", "0.0.0"),
+        ):
             loadpkl("./pickled.pkz")
 
 

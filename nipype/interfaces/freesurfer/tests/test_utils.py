@@ -184,7 +184,9 @@ def test_surfshots(create_files_in_directory_plus_dummy_file):
 @pytest.mark.skipif(fs.no_freesurfer(), reason="freesurfer is not installed")
 def test_mrisexpand(tmpdir):
     subjects_dir = fs.Info.subjectsdir()
-    if subjects_dir is None or not os.path.exists(os.path.join(subjects_dir, "fsaverage")):
+    if subjects_dir is None or not os.path.exists(
+        os.path.join(subjects_dir, "fsaverage")
+    ):
         pytest.skip("fsaverage subject not found in SUBJECTS_DIR")
 
     fssrc = FreeSurferSource(
@@ -235,7 +237,9 @@ def test_mrisexpand(tmpdir):
 def test_eulernumber(tmpdir):
     # grab a surface from fsaverage
     subjects_dir = fs.Info.subjectsdir()
-    if subjects_dir is None or not os.path.exists(os.path.join(subjects_dir, "fsaverage")):
+    if subjects_dir is None or not os.path.exists(
+        os.path.join(subjects_dir, "fsaverage")
+    ):
         pytest.skip("fsaverage subject not found in SUBJECTS_DIR")
 
     fssrc = FreeSurferSource(

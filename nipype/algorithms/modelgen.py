@@ -6,6 +6,7 @@ subject analysis of task-based fMRI experiments. In particular it also includes
 algorithms for generating regressors for sparse and sparse-clustered acquisition
 experiments.
 """
+
 from copy import deepcopy
 import csv
 import math

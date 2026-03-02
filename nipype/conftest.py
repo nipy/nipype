@@ -16,7 +16,6 @@ if "SUBJECTS_DIR" not in os.environ:
     os.environ["SUBJECTS_DIR"] = temp_folder
 
 
-
 @pytest.fixture(autouse=True)
 def add_np(doctest_namespace):
     doctest_namespace["np"] = np

@@ -323,18 +323,18 @@ class AllineateInputSpec(AFNICommandInputSpec):
         *_cost_funcs,
         argstr="-cost %s",
         desc="Defines the 'cost' function that defines the matching between "
-        "the source and the base"
+        "the source and the base",
     )
     _interp_funcs = ["nearestneighbour", "linear", "cubic", "quintic", "wsinc5"]
     interpolation = traits.Enum(
         *_interp_funcs[:-1],
         argstr="-interp %s",
-        desc="Defines interpolation method to use during matching"
+        desc="Defines interpolation method to use during matching",
     )
     final_interpolation = traits.Enum(
         *_interp_funcs,
         argstr="-final %s",
-        desc="Defines interpolation method used to create the output dataset"
+        desc="Defines interpolation method used to create the output dataset",
     )
 
     #   TECHNICAL OPTIONS (used for fine control of the program):
@@ -476,7 +476,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
         *_cost_funcs,
         argstr="-replacemeth %s",
         desc="After first volume is aligned, switch method for later volumes. "
-        "For use with '-replacebase'."
+        "For use with '-replacebase'.",
     )
     epi = traits.Bool(
         argstr="-EPI",
@@ -516,7 +516,7 @@ class AllineateInputSpec(AFNICommandInputSpec):
     nwarp = traits.Enum(
         *_nwarp_types,
         argstr="-nwarp %s",
-        desc="Experimental nonlinear warping: bilinear or legendre poly."
+        desc="Experimental nonlinear warping: bilinear or legendre poly.",
     )
     _dirs = ["X", "Y", "Z", "I", "J", "K"]
     nwarp_fixmot = traits.List(

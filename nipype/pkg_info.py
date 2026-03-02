@@ -22,7 +22,7 @@ def pkg_commit_hash(pkg_path):
        short form of hash
     """
     from . import __version__
-    
+
     # If version has a local part (e.g. +g8234ec318)
     if "+" in __version__:
         local_part = __version__.split("+")[1]

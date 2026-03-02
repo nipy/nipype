@@ -5,6 +5,7 @@
 >>> tmp = getfixture('tmpdir')
 >>> old = tmp.chdir()
 """
+
 import os
 import re
 import numpy as np

@@ -4,6 +4,7 @@
 
 The `Node` class provides core functionality for batch processing.
 """
+
 from collections import OrderedDict, defaultdict
 
 import os
@@ -268,16 +269,15 @@ class Node(EngineBase):
     def mem_gb_runtime(self):
         """Get estimated memory (GB), updated based on input if a ram estimator was specified"""
         if (
-                self.ram_estimator is not None
-                and self._ram_estimated is False
-                and isinstance(self.ram_estimator, RamEstimator)
+            self.ram_estimator is not None
+            and self._ram_estimated is False
+            and isinstance(self.ram_estimator, RamEstimator)
         ):
             self._get_inputs()
             self._mem_gb, self.ram_estimator_str = self.ram_estimator(self.inputs)
             self._ram_estimated = True
 
         return self.mem_gb
-
 
     @property
     def n_procs(self):
@@ -611,12 +611,9 @@ directory. Please ensure no other concurrent workflows are racing""",
                 logger.critical("%s", e)
 
             if outputs is None:
-                raise NodeExecutionError(
-                    """\
+                raise NodeExecutionError("""\
 Error populating the inputs of node "%s": the results file of the source node \
-(%s) does not contain any outputs."""
-                    % (self.name, results_fname)
-                )
+(%s) does not contain any outputs.""" % (self.name, results_fname))
 
             for key, conn in connections:
                 output_value = Undefined

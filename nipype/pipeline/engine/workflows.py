@@ -5,6 +5,7 @@
 
 The `Workflow` class provides core functionality for batch processing.
 """
+
 import os
 import os.path as op
 import sys
@@ -179,13 +180,10 @@ class Workflow(EngineBase):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if dest in connected_ports[destnode]:
-                    raise Exception(
-                        """\
+                    raise Exception("""\
 Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
 connected.
-"""
-                        % (srcnode, source, destnode, dest, dest, destnode)
-                    )
+""" % (srcnode, source, destnode, dest, dest, destnode))
                 if not (
                     hasattr(destnode, "_interface")
                     and (

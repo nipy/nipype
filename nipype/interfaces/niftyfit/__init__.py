@@ -7,6 +7,7 @@ The niftyfit module provides classes for interfacing with the `NiftyFit
 <https://cmiclab.cs.ucl.ac.uk/CMIC/NiftyFit-Release>`__ command line tools.
 
 """
+
 from .asl import FitAsl
 from .dwi import FitDwi, DwiTool
 from .qt1 import FitQt1

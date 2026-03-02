@@ -60,13 +60,7 @@ class RamEstimator:
         flirt.ram_estimator = FlirtRamEstimator()
     """
 
-    def __init__(
-        self,
-        input_multipliers=None,
-        overhead_gb=0.3,
-        min_gb=0.5,
-        max_gb=8.0
-    ):
+    def __init__(self, input_multipliers=None, overhead_gb=0.3, min_gb=0.5, max_gb=8.0):
         """
         Parameters
         ----------
@@ -157,7 +151,9 @@ class RamEstimator:
             if isinstance(val, str):
                 paths = [val]
 
-            elif isinstance(val, (list, tuple)) and any(isinstance(v, str) for v in val):
+            elif isinstance(val, (list, tuple)) and any(
+                isinstance(v, str) for v in val
+            ):
                 paths = [v for v in val if isinstance(v, str)]
 
             if paths is not None:
@@ -175,7 +171,7 @@ class RamEstimator:
                         continue
 
                 if valid_files > 0:
-                    contribution = vox_total * multiplier / (1024 ** 3)
+                    contribution = vox_total * multiplier / (1024**3)
                     total_gb += contribution
 
                     debug_lines.append(
@@ -195,7 +191,9 @@ class RamEstimator:
             if isinstance(val, (int, float)):
                 values = [val]
 
-            elif isinstance(val, (list, tuple)) and all(isinstance(v, (int, float)) for v in val):
+            elif isinstance(val, (list, tuple)) and all(
+                isinstance(v, (int, float)) for v in val
+            ):
                 values = val
 
             if values is not None:
@@ -211,9 +209,7 @@ class RamEstimator:
             # --------------------------------------------------
             # UNSUPPORTED TYPE
             # --------------------------------------------------
-            debug_lines.append(
-                f"{attr}: unsupported value type ({type(val).__name__})"
-            )
+            debug_lines.append(f"{attr}: unsupported value type ({type(val).__name__})")
 
         # ------------------------------------------------------
         # OVERHEAD + CLAMP

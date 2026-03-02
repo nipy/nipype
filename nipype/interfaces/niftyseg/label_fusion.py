@@ -4,6 +4,7 @@
 The fusion module provides higher-level interfaces to some of the operations
 that can be performed with the seg_LabFusion command-line program.
 """
+
 import os
 import warnings
 

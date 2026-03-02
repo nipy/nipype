@@ -3,6 +3,7 @@
 """
 Test the resource management of MultiProc
 """
+
 import sys
 import os
 import pytest

@@ -7,6 +7,7 @@ The niftyreg module provides classes for interfacing with the `NiftyReg
 <http://sourceforge.net/projects/niftyreg/>`_ command line tools.
 
 """
+
 from .base import get_custom_path
 from .reg import RegAladin, RegF3D
 from .regutils import (

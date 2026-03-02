@@ -4,6 +4,7 @@
 Image assessment algorithms. Typical overlap and error computation
 measures to evaluate results from other processing units.
 """
+
 import os
 import os.path as op
 
@@ -98,7 +99,7 @@ class Distance(BaseInterface):
         set2_coordinates = self._get_coordinates(border2, nii2.affine)
 
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
-        (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
+        point1, point2 = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
         return (
             euclidean(set1_coordinates.T[point1, :], set2_coordinates.T[point2, :]),
             set1_coordinates.T[point1, :],
@@ -117,7 +118,7 @@ class Distance(BaseInterface):
 
         origdata2 = np.asanyarray(nii2.dataobj)
         origdata2 = (np.rint(origdata2) != 0) & ~np.isnan(origdata2)
-        (labeled_data, n_labels) = label(origdata2)
+        labeled_data, n_labels = label(origdata2)
 
         cogs = np.ones((4, n_labels))
 

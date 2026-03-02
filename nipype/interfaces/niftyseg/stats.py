@@ -4,6 +4,7 @@
 The stats module provides higher-level interfaces to some of the operations
 that can be performed with the niftyseg stats (seg_stats) command-line program.
 """
+
 import numpy as np
 
 from ..base import TraitedSpec, File, traits, CommandLineInputSpec
