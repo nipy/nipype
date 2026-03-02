@@ -21,7 +21,7 @@ nipype/testing/data/von-ray_errmap.nii.gz
 nipype/testing/data/von_errmap.nii.gz
 nipype/testing/data/.proc*
 crash*.pklz
-.coverage
+.coverage*
 htmlcov/
 __pycache__/
 *~
@@ -31,7 +31,7 @@ __pycache__/
 .pytest_cache
 .vscode/
 venv/
-/nipype/_version.py
+_version.py
 uv.lock
- .venv/
- .tox/
+.venv/
+.tox/
