@@ -114,7 +114,6 @@ class DistributedPluginBase(PluginBase):
         self.proc_pending = None
         self.pending_tasks = []
         self.max_jobs = self.plugin_args.get("max_jobs", np.inf)
-        self._run_errors = None
 
     def _prerun_check(self, graph):
         """Stub method to validate/massage graph and nodes before running"""
@@ -214,9 +213,9 @@ class DistributedPluginBase(PluginBase):
         self._postrun_check()
 
         if self._run_errors:
-            # If one or more nodes failed, re-rise first of them
+            # If one or more nodes failed, re-raise first of them
             error, cause = self._run_errors[0], None
-            if isinstance(error, str):
+            if isinstance(error, (str, list)):  # Error can also be a list of strings (traceback)
                 error = RuntimeError(error)
 
             if len(self._run_errors) > 1:
@@ -224,7 +223,6 @@ class DistributedPluginBase(PluginBase):
                     RuntimeError(f"{len(self._run_errors)} raised. Re-raising first."),
                     error,
                 )
-
             raise error from cause
 
     def _get_result(self, taskid):

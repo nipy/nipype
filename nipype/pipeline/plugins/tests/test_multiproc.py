@@ -34,11 +34,6 @@ class MultiprocTestInterface(nib.BaseInterface):
         return outputs
 
 
-class ErrorInterface(MultiprocTestInterface):
-    def _run_interface(self, runtime):
-        raise RuntimeError("This is an error")
-
-
 @pytest.mark.skipif(
     sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8"
 )
@@ -81,6 +76,11 @@ class SingleNodeTestInterface(nib.BaseInterface):
         outputs = self._outputs().get()
         outputs["output1"] = self.inputs.input1
         return outputs
+
+
+class ErrorInterface(SingleNodeTestInterface):
+    def _run_interface(self, runtime):
+        raise RuntimeError("This is an error")
 
 
 def test_no_more_memory_than_specified(tmpdir):
@@ -164,12 +164,13 @@ def test_hold_job_until_procs_available(tmpdir):
     pipe.run(plugin="MultiProc", plugin_args={"n_procs": max_threads})
 
 
-def test_error_run_without_submitting(tmp_path):
-    wf = pe.Workflow(name='rws', base_dir=tmp_path)
-    n1 = pe.Node(MultiprocTestInterface(), name='n1')
+@pytest.mark.parametrize("plugin", ["MultiProc", "LegacyMultiProc"])
+def test_error_run_without_submitting(tmp_path, plugin):
+    wf = pe.Workflow(name='rws', base_dir=str(tmp_path))
+    n1 = pe.Node(SingleNodeTestInterface(), name='n1')
     n1.inputs.input1 = 1
     n2 = pe.Node(ErrorInterface(), name='n2', run_without_submitting=True)
-    n3 = pe.Node(MultiprocTestInterface(), name='n3')
+    n3 = pe.Node(SingleNodeTestInterface(), name='n3')
 
     wf.connect([
         (n1, n2, [('output1', 'input1')]),
@@ -177,4 +178,4 @@ def test_error_run_without_submitting(tmp_path):
     ]),
 
     with pytest.raises(RuntimeError):
-        wf.run(plugin='MultiProc')
+        wf.run(plugin=plugin)
