@@ -141,6 +141,7 @@ def test_Eddy_inputs():
             usedefault=True,
         ),
         num_threads=dict(
+            argstr="--nthr=%d",
             nohash=True,
             usedefault=True,
         ),
