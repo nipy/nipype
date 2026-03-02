@@ -19,6 +19,7 @@ from tempfile import mkdtemp
 
 from ... import config, logging
 from ...utils.misc import flatten, unflatten, str2bool, dict_diff
+from ...utils.ram_estimator import RamEstimator
 from ...utils.filemanip import (
     md5,
     ensure_list,
@@ -207,6 +208,11 @@ class Node(EngineBase):
         self.needed_outputs = needed_outputs
         self.config = None
 
+        # Dynamic RAM estimator
+        self.ram_estimator = None
+        self.ram_estimator_str = None
+        self._ram_estimated = False
+
         if hasattr(self._interface, "write_cmdline"):
             self._interface.write_cmdline = True
 
@@ -257,6 +263,21 @@ class Node(EngineBase):
             )
 
         return self._mem_gb
+
+    @property
+    def mem_gb_runtime(self):
+        """Get estimated memory (GB), updated based on input if a ram estimator was specified"""
+        if (
+                self.ram_estimator is not None
+                and self._ram_estimated is False
+                and isinstance(self.ram_estimator, RamEstimator)
+        ):
+            self._get_inputs()
+            self._mem_gb, self.ram_estimator_str = self.ram_estimator(self.inputs)
+            self._ram_estimated = True
+
+        return self.mem_gb
+
 
     @property
     def n_procs(self):
@@ -1234,6 +1255,7 @@ class MapNode(Node):
                 **deepcopy(self._interface.inputs.trait_get())
             )
             node.interface.resource_monitor = self._interface.resource_monitor
+            node.ram_estimator = self.ram_estimator
             for field in self.iterfield:
                 if self.nested:
                     fieldvals = flatten(ensure_list(getattr(self.inputs, field)))

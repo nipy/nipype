@@ -178,6 +178,9 @@ def write_node_report(node, result=None, is_mapnode=False):
         if hasattr(result.runtime, prop):
             rst_dict[prop] = getattr(result.runtime, prop)
 
+    if node.ram_estimator_str:
+        rst_dict["ram_estimator"] = node.ram_estimator_str
+
     lines.append(write_rst_dict(rst_dict))
 
     # Collect terminal output
