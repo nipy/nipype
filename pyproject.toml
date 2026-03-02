@@ -59,6 +59,7 @@ doc = [
     "sphinx-argparse",
     "sphinx>=2.1.2",
     "sphinxcontrib-apidoc",
+    "niflow-nipype1-workflows",
 ]
 duecredit = ["duecredit"]
 maint = ["GitPython", "fuzzywuzzy"]
