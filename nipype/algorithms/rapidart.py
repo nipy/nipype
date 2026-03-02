@@ -11,6 +11,7 @@ These functions include:
   * StimulusCorrelation: determines correlation between stimuli
     schedule and movement/intensity parameters
 """
+
 import os
 from copy import deepcopy
 
@@ -487,7 +488,7 @@ class ArtifactDetect(BaseInterface):
                 nim = funcs.concat_images(images)
 
         # compute global intensity signal
-        (x, y, z, timepoints) = nim.shape
+        x, y, z, timepoints = nim.shape
 
         data = nim.get_fdata(dtype=np.float32)
         affine = nim.affine
@@ -753,8 +754,8 @@ class StimulusCorrelation(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        (_, filename) = os.path.split(motionfile)
-        (filename, _) = os.path.splitext(filename)
+        _, filename = os.path.split(motionfile)
+        filename, _ = os.path.splitext(filename)
         corrfile = os.path.join(output_dir, f"qa.{filename}_stimcorr.txt")
         return corrfile
 

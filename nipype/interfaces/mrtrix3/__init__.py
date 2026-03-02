@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # -*- coding: utf-8 -*-
 """MRTrix3 provides software tools to perform various types of diffusion MRI analyses."""
+
 from .connectivity import BuildConnectome, LabelConfig, LabelConvert
 from .preprocess import (
     ACTPrepareFSL,

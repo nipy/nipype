@@ -1,5 +1,7 @@
 """Compatibility shim for legacy nipype metadata access."""
+
 from . import __version__
+
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
@@ -12,9 +14,7 @@ def get_nipype_gitversion():
     import os
     import subprocess
 
-    gitpath = os.path.realpath(
-        os.path.join(os.path.dirname(__file__), os.path.pardir)
-    )
+    gitpath = os.path.realpath(os.path.join(os.path.dirname(__file__), os.path.pardir))
     gitpathgit = os.path.join(gitpath, ".git")
     if not os.path.exists(gitpathgit):
         return None

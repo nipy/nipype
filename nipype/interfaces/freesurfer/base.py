@@ -13,6 +13,7 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
+
 import os
 
 from looseversion import LooseVersion

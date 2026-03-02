@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous algorithms."""
+
 import os
 import os.path as op
 
@@ -39,10 +40,8 @@ class PickAtlasInputSpec(BaseInterfaceInputSpec):
     labels = traits.Either(
         traits.Int,
         traits.List(traits.Int),
-        desc=(
-            "Labels of regions that will be included in the mask. Must be\
-        compatible with the atlas used."
-        ),
+        desc=("Labels of regions that will be included in the mask. Must be\
+        compatible with the atlas used."),
         mandatory=True,
     )
     hemi = traits.Enum(
@@ -387,10 +386,8 @@ class Matlab2CSVInputSpec(TraitedSpec):
 
 class Matlab2CSVOutputSpec(TraitedSpec):
     csv_files = OutputMultiPath(
-        File(
-            desc="Output CSV files for each variable saved in the input .mat\
-        file"
-        )
+        File(desc="Output CSV files for each variable saved in the input .mat\
+        file")
     )
 
 

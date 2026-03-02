@@ -62,8 +62,7 @@ nipype_cmd: error: the following arguments are required: module, interface
         else:
             options = "optional arguments"
         assert (
-            strip_ansi(stdout.getvalue())
-            == f"""usage: nipype_cmd [-h] module interface
+            strip_ansi(stdout.getvalue()) == f"""usage: nipype_cmd [-h] module interface
 
 Nipype interface runner
 
@@ -89,13 +88,10 @@ positional arguments:
         assert exit_exception.code == 0
 
         assert strip_ansi(stderr.getvalue()) == ""
-        assert (
-            strip_ansi(stdout.getvalue())
-            == """Available Interfaces:
+        assert strip_ansi(stdout.getvalue()) == """Available Interfaces:
 \tComputeMask
 \tEstimateContrast
 \tFitGLM
 \tSimilarity
 \tSpaceTimeRealigner
 """
-        )

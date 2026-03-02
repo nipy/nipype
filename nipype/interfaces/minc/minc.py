@@ -6,6 +6,7 @@ module was written to work with MINC version 2.2.00.
 
 Author: `Carlo Hamalainen <http://carlo-hamalainen.net>`__
 """
+
 import glob
 import os
 import os.path
