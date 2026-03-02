@@ -172,10 +172,12 @@ def test_error_run_without_submitting(tmp_path, plugin):
     n2 = pe.Node(ErrorInterface(), name='n2', run_without_submitting=True)
     n3 = pe.Node(SingleNodeTestInterface(), name='n3')
 
-    wf.connect([
-        (n1, n2, [('output1', 'input1')]),
-        (n2, n3, [('output1', 'input1')]),
-    ]),
+    wf.connect(
+        [
+            (n1, n2, [('output1', 'input1')]),
+            (n2, n3, [('output1', 'input1')]),
+        ]
+    ),
 
     with pytest.raises(RuntimeError):
         wf.run(plugin=plugin)

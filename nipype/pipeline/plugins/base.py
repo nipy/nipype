@@ -215,7 +215,9 @@ class DistributedPluginBase(PluginBase):
         if self._run_errors:
             # If one or more nodes failed, re-raise first of them
             error, cause = self._run_errors[0], None
-            if isinstance(error, (str, list)):  # Error can also be a list of strings (traceback)
+            if isinstance(
+                error, (str, list)
+            ):  # Error can also be a list of strings (traceback)
                 error = RuntimeError(error)
 
             if len(self._run_errors) > 1:
