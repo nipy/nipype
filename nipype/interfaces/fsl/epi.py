@@ -80,8 +80,7 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
     >>> prepare.inputs.output_type = "NIFTI_GZ"
     >>> prepare.cmdline # doctest: +ELLIPSIS
-    'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii \
-.../phase_fslprepared.nii.gz 2.460000'
+    "fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii '.../phase_fslprepared.nii.gz' 2.460000"
     >>> res = prepare.run() # doctest: +SKIP
 
 
@@ -906,20 +905,20 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_openmp --flm=quadratic --ff=10.0 \
+    "eddy_openmp --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --slm=none'
+--out='.../eddy_corrected' --slm=none"
 
     Running eddy on an Nvidia GPU using cuda:
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 \
+    "eddy_cuda --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --slm=none'
+--out='.../eddy_corrected' --slm=none"
 
     Running eddy with slice-to-volume motion correction:
     >>> eddy.inputs.mporder = 6
@@ -928,12 +927,12 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.slice2vol_interp = 'trilinear'
     >>> eddy.inputs.slice_order = 'epi_slspec.txt'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 \
+    "eddy_cuda --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --mporder=6 --niter=5 --nvoxhp=1000 \
---out=.../eddy_corrected --s2v_interp=trilinear --s2v_lambda=1 \
---s2v_niter=5 --slspec=epi_slspec.txt --slm=none'
+--out='.../eddy_corrected' --s2v_interp=trilinear --s2v_lambda=1 \
+--s2v_niter=5 --slspec=epi_slspec.txt --slm=none"
     >>> res = eddy.run()     # doctest: +SKIP
 
     """
@@ -986,11 +985,11 @@ class Eddy(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         if name == "in_topup_fieldcoef":
-            return spec.argstr % value.split("_fieldcoef")[0]
-        if name == "field":
-            return spec.argstr % fname_presuffix(value, use_ext=False)
-        if name == "out_base":
-            return spec.argstr % os.path.abspath(value)
+            value = value.split("_fieldcoef")[0]
+        elif name == "field":
+            value = fname_presuffix(value, use_ext=False)
+        elif name == "out_base":
+            value = os.path.abspath(value)
         return super()._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -1105,7 +1104,7 @@ class SigLoss(FSLCommand):
     >>> sigloss.inputs.echo_time = 0.03
     >>> sigloss.inputs.output_type = "NIFTI_GZ"
     >>> sigloss.cmdline # doctest: +ELLIPSIS
-    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
+    "sigloss --te=0.030000 -i phase.nii -s '.../phase_sigloss.nii.gz'"
     >>> res = sigloss.run() # doctest: +SKIP
 
 
@@ -1381,9 +1380,9 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.dph_file = "phase.nii"
     >>> dewarp.inputs.output_type = "NIFTI_GZ"
     >>> dewarp.cmdline # doctest: +ELLIPSIS
-    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
---esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 \
---tmpdir .../temp --vsm .../vsm.nii.gz'
+    "epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
+--esp 0.58 --exfdw '.../exfdw.nii.gz' --nocleanup --sigma 2 --tediff 2.46 \
+--tmpdir '.../temp' --vsm '.../vsm.nii.gz'"
     >>> res = dewarp.run() # doctest: +SKIP
 
 
