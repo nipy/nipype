@@ -5,7 +5,6 @@
 
 The interfaces were written to work with niftyreg version 1.5.10
 """
-
 import os
 
 from ..base import TraitedSpec, File, traits, Tuple, isdefined
@@ -814,7 +813,7 @@ class RegTransform(NiftyRegCommand):
     >>> node.inputs.def_input = 'warpfield.nii'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS
-    "reg_transform -omp 4 -def warpfield.nii '.../warpfield_trans.nii.gz'"
+    'reg_transform -omp 4 -def warpfield.nii .../warpfield_trans.nii.gz'
 
     """
 

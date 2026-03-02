@@ -5,7 +5,6 @@ Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
 
 """
-
 import os.path as op
 import re
 

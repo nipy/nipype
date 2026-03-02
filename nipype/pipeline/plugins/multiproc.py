@@ -272,7 +272,6 @@ class MultiProcPlugin(DistributedPluginBase):
             free_gpu_slots,
             self.n_gpu_procs,
         )
-
         if self._stats != stats:
             tasks_list_msg = ""
 
@@ -335,7 +334,7 @@ class MultiProcPlugin(DistributedPluginBase):
                         continue
 
             # Check requirements of this job
-            next_job_gb = min(self.procs[jobid].mem_gb_runtime, self.memory_gb)
+            next_job_gb = min(self.procs[jobid].mem_gb, self.memory_gb)
             next_job_th = min(self.procs[jobid].n_procs, self.processors)
             next_job_gpu_th = min(self.procs[jobid].n_procs, self.n_gpu_procs)
 
@@ -390,7 +389,6 @@ class MultiProcPlugin(DistributedPluginBase):
                     self.procs[jobid].run(updatehash=updatehash)
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
-                    self._run_errors.append(traceback)
                     self._clean_queue(
                         jobid, graph, result={"result": None, "traceback": traceback}
                     )

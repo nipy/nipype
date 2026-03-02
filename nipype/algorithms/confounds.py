@@ -3,7 +3,6 @@
 """
 Algorithms to compute confounds in :abbr:`fMRI (functional MRI)`
 """
-
 import os
 import os.path as op
 from collections import OrderedDict
@@ -112,7 +111,8 @@ class ComputeDVARS(BaseInterface):
     output_spec = ComputeDVARSOutputSpec
     _references = [
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @techreport{nichols_notes_2013,
     address = {Coventry, UK},
     title = {Notes on {Creating} a {Standardized} {Version} of {DVARS}},
@@ -122,11 +122,13 @@ research/nichols/scripts/fsl/standardizeddvars.pdf},
     institution = {University of Warwick},
     author = {Nichols, Thomas},
     year = {2013}
-}"""),
+}"""
+            ),
             "tags": ["method"],
         },
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @article{power_spurious_2012,
     title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
 arise from subject motion},
@@ -140,7 +142,8 @@ Bradley L. and Petersen, Steven E.},
     year = {2012},
     pages = {2142--2154},
 }
-"""),
+"""
+            ),
             "tags": ["method"],
         },
     ]
@@ -316,7 +319,8 @@ class FramewiseDisplacement(BaseInterface):
 
     _references = [
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @article{power_spurious_2012,
     title = {Spurious but systematic correlations in functional connectivity {MRI} networks \
 arise from subject motion},
@@ -330,7 +334,8 @@ Bradley L. and Petersen, Steven E.},
     year = {2012},
     pages = {2142--2154},
 }
-"""),
+"""
+            ),
             "tags": ["method"],
         }
     ]
@@ -560,7 +565,8 @@ class CompCor(SimpleInterface):
     _references = [
         {
             "tags": ["method", "implementation"],
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @article{compcor_2007,
     title = {A component based noise correction method (CompCor) for BOLD and perfusion based},
     volume = {37},
@@ -571,7 +577,8 @@ class CompCor(SimpleInterface):
     author = {Behzadi, Yashar and Restom, Khaled and Liau, Joy and Liu, Thomas T.},
     year = {2007},
     pages = {90-101}
-}"""),
+}"""
+            ),
         }
     ]
 

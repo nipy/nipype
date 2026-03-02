@@ -5,7 +5,6 @@
     >>> tmp = getfixture('tmpdir')
     >>> old = tmp.chdir()
 """
-
 from ... import logging
 from ..base import (
     traits,
@@ -49,7 +48,7 @@ class Function(IOBase):
         output_names="out",
         function=None,
         imports=None,
-        **inputs,
+        **inputs
     ):
         """
 

@@ -10,21 +10,12 @@ Top-level module API
 --------------------
 
 """
-
 import os
 
 # No longer used internally but could be used externally.
 from looseversion import LooseVersion
 
-try:
-    from ._version import __version__
-except ImportError:
-    __version__ = "unknown"
-
-__url__ = "http://nipy.org/nipype"
-__status__ = "stable"
-
-
+from .info import URL as __url__, STATUS as __status__, __version__
 from .utils.config import NipypeConfig
 from .utils.logger import Logging
 from .refs import due

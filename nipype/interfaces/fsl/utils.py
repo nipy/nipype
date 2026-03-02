@@ -8,7 +8,6 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 """
-
 import os
 import os.path as op
 import re

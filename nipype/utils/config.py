@@ -8,7 +8,6 @@ hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
 """
-
 import os
 import sys
 import errno

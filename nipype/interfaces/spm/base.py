@@ -13,7 +13,6 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
-
 # Standard library imports
 import os
 from copy import deepcopy

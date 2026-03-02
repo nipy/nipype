@@ -3,7 +3,6 @@
 """
 Utilities to keep track of performance
 """
-
 import os
 import numpy as np
 import threading

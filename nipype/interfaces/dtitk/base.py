@@ -24,7 +24,6 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
-
 import os
 
 from ... import logging

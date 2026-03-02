@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous file manipulation functions"""
-
 import sys
 import pickle
 import errno
@@ -636,9 +635,11 @@ with an incompatible Nipype version (%s)""",
                     version,
                 )
                 raise e
-        fmlogger.warning("""\
+        fmlogger.warning(
+            """\
 No metadata was found in the pkl file. Make sure you are currently using \
-the same Nipype version from the generated pkl.""")
+the same Nipype version from the generated pkl."""
+        )
         raise e
 
     if unpkl is None:

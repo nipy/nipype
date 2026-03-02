@@ -19,7 +19,6 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-
 from collections.abc import Sequence
 
 # perform all external trait imports here
@@ -354,9 +353,12 @@ class ImageFile(File):
 
             if set(types) - set(IMG_FORMATS.keys()):
                 invalid = set(types) - set(IMG_FORMATS.keys())
-                raise ValueError("""\
+                raise ValueError(
+                    """\
 Unknown value(s) %s for metadata type of an ImageFile input.\
-""" % ", ".join(['"%s"' % t for t in invalid]))
+"""
+                    % ", ".join(['"%s"' % t for t in invalid])
+                )
             extensions = [ext for t in types for ext in IMG_FORMATS[t]]
 
         super().__init__(

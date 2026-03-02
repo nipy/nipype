@@ -10,7 +10,6 @@ XNATSource: preliminary interface to XNAT
 To come :
 XNATSink
 """
-
 import glob
 import fnmatch
 import string

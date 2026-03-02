@@ -1741,7 +1741,8 @@ class KellyKapowski(ANTSCommand):
 
     _references = [
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @book{Das2009867,
   author={Sandhitsu R. Das and Brian B. Avants and Murray Grossman and James C. Gee},
   title={Registration based cortical thickness measurement.},
@@ -1753,7 +1754,8 @@ class KellyKapowski(ANTSCommand):
   issn={1053-8119},
   url={http://www.sciencedirect.com/science/article/pii/S1053811908012780},
   doi={https://doi.org/10.1016/j.neuroimage.2008.12.016}
-}"""),
+}"""
+            ),
             "description": "The details on the implementation of DiReCT.",
             "tags": ["implementation"],
         }

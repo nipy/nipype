@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Interfaces to assorted Freesurfer utility programs."""
-
 import os
 import re
 import shutil
@@ -321,8 +320,7 @@ class SampleToSurface(FSCommand):
     >>> sampler.inputs.sampling_range = 1
     >>> sampler.inputs.sampling_units = "frac"
     >>> sampler.cmdline  # doctest: +ELLIPSIS
-    "mri_vol2surf --hemi lh --o '.../lh.cope1.mgz' --reg register.dat \
-    --projfrac-avg 1.000 --mov cope1.nii.gz"
+    'mri_vol2surf --hemi lh --o ...lh.cope1.mgz --reg register.dat --projfrac-avg 1.000 --mov cope1.nii.gz'
     >>> res = sampler.run() # doctest: +SKIP
 
     """
@@ -479,8 +477,7 @@ class SurfaceSmooth(FSCommand):
     >>> smoother.inputs.hemi = "lh"
     >>> smoother.inputs.fwhm = 5
     >>> smoother.cmdline # doctest: +ELLIPSIS
-    "mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval lh.cope1.mgz \
-    --tval '.../lh.cope1_smooth5.mgz' --s subj_1"
+    'mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval lh.cope1.mgz --tval ...lh.cope1_smooth5.mgz --s subj_1'
     >>> smoother.run() # doctest: +SKIP
 
     """

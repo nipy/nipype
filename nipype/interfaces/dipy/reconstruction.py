@@ -20,6 +20,7 @@ from .base import (
     get_dipy_workflows,
 )
 
+
 IFLOGGER = logging.getLogger("nipype.interface")
 
 if HAVE_DIPY and LooseVersion(dipy_version()) >= LooseVersion("0.15"):

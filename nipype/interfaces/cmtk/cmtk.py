@@ -206,7 +206,7 @@ def cmat(
     # Preserve on-disk type unless scaled
     roiData = np.asanyarray(roi.dataobj)
     roiVoxelSize = roi.header.get_zooms()
-    endpoints, endpointsmm = create_endpoints_array(fib, roiVoxelSize)
+    (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
 
     # Output endpoint arrays
     iflogger.info("Saving endpoint array: %s", en_fname)

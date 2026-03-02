@@ -6,7 +6,6 @@ Miscellaneous tools to support Interface functionality
 ......................................................
 
 """
-
 import os
 from contextlib import AbstractContextManager
 from copy import deepcopy

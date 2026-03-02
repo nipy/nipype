@@ -3,20 +3,8 @@ import pytest
 import sys
 from contextlib import contextmanager
 
-import re
 from io import StringIO
 from ...utils import nipype_cmd
-
-
-def strip_ansi(text):
-    """
-    Remove ANSI escape sequences from text.
-
-    Used to ensure consistent string comparisons in tests when
-    terminal colors are enabled (e.g., in CI environments).
-    """
-    ansi_escape = re.compile(r"\x1b\[[0-9;]*[mK]")
-    return ansi_escape.sub("", text)
 
 
 @contextmanager
@@ -45,8 +33,8 @@ class TestNipypeCMD:
 nipype_cmd: error: the following arguments are required: module, interface
 """
 
-        assert strip_ansi(stderr.getvalue()) == msg
-        assert strip_ansi(stdout.getvalue()) == ""
+        assert stderr.getvalue() == msg
+        assert stdout.getvalue() == ""
 
     def test_main_returns_0_on_help(self):
         with pytest.raises(SystemExit) as cm:
@@ -56,13 +44,14 @@ nipype_cmd: error: the following arguments are required: module, interface
         exit_exception = cm.value
         assert exit_exception.code == 0
 
-        assert strip_ansi(stderr.getvalue()) == ""
+        assert stderr.getvalue() == ""
         if sys.version_info >= (3, 10):
             options = "options"
         else:
             options = "optional arguments"
         assert (
-            strip_ansi(stdout.getvalue()) == f"""usage: nipype_cmd [-h] module interface
+            stdout.getvalue()
+            == f"""usage: nipype_cmd [-h] module interface
 
 Nipype interface runner
 
@@ -87,11 +76,14 @@ positional arguments:
         exit_exception = cm.value
         assert exit_exception.code == 0
 
-        assert strip_ansi(stderr.getvalue()) == ""
-        assert strip_ansi(stdout.getvalue()) == """Available Interfaces:
+        assert stderr.getvalue() == ""
+        assert (
+            stdout.getvalue()
+            == """Available Interfaces:
 \tComputeMask
 \tEstimateContrast
 \tFitGLM
 \tSimilarity
 \tSpaceTimeRealigner
 """
+        )

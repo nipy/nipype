@@ -10,7 +10,6 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
-
 import os
 import subprocess as sp
 import shlex
@@ -33,7 +32,7 @@ from ...utils.subprocess import run_command
 
 from ...external.due import due
 
-from .traits_extension import traits, isdefined, BasePath, Undefined
+from .traits_extension import traits, isdefined, Undefined
 from .specs import (
     BaseInterfaceInputSpec,
     CommandLineInputSpec,
@@ -445,9 +444,12 @@ class BaseInterface(Interface):
             na_names = aggregate_names.intersection(_na_outputs)
             if na_names:
                 # XXX Change to TypeError in Nipype 2.0
-                raise KeyError("""\
+                raise KeyError(
+                    """\
 Output trait(s) %s not available in version %s of interface %s.\
-""" % (", ".join(na_names), self.version, self.__class__.__name__))
+"""
+                    % (", ".join(na_names), self.version, self.__class__.__name__)
+                )
 
         for key in aggregate_names:  # Final aggregation
             val = predicted_outputs[key]
@@ -796,13 +798,6 @@ class CommandLine(BaseInterface):
             # type-checking code here as well
             sep = trait_spec.sep if trait_spec.sep is not None else " "
 
-            if argstr == '%s':
-                inner_traits = getattr(trait_spec, "inner_traits", None)
-                if inner_traits and any(
-                    t.is_trait_type(BasePath) for t in inner_traits
-                ):
-                    values = [shlex.quote(elt) for elt in value]
-
             if argstr.endswith("..."):
                 # repeatable option
                 # --id %d... will expand to
@@ -812,9 +807,6 @@ class CommandLine(BaseInterface):
             else:
                 return argstr % sep.join(str(elt) for elt in value)
         else:
-            if trait_spec.is_trait_type(BasePath):
-                if "'%s'" not in argstr and '"%s"' not in argstr:
-                    value = shlex.quote(value)
             # Append options using format string.
             return argstr % value
 

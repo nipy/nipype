@@ -3,7 +3,6 @@
 """
 Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 """
-
 import os.path as op
 import numpy as np
 from numpy import linalg as nla

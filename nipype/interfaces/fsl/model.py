@@ -4,7 +4,6 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 """
-
 import os
 from glob import glob
 from shutil import rmtree
@@ -387,7 +386,7 @@ class Level1Design(BaseInterface):
                 basis_key,
             )
             nim = load(func_files[i])
-            _, _, _, timepoints = nim.shape
+            (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(
                 run_num=i,
                 interscan_interval=self.inputs.interscan_interval,

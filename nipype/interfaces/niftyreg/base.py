@@ -14,7 +14,6 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
-
 import os
 from packaging.version import Version
 

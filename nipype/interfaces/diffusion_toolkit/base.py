@@ -12,7 +12,6 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-
 import re
 from ..base import CommandLine
 

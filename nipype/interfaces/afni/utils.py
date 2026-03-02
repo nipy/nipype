@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """AFNI utility interfaces."""
-
 import os
 import os.path as op
 import re
@@ -1034,7 +1033,8 @@ class Edge3(AFNICommand):
     output_spec = AFNICommandOutputSpec
     _references = [
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @article{Deriche1987,
 author={R. Deriche},
 title={Optimal edge detection using recursive filtering},
@@ -1042,11 +1042,13 @@ journal={International Journal of Computer Vision},
 volume={2},'
 pages={167-187},
 year={1987},
-}"""),
+}"""
+            ),
             "tags": ["method"],
         },
         {
-            "entry": BibTeX("""\
+            "entry": BibTeX(
+                """\
 @article{MongaDericheMalandainCocquerez1991,
     author={O. Monga, R. Deriche, G. Malandain, J.P. Cocquerez},
     title={Recursive filtering and edge tracking: two primary tools for 3D edge detection},
@@ -1054,7 +1056,8 @@ year={1987},
     volume={9},'
     pages={203-214},
     year={1991},
-}"""),
+}"""
+            ),
             "tags": ["method"],
         },
     ]

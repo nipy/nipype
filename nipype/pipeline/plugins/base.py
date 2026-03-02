@@ -1,12 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution."""
-
 import sys
 from copy import deepcopy
 from glob import glob
 import os
-import shlex
 import shutil
 from time import sleep, time
 from traceback import format_exception
@@ -125,9 +123,6 @@ class DistributedPluginBase(PluginBase):
         """
         Executes a pre-defined pipeline using distributed approaches
         """
-        # Ensure only current run errors are reported
-        self._run_errors = []
-
         logger.info("Running in parallel.")
         self._config = config
         poll_sleep_secs = float(config["execution"]["poll_sleep_duration"])
@@ -139,6 +134,7 @@ class DistributedPluginBase(PluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
+        errors = []
 
         old_progress_stats = None
         old_presub_stats = None
@@ -173,14 +169,14 @@ class DistributedPluginBase(PluginBase):
                     result = self._get_result(taskid)
                 except Exception as exc:
                     notrun.append(self._clean_queue(jobid, graph))
-                    self._run_errors.append(exc)
+                    errors.append(exc)
                 else:
                     if result:
                         if result["traceback"]:
                             notrun.append(
                                 self._clean_queue(jobid, graph, result=result)
                             )
-                            self._run_errors.append("".join(result["traceback"]))
+                            errors.append("".join(result["traceback"]))
                         else:
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
@@ -212,19 +208,18 @@ class DistributedPluginBase(PluginBase):
         # close any open resources
         self._postrun_check()
 
-        if self._run_errors:
-            # If one or more nodes failed, re-raise first of them
-            error, cause = self._run_errors[0], None
-            if isinstance(
-                error, (str, list)
-            ):  # Error can also be a list of strings (traceback)
+        if errors:
+            # If one or more nodes failed, re-rise first of them
+            error, cause = errors[0], None
+            if isinstance(error, str):
                 error = RuntimeError(error)
 
-            if len(self._run_errors) > 1:
+            if len(errors) > 1:
                 error, cause = (
-                    RuntimeError(f"{len(self._run_errors)} raised. Re-raising first."),
+                    RuntimeError(f"{len(errors)} raised. Re-raising first."),
                     error,
                 )
+
             raise error from cause
 
     def _get_result(self, taskid):
@@ -569,7 +564,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         batch_dir, name = os.path.split(pyscript)
         name = ".".join(name.split(".")[:-1])
         batchscript = "\n".join(
-            (self._template.rstrip("\n"), shlex.join([sys.executable, pyscript]))
+            (self._template.rstrip("\n"), f"{sys.executable} {pyscript}")
         )
         batchscriptfile = os.path.join(batch_dir, "batchscript_%s.sh" % name)
         with open(batchscriptfile, "w") as fp:
