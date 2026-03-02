@@ -34,6 +34,11 @@ class MultiprocTestInterface(nib.BaseInterface):
         return outputs
 
 
+class ErrorInterface(MultiprocTestInterface):
+    def _run_interface(self, runtime):
+        raise RuntimeError("This is an error")
+
+
 @pytest.mark.skipif(
     sys.version_info >= (3, 8), reason="multiprocessing issues in Python 3.8"
 )
@@ -157,3 +162,19 @@ def test_hold_job_until_procs_available(tmpdir):
 
     max_threads = 2
     pipe.run(plugin="MultiProc", plugin_args={"n_procs": max_threads})
+
+
+def test_error_run_without_submitting(tmp_path):
+    wf = pe.Workflow(name='rws', base_dir=tmp_path)
+    n1 = pe.Node(MultiprocTestInterface(), name='n1')
+    n1.inputs.input1 = 1
+    n2 = pe.Node(ErrorInterface(), name='n2', run_without_submitting=True)
+    n3 = pe.Node(MultiprocTestInterface(), name='n3')
+
+    wf.connect([
+        (n1, n2, [('output1', 'input1')]),
+        (n2, n3, [('output1', 'input1')]),
+    ]),
+
+    with pytest.raises(RuntimeError):
+        wf.run(plugin='MultiProc')
