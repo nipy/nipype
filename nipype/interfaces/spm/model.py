@@ -316,7 +316,7 @@ class EstimateModel(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth = os.path.dirname(self.inputs.spm_mat_file)
-        outtype = "nii" if "12" in self.version.split(".")[0] else "img"
+        outtype = "nii" if self.version.split(".")[0] in ["12", "25"] else "img"
         spm = load_spm_mat(self.inputs.spm_mat_file, struct_as_record=False)
 
         betas = [vbeta.fname[0] for vbeta in spm["SPM"][0, 0].Vbeta[0]]
