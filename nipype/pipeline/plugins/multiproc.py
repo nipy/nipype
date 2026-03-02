@@ -272,6 +272,7 @@ class MultiProcPlugin(DistributedPluginBase):
             free_gpu_slots,
             self.n_gpu_procs,
         )
+
         if self._stats != stats:
             tasks_list_msg = ""
 
@@ -389,6 +390,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     self.procs[jobid].run(updatehash=updatehash)
                 except Exception:
                     traceback = format_exception(*sys.exc_info())
+                    self._run_errors.append(traceback)
                     self._clean_queue(
                         jobid, graph, result={"result": None, "traceback": traceback}
                     )
