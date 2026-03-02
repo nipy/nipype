@@ -115,8 +115,10 @@ jobs:
           uv tool install --with=tox-uv --with=tox-gh-actions tox
       - name: Show tox config
         run: tox c
+      - name: Setup test suite
+        run: tox run -vv --notest
       - name: Run tox
-        run: tox -v --exit-and-dump-after 1200
+        run: tox -v --skip-pkg-install --exit-and-dump-after 1200
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -156,8 +158,6 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Install tox
         run: uv tool install --with=tox-uv tox
-      - name: Show tox config
-        run: tox c
       - name: Show tox config (this call)
         run: tox c -e ${{ matrix.check }}
       - name: Run check

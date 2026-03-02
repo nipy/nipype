@@ -55,9 +55,11 @@ jobs:
           uv tool install --with=tox-uv --with=tox-gh-actions tox
       - name: Show tox config
         run: tox c
+      - name: Setup test suite
+        run: tox run -vv --notest
       - name: Run tox
         id: pre
-        run: tox -v --exit-and-dump-after 1200
+        run: tox -v --skip-pkg-install --exit-and-dump-after 1200
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
