@@ -85,22 +85,17 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        dependencies: [none, full, pre]
+        dependencies: [none, full]
         include:
           - os: ubuntu-latest
             python-version: "3.10"
             dependencies: min
         exclude:
           # Skip some intermediate versions for full tests
-          - python-version: "3.10"
-            dependencies: full
           - python-version: "3.11"
             dependencies: full
-          # Do not test pre-releases for versions out of SPEC0
-          - python-version: "3.10"
-            dependencies: pre
-          - python-version: "3.11"
-            dependencies: pre
+          - python-version: "3.12"
+            dependencies: full
 
     env:
       DEPENDS: ${{ matrix.dependencies }}
@@ -120,8 +115,10 @@ jobs:
           uv tool install --with=tox-uv --with=tox-gh-actions tox
       - name: Show tox config
         run: tox c
+      - name: Setup test suite
+        run: tox run -vv --notest
       - name: Run tox
-        run: tox -v --exit-and-dump-after 1200
+        run: tox -v --skip-pkg-install --exit-and-dump-after 1200
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -161,8 +158,6 @@ jobs:
         uses: astral-sh/setup-uv@v7
       - name: Install tox
         run: uv tool install --with=tox-uv tox
-      - name: Show tox config
-        run: tox c
       - name: Show tox config (this call)
         run: tox c -e ${{ matrix.check }}
       - name: Run check
