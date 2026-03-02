@@ -801,7 +801,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         default_value=1,
         usedefault=True,
         nohash=True,
-        desc="Number of openmp threads to use"
+        desc="Number of openmp threads to use",
     )
     is_shelled = traits.Bool(
         False,
@@ -961,7 +961,7 @@ class Eddy(FSLCommand):
             self._use_cuda()
 
     def _num_threads_update(self):
-        if self.inputs.use_cuda and gpu_count()>0:
+        if self.inputs.use_cuda and gpu_count() > 0:
             self.inputs.num_threads = 1
         self._num_threads = self.inputs.num_threads
         if not isdefined(self.inputs.num_threads):
@@ -971,7 +971,7 @@ class Eddy(FSLCommand):
             self.inputs.environ["OMP_NUM_THREADS"] = str(self.inputs.num_threads)
 
     def _use_cuda(self):
-        if self.inputs.use_cuda and gpu_count()>0:
+        if self.inputs.use_cuda and gpu_count() > 0:
             self.inputs.num_threads = 1
             # eddy_cuda usually link to eddy_cudaX.X but some versions miss the symlink
             # anyway in newer fsl versions eddy automatically use cuda on cuda-capable systems
