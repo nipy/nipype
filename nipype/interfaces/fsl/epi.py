@@ -932,10 +932,10 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.slice2vol_interp = 'trilinear'
     >>> eddy.inputs.slice_order = 'epi_slspec.txt'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_cuda --flm=quadratic --ff=10.0 \
+    'eddy_cpu --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --mporder=6 --niter=5 --nvoxhp=1000 \
+--interp=spline --resamp=jac --mporder=6 --niter=5 --nthr=1 --nvoxhp=1000 \
 --out=.../eddy_corrected --s2v_interp=trilinear --s2v_lambda=1 \
 --s2v_niter=5 --slspec=epi_slspec.txt --slm=none'
     >>> res = eddy.run()     # doctest: +SKIP
