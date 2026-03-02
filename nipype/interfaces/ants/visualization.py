@@ -28,7 +28,7 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     )
     mask_image = traits.Either(
         "none",
-        File(exists=True),
+        traits.File(exists=True),
         argstr="%s",
         desc="mask image",
         position=3,

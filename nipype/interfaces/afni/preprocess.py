@@ -2860,9 +2860,9 @@ class TNorm(AFNICommand):
     >>> tnorm = afni.TNorm()
     >>> tnorm.inputs.in_file = 'functional.nii'
     >>> tnorm.inputs.norm2 = True
-    >>> tnorm.inputs.out_file = 'errts+tlrc'
+    >>> tnorm.inputs.out_file = 'rm.errts.unit errts+tlrc'
     >>> tnorm.cmdline
-    '3dTnorm -norm2 -prefix errts+tlrc functional.nii'
+    '3dTnorm -norm2 -prefix rm.errts.unit errts+tlrc functional.nii'
     >>> res = tshift.run()  # doctest: +SKIP
 
     """
