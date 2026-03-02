@@ -44,6 +44,11 @@ def test_Dcm2niix_inputs():
             argstr="-m %d",
             usedefault=True,
         ),
+        name_conflicts=dict(
+            argstr="-w %d",
+            descr="Write behavior for name conflicts - [0=skip duplicates, 1=overwrite, 2=add suffix]",
+            usedefault=True,
+        ),
         out_filename=dict(
             argstr="-f %s",
         ),
