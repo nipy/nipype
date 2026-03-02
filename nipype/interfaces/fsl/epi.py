@@ -575,8 +575,8 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr="--bvals=%s",
         desc="File containing the b-values for all volumes in --imain",
     )
-    out_base = traits.Str(
-        default_value="eddy_corrected",
+    out_base = File(
+        "eddy_corrected",
         usedefault=True,
         argstr="--out=%s",
         desc="Basename for output image",
@@ -753,7 +753,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         requires=["mporder"],
         min_ver="5.0.11",
     )
-    slice_order = traits.File(
+    slice_order = File(
         exists=True,
         argstr="--slspec=%s",
         desc="Name of text file completely specifying slice/group acquisition",
@@ -761,7 +761,7 @@ class EddyInputSpec(FSLCommandInputSpec):
         xor=["json"],
         min_ver="5.0.11",
     )
-    json = traits.File(
+    json = File(
         exists=True,
         argstr="--json=%s",
         desc="Name of .json text file with information about slice timing",
@@ -1346,14 +1346,10 @@ class EPIDeWarpInputSpec(FSLCommandInputSpec):
         desc="2D spatial gaussing smoothing \
                        stdev (default = 2mm)",
     )
-    vsm = traits.String(genfile=True, desc="voxel shift map", argstr="--vsm %s")
-    exfdw = traits.String(
-        desc="dewarped example func volume", genfile=True, argstr="--exfdw %s"
-    )
-    epidw = traits.String(
-        desc="dewarped epi volume", genfile=False, argstr="--epidw %s"
-    )
-    tmpdir = traits.String(genfile=True, desc="tmpdir", argstr="--tmpdir %s")
+    vsm = File(genfile=True, desc="voxel shift map", argstr="--vsm %s")
+    exfdw = File(desc="dewarped example func volume", genfile=True, argstr="--exfdw %s")
+    epidw = File(desc="dewarped epi volume", genfile=False, argstr="--epidw %s")
+    tmpdir = File(genfile=True, desc="tmpdir", argstr="--tmpdir %s")
     nocleanup = traits.Bool(
         True, usedefault=True, desc="no cleanup", argstr="--nocleanup"
     )
