@@ -17,6 +17,6 @@ for NAME in $(git shortlog -nse $RELEASE.. | cut -f2-); do
 done
 
 # sort and write
-sort $MAILMAP > .tmpmailmap
+LC_ALL=C sort -s $MAILMAP > .tmpmailmap
 cp .tmpmailmap $MAILMAP
 rm .tmpmailmap
