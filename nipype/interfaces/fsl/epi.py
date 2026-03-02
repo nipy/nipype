@@ -910,7 +910,7 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    'eddy_openmp --flm=quadratic --ff=10.0 \
+    'eddy_cpu --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
