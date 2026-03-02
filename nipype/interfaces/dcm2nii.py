@@ -406,7 +406,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compression = 5
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
-    'dcm2niix -b y -z y -5 -x n -t n -m 0 -o ds005 -s n -v n dicomdir'
+    'dcm2niix -b y -z y -5 -x n -t n -m 0 -w 2 -o ds005 -s n -v n dicomdir'
     >>> converter.run() # doctest: +SKIP
 
     In the example below, we note that the current version of dcm2niix
@@ -419,7 +419,7 @@ class Dcm2niix(CommandLine):
     >>> converter.inputs.compression = 5
     >>> converter.inputs.output_dir = 'ds005'
     >>> converter.cmdline
-    'dcm2niix -b y -z y -5 -x n -t n -m 0 -o ds005 -s n -v n .'
+    'dcm2niix -b y -z y -5 -x n -t n -m 0 -w 2 -o ds005 -s n -v n .'
     >>> converter.run() # doctest: +SKIP
     """
 
