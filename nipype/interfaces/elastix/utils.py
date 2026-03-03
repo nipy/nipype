@@ -5,6 +5,7 @@ Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
 
 """
+
 import os.path as op
 
 from ... import logging

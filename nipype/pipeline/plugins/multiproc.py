@@ -334,7 +334,7 @@ class MultiProcPlugin(DistributedPluginBase):
                         continue
 
             # Check requirements of this job
-            next_job_gb = min(self.procs[jobid].mem_gb, self.memory_gb)
+            next_job_gb = min(self.procs[jobid].mem_gb_runtime, self.memory_gb)
             next_job_th = min(self.procs[jobid].n_procs, self.processors)
             next_job_gpu_th = min(self.procs[jobid].n_procs, self.n_gpu_procs)
 

@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs"""
+
 import os
 import sys
 import pickle
@@ -177,6 +178,9 @@ def write_node_report(node, result=None, is_mapnode=False):
     for prop in ("cmdline", "mem_peak_gb", "cpu_percent"):
         if hasattr(result.runtime, prop):
             rst_dict[prop] = getattr(result.runtime, prop)
+
+    if node.ram_estimator_str:
+        rst_dict["ram_estimator"] = node.ram_estimator_str
 
     lines.append(write_rst_dict(rst_dict))
 

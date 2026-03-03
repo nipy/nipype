@@ -4,6 +4,7 @@
 Module to draw an html gantt chart from logfile produced by
 ``nipype.utils.profiler.log_nodes_cb()``
 """
+
 # Import packages
 import random
 import datetime

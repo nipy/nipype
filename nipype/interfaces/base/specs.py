@@ -8,6 +8,7 @@ Base I/O specifications for Nipype interfaces
 Define the API for the I/O of interfaces
 
 """
+
 import os
 from inspect import isclass
 from copy import deepcopy

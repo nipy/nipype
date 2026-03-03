@@ -8,6 +8,7 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 - nitime.viz.drawmatrix_channels
 
 """
+
 import numpy as np
 import tempfile
 
@@ -88,11 +89,9 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
         "``file_name_{coherence,timedelay}``"
     )
 
-    output_figure_file = File(
-        desc="""\
+    output_figure_file = File(desc="""\
 File to write output figures (coherence,time-delay) with file-names:
-``file_name_{coherence,timedelay}``. Possible formats: .png,.svg,.pdf,.jpg,..."""
-    )
+``file_name_{coherence,timedelay}``. Possible formats: .png,.svg,.pdf,.jpg,...""")
 
     figure_type = traits.Enum(
         "matrix",

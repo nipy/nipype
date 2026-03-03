@@ -10,6 +10,7 @@ The I/O specifications corresponding to these base
 interfaces are found in the ``specs`` module.
 
 """
+
 import os
 import subprocess as sp
 import shlex
@@ -444,12 +445,9 @@ class BaseInterface(Interface):
             na_names = aggregate_names.intersection(_na_outputs)
             if na_names:
                 # XXX Change to TypeError in Nipype 2.0
-                raise KeyError(
-                    """\
+                raise KeyError("""\
 Output trait(s) %s not available in version %s of interface %s.\
-"""
-                    % (", ".join(na_names), self.version, self.__class__.__name__)
-                )
+""" % (", ".join(na_names), self.version, self.__class__.__name__))
 
         for key in aggregate_names:  # Final aggregation
             val = predicted_outputs[key]
