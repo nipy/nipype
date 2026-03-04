@@ -4,6 +4,7 @@
 The maths module provides higher-level interfaces to some of the operations
 that can be performed with the fslmaths command-line program.
 """
+
 import os
 import numpy as np
 
@@ -23,13 +24,13 @@ class MathsInput(FSLCommandInputSpec):
         *_dtypes,
         position=1,
         argstr="-dt %s",
-        desc=("datatype to use for calculations (default is float)")
+        desc=("datatype to use for calculations (default is float)"),
     )
     output_datatype = traits.Enum(
         *_dtypes,
         position=-1,
         argstr="-odt %s",
-        desc=("datatype to use for output (default uses input type)")
+        desc=("datatype to use for output (default uses input type)"),
     )
 
     nan2zeros = traits.Bool(

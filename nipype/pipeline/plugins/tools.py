@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution"""
+
 import os
 import getpass
 from socket import gethostname
@@ -27,18 +28,12 @@ def report_crash(node, traceback=None, hostname=None):
         traceback += """
 
 When creating this crashfile, the results file corresponding
-to the node could not be found.""".splitlines(
-            keepends=True
-        )
+to the node could not be found.""".splitlines(keepends=True)
     except Exception as exc:
         traceback += """
 
 During the creation of this crashfile triggered by the above exception,
-another exception occurred:\n\n{}.""".format(
-            exc
-        ).splitlines(
-            keepends=True
-        )
+another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
     else:
         if getattr(result, "runtime", None):
             if isinstance(result.runtime, list):
@@ -52,7 +47,7 @@ another exception occurred:\n\n{}.""".format(
     timeofcrash = strftime("%Y%m%d-%H%M%S")
     try:
         login_name = getpass.getuser()
-    except KeyError:
+    except (KeyError, OSError):
         login_name = f"UID{os.getuid():d}"
     crashfile = f"crash-{timeofcrash}-{login_name}-{name}-{uuid.uuid4()}"
     crashdir = node.config["execution"].get("crashdump_dir", os.getcwd())

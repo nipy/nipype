@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provides interfaces to various commands provided by FreeSurfer"""
+
 import os
 import os.path as op
 from glob import glob
@@ -1975,7 +1976,7 @@ class BBRegister(FSCommand):
                 outputs["out_fsl_file"] = op.abspath(_in.out_fsl_file)
 
         if isdefined(_in.init_cost_file):
-            if isinstance(_in.out_fsl_file, bool):
+            if isinstance(_in.init_cost_file, bool):
                 outputs["init_cost_file"] = outputs["out_reg_file"] + ".initcost"
             else:
                 outputs["init_cost_file"] = op.abspath(_in.init_cost_file)

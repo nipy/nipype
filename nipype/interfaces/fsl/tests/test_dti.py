@@ -295,7 +295,7 @@ def test_Vec_reg():
             infile="infile",
             outfile="outfile",
             refVolName="MNI152",
-            **{name: settings[1]}
+            **{name: settings[1]},
         )
         assert (
             vrg4.cmdline == vrg4.cmd + " -i infile -o outfile -r MNI152 " + settings[0]

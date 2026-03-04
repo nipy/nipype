@@ -32,9 +32,7 @@ def test_MultipleRegressDesign(tmpdir):
 
     expected_content = {}
 
-    expected_content[
-        "design_mat"
-    ] = """/NumWaves       3
+    expected_content["design_mat"] = """/NumWaves       3
 /NumPoints      3
 /PPheights      3.000000e+00 5.000000e-01 1.000000e+00
 
@@ -44,9 +42,7 @@ def test_MultipleRegressDesign(tmpdir):
 2.000000e+00 5.000000e-01 1.000000e+00
 """
 
-    expected_content[
-        "design_con"
-    ] = """/ContrastName1   voice_and_age
+    expected_content["design_con"] = """/ContrastName1   voice_and_age
 /ContrastName2   just_BMI
 /NumWaves       3
 /NumContrasts   2
@@ -58,9 +54,7 @@ def test_MultipleRegressDesign(tmpdir):
 1.000000e+00 0.000000e+00 0.000000e+00
 """
 
-    expected_content[
-        "design_fts"
-    ] = """/NumWaves       2
+    expected_content["design_fts"] = """/NumWaves       2
 /NumContrasts   2
 
 /Matrix
@@ -68,9 +62,7 @@ def test_MultipleRegressDesign(tmpdir):
 0 1
 """
 
-    expected_content[
-        "design_grp"
-    ] = """/NumWaves       1
+    expected_content["design_grp"] = """/NumWaves       1
 /NumPoints      3
 
 /Matrix

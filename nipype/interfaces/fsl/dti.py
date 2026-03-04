@@ -4,6 +4,7 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 """
+
 import os
 import warnings
 

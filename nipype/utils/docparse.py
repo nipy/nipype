@@ -12,6 +12,7 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
+
 import subprocess
 from ..interfaces.base import CommandLine
 from .misc import is_container
