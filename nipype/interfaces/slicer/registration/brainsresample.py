@@ -103,5 +103,5 @@ class BRAINSResample(SEMLikeCommandLine):
 
     input_spec = BRAINSResampleInputSpec
     output_spec = BRAINSResampleOutputSpec
-    _cmd = "Slicer --launch BRAINSResample "
+    _cmd = "BRAINSResample "
     _outputs_filenames = {"outputVolume": "outputVolume.nii"}
