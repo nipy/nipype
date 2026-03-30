@@ -119,7 +119,7 @@ jobs:
         run: tox run -vv --notest
       - name: Run tox
         run: tox -v --skip-pkg-install --exit-and-dump-after 1200
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         if: ${{ always() }}
