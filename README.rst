@@ -8,30 +8,30 @@
 
    * - Code
      -
-       .. image:: https://img.shields.io/pypi/pyversions/nipype.svg
-          :target: https://pypi.python.org/pypi/nipype/
-          :alt: Supported Python versions
+      .. image:: https://img.shields.io/pypi/pyversions/nipype.svg
+         :target: https://pypi.python.org/pypi/nipype/
+         :alt: Supported Python versions
 
    * - Tests
      -
-       .. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
-          :target: https://codecov.io/gh/nipy/nipype
-          :alt: codecov badge
-       .. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
-          :target: https://travis-ci.org/nipy/nipype
-          :alt: Travis CI badge
-       .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
-          :target: https://circleci.com/gh/nipy/nipype/tree/master
-          :alt: CircleCI badge
+      .. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
+         :target: https://codecov.io/gh/nipy/nipype
+         :alt: codecov badge
+      .. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
+         :target: https://travis-ci.org/nipy/nipype
+         :alt: Travis CI badge
+      .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
+         :target: https://circleci.com/gh/nipy/nipype/tree/master
+         :alt: CircleCI badge
 
    * - PyPI
      -
-       .. image:: https://img.shields.io/pypi/v/nipype.svg
-          :target: https://pypi.python.org/pypi/nipype/
-          :alt: PyPI version
-       .. image:: https://img.shields.io/pypi/status/nipype.svg
-          :target: https://pypi.python.org/pypi/nipype/
-          :alt: Development Status
+      .. image:: https://img.shields.io/pypi/v/nipype.svg
+         :target: https://pypi.python.org/pypi/nipype/
+         :alt: PyPI version
+      .. image:: https://img.shields.io/pypi/status/nipype.svg
+         :target: https://pypi.python.org/pypi/nipype/
+         :alt: Development Status
       .. image:: https://img.shields.io/pypi/dm/nipype.svg
          :target: https://pypistats.org/packages/nipype
          :alt: PyPI - Downloads
