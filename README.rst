@@ -1,6 +1,6 @@
-========================================================
-NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
-========================================================
+.. image:: https://raw.githubusercontent.com/nipy/nipype/master/doc/_static/nipype-banner-bg.png
+   :target: https://nipy.org/nipype
+   :alt: Nipype logo
 
 .. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
   :target: https://travis-ci.org/nipy/nipype
