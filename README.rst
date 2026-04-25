@@ -2,41 +2,60 @@
    :target: https://nipy.org/nipype
    :alt: Nipype logo
 
-.. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
-  :target: https://travis-ci.org/nipy/nipype
+.. list-table::
+   :widths: 20 80
+   :header-rows: 0
 
-.. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
-  :target: https://circleci.com/gh/nipy/nipype/tree/master
+   * - Code
+     -
+       .. image:: https://img.shields.io/pypi/pyversions/nipype.svg
+          :target: https://pypi.python.org/pypi/nipype/
+          :alt: Supported Python versions
 
-.. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/nipy/nipype
+   * - Tests
+     -
+       .. image:: https://codecov.io/gh/nipy/nipype/branch/master/graph/badge.svg
+          :target: https://codecov.io/gh/nipy/nipype
+          :alt: codecov badge
+       .. image:: https://travis-ci.org/nipy/nipype.svg?branch=master
+          :target: https://travis-ci.org/nipy/nipype
+          :alt: Travis CI badge
+       .. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
+          :target: https://circleci.com/gh/nipy/nipype/tree/master
+          :alt: CircleCI badge
 
-.. image:: https://api.codacy.com/project/badge/Grade/452bfc0d4de342c99b177d2c29abda7b
-  :target: https://www.codacy.com/app/nipype/nipype?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nipy/nipype&amp;utm_campaign=Badge_Grade
+   * - PyPI
+     -
+       .. image:: https://img.shields.io/pypi/v/nipype.svg
+          :target: https://pypi.python.org/pypi/nipype/
+          :alt: PyPI version
+       .. image:: https://img.shields.io/pypi/status/nipype.svg
+          :target: https://pypi.python.org/pypi/nipype/
+          :alt: Development Status
+      .. image:: https://img.shields.io/pypi/dm/nipype.svg
+         :target: https://pypistats.org/packages/nipype
+         :alt: PyPI - Downloads
 
-.. image:: https://img.shields.io/pypi/v/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: Latest Version
+   * - Packages
+     -
+      .. image:: https://img.shields.io/conda/vn/conda-forge/nipype
+         :target: https://anaconda.org/conda-forge/nipype
+         :alt: Conda package
 
-.. image:: https://img.shields.io/pypi/pyversions/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: Supported Python versions
+   * - License & DOI
+     -
+      .. image:: https://img.shields.io/pypi/l/nipype.svg
+         :target: https://pypi.python.org/pypi/nipype/
+         :alt: License
+      .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596855.svg
+         :target: https://doi.org/10.5281/zenodo.596855
+         :alt: Citable DOI
 
-.. image:: https://img.shields.io/pypi/status/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: Development Status
-
-.. image:: https://img.shields.io/pypi/l/nipype.svg
-    :target: https://pypi.python.org/pypi/nipype/
-    :alt: License
-
-.. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
-    :target: http://gitter.im/nipy/nipype
-    :alt: Chat
-
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596855.svg
-   :target: https://doi.org/10.5281/zenodo.596855
-   :alt: Citable DOI
+    * - Community
+      -
+       .. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
+          :target: http://gitter.im/nipy/nipype
+          :alt: Chat
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
