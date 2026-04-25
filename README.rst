@@ -96,9 +96,7 @@ If you have a problem or would like to ask a question about how to do something 
 `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a
 platform similar to StackOverflow but dedicated to neuroinformatics.
 
-To participate in the Nipype development related discussions please use the following mailing list::
-
-       http://mail.python.org/mailman/listinfo/neuroimaging
+To participate in the Nipype development related discussions please use the `neuroimaging@python.org mailing list <http://mail.python.org/mailman/listinfo/neuroimaging>`_.
 
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
