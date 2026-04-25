@@ -51,11 +51,11 @@
          :target: https://doi.org/10.5281/zenodo.596855
          :alt: Citable DOI
 
-    * - Community
-      -
-       .. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
-          :target: http://gitter.im/nipy/nipype
-          :alt: Chat
+   * - Community
+     -
+      .. image:: https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg?style=flat
+         :target: http://gitter.im/nipy/nipype
+         :alt: Chat
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
