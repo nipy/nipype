@@ -86,7 +86,7 @@ existing pipeline systems.
 Documentation
 -------------
 
-Please see `nipy.org/nipype <http://nipy.org/nipype>`_ for the Nipype 
+Please see `nipy.org/nipype <http://nipy.org/nipype>`_ for the Nipype
 documentation.
 
 Python 2 Statement
