@@ -67,15 +67,8 @@ existing pipeline systems.
 Documentation
 -------------
 
-Please see the ``doc/README.txt`` document for information on our
+Please see `nipy.org/nipype <http://nipy.org/nipype>`_ for the Nipype 
 documentation.
-
-Website
--------
-
-Information specific to Nipype is located here::
-
-    http://nipy.org/nipype
 
 Python 2 Statement
 ------------------
