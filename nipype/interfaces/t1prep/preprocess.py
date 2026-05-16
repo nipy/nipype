@@ -7,10 +7,8 @@
 """
 
 import os
-import sys
 
 from ..base import (
-    CommandLine,
     CommandLineInputSpec,
     TraitedSpec,
     File,
@@ -19,12 +17,9 @@ from ..base import (
     traits,
     isdefined,
 )
+from .base import T1PrepCommand
 
 __docformat__ = "restructuredtext"
-
-# Python interpreter used to invoke the t1prep modules.  Evaluated once at
-# import time so that the correct environment is picked up automatically.
-_PYTHON = sys.executable
 
 
 # ---------------------------------------------------------------------------
@@ -255,7 +250,7 @@ class T1PrepOutputSpec(TraitedSpec):
     label_dir = Directory(desc="Label sub-directory (atlas ROI JSON).")
 
 
-class T1Prep(CommandLine):
+class T1Prep(T1PrepCommand):
     """Nipype interface for the T1Prep T1-weighted MRI preprocessing pipeline.
 
     T1Prep preprocesses T1-weighted MRI data through three stages:
@@ -301,12 +296,9 @@ class T1Prep(CommandLine):
     https://github.com/ChristianGaser/T1Prep
     """
 
-    _cmd = f"{_PYTHON} -m t1prep.t1prep"
+    _module = "t1prep.t1prep"
     input_spec = T1PrepInputSpec
     output_spec = T1PrepOutputSpec
-
-    def _gen_filename(self, name):
-        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -331,7 +323,7 @@ class T1Prep(CommandLine):
 class T1PrepSegmentInputSpec(CommandLineInputSpec):
     """Input specification for :class:`T1PrepSegment`."""
 
-    input = File(
+    in_file = File(
         exists=True,
         argstr="--input %s",
         mandatory=True,
@@ -480,7 +472,7 @@ class T1PrepSegmentOutputSpec(TraitedSpec):
     label_dir = Directory(desc="Label output directory with atlas ROI JSON files.")
 
 
-class T1PrepSegment(CommandLine):
+class T1PrepSegment(T1PrepCommand):
     """Nipype interface for the T1Prep segmentation module (``t1prep.segment``).
 
     Performs skull-stripping, bias field correction, and tissue segmentation
@@ -498,7 +490,7 @@ class T1PrepSegment(CommandLine):
     Examples
     --------
     >>> seg = T1PrepSegment()
-    >>> seg.inputs.input = 'sub-01_T1w.nii.gz'
+    >>> seg.inputs.in_file = 'sub-01_T1w.nii.gz'
     >>> seg.inputs.mri_dir = 'out/mri'
     >>> seg.inputs.report_dir = 'out/report'
     >>> seg.inputs.label_dir = 'out/label'
@@ -510,7 +502,7 @@ class T1PrepSegment(CommandLine):
     Save native-space GM and WM maps plus CSF:
 
     >>> seg = T1PrepSegment()
-    >>> seg.inputs.input = 'sub-01_T1w.nii.gz'
+    >>> seg.inputs.in_file = 'sub-01_T1w.nii.gz'
     >>> seg.inputs.mri_dir = 'out/mri'
     >>> seg.inputs.report_dir = 'out/report'
     >>> seg.inputs.label_dir = 'out/label'
@@ -520,12 +512,9 @@ class T1PrepSegment(CommandLine):
     'python -m t1prep.segment --csf --p --input sub-01_T1w.nii.gz --label_dir out/label --mri_dir out/mri --report_dir out/report'
     """
 
-    _cmd = f"{_PYTHON} -m t1prep.segment"
+    _module = "t1prep.segment"
     input_spec = T1PrepSegmentInputSpec
     output_spec = T1PrepSegmentOutputSpec
-
-    def _gen_filename(self, name):
-        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

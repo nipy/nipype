@@ -12,12 +12,10 @@
 """
 
 import os
-import sys
 
 from ..base import (
     BaseInterface,
     BaseInterfaceInputSpec,
-    CommandLine,
     CommandLineInputSpec,
     TraitedSpec,
     File,
@@ -25,10 +23,9 @@ from ..base import (
     traits,
     isdefined,
 )
+from .base import T1PrepCommand, import_cat_surf
 
 __docformat__ = "restructuredtext"
-
-_PYTHON = sys.executable
 
 
 # ---------------------------------------------------------------------------
@@ -282,7 +279,7 @@ class T1PrepSurfaceEstimationOutputSpec(TraitedSpec):
     )
 
 
-class T1PrepSurfaceEstimation(CommandLine):
+class T1PrepSurfaceEstimation(T1PrepCommand):
     """Nipype interface for the T1Prep surface estimation module.
 
     Reconstructs the cortical central surface from hemisphere partition
@@ -323,12 +320,9 @@ class T1PrepSurfaceEstimation(CommandLine):
     https://github.com/ChristianGaser/CAT-Surface
     """
 
-    _cmd = f"{_PYTHON} -m t1prep.surface_estimation"
+    _module = "t1prep.surface_estimation"
     input_spec = T1PrepSurfaceEstimationInputSpec
     output_spec = T1PrepSurfaceEstimationOutputSpec
-
-    def _gen_filename(self, name):
-        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -449,12 +443,7 @@ class T1PrepCatSurf(BaseInterface):
     output_spec = T1PrepCatSurfOutputSpec
 
     def _run_interface(self, runtime):
-        # Support both the t1prep re-export and a standalone cat_surf install.
-        try:
-            from t1prep import cat_surf  # noqa: F401 (prefer t1prep alias)
-        except ImportError:
-            import cat_surf  # type: ignore
-
+        cat_surf = import_cat_surf()
         v, fcs = cat_surf.read_surface(self.inputs.in_surface)
         vals = cat_surf.read_values(self.inputs.in_values)
         smoothed = cat_surf.smooth_heatkernel(v, fcs, vals, fwhm=self.inputs.fwhm)

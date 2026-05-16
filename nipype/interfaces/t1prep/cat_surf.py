@@ -83,17 +83,9 @@ from ..base import (
     traits,
     isdefined,
 )
+from .base import import_cat_surf as _import_cat_surf
 
 __docformat__ = "restructuredtext"
-
-
-def _import_cat_surf():
-    """Import cat_surf, preferring the t1prep re-export namespace."""
-    try:
-        from t1prep import cat_surf  # type: ignore
-    except ImportError:
-        import cat_surf  # type: ignore
-    return cat_surf
 
 
 # ===========================================================================

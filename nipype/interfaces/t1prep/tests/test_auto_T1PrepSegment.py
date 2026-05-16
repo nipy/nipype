@@ -32,7 +32,7 @@ def test_T1PrepSegment_inputs():
         gz=dict(
             argstr="--gz",
         ),
-        input=dict(
+        in_file=dict(
             argstr="--input %s",
             extensions=None,
             mandatory=True,
