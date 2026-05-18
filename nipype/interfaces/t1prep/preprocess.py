@@ -330,17 +330,17 @@ class T1PrepSegmentInputSpec(CommandLineInputSpec):
         desc="Input T1-weighted NIfTI image (.nii or .nii.gz).",
     )
     mri_dir = Directory(
-        argstr="--mri_dir %s",
+        argstr="--mri-dir %s",
         mandatory=True,
         desc="Output directory for MRI volumes (segmentations, brain mask, deformations).",
     )
     report_dir = Directory(
-        argstr="--report_dir %s",
+        argstr="--report-dir %s",
         mandatory=True,
         desc="Output directory for report log files.",
     )
     label_dir = Directory(
-        argstr="--label_dir %s",
+        argstr="--label-dir %s",
         mandatory=True,
         desc="Output directory for label and atlas-ROI JSON outputs.",
     )
