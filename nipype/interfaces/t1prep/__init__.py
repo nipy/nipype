@@ -36,7 +36,7 @@ Base classes
 The full ``cat_surf`` function surface is also available as individual
 interfaces in :mod:`nipype.interfaces.t1prep.cat_surf`, all exported
 directly from this package (e.g. :class:`CatSurfVolThicknessPbt`,
-:class:`CatSurfSurfDeform`, :class:`CatSurfVolMarchingCubes`, etc.).
+:class:`CatSurfDeform`, :class:`CatSurfVolMarchingCubes`, etc.).
 
 References
 ----------
@@ -69,18 +69,18 @@ from .cat_surf import (
     CatSurfRemoveIntersections,
     CatSurfReduceMesh,
     # Surface processing / deformation
-    CatSurfSurfDeform,
-    CatSurfSurfToPialWhite,
-    CatSurfSurfToSphere,
-    CatSurfSurfWarp,
-    CatSurfSurfAverage,
+    CatSurfDeform,
+    CatSurfToPialWhite,
+    CatSurfToSphere,
+    CatSurfWarp,
+    CatSurfAverage,
     CatSurfResampleToSphere,
     CatSurfResampleAnnot,
     # Per-vertex data smoothing / curvature
     CatSurfSmoothHeatkernel,
     CatSurfSmoothMesh,
     CatSurfSmoothedCurvatures,
-    CatSurfSurfCurvature,
+    CatSurfCurvature,
     CatSurfSulcusDepth,
     CatSurfCorrectThicknessFolding,
     # Volume operations
@@ -122,18 +122,18 @@ __all__ = [
     "CatSurfRemoveIntersections",
     "CatSurfReduceMesh",
     # Surface processing / deformation
-    "CatSurfSurfDeform",
-    "CatSurfSurfToPialWhite",
-    "CatSurfSurfToSphere",
-    "CatSurfSurfWarp",
-    "CatSurfSurfAverage",
+    "CatSurfDeform",
+    "CatSurfToPialWhite",
+    "CatSurfToSphere",
+    "CatSurfWarp",
+    "CatSurfAverage",
     "CatSurfResampleToSphere",
     "CatSurfResampleAnnot",
     # Per-vertex data smoothing / curvature
     "CatSurfSmoothHeatkernel",
     "CatSurfSmoothMesh",
     "CatSurfSmoothedCurvatures",
-    "CatSurfSurfCurvature",
+    "CatSurfCurvature",
     "CatSurfSulcusDepth",
     "CatSurfCorrectThicknessFolding",
     # Volume operations

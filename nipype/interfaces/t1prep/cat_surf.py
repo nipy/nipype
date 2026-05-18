@@ -31,21 +31,21 @@ Interfaces
 
 **Surface processing / deformation**
 
-* :class:`CatSurfSurfDeform`           – ``cat_surf.surf_deform``
-* :class:`CatSurfSurfToPialWhite`      – ``cat_surf.surf_to_pial_white``
-* :class:`CatSurfSurfToSphere`         – ``cat_surf.surf_to_sphere``
-* :class:`CatSurfSurfWarp`             – ``cat_surf.surf_warp``
-* :class:`CatSurfSurfAverage`          – ``cat_surf.surf_average``
-* :class:`CatSurfResampleToSphere`     – ``cat_surf.resample_to_sphere``
-* :class:`CatSurfResampleAnnot`        – ``cat_surf.resample_annot``
+* :class:`CatSurfDeform`                   – ``cat_surf.surf_deform``
+* :class:`CatSurfToPialWhite`              – ``cat_surf.surf_to_pial_white``
+* :class:`CatSurfToSphere`                 – ``cat_surf.surf_to_sphere``
+* :class:`CatSurfWarp`                     – ``cat_surf.surf_warp``
+* :class:`CatSurfAverage`                  – ``cat_surf.surf_average``
+* :class:`CatSurfResampleToSphere`         – ``cat_surf.resample_to_sphere``
+* :class:`CatSurfResampleAnnot`            – ``cat_surf.resample_annot``
 
 **Per-vertex data smoothing / curvature**
 
-* :class:`CatSurfSmoothHeatkernel`     – ``cat_surf.smooth_heatkernel``
-* :class:`CatSurfSmoothMesh`           – ``cat_surf.smooth_mesh``
-* :class:`CatSurfSmoothedCurvatures`   – ``cat_surf.smoothed_curvatures``
-* :class:`CatSurfSurfCurvature`        – ``cat_surf.surf_curvature``
-* :class:`CatSurfSulcusDepth`          – ``cat_surf.sulcus_depth``
+* :class:`CatSurfSmoothHeatkernel`        – ``cat_surf.smooth_heatkernel``
+* :class:`CatSurfSmoothMesh`              – ``cat_surf.smooth_mesh``
+* :class:`CatSurfSmoothedCurvatures`      – ``cat_surf.smoothed_curvatures``
+* :class:`CatSurfCurvature`               – ``cat_surf.surf_curvature``
+* :class:`CatSurfSulcusDepth`             – ``cat_surf.sulcus_depth``
 * :class:`CatSurfCorrectThicknessFolding` – ``cat_surf.correct_thickness_folding``
 
 **Volume operations**
@@ -755,7 +755,7 @@ class CatSurfReduceMesh(BaseInterface):
 # ===========================================================================
 
 
-class CatSurfSurfDeformInputSpec(BaseInterfaceInputSpec):
+class CatSurfDeformInputSpec(BaseInterfaceInputSpec):
     vertices = traits.Any(mandatory=True, desc="Input surface vertices (N, 3) float32.")
     faces = traits.Any(mandatory=True, desc="Input surface faces (M, 3) int32.")
     volume_file = File(
@@ -775,12 +775,12 @@ class CatSurfSurfDeformInputSpec(BaseInterfaceInputSpec):
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
 
-class CatSurfSurfDeformOutputSpec(TraitedSpec):
+class CatSurfDeformOutputSpec(TraitedSpec):
     vertices = traits.Any(desc="Deformed surface vertices.")
     faces = traits.Any(desc="Updated face array.")
 
 
-class CatSurfSurfDeform(BaseInterface):
+class CatSurfDeform(BaseInterface):
     """Deform a surface mesh towards an iso-surface in a driving volume.
 
     Wraps
@@ -793,15 +793,15 @@ class CatSurfSurfDeform(BaseInterface):
 
     Examples
     --------
-    >>> node = CatSurfSurfDeform()
+    >>> node = CatSurfDeform()
     >>> node.inputs.vertices = v              # doctest: +SKIP
     >>> node.inputs.faces = fcs               # doctest: +SKIP
     >>> node.inputs.volume_file = 'ppm.nii.gz'
     >>> node.inputs.iterations = 75
     """
 
-    input_spec = CatSurfSurfDeformInputSpec
-    output_spec = CatSurfSurfDeformOutputSpec
+    input_spec = CatSurfDeformInputSpec
+    output_spec = CatSurfDeformOutputSpec
 
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
@@ -829,7 +829,7 @@ class CatSurfSurfDeform(BaseInterface):
 # ---------------------------------------------------------------------------
 
 
-class CatSurfSurfToPialWhiteInputSpec(BaseInterfaceInputSpec):
+class CatSurfToPialWhiteInputSpec(BaseInterfaceInputSpec):
     vertices = traits.Any(mandatory=True, desc="Central surface vertices (N, 3) float32.")
     faces = traits.Any(mandatory=True, desc="Central surface faces (M, 3) int32.")
     thickness = traits.Any(mandatory=True, desc="Per-vertex cortical thickness (N,) float32.")
@@ -844,14 +844,14 @@ class CatSurfSurfToPialWhiteInputSpec(BaseInterfaceInputSpec):
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
 
-class CatSurfSurfToPialWhiteOutputSpec(TraitedSpec):
+class CatSurfToPialWhiteOutputSpec(TraitedSpec):
     pial_vertices = traits.Any(desc="Pial surface vertex array (N, 3).")
     pial_faces = traits.Any(desc="Pial surface face array (M, 3).")
     white_vertices = traits.Any(desc="White matter surface vertex array (N, 3).")
     white_faces = traits.Any(desc="White matter surface face array (M, 3).")
 
 
-class CatSurfSurfToPialWhite(BaseInterface):
+class CatSurfToPialWhite(BaseInterface):
     """Estimate pial and white matter surfaces from a central surface.
 
     Wraps
@@ -863,15 +863,15 @@ class CatSurfSurfToPialWhite(BaseInterface):
 
     Examples
     --------
-    >>> node = CatSurfSurfToPialWhite()
+    >>> node = CatSurfToPialWhite()
     >>> node.inputs.vertices = v              # doctest: +SKIP
     >>> node.inputs.faces = fcs              # doctest: +SKIP
     >>> node.inputs.thickness = t           # doctest: +SKIP
     >>> node.inputs.volume_file = 'hemi.nii.gz'
     """
 
-    input_spec = CatSurfSurfToPialWhiteInputSpec
-    output_spec = CatSurfSurfToPialWhiteOutputSpec
+    input_spec = CatSurfToPialWhiteInputSpec
+    output_spec = CatSurfToPialWhiteOutputSpec
 
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
@@ -902,7 +902,7 @@ class CatSurfSurfToPialWhite(BaseInterface):
 # ---------------------------------------------------------------------------
 
 
-class CatSurfSurfToSphereInputSpec(BaseInterfaceInputSpec):
+class CatSurfToSphereInputSpec(BaseInterfaceInputSpec):
     vertices = traits.Any(mandatory=True, desc="Input surface vertices (N, 3) float32.")
     faces = traits.Any(mandatory=True, desc="Input surface faces (M, 3) int32.")
     stop_at = traits.Int(
@@ -917,12 +917,12 @@ class CatSurfSurfToSphereInputSpec(BaseInterfaceInputSpec):
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
 
-class CatSurfSurfToSphereOutputSpec(TraitedSpec):
+class CatSurfToSphereOutputSpec(TraitedSpec):
     sphere_vertices = traits.Any(desc="Inflated sphere vertex array (N, 3).")
     sphere_faces = traits.Any(desc="Sphere face array (M, 3).")
 
 
-class CatSurfSurfToSphere(BaseInterface):
+class CatSurfToSphere(BaseInterface):
     """Inflate a cortical surface mesh to a sphere.
 
     Wraps
@@ -935,14 +935,14 @@ class CatSurfSurfToSphere(BaseInterface):
 
     Examples
     --------
-    >>> node = CatSurfSurfToSphere()
+    >>> node = CatSurfToSphere()
     >>> node.inputs.vertices = v   # doctest: +SKIP
     >>> node.inputs.faces = fcs    # doctest: +SKIP
     >>> node.inputs.stop_at = 6
     """
 
-    input_spec = CatSurfSurfToSphereInputSpec
-    output_spec = CatSurfSurfToSphereOutputSpec
+    input_spec = CatSurfToSphereInputSpec
+    output_spec = CatSurfToSphereOutputSpec
 
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
@@ -964,7 +964,7 @@ class CatSurfSurfToSphere(BaseInterface):
 # ---------------------------------------------------------------------------
 
 
-class CatSurfSurfWarpInputSpec(BaseInterfaceInputSpec):
+class CatSurfWarpInputSpec(BaseInterfaceInputSpec):
     source_file = File(mandatory=True, desc="Source surface file (central surface).")
     source_sphere_file = File(mandatory=True, desc="Source sphere file.")
     target_file = File(mandatory=True, desc="Target (average) surface file used as registration template.")
@@ -975,11 +975,11 @@ class CatSurfSurfWarpInputSpec(BaseInterfaceInputSpec):
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
 
-class CatSurfSurfWarpOutputSpec(TraitedSpec):
+class CatSurfWarpOutputSpec(TraitedSpec):
     output_sphere_file = File(desc="Registered sphere file.")
 
 
-class CatSurfSurfWarp(BaseInterface):
+class CatSurfWarp(BaseInterface):
     """Perform DARTEL-based spherical surface registration.
 
     Wraps
@@ -990,7 +990,7 @@ class CatSurfSurfWarp(BaseInterface):
 
     Examples
     --------
-    >>> node = CatSurfSurfWarp()
+    >>> node = CatSurfWarp()
     >>> node.inputs.source_file = 'lh.central.sub-01.gii'
     >>> node.inputs.source_sphere_file = 'lh.sphere.sub-01.gii'
     >>> node.inputs.target_file = 'lh.central.freesurfer.gii'
@@ -998,8 +998,8 @@ class CatSurfSurfWarp(BaseInterface):
     >>> node.inputs.output_sphere_file = 'lh.sphere.reg.sub-01.gii'
     """
 
-    input_spec = CatSurfSurfWarpInputSpec
-    output_spec = CatSurfSurfWarpOutputSpec
+    input_spec = CatSurfWarpInputSpec
+    output_spec = CatSurfWarpOutputSpec
 
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
@@ -1024,7 +1024,7 @@ class CatSurfSurfWarp(BaseInterface):
 # ---------------------------------------------------------------------------
 
 
-class CatSurfSurfAverageInputSpec(BaseInterfaceInputSpec):
+class CatSurfAverageInputSpec(BaseInterfaceInputSpec):
     out_file = File(mandatory=True, desc="Output (averaged) surface file path.")
     in_files = traits.List(
         File(exists=True),
@@ -1033,11 +1033,11 @@ class CatSurfSurfAverageInputSpec(BaseInterfaceInputSpec):
     )
 
 
-class CatSurfSurfAverageOutputSpec(TraitedSpec):
+class CatSurfAverageOutputSpec(TraitedSpec):
     out_file = File(desc="Averaged surface file path.")
 
 
-class CatSurfSurfAverage(BaseInterface):
+class CatSurfAverage(BaseInterface):
     """Average two or more surface meshes vertex-wise.
 
     Wraps ``cat_surf.surf_average(out_file, *in_files)``.
@@ -1047,13 +1047,13 @@ class CatSurfSurfAverage(BaseInterface):
 
     Examples
     --------
-    >>> node = CatSurfSurfAverage()
+    >>> node = CatSurfAverage()
     >>> node.inputs.out_file = 'lh.central.sub-01.gii'
     >>> node.inputs.in_files = ['lh.pial.sub-01.gii', 'lh.white.sub-01.gii']  # doctest: +SKIP
     """
 
-    input_spec = CatSurfSurfAverageInputSpec
-    output_spec = CatSurfSurfAverageOutputSpec
+    input_spec = CatSurfAverageInputSpec
+    output_spec = CatSurfAverageOutputSpec
 
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
@@ -1312,7 +1312,7 @@ class CatSurfSmoothedCurvatures(BaseInterface):
 # ---------------------------------------------------------------------------
 
 
-class CatSurfSurfCurvature(BaseInterface):
+class CatSurfCurvature(BaseInterface):
     """Compute curvature-based per-vertex values for a surface mesh.
 
     Wraps
@@ -1324,7 +1324,7 @@ class CatSurfSurfCurvature(BaseInterface):
 
     Examples
     --------
-    >>> node = CatSurfSurfCurvature()
+    >>> node = CatSurfCurvature()
     >>> node.inputs.vertices = v   # doctest: +SKIP
     >>> node.inputs.faces = fcs    # doctest: +SKIP
     >>> node.inputs.curvtype = 11
