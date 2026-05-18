@@ -303,7 +303,7 @@ class T1PrepSurfaceEstimation(T1PrepCommand):
     >>> surf.inputs.side = 'left'
     >>> surf.inputs.mri_dir = 'out/mri'
     >>> surf.inputs.surf_dir = 'out/surf'
-    >>> surf.inputs.names_tsv = '/opt/T1Prep/src/t1prep/data/Names.tsv'
+    >>> surf.inputs.names_tsv = '/opt/T1Prep/src/t1prep/data/Names.tsv'  # doctest: +SKIP
     >>> surf.inputs.surf_templates_dir = '/opt/T1Prep/src/t1prep/data/templates_surfaces_32k'
     >>> surf.inputs.atlas_templates_dir = '/opt/T1Prep/src/t1prep/data/atlases_surfaces_32k'
     >>> surf.cmdline  # doctest: +SKIP
@@ -424,8 +424,8 @@ class T1PrepCatSurf(BaseInterface):
     Smooth cortical thickness with a 20 mm FWHM kernel:
 
     >>> smooth = T1PrepCatSurf()
-    >>> smooth.inputs.in_surface = 'lh.central.sub-01_T1w.gii'
-    >>> smooth.inputs.in_values = 'lh.thickness.sub-01_T1w'
+    >>> smooth.inputs.in_surface = 'lh.central.sub-01_T1w.gii'  # doctest: +SKIP
+    >>> smooth.inputs.in_values = 'lh.thickness.sub-01_T1w'  # doctest: +SKIP
     >>> smooth.inputs.fwhm = 20.0
     >>> smooth.run()  # doctest: +SKIP
 

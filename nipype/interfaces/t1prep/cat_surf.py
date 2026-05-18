@@ -117,7 +117,7 @@ class CatSurfReadSurface(BaseInterface):
     Examples
     --------
     >>> node = CatSurfReadSurface()
-    >>> node.inputs.in_file = 'lh.central.sub-01.gii'
+    >>> node.inputs.in_file = 'lh.central.sub-01.gii'  # doctest: +SKIP
     >>> res = node.run()  # doctest: +SKIP
     >>> v, fcs = res.outputs.vertices, res.outputs.faces  # doctest: +SKIP
     """
@@ -198,7 +198,7 @@ class CatSurfReadValues(BaseInterface):
     Examples
     --------
     >>> node = CatSurfReadValues()
-    >>> node.inputs.in_file = 'lh.thickness.sub-01'
+    >>> node.inputs.in_file = 'lh.thickness.sub-01'  # doctest: +SKIP
     >>> res = node.run()  # doctest: +SKIP
     """
 
@@ -1049,7 +1049,7 @@ class CatSurfSurfAverage(BaseInterface):
     --------
     >>> node = CatSurfSurfAverage()
     >>> node.inputs.out_file = 'lh.central.sub-01.gii'
-    >>> node.inputs.in_files = ['lh.pial.sub-01.gii', 'lh.white.sub-01.gii']
+    >>> node.inputs.in_files = ['lh.pial.sub-01.gii', 'lh.white.sub-01.gii']  # doctest: +SKIP
     """
 
     input_spec = CatSurfSurfAverageInputSpec

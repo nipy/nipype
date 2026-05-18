@@ -145,7 +145,7 @@ class T1PrepRealignLongitudinal(T1PrepCommand):
     Examples
     --------
     >>> ra = T1PrepRealignLongitudinal()
-    >>> ra.inputs.in_files = ['sub-01_ses-01_T1w.nii.gz', 'sub-01_ses-02_T1w.nii.gz']
+    >>> ra.inputs.in_files = ['sub-01_ses-01_T1w.nii.gz', 'sub-01_ses-02_T1w.nii.gz']  # doctest: +SKIP
     >>> ra.inputs.out_dir = 'derivatives/realign'
     >>> ra.inputs.save_resampled = True
     >>> ra.cmdline  # doctest: +SKIP

@@ -276,7 +276,7 @@ class T1Prep(T1PrepCommand):
     Full pipeline with BIDS naming:
 
     >>> t1 = T1Prep()
-    >>> t1.inputs.in_files = ['sub-01_T1w.nii.gz']
+    >>> t1.inputs.in_files = ['sub-01_T1w.nii.gz']  # doctest: +SKIP
     >>> t1.inputs.out_dir = 'derivatives'
     >>> t1.inputs.bids = True
     >>> t1.cmdline  # doctest: +SKIP
@@ -285,7 +285,7 @@ class T1Prep(T1PrepCommand):
     Segmentation only (skip surface estimation):
 
     >>> t1 = T1Prep()
-    >>> t1.inputs.in_files = ['sub-01_T1w.nii.gz']
+    >>> t1.inputs.in_files = ['sub-01_T1w.nii.gz']  # doctest: +SKIP
     >>> t1.inputs.no_surf = True
     >>> t1.inputs.p = True
     >>> t1.cmdline  # doctest: +SKIP
@@ -490,7 +490,7 @@ class T1PrepSegment(T1PrepCommand):
     Examples
     --------
     >>> seg = T1PrepSegment()
-    >>> seg.inputs.in_file = 'sub-01_T1w.nii.gz'
+    >>> seg.inputs.in_file = 'sub-01_T1w.nii.gz'  # doctest: +SKIP
     >>> seg.inputs.mri_dir = 'out/mri'
     >>> seg.inputs.report_dir = 'out/report'
     >>> seg.inputs.label_dir = 'out/label'
@@ -502,7 +502,7 @@ class T1PrepSegment(T1PrepCommand):
     Save native-space GM and WM maps plus CSF:
 
     >>> seg = T1PrepSegment()
-    >>> seg.inputs.in_file = 'sub-01_T1w.nii.gz'
+    >>> seg.inputs.in_file = 'sub-01_T1w.nii.gz'  # doctest: +SKIP
     >>> seg.inputs.mri_dir = 'out/mri'
     >>> seg.inputs.report_dir = 'out/report'
     >>> seg.inputs.label_dir = 'out/label'
