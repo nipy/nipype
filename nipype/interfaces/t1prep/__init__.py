@@ -20,11 +20,6 @@ Sub-module interfaces
     Rigid realignment of longitudinal T1w time-points.  Wraps
     ``python -m t1prep.realign_longitudinal``.
 
-:class:`T1PrepCatSurf`
-    Surface post-processing via the ``cat_surf`` Python API
-    (exposed as ``t1prep.cat_surf``).  Currently wraps heat-kernel
-    smoothing of per-vertex data.
-
 Base classes
 ------------
 :class:`Info`
@@ -38,18 +33,11 @@ interfaces in :mod:`nipype.interfaces.t1prep.cat_surf`, all exported
 directly from this package (e.g. :class:`CatSurfVolThicknessPbt`,
 :class:`CatSurfDeform`, :class:`CatSurfVolMarchingCubes`, etc.).
 
-References
-----------
-Lukas Fisch et al., "deepmriprep: Voxel-based Morphometry (VBM)
-Preprocessing via Deep Neural Networks", arXiv:2408.10656.
-
-Dahnke R, Yotter RA, Gaser C, "Cortical thickness and central surface
-estimation", NeuroImage, 65:226-248, 2013.
 """
 
 from .base import Info, T1PrepCommand
 from .preprocess import T1Prep, T1PrepSegment
-from .surface import T1PrepSurfaceEstimation, T1PrepCatSurf
+from .surface import T1PrepSurfaceEstimation
 from .longitudinal import T1PrepRealignLongitudinal
 from .cat_surf import (
     # I/O
@@ -104,7 +92,6 @@ __all__ = [
     "T1PrepSegment",
     "T1PrepSurfaceEstimation",
     "T1PrepRealignLongitudinal",
-    "T1PrepCatSurf",
     # I/O
     "CatSurfReadSurface",
     "CatSurfWriteSurface",

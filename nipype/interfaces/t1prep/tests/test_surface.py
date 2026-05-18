@@ -7,7 +7,7 @@ import sys
 
 import pytest
 
-from nipype.interfaces.t1prep import T1PrepSurfaceEstimation, T1PrepCatSurf
+from nipype.interfaces.t1prep import T1PrepSurfaceEstimation
 
 
 def _make_file(p):
@@ -69,58 +69,3 @@ def test_T1PrepSurfaceEstimation_list_outputs_hemi_pattern(surface_paths):
         assert outs[f"spherereg_{hemi}"] == os.path.join(
             surf, f"{hemi}.sphere.reg.sub-01_T1w.gii"
         )
-
-
-# ---------------------------------------------------------------------------
-# T1PrepCatSurf
-# ---------------------------------------------------------------------------
-
-
-def _have_cat_surf():
-    try:
-        from t1prep import cat_surf  # noqa: F401
-        return True
-    except ImportError:
-        try:
-            import cat_surf  # noqa: F401
-            return True
-        except ImportError:
-            return False
-
-
-def test_T1PrepCatSurf_gen_outfile_default(tmp_path):
-    surf = _make_file(tmp_path / "lh.central.sub-01.gii")
-    vals = _make_file(tmp_path / "lh.thickness.sub-01")
-    node = T1PrepCatSurf()
-    node.inputs.in_surface = surf
-    node.inputs.in_values = vals
-    node.inputs.fwhm = 20.0
-    out = node._gen_outfile()
-    assert os.path.basename(out) == "s20.lh.thickness.sub-01"
-    assert os.path.isabs(out)
-
-
-def test_T1PrepCatSurf_gen_outfile_explicit(tmp_path):
-    surf = _make_file(tmp_path / "lh.central.sub-01.gii")
-    vals = _make_file(tmp_path / "lh.thickness.sub-01")
-    node = T1PrepCatSurf()
-    node.inputs.in_surface = surf
-    node.inputs.in_values = vals
-    node.inputs.out_file = "explicit.out"
-    assert node._gen_outfile() == os.path.abspath("explicit.out")
-
-
-@pytest.mark.skipif(not _have_cat_surf(), reason="cat_surf is not installed")
-def test_T1PrepCatSurf_runtime_smoke(tmp_path):
-    """Smoke-test the full run path when cat_surf is importable."""
-    # We do not have real input data here; just verify that the input traits
-    # validate and that _run_interface dispatches to cat_surf.  If cat_surf is
-    # installed but the input files don't load, the call may raise — that's OK
-    # for this smoke test (we just want to confirm the wiring isn't broken).
-    surf = _make_file(tmp_path / "lh.central.sub-01.gii")
-    vals = _make_file(tmp_path / "lh.thickness.sub-01")
-    node = T1PrepCatSurf()
-    node.inputs.in_surface = surf
-    node.inputs.in_values = vals
-    with pytest.raises(Exception):
-        node._run_interface(None)

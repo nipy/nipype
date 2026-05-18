@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Nipype interfaces for the T1Prep segmentation pipeline.
 
-:class:`T1Prep`     – full pipeline (skull-strip → segment → surface).
+:class:`T1Prep`        – full pipeline (skull-strip → segment → surface).
 :class:`T1PrepSegment` – segmentation stage (``python -m t1prep.segment``).
 """
 
