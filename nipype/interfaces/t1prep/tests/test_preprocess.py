@@ -81,9 +81,9 @@ def test_T1PrepSegment_cmdline(in_t1, tmp_path):
     assert "--gz" in cmd
     assert "--surf" in cmd
     assert f"--input {in_t1}" in cmd or f"--input '{in_t1}'" in cmd
-    assert "--mri_dir" in cmd
-    assert "--report_dir" in cmd
-    assert "--label_dir" in cmd
+    assert "--mri-dir" in cmd
+    assert "--report-dir" in cmd
+    assert "--label-dir" in cmd
 
 
 def test_T1PrepSegment_list_outputs_absolute(in_t1, tmp_path):

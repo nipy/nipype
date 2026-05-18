@@ -38,14 +38,14 @@ def test_T1PrepSegment_inputs():
             mandatory=True,
         ),
         label_dir=dict(
-            argstr="--label_dir %s",
+            argstr="--label-dir %s",
             mandatory=True,
         ),
         lesions=dict(
             argstr="--lesions",
         ),
         mri_dir=dict(
-            argstr="--mri_dir %s",
+            argstr="--mri-dir %s",
             mandatory=True,
         ),
         mwp=dict(
@@ -55,7 +55,7 @@ def test_T1PrepSegment_inputs():
             argstr="--p",
         ),
         report_dir=dict(
-            argstr="--report_dir %s",
+            argstr="--report-dir %s",
             mandatory=True,
         ),
         rp=dict(

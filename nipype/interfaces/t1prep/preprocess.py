@@ -497,7 +497,7 @@ class T1PrepSegment(T1PrepCommand):
     >>> seg.inputs.surf = True
     >>> seg.inputs.gz = True
     >>> seg.cmdline  # doctest: +SKIP
-    'python -m t1prep.segment --gz --surf --input sub-01_T1w.nii.gz --label_dir out/label --mri_dir out/mri --report_dir out/report'
+    'python -m t1prep.segment --gz --surf --input sub-01_T1w.nii.gz --label-dir out/label --mri-dir out/mri --report-dir out/report'
 
     Save native-space GM and WM maps plus CSF:
 
@@ -509,7 +509,7 @@ class T1PrepSegment(T1PrepCommand):
     >>> seg.inputs.p = True
     >>> seg.inputs.csf = True
     >>> seg.cmdline  # doctest: +SKIP
-    'python -m t1prep.segment --csf --p --input sub-01_T1w.nii.gz --label_dir out/label --mri_dir out/mri --report_dir out/report'
+    'python -m t1prep.segment --csf --p --input sub-01_T1w.nii.gz --label-dir out/label --mri-dir out/mri --report-dir out/report'
     """
 
     _module = "t1prep.segment"
