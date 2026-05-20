@@ -180,9 +180,13 @@ def _set_mandatory_inputs(node, tmp_path):
     return counter
 
 
-@pytest.mark.parametrize(
-    "iface", _catsurf_interfaces(), ids=lambda c: c.__name__
-)
+@pytest.mark.parametrize("iface", _catsurf_interfaces(), ids=lambda c: c.__name__)
+def test_catsurf_dispatch_with_fake_module(iface, tmp_path, monkeypatch):
+    """Each wrapper dispatches to cat_surf and maps outputs without the C lib."""
+    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
+    node = iface()
+    _set_mandatory_inputs(node, tmp_path)
+
 def test_catsurf_dispatch_with_fake_module(iface, tmp_path, monkeypatch):
     """Each wrapper dispatches to cat_surf and maps outputs without the C lib."""
     monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
