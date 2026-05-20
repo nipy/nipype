@@ -1132,12 +1132,8 @@ class CatSurfAverage(BaseInterface):
 
 
 class CatSurfResampleToSphereInputSpec(BaseInterfaceInputSpec):
-    source_surface_file = File(
-        exists=True, mandatory=True, desc="Source surface file."
-    )
-    source_sphere_file = File(
-        exists=True, mandatory=True, desc="Source sphere file."
-    )
+    source_surface_file = File(exists=True, mandatory=True, desc="Source surface file.")
+    source_sphere_file = File(exists=True, mandatory=True, desc="Source sphere file.")
     target_sphere_file = File(
         exists=True,
         mandatory=True,
