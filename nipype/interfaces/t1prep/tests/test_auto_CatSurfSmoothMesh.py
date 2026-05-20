@@ -4,6 +4,12 @@ from ..cat_surf import CatSurfSmoothMesh
 
 def test_CatSurfSmoothMesh_inputs():
     input_map = dict(
+        alpha=dict(
+            usedefault=True,
+        ),
+        beta=dict(
+            usedefault=True,
+        ),
         faces=dict(
             mandatory=True,
         ),

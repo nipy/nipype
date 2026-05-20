@@ -779,6 +779,7 @@ class CatSurfDeformInputSpec(BaseInterfaceInputSpec):
     vertices = traits.Any(mandatory=True, desc="Input surface vertices (N, 3) float32.")
     faces = traits.Any(mandatory=True, desc="Input surface faces (M, 3) int32.")
     volume_file = File(
+        exists=True,
         mandatory=True,
         desc="NIfTI volume used to drive the deformation (e.g. PPM volume).",
     )
@@ -868,6 +869,7 @@ class CatSurfToPialWhiteInputSpec(BaseInterfaceInputSpec):
         mandatory=True, desc="Per-vertex cortical thickness (N,) float32."
     )
     volume_file = File(
+        exists=True,
         mandatory=True,
         desc="Hemi-partition NIfTI volume used to drive pial/white estimation.",
     )
@@ -1011,13 +1013,20 @@ class CatSurfToSphere(BaseInterface):
 
 
 class CatSurfWarpInputSpec(BaseInterfaceInputSpec):
-    source_file = File(mandatory=True, desc="Source surface file (central surface).")
-    source_sphere_file = File(mandatory=True, desc="Source sphere file.")
+    source_file = File(
+        exists=True, mandatory=True, desc="Source surface file (central surface)."
+    )
+    source_sphere_file = File(
+        exists=True, mandatory=True, desc="Source sphere file."
+    )
     target_file = File(
+        exists=True,
         mandatory=True,
         desc="Target (average) surface file used as registration template.",
     )
-    target_sphere_file = File(mandatory=True, desc="Target (average) sphere file.")
+    target_sphere_file = File(
+        exists=True, mandatory=True, desc="Target (average) sphere file."
+    )
     output_sphere_file = File(
         mandatory=True, desc="Output registered sphere file path."
     )
@@ -1125,16 +1134,23 @@ class CatSurfAverage(BaseInterface):
 
 
 class CatSurfResampleToSphereInputSpec(BaseInterfaceInputSpec):
-    source_surface_file = File(mandatory=True, desc="Source surface file.")
-    source_sphere_file = File(mandatory=True, desc="Source sphere file.")
+    source_surface_file = File(
+        exists=True, mandatory=True, desc="Source surface file."
+    )
+    source_sphere_file = File(
+        exists=True, mandatory=True, desc="Source sphere file."
+    )
     target_sphere_file = File(
-        mandatory=True, desc="Target sphere file (defines the resampling grid)."
+        exists=True,
+        mandatory=True,
+        desc="Target sphere file (defines the resampling grid).",
     )
     output_surface_file = File(
         mandatory=True, desc="Output resampled surface file path."
     )
     input_values_file = File(
-        desc="Optional per-vertex input values file to also resample."
+        exists=True,
+        desc="Optional per-vertex input values file to also resample.",
     )
     output_values_file = File(desc="Optional output resampled values file path.")
 
@@ -1194,12 +1210,18 @@ class CatSurfResampleToSphere(BaseInterface):
 
 
 class CatSurfResampleAnnotInputSpec(BaseInterfaceInputSpec):
-    source_surface_file = File(mandatory=True, desc="Source (average) surface file.")
-    source_sphere_file = File(mandatory=True, desc="Source (average) sphere file.")
-    target_sphere_file = File(
-        mandatory=True, desc="Target subject sphere file (registered)."
+    source_surface_file = File(
+        exists=True, mandatory=True, desc="Source (average) surface file."
     )
-    annot_in_file = File(mandatory=True, desc="Input atlas annotation (.annot) file.")
+    source_sphere_file = File(
+        exists=True, mandatory=True, desc="Source (average) sphere file."
+    )
+    target_sphere_file = File(
+        exists=True, mandatory=True, desc="Target subject sphere file (registered)."
+    )
+    annot_in_file = File(
+        exists=True, mandatory=True, desc="Input atlas annotation (.annot) file."
+    )
     annot_out_file = File(mandatory=True, desc="Output resampled annotation file path.")
 
 
@@ -1302,8 +1324,11 @@ class CatSurfSmoothMesh(BaseInterface):
     """Smooth a surface mesh by displacing vertices.
 
     Wraps
-    ``cat_surf.smooth_mesh(vertices, faces[, iterations, lambda_])
+    ``cat_surf.smooth_mesh(vertices, faces[, iterations, alpha, beta])
     → (vertices, faces)``.
+
+    ``alpha`` and ``beta`` are the two smoothing weights.  The defaults
+    (both 0.5) match the original ``CAT_SurfSmoothLaplacian`` CLI.
 
     Examples
     --------
@@ -1319,8 +1344,15 @@ class CatSurfSmoothMesh(BaseInterface):
         iterations = traits.Int(
             10, usedefault=True, desc="Number of smoothing iterations."
         )
-        lambda_ = traits.Float(
-            0.5, usedefault=True, desc="Laplacian smoothing weight (lambda)."
+        alpha = traits.Float(
+            0.1,
+            usedefault=True,
+            desc="Smoothing weight (first pass); default 0.1.",
+        )
+        beta = traits.Float(
+            0.5,
+            usedefault=True,
+            desc="Smoothing weight (second pass); default 0.5.",
         )
 
     class output_spec(TraitedSpec):
@@ -1333,6 +1365,8 @@ class CatSurfSmoothMesh(BaseInterface):
             self.inputs.vertices,
             self.inputs.faces,
             iterations=self.inputs.iterations,
+            alpha=self.inputs.alpha,
+            beta=self.inputs.beta,
         )
         return runtime
 
@@ -1606,10 +1640,12 @@ class CatSurfVolMarchingCubes(BaseInterface):
 
     class input_spec(BaseInterfaceInputSpec):
         volume_file = File(
+            exists=True,
             mandatory=True,
             desc="NIfTI volume from which to extract the surface (e.g. PPM probability map).",
         )
         label_file = File(
+            exists=True,
             mandatory=True,
             desc="NIfTI label volume used as a mask (e.g. hemisphere partition map).",
         )
@@ -1693,7 +1729,9 @@ class CatSurfVol2Surf(BaseInterface):
 
     class input_spec(BaseInterfaceInputSpec):
         volume_file = File(
-            mandatory=True, desc="NIfTI volume to project onto the surface."
+            exists=True,
+            mandatory=True,
+            desc="NIfTI volume to project onto the surface.",
         )
         vertices = traits.Any(
             mandatory=True, desc="Surface vertex array (N, 3) float32."
@@ -1976,13 +2014,19 @@ class CatSurfBbreg(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        moving_file = File(mandatory=True, desc="Moving (source) NIfTI image.")
-        fixed_file = File(mandatory=True, desc="Fixed (reference) T1w NIfTI image.")
+        moving_file = File(
+            exists=True, mandatory=True, desc="Moving (source) NIfTI image."
+        )
+        fixed_file = File(
+            exists=True, mandatory=True, desc="Fixed (reference) T1w NIfTI image."
+        )
         surface_file = File(
-            desc="White-matter surface file used for BBR cost calculation."
+            exists=True,
+            desc="White-matter surface file used for BBR cost calculation.",
         )
         init_matrix = File(
-            desc="Initial 4×4 affine transform matrix file (.mat or .txt)."
+            exists=True,
+            desc="Initial 4×4 affine transform matrix file (.mat or .txt).",
         )
         out_matrix_file = File(desc="Output affine transform file path.")
         dof = traits.Enum(
@@ -2036,7 +2080,9 @@ class CatSurfBbregDetectContrast(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        volume_file = File(mandatory=True, desc="NIfTI volume file to analyse.")
+        volume_file = File(
+            exists=True, mandatory=True, desc="NIfTI volume file to analyse."
+        )
 
     class output_spec(TraitedSpec):
         contrast_type = traits.Str(
@@ -2073,8 +2119,12 @@ class CatSurfVolumeRegisterNmi(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        moving_file = File(mandatory=True, desc="Moving (source) NIfTI image.")
-        fixed_file = File(mandatory=True, desc="Fixed (reference) NIfTI image.")
+        moving_file = File(
+            exists=True, mandatory=True, desc="Moving (source) NIfTI image."
+        )
+        fixed_file = File(
+            exists=True, mandatory=True, desc="Fixed (reference) NIfTI image."
+        )
         out_matrix_file = File(mandatory=True, desc="Output affine matrix file path.")
         dof = traits.Enum(
             12,
@@ -2129,8 +2179,12 @@ class CatSurfVolumeRegisterRobust(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        moving_file = File(mandatory=True, desc="Moving (source) NIfTI image.")
-        fixed_file = File(mandatory=True, desc="Fixed (reference) NIfTI image.")
+        moving_file = File(
+            exists=True, mandatory=True, desc="Moving (source) NIfTI image."
+        )
+        fixed_file = File(
+            exists=True, mandatory=True, desc="Fixed (reference) NIfTI image."
+        )
         out_matrix_file = File(mandatory=True, desc="Output affine matrix file path.")
         dof = traits.Enum(
             12,
