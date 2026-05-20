@@ -15,10 +15,12 @@ from nipype.interfaces.t1prep import base as t1prep_base
 def _have_cat_surf():
     try:
         from t1prep import cat_surf  # noqa: F401
+
         return True
     except ImportError:
         try:
             import cat_surf  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -27,10 +29,15 @@ def _have_cat_surf():
 def test_import_cat_surf_returns_none_when_missing(monkeypatch):
     """If neither t1prep nor cat_surf is importable, the helper should raise."""
     import builtins
+
     real_import = builtins.__import__
 
     def fake_import(name, *args, **kwargs):
-        if name in {"t1prep", "cat_surf"} or name.startswith("t1prep.") or name.startswith("cat_surf."):
+        if (
+            name in {"t1prep", "cat_surf"}
+            or name.startswith("t1prep.")
+            or name.startswith("cat_surf.")
+        ):
             raise ImportError(name)
         return real_import(name, *args, **kwargs)
 

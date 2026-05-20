@@ -101,7 +101,11 @@ _arr = traits.Any  # placeholder for numpy array inputs/outputs
 
 
 class CatSurfReadSurfaceInputSpec(BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True, desc="Surface file to read (.gii, FreeSurfer, or .obj).")
+    in_file = File(
+        exists=True,
+        mandatory=True,
+        desc="Surface file to read (.gii, FreeSurfer, or .obj).",
+    )
 
 
 class CatSurfReadSurfaceOutputSpec(TraitedSpec):
@@ -307,7 +311,9 @@ class CatSurfGetArea(BaseInterface):
 class CatSurfGetAreaNormalizedInputSpec(BaseInterfaceInputSpec):
     vertices = traits.Any(mandatory=True, desc="Vertex array (N, 3) float32.")
     faces = traits.Any(mandatory=True, desc="Face/triangle array (M, 3) int32.")
-    reference_area = traits.Float(desc="Reference total area for normalisation (mm²). Defaults to total surface area.")
+    reference_area = traits.Float(
+        desc="Reference total area for normalisation (mm²). Defaults to total surface area."
+    )
 
 
 class CatSurfGetAreaNormalizedOutputSpec(TraitedSpec):
@@ -355,7 +361,9 @@ class CatSurfEulerCharacteristicInputSpec(BaseInterfaceInputSpec):
 
 
 class CatSurfEulerCharacteristicOutputSpec(TraitedSpec):
-    euler_number = traits.Int(desc="Euler characteristic χ = V − E + F. For a genus-0 surface: χ = 2.")
+    euler_number = traits.Int(
+        desc="Euler characteristic χ = V − E + F. For a genus-0 surface: χ = 2."
+    )
     defects = traits.Int(desc="Number of topological defects (holes+handles).")
 
 
@@ -401,7 +409,9 @@ class CatSurfEulerCharacteristic(BaseInterface):
 
 
 class CatSurfSphereRadiusInputSpec(BaseInterfaceInputSpec):
-    vertices = traits.Any(mandatory=True, desc="Vertex array (N, 3) float32 of a sphere mesh.")
+    vertices = traits.Any(
+        mandatory=True, desc="Vertex array (N, 3) float32 of a sphere mesh."
+    )
     faces = traits.Any(mandatory=True, desc="Face/triangle array (M, 3) int32.")
 
 
@@ -441,7 +451,9 @@ class CatSurfSphereRadius(BaseInterface):
 class CatSurfHausdorffDistanceInputSpec(BaseInterfaceInputSpec):
     vertices1 = traits.Any(mandatory=True, desc="Vertices of the first surface (N, 3).")
     faces1 = traits.Any(mandatory=True, desc="Faces of the first surface (M, 3).")
-    vertices2 = traits.Any(mandatory=True, desc="Vertices of the second surface (N, 3).")
+    vertices2 = traits.Any(
+        mandatory=True, desc="Vertices of the second surface (N, 3)."
+    )
     faces2 = traits.Any(mandatory=True, desc="Faces of the second surface (K, 3).")
 
 
@@ -473,8 +485,10 @@ class CatSurfHausdorffDistance(BaseInterface):
         cs = _import_cat_surf()
         self._dist = float(
             cs.hausdorff_distance(
-                self.inputs.vertices1, self.inputs.faces1,
-                self.inputs.vertices2, self.inputs.faces2,
+                self.inputs.vertices1,
+                self.inputs.faces1,
+                self.inputs.vertices2,
+                self.inputs.faces2,
             )
         )
         return runtime
@@ -519,8 +533,10 @@ class CatSurfPointDistance(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._dists = cs.point_distance(
-            self.inputs.vertices1, self.inputs.faces1,
-            self.inputs.vertices2, self.inputs.faces2,
+            self.inputs.vertices1,
+            self.inputs.faces1,
+            self.inputs.vertices2,
+            self.inputs.faces2,
         )
         return runtime
 
@@ -582,8 +598,10 @@ class CatSurfPointDistanceMean(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         d, mean = cs.point_distance_mean(
-            self.inputs.vertices1, self.inputs.faces1,
-            self.inputs.vertices2, self.inputs.faces2,
+            self.inputs.vertices1,
+            self.inputs.faces1,
+            self.inputs.vertices2,
+            self.inputs.faces2,
             symmetric=self.inputs.symmetric,
             max_dist=self.inputs.max_dist,
         )
@@ -670,7 +688,8 @@ class CatSurfRemoveIntersections(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._v, self._fcs = cs.remove_intersections(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             verbose=self.inputs.verbose,
         )
         return runtime
@@ -735,7 +754,8 @@ class CatSurfReduceMesh(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._v, self._fcs = cs.reduce_mesh(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             target_faces=self.inputs.target_faces,
             aggressiveness=self.inputs.aggressiveness,
             preserve_sharp=self.inputs.preserve_sharp,
@@ -765,11 +785,20 @@ class CatSurfDeformInputSpec(BaseInterfaceInputSpec):
     w1 = traits.Float(0.1, usedefault=True, desc="Weight for the image force term.")
     w2 = traits.Float(0.1, usedefault=True, desc="Weight for the balloon force term.")
     w3 = traits.Float(1.0, usedefault=True, desc="Weight for the regularisation term.")
-    sigma = traits.Float(0.2, usedefault=True, desc="Gaussian smoothing sigma for the gradient force (mm).")
-    isovalue = traits.Float(0.5, usedefault=True, desc="Iso-surface value in the driving volume.")
-    iterations = traits.Int(75, usedefault=True, desc="Number of deformation iterations.")
+    sigma = traits.Float(
+        0.2,
+        usedefault=True,
+        desc="Gaussian smoothing sigma for the gradient force (mm).",
+    )
+    isovalue = traits.Float(
+        0.5, usedefault=True, desc="Iso-surface value in the driving volume."
+    )
+    iterations = traits.Int(
+        75, usedefault=True, desc="Number of deformation iterations."
+    )
     remove_intersect = traits.Bool(
-        True, usedefault=True,
+        True,
+        usedefault=True,
         desc="Remove self-intersections after each deformation step.",
     )
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
@@ -806,7 +835,8 @@ class CatSurfDeform(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._v, self._fcs = cs.surf_deform(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             self.inputs.volume_file,
             w1=self.inputs.w1,
             w2=self.inputs.w2,
@@ -830,17 +860,30 @@ class CatSurfDeform(BaseInterface):
 
 
 class CatSurfToPialWhiteInputSpec(BaseInterfaceInputSpec):
-    vertices = traits.Any(mandatory=True, desc="Central surface vertices (N, 3) float32.")
+    vertices = traits.Any(
+        mandatory=True, desc="Central surface vertices (N, 3) float32."
+    )
     faces = traits.Any(mandatory=True, desc="Central surface faces (M, 3) int32.")
-    thickness = traits.Any(mandatory=True, desc="Per-vertex cortical thickness (N,) float32.")
-    volume_file = File(mandatory=True, desc="Hemi-partition NIfTI volume used to drive pial/white estimation.")
+    thickness = traits.Any(
+        mandatory=True, desc="Per-vertex cortical thickness (N,) float32."
+    )
+    volume_file = File(
+        mandatory=True,
+        desc="Hemi-partition NIfTI volume used to drive pial/white estimation.",
+    )
     w1 = traits.Float(0.05, usedefault=True, desc="Image-force weight.")
     w2 = traits.Float(0.05, usedefault=True, desc="Balloon-force weight.")
     w3 = traits.Float(0.05, usedefault=True, desc="Regularisation weight.")
     sigma = traits.Float(0.2, usedefault=True, desc="Gaussian smoothing sigma (mm).")
-    iterations = traits.Int(100, usedefault=True, desc="Number of deformation iterations.")
-    gradient_iterations = traits.Int(0, usedefault=True, desc="Number of gradient-descent iterations.")
-    method = traits.Int(2, usedefault=True, desc="Pial/white estimation method (default 2).")
+    iterations = traits.Int(
+        100, usedefault=True, desc="Number of deformation iterations."
+    )
+    gradient_iterations = traits.Int(
+        0, usedefault=True, desc="Number of gradient-descent iterations."
+    )
+    method = traits.Int(
+        2, usedefault=True, desc="Pial/white estimation method (default 2)."
+    )
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
 
@@ -876,8 +919,10 @@ class CatSurfToPialWhite(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         pv, pf, wv, wf = cs.surf_to_pial_white(
-            self.inputs.vertices, self.inputs.faces,
-            self.inputs.thickness, self.inputs.volume_file,
+            self.inputs.vertices,
+            self.inputs.faces,
+            self.inputs.thickness,
+            self.inputs.volume_file,
             w1=self.inputs.w1,
             w2=self.inputs.w2,
             w3=self.inputs.w3,
@@ -947,7 +992,8 @@ class CatSurfToSphere(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         sv, sf = cs.surf_to_sphere(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             stop_at=self.inputs.stop_at,
             verbose=self.inputs.verbose,
         )
@@ -967,11 +1013,20 @@ class CatSurfToSphere(BaseInterface):
 class CatSurfWarpInputSpec(BaseInterfaceInputSpec):
     source_file = File(mandatory=True, desc="Source surface file (central surface).")
     source_sphere_file = File(mandatory=True, desc="Source sphere file.")
-    target_file = File(mandatory=True, desc="Target (average) surface file used as registration template.")
+    target_file = File(
+        mandatory=True,
+        desc="Target (average) surface file used as registration template.",
+    )
     target_sphere_file = File(mandatory=True, desc="Target (average) sphere file.")
-    output_sphere_file = File(mandatory=True, desc="Output registered sphere file path.")
-    n_steps = traits.Int(2, usedefault=True, desc="Number of DARTEL warp steps (default 2).")
-    avg = traits.Bool(True, usedefault=True, desc="Use average-shape regularisation during warp.")
+    output_sphere_file = File(
+        mandatory=True, desc="Output registered sphere file path."
+    )
+    n_steps = traits.Int(
+        2, usedefault=True, desc="Number of DARTEL warp steps (default 2)."
+    )
+    avg = traits.Bool(
+        True, usedefault=True, desc="Use average-shape regularisation during warp."
+    )
     verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
 
@@ -1072,9 +1127,15 @@ class CatSurfAverage(BaseInterface):
 class CatSurfResampleToSphereInputSpec(BaseInterfaceInputSpec):
     source_surface_file = File(mandatory=True, desc="Source surface file.")
     source_sphere_file = File(mandatory=True, desc="Source sphere file.")
-    target_sphere_file = File(mandatory=True, desc="Target sphere file (defines the resampling grid).")
-    output_surface_file = File(mandatory=True, desc="Output resampled surface file path.")
-    input_values_file = File(desc="Optional per-vertex input values file to also resample.")
+    target_sphere_file = File(
+        mandatory=True, desc="Target sphere file (defines the resampling grid)."
+    )
+    output_surface_file = File(
+        mandatory=True, desc="Output resampled surface file path."
+    )
+    input_values_file = File(
+        desc="Optional per-vertex input values file to also resample."
+    )
     output_values_file = File(desc="Optional output resampled values file path.")
 
 
@@ -1119,9 +1180,13 @@ class CatSurfResampleToSphere(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["output_surface_file"] = os.path.abspath(self.inputs.output_surface_file)
+        outputs["output_surface_file"] = os.path.abspath(
+            self.inputs.output_surface_file
+        )
         if isdefined(self.inputs.output_values_file):
-            outputs["output_values_file"] = os.path.abspath(self.inputs.output_values_file)
+            outputs["output_values_file"] = os.path.abspath(
+                self.inputs.output_values_file
+            )
         return outputs
 
 
@@ -1131,7 +1196,9 @@ class CatSurfResampleToSphere(BaseInterface):
 class CatSurfResampleAnnotInputSpec(BaseInterfaceInputSpec):
     source_surface_file = File(mandatory=True, desc="Source (average) surface file.")
     source_sphere_file = File(mandatory=True, desc="Source (average) sphere file.")
-    target_sphere_file = File(mandatory=True, desc="Target subject sphere file (registered).")
+    target_sphere_file = File(
+        mandatory=True, desc="Target subject sphere file (registered)."
+    )
     annot_in_file = File(mandatory=True, desc="Input atlas annotation (.annot) file.")
     annot_out_file = File(mandatory=True, desc="Output resampled annotation file path.")
 
@@ -1215,8 +1282,10 @@ class CatSurfSmoothHeatkernel(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._out = cs.smooth_heatkernel(
-            self.inputs.vertices, self.inputs.faces,
-            self.inputs.values, fwhm=self.inputs.fwhm,
+            self.inputs.vertices,
+            self.inputs.faces,
+            self.inputs.values,
+            fwhm=self.inputs.fwhm,
         )
         return runtime
 
@@ -1247,8 +1316,12 @@ class CatSurfSmoothMesh(BaseInterface):
     class input_spec(BaseInterfaceInputSpec):
         vertices = traits.Any(mandatory=True, desc="Input vertex array (N, 3).")
         faces = traits.Any(mandatory=True, desc="Input face array (M, 3).")
-        iterations = traits.Int(10, usedefault=True, desc="Number of smoothing iterations.")
-        lambda_ = traits.Float(0.5, usedefault=True, desc="Laplacian smoothing weight (lambda).")
+        iterations = traits.Int(
+            10, usedefault=True, desc="Number of smoothing iterations."
+        )
+        lambda_ = traits.Float(
+            0.5, usedefault=True, desc="Laplacian smoothing weight (lambda)."
+        )
 
     class output_spec(TraitedSpec):
         vertices = traits.Any(desc="Smoothed vertex array.")
@@ -1257,7 +1330,8 @@ class CatSurfSmoothMesh(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._v, self._fcs = cs.smooth_mesh(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             iterations=self.inputs.iterations,
         )
         return runtime
@@ -1290,7 +1364,9 @@ class CatSurfSmoothedCurvatures(BaseInterface):
     class input_spec(BaseInterfaceInputSpec):
         vertices = traits.Any(mandatory=True, desc="Vertex array (N, 3).")
         faces = traits.Any(mandatory=True, desc="Face array (M, 3).")
-        fwhm = traits.Float(3.0, usedefault=True, desc="FWHM for curvature smoothing (mm).")
+        fwhm = traits.Float(
+            3.0, usedefault=True, desc="FWHM for curvature smoothing (mm)."
+        )
 
     class output_spec(TraitedSpec):
         curvatures = traits.Any(desc="Per-vertex curvature array (N,) float32.")
@@ -1298,7 +1374,8 @@ class CatSurfSmoothedCurvatures(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._out = cs.smoothed_curvatures(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             fwhm=self.inputs.fwhm,
         )
         return runtime
@@ -1335,15 +1412,22 @@ class CatSurfCurvature(BaseInterface):
         vertices = traits.Any(mandatory=True, desc="Vertex array (N, 3).")
         faces = traits.Any(mandatory=True, desc="Face array (M, 3).")
         curvtype = traits.Int(
-            0, usedefault=True,
+            0,
+            usedefault=True,
             desc=(
                 "Curvature type (integer code): "
                 "0 = mean, 1 = Gaussian, 11 = sulcal depth index."
             ),
         )
-        fwhm = traits.Float(0.0, usedefault=True, desc="FWHM for post-smoothing (0 = no smoothing).")
-        use_abs_values = traits.Bool(False, usedefault=True, desc="Take absolute values before returning.")
-        invert_values = traits.Bool(False, usedefault=True, desc="Negate values before returning.")
+        fwhm = traits.Float(
+            0.0, usedefault=True, desc="FWHM for post-smoothing (0 = no smoothing)."
+        )
+        use_abs_values = traits.Bool(
+            False, usedefault=True, desc="Take absolute values before returning."
+        )
+        invert_values = traits.Bool(
+            False, usedefault=True, desc="Negate values before returning."
+        )
 
     class output_spec(TraitedSpec):
         values = traits.Any(desc="Per-vertex curvature-based scalar array (N,).")
@@ -1351,7 +1435,8 @@ class CatSurfCurvature(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._out = cs.surf_curvature(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             curvtype=self.inputs.curvtype,
             fwhm=self.inputs.fwhm,
             use_abs_values=self.inputs.use_abs_values,
@@ -1428,9 +1513,15 @@ class CatSurfCorrectThicknessFolding(BaseInterface):
     class input_spec(BaseInterfaceInputSpec):
         vertices = traits.Any(mandatory=True, desc="Vertex array (N, 3) float32.")
         faces = traits.Any(mandatory=True, desc="Face array (M, 3) int32.")
-        thickness = traits.Any(mandatory=True, desc="Per-vertex thickness array (N,) float32.")
-        slope = traits.Float(1.0, usedefault=True, desc="Correction slope parameter (default 1.0).")
-        max_dist = traits.Float(6.0, usedefault=True, desc="Maximum thickness value to correct (mm).")
+        thickness = traits.Any(
+            mandatory=True, desc="Per-vertex thickness array (N,) float32."
+        )
+        slope = traits.Float(
+            1.0, usedefault=True, desc="Correction slope parameter (default 1.0)."
+        )
+        max_dist = traits.Float(
+            6.0, usedefault=True, desc="Maximum thickness value to correct (mm)."
+        )
 
     class output_spec(TraitedSpec):
         thickness = traits.Any(desc="Corrected per-vertex thickness array (N,).")
@@ -1438,7 +1529,8 @@ class CatSurfCorrectThicknessFolding(BaseInterface):
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
         self._out = cs.correct_thickness_folding(
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             self.inputs.thickness,
             slope=self.inputs.slope,
             max_dist=self.inputs.max_dist,
@@ -1521,11 +1613,23 @@ class CatSurfVolMarchingCubes(BaseInterface):
             mandatory=True,
             desc="NIfTI label volume used as a mask (e.g. hemisphere partition map).",
         )
-        threshold = traits.Float(0.5, usedefault=True, desc="Iso-surface threshold (default 0.5).")
-        pre_fwhm = traits.Float(1.0, usedefault=True, desc="Pre-smoothing FWHM before marching cubes (mm).")
-        iter_laplacian = traits.Int(50, usedefault=True, desc="Laplacian smoothing iterations after extraction.")
-        n_median_filter = traits.Int(0, usedefault=True, desc="Number of median filter passes applied before extraction.")
-        strength_gyri_mask = traits.Float(0.1, usedefault=True, desc="Strength of gyral mask applied to the volume.")
+        threshold = traits.Float(
+            0.5, usedefault=True, desc="Iso-surface threshold (default 0.5)."
+        )
+        pre_fwhm = traits.Float(
+            1.0, usedefault=True, desc="Pre-smoothing FWHM before marching cubes (mm)."
+        )
+        iter_laplacian = traits.Int(
+            50, usedefault=True, desc="Laplacian smoothing iterations after extraction."
+        )
+        n_median_filter = traits.Int(
+            0,
+            usedefault=True,
+            desc="Number of median filter passes applied before extraction.",
+        )
+        strength_gyri_mask = traits.Float(
+            0.1, usedefault=True, desc="Strength of gyral mask applied to the volume."
+        )
         verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
     class output_spec(TraitedSpec):
@@ -1588,23 +1692,33 @@ class CatSurfVol2Surf(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        volume_file = File(mandatory=True, desc="NIfTI volume to project onto the surface.")
-        vertices = traits.Any(mandatory=True, desc="Surface vertex array (N, 3) float32.")
+        volume_file = File(
+            mandatory=True, desc="NIfTI volume to project onto the surface."
+        )
+        vertices = traits.Any(
+            mandatory=True, desc="Surface vertex array (N, 3) float32."
+        )
         faces = traits.Any(mandatory=True, desc="Surface face array (M, 3) int32.")
         grid_start = traits.Float(
-            -0.4, usedefault=True,
+            -0.4,
+            usedefault=True,
             desc="Start of the sampling grid along the surface normal (relative to vertex, in mm).",
         )
         grid_end = traits.Float(
-            0.4, usedefault=True,
+            0.4,
+            usedefault=True,
             desc="End of the sampling grid along the surface normal (mm).",
         )
         grid_steps = traits.Int(
-            5, usedefault=True,
+            5,
+            usedefault=True,
             desc="Number of equally spaced sampling positions along the normal.",
         )
         map_func = traits.Enum(
-            "waverage", "mean", "median", "max",
+            "waverage",
+            "mean",
+            "median",
+            "max",
             usedefault=True,
             desc="Aggregation function for values along the normal ('waverage', 'mean', 'median', 'max').",
         )
@@ -1617,7 +1731,8 @@ class CatSurfVol2Surf(BaseInterface):
         cs = _import_cat_surf()
         self._values, self._grid = cs.vol2surf(
             self.inputs.volume_file,
-            self.inputs.vertices, self.inputs.faces,
+            self.inputs.vertices,
+            self.inputs.faces,
             grid_start=self.inputs.grid_start,
             grid_end=self.inputs.grid_end,
             grid_steps=self.inputs.grid_steps,
@@ -1657,18 +1772,34 @@ class CatSurfVolThicknessPbt(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        volume = traits.Any(mandatory=True, desc="3-D float32 hemisphere partition volume.")
-        voxelsize = traits.Any(mandatory=True, desc="Voxel dimensions in mm (length-3 array or tuple).")
-        n_avgs = traits.Int(2, usedefault=True, desc="Number of averaging passes during PBT.")
-        n_median_filter = traits.Int(2, usedefault=True, desc="Number of median filter passes.")
-        median_subsample = traits.Int(2, usedefault=True, desc="Subsampling factor for median filter.")
+        volume = traits.Any(
+            mandatory=True, desc="3-D float32 hemisphere partition volume."
+        )
+        voxelsize = traits.Any(
+            mandatory=True, desc="Voxel dimensions in mm (length-3 array or tuple)."
+        )
+        n_avgs = traits.Int(
+            2, usedefault=True, desc="Number of averaging passes during PBT."
+        )
+        n_median_filter = traits.Int(
+            2, usedefault=True, desc="Number of median filter passes."
+        )
+        median_subsample = traits.Int(
+            2, usedefault=True, desc="Subsampling factor for median filter."
+        )
         range_val = traits.Float(0.45, usedefault=True, desc="Range value for PBT.")
-        correct_voxelsize = traits.Float(-0.75, usedefault=True, desc="Voxel-size correction factor.")
-        sulcal_width = traits.Float(5.0, usedefault=True, desc="Sulcal width parameter (mm).")
+        correct_voxelsize = traits.Float(
+            -0.75, usedefault=True, desc="Voxel-size correction factor."
+        )
+        sulcal_width = traits.Float(
+            5.0, usedefault=True, desc="Sulcal width parameter (mm)."
+        )
         verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
     class output_spec(TraitedSpec):
-        gmt = traits.Any(desc="GM thickness volume (float32 array, same shape as input).")
+        gmt = traits.Any(
+            desc="GM thickness volume (float32 array, same shape as input)."
+        )
         ppm = traits.Any(desc="Pial probability map volume (float32 array).")
         dcsf = traits.Any(desc="Distance to CSF volume (float32 array).")
         dwm = traits.Any(desc="Distance to WM volume (float32 array).")
@@ -1723,13 +1854,27 @@ class CatSurfVolAmap(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        volume = traits.Any(mandatory=True, desc="3-D float32 bias-corrected intensity volume.")
-        label = traits.Any(mandatory=True, desc="3-D uint8 tissue label map (1=CSF, 2=GM, 3=WM).")
-        voxelsize = traits.Any(mandatory=True, desc="Voxel dimensions in mm (length-3 array or tuple).")
-        weight_mrf = traits.Float(0.0, usedefault=True, desc="MRF (Markov Random Field) regularisation weight.")
+        volume = traits.Any(
+            mandatory=True, desc="3-D float32 bias-corrected intensity volume."
+        )
+        label = traits.Any(
+            mandatory=True, desc="3-D uint8 tissue label map (1=CSF, 2=GM, 3=WM)."
+        )
+        voxelsize = traits.Any(
+            mandatory=True, desc="Voxel dimensions in mm (length-3 array or tuple)."
+        )
+        weight_mrf = traits.Float(
+            0.0,
+            usedefault=True,
+            desc="MRF (Markov Random Field) regularisation weight.",
+        )
         sub = traits.Int(64, usedefault=True, desc="Sub-volume size for AMAP tiling.")
-        use_multistep = traits.Bool(True, usedefault=True, desc="Use multi-step AMAP estimation.")
-        pve = traits.Bool(False, usedefault=True, desc="Output partial volume estimates.")
+        use_multistep = traits.Bool(
+            True, usedefault=True, desc="Use multi-step AMAP estimation."
+        )
+        pve = traits.Bool(
+            False, usedefault=True, desc="Output partial volume estimates."
+        )
         verbose = traits.Bool(False, usedefault=True, desc="Print diagnostic output.")
 
     class output_spec(TraitedSpec):
@@ -1784,8 +1929,12 @@ class CatSurfVolBloodVesselCorrection(BaseInterface):
     """
 
     class input_spec(BaseInterfaceInputSpec):
-        volume = traits.Any(mandatory=True, desc="3-D float32 hemisphere partition volume.")
-        voxelsize = traits.Any(mandatory=True, desc="Voxel dimensions in mm (length-3 array or tuple).")
+        volume = traits.Any(
+            mandatory=True, desc="3-D float32 hemisphere partition volume."
+        )
+        voxelsize = traits.Any(
+            mandatory=True, desc="Voxel dimensions in mm (length-3 array or tuple)."
+        )
 
     class output_spec(TraitedSpec):
         corrected = traits.Any(desc="Blood-vessel-corrected 3-D float32 volume.")
@@ -1829,11 +1978,17 @@ class CatSurfBbreg(BaseInterface):
     class input_spec(BaseInterfaceInputSpec):
         moving_file = File(mandatory=True, desc="Moving (source) NIfTI image.")
         fixed_file = File(mandatory=True, desc="Fixed (reference) T1w NIfTI image.")
-        surface_file = File(desc="White-matter surface file used for BBR cost calculation.")
-        init_matrix = File(desc="Initial 4×4 affine transform matrix file (.mat or .txt).")
+        surface_file = File(
+            desc="White-matter surface file used for BBR cost calculation."
+        )
+        init_matrix = File(
+            desc="Initial 4×4 affine transform matrix file (.mat or .txt)."
+        )
         out_matrix_file = File(desc="Output affine transform file path.")
         dof = traits.Enum(
-            6, 9, 12,
+            6,
+            9,
+            12,
             usedefault=False,
             desc="Degrees of freedom for the registration (6, 9, or 12).",
         )
@@ -1884,7 +2039,9 @@ class CatSurfBbregDetectContrast(BaseInterface):
         volume_file = File(mandatory=True, desc="NIfTI volume file to analyse.")
 
     class output_spec(TraitedSpec):
-        contrast_type = traits.Str(desc="Detected contrast type string (e.g. 'T1', 'T2', 'PD').")
+        contrast_type = traits.Str(
+            desc="Detected contrast type string (e.g. 'T1', 'T2', 'PD')."
+        )
 
     def _run_interface(self, runtime):
         cs = _import_cat_surf()
@@ -1920,7 +2077,9 @@ class CatSurfVolumeRegisterNmi(BaseInterface):
         fixed_file = File(mandatory=True, desc="Fixed (reference) NIfTI image.")
         out_matrix_file = File(mandatory=True, desc="Output affine matrix file path.")
         dof = traits.Enum(
-            12, 6, 9,
+            12,
+            6,
+            9,
             usedefault=False,
             desc="Degrees of freedom (6, 9, or 12).",
         )
@@ -1974,7 +2133,9 @@ class CatSurfVolumeRegisterRobust(BaseInterface):
         fixed_file = File(mandatory=True, desc="Fixed (reference) NIfTI image.")
         out_matrix_file = File(mandatory=True, desc="Output affine matrix file path.")
         dof = traits.Enum(
-            12, 6, 9,
+            12,
+            6,
+            9,
             usedefault=False,
             desc="Degrees of freedom (6, 9, or 12).",
         )

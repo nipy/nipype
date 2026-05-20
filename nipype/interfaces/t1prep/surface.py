@@ -341,9 +341,7 @@ class T1PrepSurfaceEstimation(T1PrepCommand):
                 surf, f"{hemi}.thickness.{bname}"
             )
             outputs[f"area_{hemi}"] = os.path.join(surf, f"{hemi}.area.{bname}")
-            outputs[f"sphere_{hemi}"] = os.path.join(
-                surf, f"{hemi}.sphere.{bname}.gii"
-            )
+            outputs[f"sphere_{hemi}"] = os.path.join(surf, f"{hemi}.sphere.{bname}.gii")
             outputs[f"spherereg_{hemi}"] = os.path.join(
                 surf, f"{hemi}.sphere.reg.{bname}.gii"
             )

@@ -40,10 +40,7 @@ class T1PrepRealignLongitudinalInputSpec(CommandLineInputSpec):
     out_subfolders = traits.List(
         traits.Str,
         argstr="--out-subfolders %s",
-        desc=(
-            "Per-input output subfolder names (must match the number of "
-            "inputs)."
-        ),
+        desc=("Per-input output subfolder names (must match the number of " "inputs)."),
     )
 
     iterations = traits.Int(
