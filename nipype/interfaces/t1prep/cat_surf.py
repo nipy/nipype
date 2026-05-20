@@ -826,7 +826,7 @@ class CatSurfDeform(BaseInterface):
     >>> node = CatSurfDeform()
     >>> node.inputs.vertices = v              # doctest: +SKIP
     >>> node.inputs.faces = fcs               # doctest: +SKIP
-    >>> node.inputs.volume_file = 'ppm.nii.gz'
+    >>> node.inputs.volume_file = 'ppm.nii.gz'  # doctest: +SKIP
     >>> node.inputs.iterations = 75
     """
 
@@ -912,7 +912,7 @@ class CatSurfToPialWhite(BaseInterface):
     >>> node.inputs.vertices = v              # doctest: +SKIP
     >>> node.inputs.faces = fcs              # doctest: +SKIP
     >>> node.inputs.thickness = t           # doctest: +SKIP
-    >>> node.inputs.volume_file = 'hemi.nii.gz'
+    >>> node.inputs.volume_file = 'hemi.nii.gz'  # doctest: +SKIP
     """
 
     input_spec = CatSurfToPialWhiteInputSpec
@@ -1016,9 +1016,7 @@ class CatSurfWarpInputSpec(BaseInterfaceInputSpec):
     source_file = File(
         exists=True, mandatory=True, desc="Source surface file (central surface)."
     )
-    source_sphere_file = File(
-        exists=True, mandatory=True, desc="Source sphere file."
-    )
+    source_sphere_file = File(exists=True, mandatory=True, desc="Source sphere file.")
     target_file = File(
         exists=True,
         mandatory=True,
@@ -1055,10 +1053,10 @@ class CatSurfWarp(BaseInterface):
     Examples
     --------
     >>> node = CatSurfWarp()
-    >>> node.inputs.source_file = 'lh.central.sub-01.gii'
-    >>> node.inputs.source_sphere_file = 'lh.sphere.sub-01.gii'
-    >>> node.inputs.target_file = 'lh.central.freesurfer.gii'
-    >>> node.inputs.target_sphere_file = 'lh.sphere.freesurfer.gii'
+    >>> node.inputs.source_file = 'lh.central.sub-01.gii'  # doctest: +SKIP
+    >>> node.inputs.source_sphere_file = 'lh.sphere.sub-01.gii'  # doctest: +SKIP
+    >>> node.inputs.target_file = 'lh.central.freesurfer.gii'  # doctest: +SKIP
+    >>> node.inputs.target_sphere_file = 'lh.sphere.freesurfer.gii'  # doctest: +SKIP
     >>> node.inputs.output_sphere_file = 'lh.sphere.reg.sub-01.gii'
     """
 
@@ -1170,9 +1168,9 @@ class CatSurfResampleToSphere(BaseInterface):
     Examples
     --------
     >>> node = CatSurfResampleToSphere()
-    >>> node.inputs.source_surface_file = 'lh.central.sub-01.gii'
-    >>> node.inputs.source_sphere_file = 'lh.sphere.sub-01.gii'
-    >>> node.inputs.target_sphere_file = 'lh.sphere.freesurfer.gii'
+    >>> node.inputs.source_surface_file = 'lh.central.sub-01.gii'  # doctest: +SKIP
+    >>> node.inputs.source_sphere_file = 'lh.sphere.sub-01.gii'  # doctest: +SKIP
+    >>> node.inputs.target_sphere_file = 'lh.sphere.freesurfer.gii'  # doctest: +SKIP
     >>> node.inputs.output_surface_file = 'lh.central.resampled.gii'
     """
 
@@ -1241,10 +1239,10 @@ class CatSurfResampleAnnot(BaseInterface):
     Examples
     --------
     >>> node = CatSurfResampleAnnot()
-    >>> node.inputs.source_surface_file = 'lh.central.freesurfer.gii'
-    >>> node.inputs.source_sphere_file = 'lh.sphere.freesurfer.gii'
-    >>> node.inputs.target_sphere_file = 'lh.sphere.reg.sub-01.gii'
-    >>> node.inputs.annot_in_file = 'lh.aparc_DK40.freesurfer.annot'
+    >>> node.inputs.source_surface_file = 'lh.central.freesurfer.gii'  # doctest: +SKIP
+    >>> node.inputs.source_sphere_file = 'lh.sphere.freesurfer.gii'  # doctest: +SKIP
+    >>> node.inputs.target_sphere_file = 'lh.sphere.reg.sub-01.gii'  # doctest: +SKIP
+    >>> node.inputs.annot_in_file = 'lh.aparc_DK40.freesurfer.annot'  # doctest: +SKIP
     >>> node.inputs.annot_out_file = 'lh.aparc_DK40.sub-01.annot'
     """
 
@@ -1632,8 +1630,8 @@ class CatSurfVolMarchingCubes(BaseInterface):
     Examples
     --------
     >>> node = CatSurfVolMarchingCubes()
-    >>> node.inputs.volume_file = 'ppm.nii.gz'
-    >>> node.inputs.label_file = 'hemi.nii.gz'
+    >>> node.inputs.volume_file = 'ppm.nii.gz'  # doctest: +SKIP
+    >>> node.inputs.label_file = 'hemi.nii.gz'  # doctest: +SKIP
     >>> node.inputs.threshold = 0.5
     >>> node.inputs.pre_fwhm = 1.0
     """
@@ -1718,7 +1716,7 @@ class CatSurfVol2Surf(BaseInterface):
     Map GMT thickness volume onto central surface:
 
     >>> node = CatSurfVol2Surf()
-    >>> node.inputs.volume_file = 'gmt.nii.gz'
+    >>> node.inputs.volume_file = 'gmt.nii.gz'  # doctest: +SKIP
     >>> node.inputs.vertices = v      # doctest: +SKIP
     >>> node.inputs.faces = fcs       # doctest: +SKIP
     >>> node.inputs.grid_start = -0.4
@@ -2008,9 +2006,9 @@ class CatSurfBbreg(BaseInterface):
     Examples
     --------
     >>> node = CatSurfBbreg()
-    >>> node.inputs.moving_file = 'bold_ref.nii.gz'
-    >>> node.inputs.fixed_file = 'sub-01_T1w.nii.gz'
-    >>> node.inputs.surface_file = 'lh.white.sub-01.gii'
+    >>> node.inputs.moving_file = 'bold_ref.nii.gz'  # doctest: +SKIP
+    >>> node.inputs.fixed_file = 'sub-01_T1w.nii.gz'  # doctest: +SKIP
+    >>> node.inputs.surface_file = 'lh.white.sub-01.gii'  # doctest: +SKIP
     """
 
     class input_spec(BaseInterfaceInputSpec):
@@ -2076,7 +2074,7 @@ class CatSurfBbregDetectContrast(BaseInterface):
     Examples
     --------
     >>> node = CatSurfBbregDetectContrast()
-    >>> node.inputs.volume_file = 'bold_ref.nii.gz'
+    >>> node.inputs.volume_file = 'bold_ref.nii.gz'  # doctest: +SKIP
     """
 
     class input_spec(BaseInterfaceInputSpec):
@@ -2113,8 +2111,8 @@ class CatSurfVolumeRegisterNmi(BaseInterface):
     Examples
     --------
     >>> node = CatSurfVolumeRegisterNmi()
-    >>> node.inputs.moving_file = 'sub-01_T1w.nii.gz'
-    >>> node.inputs.fixed_file = 'template_T1.nii.gz'
+    >>> node.inputs.moving_file = 'sub-01_T1w.nii.gz'  # doctest: +SKIP
+    >>> node.inputs.fixed_file = 'template_T1.nii.gz'  # doctest: +SKIP
     >>> node.inputs.out_matrix_file = 'sub-01_to_template.mat'
     """
 
@@ -2173,8 +2171,8 @@ class CatSurfVolumeRegisterRobust(BaseInterface):
     Examples
     --------
     >>> node = CatSurfVolumeRegisterRobust()
-    >>> node.inputs.moving_file = 'sub-01_T1w.nii.gz'
-    >>> node.inputs.fixed_file = 'template_T1.nii.gz'
+    >>> node.inputs.moving_file = 'sub-01_T1w.nii.gz'  # doctest: +SKIP
+    >>> node.inputs.fixed_file = 'template_T1.nii.gz'  # doctest: +SKIP
     >>> node.inputs.out_matrix_file = 'sub-01_to_template_robust.mat'
     """
 
