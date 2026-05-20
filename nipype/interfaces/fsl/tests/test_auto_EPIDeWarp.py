@@ -25,6 +25,7 @@ def test_EPIDeWarp_inputs():
         ),
         epidw=dict(
             argstr="--epidw %s",
+            extensions=None,
             genfile=False,
         ),
         esp=dict(
@@ -37,6 +38,7 @@ def test_EPIDeWarp_inputs():
         ),
         exfdw=dict(
             argstr="--exfdw %s",
+            extensions=None,
             genfile=True,
         ),
         mag_file=dict(
@@ -60,10 +62,12 @@ def test_EPIDeWarp_inputs():
         ),
         tmpdir=dict(
             argstr="--tmpdir %s",
+            extensions=None,
             genfile=True,
         ),
         vsm=dict(
             argstr="--vsm %s",
+            extensions=None,
             genfile=True,
         ),
     )
