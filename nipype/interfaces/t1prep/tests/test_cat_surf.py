@@ -186,12 +186,6 @@ def test_catsurf_dispatch_with_fake_module(iface, tmp_path, monkeypatch):
     monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
     node = iface()
     _set_mandatory_inputs(node, tmp_path)
-
-def test_catsurf_dispatch_with_fake_module(iface, tmp_path, monkeypatch):
-    """Each wrapper dispatches to cat_surf and maps outputs without the C lib."""
-    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
-    node = iface()
-    _set_mandatory_inputs(node, tmp_path)
     node._run_interface(None)
     outputs = node._list_outputs()
     assert isinstance(outputs, dict)
