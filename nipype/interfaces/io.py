@@ -1023,12 +1023,13 @@ class S3DataGrabber(LibraryBaseInterface, IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(simplify_list(outfiles))
-            if None in outputs[key]:
-                outputs[key] = []
-            if len(outputs[key]) == 0:
-                outputs[key] = None
-            elif len(outputs[key]) == 1:
-                outputs[key] = outputs[key][0]
+            if isinstance(outputs[key], list):
+                if None in outputs[key]:
+                    outputs[key] = []
+                if len(outputs[key]) == 0:
+                    outputs[key] = None
+                elif len(outputs[key]) == 1:
+                    outputs[key] = outputs[key][0]
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
@@ -1295,15 +1296,16 @@ class DataGrabber(IOBase):
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
                         outputs[key].append(simplify_list(outfiles))
-            if self.inputs.drop_blank_outputs:
-                outputs[key] = [x for x in outputs[key] if x is not None]
-            else:
-                if None in outputs[key]:
-                    outputs[key] = []
-            if len(outputs[key]) == 0:
-                outputs[key] = None
-            elif len(outputs[key]) == 1:
-                outputs[key] = outputs[key][0]
+            if isinstance(outputs[key], list):
+                if self.inputs.drop_blank_outputs:
+                    outputs[key] = [x for x in outputs[key] if x is not None]
+                else:
+                    if None in outputs[key]:
+                        outputs[key] = []
+                if len(outputs[key]) == 0:
+                    outputs[key] = None
+                elif len(outputs[key]) == 1:
+                    outputs[key] = outputs[key][0]
         return outputs
 
 

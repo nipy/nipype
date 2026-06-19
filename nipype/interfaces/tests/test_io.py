@@ -299,6 +299,43 @@ def test_datagrabber_order(tmpdir):
     assert "sub002_L3_R10" in outfiles[2][1]
 
 
+
+
+def test_datagrabber_single_file(tmpdir):
+    """Regression test for issue #3732: DataGrabber fails with TypeError
+    when only one file matches the template."""
+    # Create a single matching file
+    subdir = tmpdir.mkdir('sub1')
+    subdir.join('MyFile-A.nii.gz').open('a').close()
+
+    dg = nio.DataGrabber()
+    dg.inputs.base_directory = tmpdir.strpath
+    dg.inputs.template = '%s/MyFile-A.nii.gz'
+    dg.inputs.template_args = {'outfiles': [['sub1']]}
+    dg.inputs.sort_filelist = True
+    res = dg.run()
+    outfiles = res.outputs.outfiles
+    # Single file should return a string, not a list
+    assert isinstance(outfiles, str), f'Expected string, got {{type(outfiles)}}'
+    assert 'MyFile-A.nii.gz' in outfiles
+
+def test_datagrabber_single_glob_match(tmpdir):
+    """Regression test for issue #3732: DataGrabber with glob template
+    fails when only one file matches."""
+    subdir = tmpdir.mkdir('sub1')
+    subdir.join('MyFile-A.nii.gz').open('a').close()
+
+    dg = nio.DataGrabber()
+    dg.inputs.base_directory = tmpdir.strpath
+    dg.inputs.template = '*/MyFile-A.nii.gz'
+    dg.inputs.template_args = {'outfiles': [[]]}
+    dg.inputs.sort_filelist = True
+    # This used to raise: TypeError: 'in <string>' requires string as left operand, not NoneType
+    res = dg.run()
+    outfiles = res.outputs.outfiles
+    assert isinstance(outfiles, str), f'Expected string, got {{type(outfiles)}}'
+    assert 'MyFile-A.nii.gz' in outfiles
+
 def test_datasink():
     ds = nio.DataSink()
     assert ds.inputs.parameterization
