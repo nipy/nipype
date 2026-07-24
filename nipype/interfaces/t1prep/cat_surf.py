@@ -73,9 +73,7 @@ def _cat_surf_cli():
 
 
 class CatSurfVolSanlmInputSpec(TraitedSpec):
-    in_file = File(
-        exists=True, mandatory=True, desc="Input NIfTI volume to denoise."
-    )
+    in_file = File(exists=True, mandatory=True, desc="Input NIfTI volume to denoise.")
     out_file = File(desc="Output denoised NIfTI path.")
     is_rician = traits.Bool(
         False, usedefault=True, desc="Assume Rician (rather than Gaussian) noise."
@@ -270,9 +268,7 @@ class CatSurfBbregDetectContrast(SimpleInterface):
 
 
 class CatSurfVolumeRegisterNmiInputSpec(TraitedSpec):
-    moving_file = File(
-        exists=True, mandatory=True, desc="Moving (source) NIfTI image."
-    )
+    moving_file = File(exists=True, mandatory=True, desc="Moving (source) NIfTI image.")
     fixed_file = File(
         exists=True, mandatory=True, desc="Fixed (reference) NIfTI image."
     )
@@ -341,9 +337,7 @@ class CatSurfVolumeRegisterNmi(SimpleInterface):
 
 
 class CatSurfVolumeRegisterRobustInputSpec(TraitedSpec):
-    moving_file = File(
-        exists=True, mandatory=True, desc="Moving (source) NIfTI image."
-    )
+    moving_file = File(exists=True, mandatory=True, desc="Moving (source) NIfTI image.")
     fixed_file = File(
         exists=True, mandatory=True, desc="Fixed (reference) NIfTI image."
     )
