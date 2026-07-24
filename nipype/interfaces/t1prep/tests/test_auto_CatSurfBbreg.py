@@ -4,24 +4,26 @@ from ..cat_surf import CatSurfBbreg
 
 def test_CatSurfBbreg_inputs():
     input_map = dict(
-        dof=dict(
-            usedefault=False,
+        fwhm=dict(
+            usedefault=True,
         ),
-        fixed_file=dict(
+        in_file=dict(
             extensions=None,
             mandatory=True,
         ),
-        init_matrix=dict(
-            extensions=None,
+        invert_contrast=dict(
+            usedefault=True,
         ),
-        moving_file=dict(
+        lh_surface=dict(
             extensions=None,
-            mandatory=True,
         ),
         out_matrix_file=dict(
             extensions=None,
         ),
-        surface_file=dict(
+        ref_file=dict(
+            extensions=None,
+        ),
+        rh_surface=dict(
             extensions=None,
         ),
         verbose=dict(
@@ -37,6 +39,7 @@ def test_CatSurfBbreg_inputs():
 
 def test_CatSurfBbreg_outputs():
     output_map = dict(
+        cost=dict(),
         out_matrix_file=dict(
             extensions=None,
         ),

@@ -4,9 +4,15 @@ from ..cat_surf import CatSurfBbregDetectContrast
 
 def test_CatSurfBbregDetectContrast_inputs():
     input_map = dict(
-        volume_file=dict(
+        in_file=dict(
             extensions=None,
             mandatory=True,
+        ),
+        lh_surface=dict(
+            extensions=None,
+        ),
+        rh_surface=dict(
+            extensions=None,
         ),
     )
     inputs = CatSurfBbregDetectContrast.input_spec()
@@ -18,7 +24,7 @@ def test_CatSurfBbregDetectContrast_inputs():
 
 def test_CatSurfBbregDetectContrast_outputs():
     output_map = dict(
-        contrast_type=dict(),
+        contrast=dict(),
     )
     outputs = CatSurfBbregDetectContrast.output_spec()
 

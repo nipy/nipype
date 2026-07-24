@@ -1,15 +1,28 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Hand-written tests for nipype.interfaces.t1prep.cat_surf."""
+"""Hand-written tests for nipype.interfaces.t1prep.cat_surf.
 
+Only the denoising / registration subset needed to replace FreeSurfer / FSL
+(bbreg) / ANTs is wrapped here; each interface is exercised against a fake
+``cat_surf`` module so the native library is not required.
+"""
+
+import inspect
+import types
+
+import numpy as np
 import pytest
 
+from nipype.interfaces.base import SimpleInterface
 from nipype.interfaces.t1prep import (
-    CatSurfReadSurface,
-    CatSurfSmoothHeatkernel,
-    CatSurfVolMarchingCubes,
+    CatSurfBbreg,
+    CatSurfBbregDetectContrast,
+    CatSurfVolSanlm,
+    CatSurfVolumeRegisterNmi,
+    CatSurfVolumeRegisterRobust,
 )
 from nipype.interfaces.t1prep import base as t1prep_base
+from nipype.interfaces.t1prep import cat_surf as cat_surf_mod
 
 
 def _have_cat_surf():
@@ -26,7 +39,7 @@ def _have_cat_surf():
             return False
 
 
-def test_import_cat_surf_returns_none_when_missing(monkeypatch):
+def test_import_cat_surf_raises_when_missing(monkeypatch):
     """If neither t1prep nor cat_surf is importable, the helper should raise."""
     import builtins
 
@@ -52,84 +65,39 @@ def test_import_cat_surf_returns_module():
     assert hasattr(cs, "read_surface")
 
 
-def test_CatSurfReadSurface_trait_validation(tmp_path):
-    """Non-existent in_file should fail validation."""
+def test_CatSurfBbreg_trait_validation():
+    """A non-existent in_file should fail trait validation."""
     from nipype.interfaces.base import traits
 
-    node = CatSurfReadSurface()
+    node = CatSurfBbreg()
     with pytest.raises(traits.TraitError):
-        node.inputs.in_file = "/nonexistent/path/that/does/not/exist.gii"
-
-
-def test_CatSurfSmoothHeatkernel_default_fwhm():
-    node = CatSurfSmoothHeatkernel()
-    # fwhm has usedefault=True with default 20.0
-    assert node.inputs.fwhm == 20.0
-
-
-def test_CatSurfVolMarchingCubes_input_mandatory(tmp_path):
-    """Missing mandatory inputs raises at _check_mandatory_inputs()."""
-    node = CatSurfVolMarchingCubes()
-    with pytest.raises(ValueError):
-        node._check_mandatory_inputs()
+        node.inputs.in_file = "/nonexistent/path/that/does/not/exist.nii.gz"
 
 
 # ---------------------------------------------------------------------------
-# Dispatch coverage: run every CatSurf* wrapper against a fake cat_surf module
+# Dispatch coverage: run every wrapper against a fake cat_surf module
 # ---------------------------------------------------------------------------
-
-import inspect
-import types
-
-from nipype.interfaces.base import BaseInterface
-from nipype.interfaces.t1prep import cat_surf as cat_surf_mod
 
 
 def _fake_cat_surf():
-    """A stand-in for the cat_surf C-extension module.
+    """Stand-in for the cat_surf C-extension module.
 
-    Each function returns a value of the same arity the wrappers unpack, so
-    every ``_run_interface`` body executes without the native library.
+    Registration helpers return ``(matrix, metric)`` and detection returns an
+    int, matching the arity the wrappers unpack; ``cli.vol_sanlm`` is a no-op.
     """
     ns = types.SimpleNamespace()
     ns.read_surface = lambda *a, **k: ("V", "F")
-    ns.write_surface = lambda *a, **k: None
-    ns.read_values = lambda *a, **k: "VALS"
-    ns.write_values = lambda *a, **k: None
-    ns.get_area = lambda *a, **k: ("AREA", 12.0)
-    ns.get_area_normalized = lambda *a, **k: "AREA_NORM"
-    ns.euler_characteristic = lambda *a, **k: (2, 0)
-    ns.sphere_radius = lambda *a, **k: 100.0
-    ns.hausdorff_distance = lambda *a, **k: 1.5
-    ns.point_distance = lambda *a, **k: "DISTS"
-    ns.point_distance_mean = lambda *a, **k: ("DISTS", 2.0)
-    ns.count_intersections = lambda *a, **k: 0
-    ns.remove_intersections = lambda *a, **k: ("V", "F")
-    ns.reduce_mesh = lambda *a, **k: ("V", "F")
-    ns.surf_deform = lambda *a, **k: ("V", "F")
-    ns.surf_to_pial_white = lambda *a, **k: ("PV", "PF", "WV", "WF")
-    ns.surf_to_sphere = lambda *a, **k: ("SV", "SF")
-    ns.surf_warp = lambda *a, **k: None
-    ns.surf_average = lambda *a, **k: None
-    ns.resample_to_sphere = lambda *a, **k: None
-    ns.resample_annot = lambda *a, **k: None
-    ns.smooth_heatkernel = lambda *a, **k: "SMOOTH"
-    ns.smooth_mesh = lambda *a, **k: ("V", "F")
-    ns.smoothed_curvatures = lambda *a, **k: "CURV"
-    ns.surf_curvature = lambda *a, **k: "CURV"
-    ns.sulcus_depth = lambda *a, **k: "DEPTH"
-    ns.correct_thickness_folding = lambda *a, **k: "THICK"
-    ns.vol_sanlm = lambda *a, **k: "VOL"
-    ns.vol_marching_cubes = lambda *a, **k: ("V", "F")
-    ns.vol2surf = lambda *a, **k: ("VALS", "GRID")
-    ns.vol_thickness_pbt = lambda *a, **k: ("GMT", "PPM", "DCSF", "DWM")
-    ns.vol_amap = lambda *a, **k: ("PROB", "LAB", "MEANS")
-    ns.vol_blood_vessel_correction = lambda *a, **k: "VOL"
-    ns.bbreg = lambda *a, **k: "RESULT"
-    ns.bbreg_detect_contrast = lambda *a, **k: "t1"
-    ns.volume_register_nmi = lambda *a, **k: None
-    ns.volume_register_robust = lambda *a, **k: None
+    ns.bbreg = lambda *a, **k: (np.eye(4), 0.5)
+    ns.bbreg_detect_contrast = lambda *a, **k: 0
+    ns.volume_register_nmi = lambda *a, **k: (np.eye(4), 0.9)
+    ns.volume_register_robust = lambda *a, **k: (np.eye(4), 0.1)
+    ns.cli = types.SimpleNamespace(vol_sanlm=lambda *a, **k: None)
     return ns
+
+
+def _fake_runtime(tmp_path):
+    """Minimal runtime stub exposing the ``cwd`` used for default output names."""
+    return types.SimpleNamespace(cwd=str(tmp_path), returncode=0, environ={})
 
 
 def _catsurf_interfaces():
@@ -137,7 +105,7 @@ def _catsurf_interfaces():
     for name, obj in vars(cat_surf_mod).items():
         if (
             inspect.isclass(obj)
-            and issubclass(obj, BaseInterface)
+            and issubclass(obj, SimpleInterface)
             and name.startswith("CatSurf")
         ):
             out.append(obj)
@@ -147,81 +115,42 @@ def _catsurf_interfaces():
 def _set_mandatory_inputs(node, tmp_path):
     """Set every mandatory input to a type-appropriate dummy value."""
     spec = node.input_spec()
-    counter = 0
     for name, trait in spec.traits().items():
-        if name in ("trait_added", "trait_modified"):
-            continue
-        if not trait.mandatory:
+        if name in ("trait_added", "trait_modified") or not trait.mandatory:
             continue
         ttype = type(trait.trait_type).__name__
-        counter += 1
         if ttype == "File":
-            f = tmp_path / f"{node.__class__.__name__}_{name}.dat"
+            f = tmp_path / f"{node.__class__.__name__}_{name}.nii.gz"
             f.write_bytes(b"")
             setattr(node.inputs, name, str(f))
-        elif ttype == "Directory":
-            d = tmp_path / f"{node.__class__.__name__}_{name}_dir"
-            d.mkdir(exist_ok=True)
-            setattr(node.inputs, name, str(d))
-        elif ttype in ("List", "InputMultiPath"):
-            f = tmp_path / f"{node.__class__.__name__}_{name}_item.dat"
-            f.write_bytes(b"")
-            setattr(node.inputs, name, [str(f)])
         elif ttype == "Int":
             setattr(node.inputs, name, 1)
         elif ttype == "Float":
             setattr(node.inputs, name, 1.0)
         elif ttype == "Bool":
             setattr(node.inputs, name, True)
-        elif ttype == "Enum":
-            setattr(node.inputs, name, trait.trait_type.values[0])
         else:  # Any, Str, etc.
             setattr(node.inputs, name, "dummy")
-    return counter
-
-
-@pytest.mark.parametrize("iface", _catsurf_interfaces(), ids=lambda c: c.__name__)
-def test_catsurf_dispatch_with_fake_module(iface, tmp_path, monkeypatch):
-    """Each wrapper dispatches to cat_surf and maps outputs without the C lib."""
-    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
-    node = iface()
-    _set_mandatory_inputs(node, tmp_path)
-    node._run_interface(None)
-    outputs = node._list_outputs()
-    assert isinstance(outputs, dict)
 
 
 def test_catsurf_interfaces_discovered():
     """Guard against the discovery helper silently finding nothing."""
-    assert len(_catsurf_interfaces()) >= 36
+    assert len(_catsurf_interfaces()) == 5
 
 
-def test_euler_characteristic_scalar_result(monkeypatch):
-    """The scalar (non-tuple) return path computes defects from the Euler no."""
-    from nipype.interfaces.t1prep import CatSurfEulerCharacteristic
-
-    fake = _fake_cat_surf()
-    fake.euler_characteristic = lambda *a, **k: 0  # scalar -> 1 defect
-    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", lambda: fake)
-    node = CatSurfEulerCharacteristic()
-    node.inputs.vertices = "V"
-    node.inputs.faces = "F"
-    node._run_interface(None)
-    outs = node._list_outputs()
-    assert outs["euler_number"] == 0
-    assert outs["defects"] == 1
+@pytest.mark.parametrize("iface", _catsurf_interfaces(), ids=lambda c: c.__name__)
+def test_catsurf_dispatch_with_fake_module(iface, tmp_path, monkeypatch):
+    """Each wrapper dispatches to cat_surf and records outputs without the C lib."""
+    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
+    node = iface()
+    _set_mandatory_inputs(node, tmp_path)
+    node._run_interface(_fake_runtime(tmp_path))
+    outputs = node._list_outputs()
+    assert isinstance(outputs, dict)
 
 
-def test_optional_input_branches(tmp_path, monkeypatch):
-    """Exercise the isdefined() branches for optional inputs."""
-    from nipype.interfaces.t1prep import (
-        CatSurfGetAreaNormalized,
-        CatSurfResampleToSphere,
-        CatSurfBbreg,
-        CatSurfVolumeRegisterNmi,
-        CatSurfVolumeRegisterRobust,
-    )
-
+def test_volume_register_nmi_writes_matrix(tmp_path, monkeypatch):
+    """NMI registration writes the 4x4 matrix and reports the metric."""
     monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
 
     def mkfile(name):
@@ -229,38 +158,54 @@ def test_optional_input_branches(tmp_path, monkeypatch):
         f.write_bytes(b"")
         return str(f)
 
-    gan = CatSurfGetAreaNormalized()
-    gan.inputs.vertices = "V"
-    gan.inputs.faces = "F"
-    gan.inputs.reference_area = 1000.0
-    gan._run_interface(None)
-    gan._list_outputs()
+    node = CatSurfVolumeRegisterNmi()
+    node.inputs.moving_file = mkfile("moving.nii.gz")
+    node.inputs.fixed_file = mkfile("fixed.nii.gz")
+    node.inputs.out_matrix_file = str(tmp_path / "moving_to_fixed.mat")
+    node._run_interface(_fake_runtime(tmp_path))
+    outs = node._list_outputs()
+    assert outs["nmi"] == pytest.approx(0.9)
+    written = np.loadtxt(outs["out_matrix_file"])
+    assert written.shape == (4, 4)
 
-    rts = CatSurfResampleToSphere()
-    rts.inputs.source_surface_file = mkfile("src.gii")
-    rts.inputs.source_sphere_file = mkfile("srcsph.gii")
-    rts.inputs.target_sphere_file = mkfile("tgtsph.gii")
-    rts.inputs.output_surface_file = str(tmp_path / "out.gii")
-    rts.inputs.input_values_file = mkfile("vals.in")
-    rts.inputs.output_values_file = str(tmp_path / "vals.out")
-    rts._run_interface(None)
-    outs = rts._list_outputs()
-    assert "output_values_file" in outs
 
-    bb = CatSurfBbreg()
-    bb.inputs.moving_file = mkfile("mov.nii")
-    bb.inputs.fixed_file = mkfile("fix.nii")
-    bb.inputs.out_matrix_file = str(tmp_path / "bb.mat")
-    bb.inputs.dof = 6
-    bb._run_interface(None)
-    outs = bb._list_outputs()
-    assert "out_matrix_file" in outs
+def test_bbreg_reads_surfaces_and_reports_cost(tmp_path, monkeypatch):
+    """BBR loads the optional surfaces and reports the cost."""
+    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
 
-    for cls in (CatSurfVolumeRegisterNmi, CatSurfVolumeRegisterRobust):
-        node = cls()
-        node.inputs.moving_file = mkfile(f"{cls.__name__}_mov.nii")
-        node.inputs.fixed_file = mkfile(f"{cls.__name__}_fix.nii")
-        node.inputs.out_matrix_file = str(tmp_path / f"{cls.__name__}.mat")
-        node.inputs.dof = 12
-        node._run_interface(None)
-        node._list_outputs()
+    def mkfile(name):
+        f = tmp_path / name
+        f.write_bytes(b"")
+        return str(f)
+
+    node = CatSurfBbreg()
+    node.inputs.in_file = mkfile("bold_ref.nii.gz")
+    node.inputs.lh_surface = mkfile("lh.white.gii")
+    node.inputs.rh_surface = mkfile("rh.white.gii")
+    node.inputs.ref_file = mkfile("T1w.nii.gz")
+    node._run_interface(_fake_runtime(tmp_path))
+    outs = node._list_outputs()
+    assert outs["cost"] == pytest.approx(0.5)
+    assert np.loadtxt(outs["out_matrix_file"]).shape == (4, 4)
+
+
+def test_bbreg_detect_contrast_returns_int(tmp_path, monkeypatch):
+    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
+    f = tmp_path / "vol.nii.gz"
+    f.write_bytes(b"")
+    node = CatSurfBbregDetectContrast()
+    node.inputs.in_file = str(f)
+    node._run_interface(_fake_runtime(tmp_path))
+    assert node._list_outputs()["contrast"] == 0
+
+
+def test_vol_sanlm_default_output_name(tmp_path, monkeypatch):
+    """VolSanlm derives a sanlm_ prefixed output when out_file is unset."""
+    monkeypatch.setattr(cat_surf_mod, "_import_cat_surf", _fake_cat_surf)
+    f = tmp_path / "sub-01_T1w.nii.gz"
+    f.write_bytes(b"")
+    node = CatSurfVolSanlm()
+    node.inputs.in_file = str(f)
+    node._run_interface(_fake_runtime(tmp_path))
+    out = node._list_outputs()["out_file"]
+    assert "sanlm_" in out

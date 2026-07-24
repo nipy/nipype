@@ -4,8 +4,18 @@ from ..cat_surf import CatSurfVolSanlm
 
 def test_CatSurfVolSanlm_inputs():
     input_map = dict(
-        volume=dict(
+        in_file=dict(
+            extensions=None,
             mandatory=True,
+        ),
+        is_rician=dict(
+            usedefault=True,
+        ),
+        out_file=dict(
+            extensions=None,
+        ),
+        strength=dict(
+            usedefault=True,
         ),
     )
     inputs = CatSurfVolSanlm.input_spec()
@@ -17,7 +27,9 @@ def test_CatSurfVolSanlm_inputs():
 
 def test_CatSurfVolSanlm_outputs():
     output_map = dict(
-        denoised=dict(),
+        out_file=dict(
+            extensions=None,
+        ),
     )
     outputs = CatSurfVolSanlm.output_spec()
 

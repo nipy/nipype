@@ -4,20 +4,25 @@ from ..cat_surf import CatSurfVolumeRegisterRobust
 
 def test_CatSurfVolumeRegisterRobust_inputs():
     input_map = dict(
-        dof=dict(
-            usedefault=False,
-        ),
         fixed_file=dict(
             extensions=None,
             mandatory=True,
+        ),
+        max_iter=dict(
+            usedefault=True,
         ),
         moving_file=dict(
             extensions=None,
             mandatory=True,
         ),
+        n_levels=dict(
+            usedefault=True,
+        ),
         out_matrix_file=dict(
             extensions=None,
-            mandatory=True,
+        ),
+        sat_k=dict(
+            usedefault=True,
         ),
         verbose=dict(
             usedefault=True,
@@ -35,6 +40,7 @@ def test_CatSurfVolumeRegisterRobust_outputs():
         out_matrix_file=dict(
             extensions=None,
         ),
+        residual=dict(),
     )
     outputs = CatSurfVolumeRegisterRobust.output_spec()
 

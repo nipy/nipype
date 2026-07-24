@@ -4,20 +4,25 @@ from ..cat_surf import CatSurfVolumeRegisterNmi
 
 def test_CatSurfVolumeRegisterNmi_inputs():
     input_map = dict(
-        dof=dict(
-            usedefault=False,
-        ),
         fixed_file=dict(
             extensions=None,
             mandatory=True,
+        ),
+        max_iter=dict(
+            usedefault=True,
         ),
         moving_file=dict(
             extensions=None,
             mandatory=True,
         ),
+        n_bins=dict(
+            usedefault=True,
+        ),
+        n_levels=dict(
+            usedefault=True,
+        ),
         out_matrix_file=dict(
             extensions=None,
-            mandatory=True,
         ),
         verbose=dict(
             usedefault=True,
@@ -32,6 +37,7 @@ def test_CatSurfVolumeRegisterNmi_inputs():
 
 def test_CatSurfVolumeRegisterNmi_outputs():
     output_map = dict(
+        nmi=dict(),
         out_matrix_file=dict(
             extensions=None,
         ),

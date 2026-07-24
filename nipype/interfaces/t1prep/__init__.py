@@ -28,10 +28,13 @@ Base classes
 :class:`T1PrepCommand`
     Base ``CommandLine`` for ``python -m t1prep.<module>`` invocations.
 
-The full ``cat_surf`` function surface is also available as individual
-interfaces in :mod:`nipype.interfaces.t1prep.cat_surf`, all exported
-directly from this package (e.g. :class:`CatSurfVolThicknessPbt`,
-:class:`CatSurfDeform`, :class:`CatSurfVolMarchingCubes`, etc.).
+A focused subset of the ``cat_surf`` API — the volume-denoising and volume/
+boundary registration interfaces needed to replace FreeSurfer / FSL (bbreg) /
+ANTs in an fMRIPrep-style pipeline — is exported directly from this package
+(:class:`CatSurfVolSanlm`, :class:`CatSurfBbreg`, :class:`CatSurfBbregDetectContrast`,
+:class:`CatSurfVolumeRegisterNmi`, :class:`CatSurfVolumeRegisterRobust`).  The
+full per-function interface set is archived for reference in the CAT-Surface
+repository under ``cat_surface_cython/examples/nipype/``.
 
 """
 
@@ -40,44 +43,8 @@ from .preprocess import T1Prep, T1PrepSegment
 from .surface import T1PrepSurfaceEstimation
 from .longitudinal import T1PrepRealignLongitudinal
 from .cat_surf import (
-    # I/O
-    CatSurfReadSurface,
-    CatSurfWriteSurface,
-    CatSurfReadValues,
-    CatSurfWriteValues,
-    # Surface geometry
-    CatSurfGetArea,
-    CatSurfGetAreaNormalized,
-    CatSurfEulerCharacteristic,
-    CatSurfSphereRadius,
-    CatSurfHausdorffDistance,
-    CatSurfPointDistance,
-    CatSurfPointDistanceMean,
-    CatSurfCountIntersections,
-    CatSurfRemoveIntersections,
-    CatSurfReduceMesh,
-    # Surface processing / deformation
-    CatSurfDeform,
-    CatSurfToPialWhite,
-    CatSurfToSphere,
-    CatSurfWarp,
-    CatSurfAverage,
-    CatSurfResampleToSphere,
-    CatSurfResampleAnnot,
-    # Per-vertex data smoothing / curvature
-    CatSurfSmoothHeatkernel,
-    CatSurfSmoothMesh,
-    CatSurfSmoothedCurvatures,
-    CatSurfCurvature,
-    CatSurfSulcusDepth,
-    CatSurfCorrectThicknessFolding,
     # Volume operations
     CatSurfVolSanlm,
-    CatSurfVolMarchingCubes,
-    CatSurfVol2Surf,
-    CatSurfVolThicknessPbt,
-    CatSurfVolAmap,
-    CatSurfVolBloodVesselCorrection,
     # Registration
     CatSurfBbreg,
     CatSurfBbregDetectContrast,
@@ -92,44 +59,8 @@ __all__ = [
     "T1PrepSegment",
     "T1PrepSurfaceEstimation",
     "T1PrepRealignLongitudinal",
-    # I/O
-    "CatSurfReadSurface",
-    "CatSurfWriteSurface",
-    "CatSurfReadValues",
-    "CatSurfWriteValues",
-    # Surface geometry
-    "CatSurfGetArea",
-    "CatSurfGetAreaNormalized",
-    "CatSurfEulerCharacteristic",
-    "CatSurfSphereRadius",
-    "CatSurfHausdorffDistance",
-    "CatSurfPointDistance",
-    "CatSurfPointDistanceMean",
-    "CatSurfCountIntersections",
-    "CatSurfRemoveIntersections",
-    "CatSurfReduceMesh",
-    # Surface processing / deformation
-    "CatSurfDeform",
-    "CatSurfToPialWhite",
-    "CatSurfToSphere",
-    "CatSurfWarp",
-    "CatSurfAverage",
-    "CatSurfResampleToSphere",
-    "CatSurfResampleAnnot",
-    # Per-vertex data smoothing / curvature
-    "CatSurfSmoothHeatkernel",
-    "CatSurfSmoothMesh",
-    "CatSurfSmoothedCurvatures",
-    "CatSurfCurvature",
-    "CatSurfSulcusDepth",
-    "CatSurfCorrectThicknessFolding",
     # Volume operations
     "CatSurfVolSanlm",
-    "CatSurfVolMarchingCubes",
-    "CatSurfVol2Surf",
-    "CatSurfVolThicknessPbt",
-    "CatSurfVolAmap",
-    "CatSurfVolBloodVesselCorrection",
     # Registration
     "CatSurfBbreg",
     "CatSurfBbregDetectContrast",
