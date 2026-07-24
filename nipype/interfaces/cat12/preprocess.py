@@ -162,6 +162,15 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
         1, field="extopts.WMHC", desc=_help_wmhc, usedefault=True
     )
 
+    _help_wmhcstr = (
+        "Strength of WM hyperintensity correction. Only has an effect if wm_hyper_intensity_correction "
+        "is set to 1 or 2. Controls how aggressively WMHs are reclassified. "
+        "Values: 0 (no correction) to 1 (maximum correction); default: 0.5."
+    )
+    wm_hyper_intensity_correction_strength = traits.Float(
+        0.5, field="extopts.WMHCstr", desc=_help_wmhcstr, usedefault=True
+    )
+
     _help_vox = (
         "The (isotropic) voxel sizes of any spatially normalised written images. A non-finite value will be "
         "replaced by the average voxel size of the tissue probability maps used by the segmentation."
@@ -250,15 +259,63 @@ class CAT12SegmentInputSpec(SPMCommandInputSpec):
     )
     cobra = traits.Bool(
         True,
-        field="output.ROImenu.atlases.hammers",
+        field="output.ROImenu.atlases.cobra",
         usedefault=True,
         desc="Extract brain measures for COBRA template",
     )
     hammers = traits.Bool(
         True,
-        field="output.ROImenu.atlases.cobra",
+        field="output.ROImenu.atlases.hammers",
         usedefault=True,
         desc="Extract brain measures for Hammers template",
+    )
+    ibsr = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.ibsr",
+        usedefault=True,
+        desc="Extract brain measures for IBSR template",
+    )
+    aal3 = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.aal3",
+        usedefault=True,
+        desc="Extract brain measures for AAL3 template",
+    )
+    mori = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.mori",
+        usedefault=True,
+        desc="Extract brain measures for Mori template",
+    )
+    anatomy3 = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.anatomy3",
+        usedefault=True,
+        desc="Extract brain measures for Anatomy3 template",
+    )
+    julichbrain3 = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.julichbrain3",
+        usedefault=True,
+        desc="Extract brain measures for JulichBrain3 template",
+    )
+    thalamus = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.thalamus",
+        usedefault=True,
+        desc="Extract brain measures for Thalamus template",
+    )
+    thalamic_nuclei = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.thalamic_nuclei",
+        usedefault=True,
+        desc="Extract brain measures for Thalamic Nuclei template",
+    )
+    suit = traits.Bool(
+        False,
+        field="output.ROImenu.atlases.suit",
+        usedefault=True,
+        desc="Extract brain measures for SUIT cerebellar template",
     )
     own_atlas = InputMultiPath(
         ImageFileSPM(exists=True),
