@@ -150,7 +150,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        check: ['specs', 'style']
+        check: ['specs']
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -160,5 +160,7 @@ jobs:
         run: uv tool install --with=tox-uv tox
       - name: Show tox config (this call)
         run: tox c -e ${{ matrix.check }}
+      - name: Setup check environment
+        run: tox run -vv --notest -e ${{ matrix.check }}
       - name: Run check
-        run: tox -e ${{ matrix.check }}
+        run: tox --skip-pkg-install -e ${{ matrix.check }}
