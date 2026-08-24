@@ -70,14 +70,14 @@ pybids = ["pybids>=0.7.0"]
 specs = ["black"]
 ssh = ["paramiko"]
 tests = [
-    "coverage >= 5.2.1",
-    "pandas >= 1.5.0",
-    "pytest >= 6",
-    "pytest-cov >=2.13",
+    "coverage[toml] >=7.6.2",
+    "pandas >=1.5.0",
+    "pytest >=8.3.3",
+    "pytest-cov >=6.0.0",
+    "pytest-doctestplus >=1.5.0",
+    "pytest-env >=1.1.4",
     "pytest-timeout >=1.4",
-    "pytest-doctestplus>=1.1.0",
-    "pytest-env>=1.1.0",
-    "pytest-xdist >= 2.5",
+    "pytest-xdist >=3.7.0",
     "sphinx >=7",
 ]
 xvfbwrapper = ["xvfbwrapper"]
