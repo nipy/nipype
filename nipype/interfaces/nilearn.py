@@ -122,16 +122,16 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         # determine form of label files, choose appropriate nilearn masker
         if np.amax(label_data.dataobj) > 1:  # 3d label file
             n_labels = np.amax(label_data.dataobj)
-            maskers.append(NiftiLabelsMasker(label_data))
+            maskers.append(NiftiLabelsMasker(label_data, dtype='f4'))
         else:  # 4d labels
             n_labels = label_data.shape[3]
             if self.inputs.incl_shared_variance:  # independent computation
                 maskers.extend(
-                    NiftiMapsMasker(self._4d(img.dataobj, img.affine))
+                    NiftiMapsMasker(self._4d(img.dataobj, img.affine), dtype='f4')
                     for img in nli.iter_img(label_data)
                 )
             else:  # one computation fitting all
-                maskers.append(NiftiMapsMasker(label_data))
+                maskers.append(NiftiMapsMasker(label_data, dtype='f4'))
 
         # check label list size
         if not np.isclose(int(n_labels), n_labels):
@@ -157,7 +157,7 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
             )  # binarize
             global_label_data = self._4d(global_label_data, label_data.affine)
             global_masker = NiftiLabelsMasker(
-                global_label_data, detrend=self.inputs.detrend
+                global_label_data, detrend=self.inputs.detrend, dtype='f4'
             )
             maskers.insert(0, global_masker)
             self.inputs.class_labels.insert(0, "GlobalSignal")
