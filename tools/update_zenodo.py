@@ -8,6 +8,7 @@
 # ]
 # ///
 """Update and sort the creators list of the zenodo record."""
+
 import git
 import json
 from subprocess import run, PIPE
