@@ -32,6 +32,5 @@ __pycache__/
 .vscode/
 venv/
 _version.py
-uv.lock
 .venv/
 .tox/
