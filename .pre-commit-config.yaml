@@ -2,6 +2,7 @@ ci:
   autoupdate_schedule: quarterly
   autoupdate_commit_message: 'chore: update pre-commit hooks'
 
+exclude: ".*/data/.*|.*\\.tcl"
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
