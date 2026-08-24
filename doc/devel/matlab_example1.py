@@ -25,13 +25,11 @@ class ConmapTxt2Mat(BaseInterface):
     def _run_interface(self, runtime):
         d = dict(in_file=self.inputs.in_file, out_file=self.inputs.out_file)
         # This is your MATLAB code template
-        script = Template(
-            """in_file = '$in_file';
+        script = Template("""in_file = '$in_file';
                              out_file = '$out_file';
                              ConmapTxt2Mat(in_file, out_file);
                              exit;
-                          """
-        ).substitute(d)
+                          """).substitute(d)
 
         # mfile = True  will create an .m file with your script and executed.
         # Alternatively
