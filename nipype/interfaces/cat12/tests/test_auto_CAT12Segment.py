@@ -4,6 +4,10 @@ from ..preprocess import CAT12Segment
 
 def test_CAT12Segment_inputs():
     input_map = dict(
+        aal3=dict(
+            field="output.ROImenu.atlases.aal3",
+            usedefault=True,
+        ),
         affine_preprocessing=dict(
             field="extopts.APP",
             usedefault=True,
@@ -12,8 +16,12 @@ def test_CAT12Segment_inputs():
             field="opts.affreg",
             usedefault=True,
         ),
+        anatomy3=dict(
+            field="output.ROImenu.atlases.anatomy3",
+            usedefault=True,
+        ),
         cobra=dict(
-            field="output.ROImenu.atlases.hammers",
+            field="output.ROImenu.atlases.cobra",
             usedefault=True,
         ),
         csf_output_dartel=dict(
@@ -41,7 +49,11 @@ def test_CAT12Segment_inputs():
             usedefault=True,
         ),
         hammers=dict(
-            field="output.ROImenu.atlases.cobra",
+            field="output.ROImenu.atlases.hammers",
+            usedefault=True,
+        ),
+        ibsr=dict(
+            field="output.ROImenu.atlases.ibsr",
             usedefault=True,
         ),
         ignore_errors=dict(
@@ -65,6 +77,10 @@ def test_CAT12Segment_inputs():
         ),
         jacobianwarped=dict(
             field="output.jacobianwarped",
+            usedefault=True,
+        ),
+        julichbrain3=dict(
+            field="output.ROImenu.atlases.julichbrain3",
             usedefault=True,
         ),
         label_dartel=dict(
@@ -101,6 +117,10 @@ def test_CAT12Segment_inputs():
         ),
         matlab_cmd=dict(),
         mfile=dict(
+            usedefault=True,
+        ),
+        mori=dict(
+            field="output.ROImenu.atlases.mori",
             usedefault=True,
         ),
         n_jobs=dict(
@@ -160,12 +180,24 @@ def test_CAT12Segment_inputs():
             field="extopts.gcutstr",
             usedefault=True,
         ),
+        suit=dict(
+            field="output.ROImenu.atlases.suit",
+            usedefault=True,
+        ),
         surface_and_thickness_estimation=dict(
             field="surface",
             usedefault=True,
         ),
         surface_measures=dict(
             field="output.surf_measures",
+            usedefault=True,
+        ),
+        thalamic_nuclei=dict(
+            field="output.ROImenu.atlases.thalamic_nuclei",
+            usedefault=True,
+        ),
+        thalamus=dict(
+            field="output.ROImenu.atlases.thalamus",
             usedefault=True,
         ),
         tpm=dict(
@@ -190,6 +222,10 @@ def test_CAT12Segment_inputs():
         ),
         wm_hyper_intensity_correction=dict(
             field="extopts.WMHC",
+            usedefault=True,
+        ),
+        wm_hyper_intensity_correction_strength=dict(
+            field="extopts.WMHCstr",
             usedefault=True,
         ),
         wm_output_dartel=dict(

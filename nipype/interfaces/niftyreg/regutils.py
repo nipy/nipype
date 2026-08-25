@@ -814,7 +814,7 @@ class RegTransform(NiftyRegCommand):
     >>> node.inputs.def_input = 'warpfield.nii'
     >>> node.inputs.omp_core_val = 4
     >>> node.cmdline  # doctest: +ELLIPSIS
-    'reg_transform -omp 4 -def warpfield.nii .../warpfield_trans.nii.gz'
+    "reg_transform -omp 4 -def warpfield.nii '.../warpfield_trans.nii.gz'"
 
     """
 

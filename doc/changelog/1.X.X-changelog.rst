@@ -1,3 +1,22 @@
+1.11.0 (March 02, 2026)
+=======================
+Start of the 1.11.x series.
+
+This release modernizes Nipype's legacy packaging. Key changes include
+better error propagation when utilizing `run_without_submitting`, proper quoting of
+paths with spaces, a fix for SPM v25 outputs, enhancements to `dcm2niix`,
+support for dynamic RAM estimation, and a revamped CI process for pre‑release tests.
+
+  * FIX: Propagate errors encountered when using `run_without_submitting` (https://github.com/nipy/nipype/pull/3745)
+  * FIX: Properly quote file paths with spaces (https://github.com/nipy/nipype/pull/3739)
+  * FIX: Catch OSError from getpass.getuser (https://github.com/nipy/nipype/pull/3728)
+  * FIX: SPM output type for version 25 (https://github.com/nipy/nipype/pull/3734)
+  * ENH: Add -w flag to dcm2niix interface (https://github.com/nipy/nipype/pull/3723)
+  * ENH: Dynamic RAM estimator (https://github.com/nipy/nipype/pull/3740)
+  * MAINT: Modernize packaging (https://github.com/nipy/nipype/pull/3742)
+  * CI: Split pre-release tests into cron job, open issues on failure (https://github.com/nipy/nipype/pull/3746)
+
+
 1.10.0 (March 19, 2025)
 =======================
 

@@ -608,3 +608,19 @@ def test_runtime_checks():
 
     with pytest.raises(RuntimeError):
         BrokenRuntime().run()
+
+
+def test_CommandLine_escape(tmp_path):
+    test_file = tmp_path / "test file.txt"
+    test_file.write_text("content")
+
+    class InputSpec(nib.TraitedSpec):
+        in_file = nib.File(desc="a file", exists=True, argstr="%s")
+
+    class CatCommand(nib.CommandLine):
+        input_spec = InputSpec
+        _cmd = "cat"
+
+    command = CatCommand(in_file=str(test_file))
+    result = command.run()
+    assert result.runtime.stdout == "content"

@@ -1,7 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Attempt to check each interface in nipype
-"""
+"""Attempt to check each interface in nipype"""
+
 # Stdlib imports
 import os
 import re
@@ -264,12 +264,10 @@ class InterfaceChecker:
                     input_fields += "),\n    "
                 cmd += ["    input_map = dict(%s)" % input_fields]
                 cmd += ["    inputs = %s.input_spec()" % c]
-                cmd += [
-                    """
+                cmd += ["""
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
-            assert getattr(inputs.traits()[key], metakey) == value"""
-                ]
+            assert getattr(inputs.traits()[key], metakey) == value"""]
 
                 fmt_cmd = black.format_str("\n".join(cmd), mode=black.FileMode())
                 with open(testfile, "w") as fp:
@@ -355,12 +353,10 @@ class InterfaceChecker:
                     input_fields += "),\n    "
                 cmd += ["    output_map = dict(%s)" % input_fields]
                 cmd += ["    outputs = %s.output_spec()" % c]
-                cmd += [
-                    """
+                cmd += ["""
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
-            assert getattr(outputs.traits()[key], metakey) == value"""
-                ]
+            assert getattr(outputs.traits()[key], metakey) == value"""]
                 fmt_cmd = black.format_str("\n".join(cmd), mode=black.FileMode())
                 with open(testfile, "a") as fp:
                     fp.writelines("\n\n" + fmt_cmd)

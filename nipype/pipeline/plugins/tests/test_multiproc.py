@@ -78,6 +78,11 @@ class SingleNodeTestInterface(nib.BaseInterface):
         return outputs
 
 
+class ErrorInterface(SingleNodeTestInterface):
+    def _run_interface(self, runtime):
+        raise RuntimeError("This is an error")
+
+
 def test_no_more_memory_than_specified(tmpdir):
     tmpdir.chdir()
     pipe = pe.Workflow(name="pipe")
@@ -157,3 +162,22 @@ def test_hold_job_until_procs_available(tmpdir):
 
     max_threads = 2
     pipe.run(plugin="MultiProc", plugin_args={"n_procs": max_threads})
+
+
+@pytest.mark.parametrize("plugin", ["MultiProc", "LegacyMultiProc"])
+def test_error_run_without_submitting(tmp_path, plugin):
+    wf = pe.Workflow(name='rws', base_dir=str(tmp_path))
+    n1 = pe.Node(SingleNodeTestInterface(), name='n1')
+    n1.inputs.input1 = 1
+    n2 = pe.Node(ErrorInterface(), name='n2', run_without_submitting=True)
+    n3 = pe.Node(SingleNodeTestInterface(), name='n3')
+
+    wf.connect(
+        [
+            (n1, n2, [('output1', 'input1')]),
+            (n2, n3, [('output1', 'input1')]),
+        ]
+    ),
+
+    with pytest.raises(RuntimeError):
+        wf.run(plugin=plugin)
