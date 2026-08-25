@@ -7,7 +7,7 @@ was written to work with FSL version 4.1.4.
 
 import os
 from glob import glob
-from shutil import rmtree
+from shutil import rmtree, which
 from string import Template
 
 import acres
@@ -2055,7 +2055,8 @@ class Cluster(FSLCommand):
 
     input_spec = ClusterInputSpec
     output_spec = ClusterOutputSpec
-    _cmd = "cluster"
+    # Renamed in FSL 6.0.6 (Nov 2022)
+    _cmd = "fsl-cluster" if which("fsl-cluster") else "cluster"
 
     filemap = {
         "out_index_file": "index",
