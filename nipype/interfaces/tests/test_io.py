@@ -299,8 +299,6 @@ def test_datagrabber_order(tmpdir):
     assert "sub002_L3_R10" in outfiles[2][1]
 
 
-
-
 def test_datagrabber_single_file(tmpdir):
     """Regression test for issue #3732: DataGrabber fails with TypeError
     when only one file matches the template."""
@@ -319,6 +317,7 @@ def test_datagrabber_single_file(tmpdir):
     assert isinstance(outfiles, str), f'Expected string, got {{type(outfiles)}}'
     assert 'MyFile-A.nii.gz' in outfiles
 
+
 def test_datagrabber_single_glob_match(tmpdir):
     """Regression test for issue #3732: DataGrabber with glob template
     fails when only one file matches."""
@@ -335,6 +334,7 @@ def test_datagrabber_single_glob_match(tmpdir):
     outfiles = res.outputs.outfiles
     assert isinstance(outfiles, str), f'Expected string, got {{type(outfiles)}}'
     assert 'MyFile-A.nii.gz' in outfiles
+
 
 def test_datasink():
     ds = nio.DataSink()
