@@ -1081,6 +1081,7 @@ class ProbTrackX2(ProbTrackX):
     def __init__(self, **inputs):
         super().__init__(**inputs)
         self.inputs.on_trait_change(self._cuda_update, "use_gpu")
+        self._cuda_update()
 
     def _cuda_update(self):
         if isdefined(self.inputs.use_gpu) and self.inputs.use_gpu and which("probtrackx2_gpu") is not None:
