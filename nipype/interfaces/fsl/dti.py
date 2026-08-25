@@ -455,6 +455,8 @@ class BEDPOSTX5(FSLXCommand):
         super().__init__(**inputs)
         self.inputs.on_trait_change(self._cuda_update, "use_gpu")
         self.inputs.on_trait_change(self._num_threads_update, "num_threads")
+        self._cuda_update()
+        self._num_threads_update()
 
     def _cuda_update(self):
         if (
