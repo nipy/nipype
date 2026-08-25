@@ -182,6 +182,11 @@
       "name": "Clark, Michael G. "
     },
     {
+      "affiliation": "Azienda Ospedaliero-Universitaria di Modena",
+      "name": "Genovese, Maurilio",
+      "orcid": "0000-0002-8154-8224"
+    },
+    {
       "affiliation": "Neuroscience Program, University of Iowa",
       "name": "Kent, James D.",
       "orcid": "0000-0002-4892-2659"
@@ -200,11 +205,6 @@
     },
     {
       "name": "Moloney, Brendan"
-    },
-    {
-      "affiliation": "Azienda Ospedaliero-Universitaria di Modena",
-      "name": "Genovese, Maurilio",
-      "orcid": "0000-0002-8154-8224"
     },
     {
       "affiliation": "Otto-von-Guericke-University Magdeburg, Germany",
@@ -294,6 +294,11 @@
       "affiliation": "Child Mind Institute",
       "name": "Cluce, Jon",
       "orcid": "0000-0001-7590-5806"
+    },
+    {
+      "affiliation": "Jena University Hospital, Germany",
+      "name": "Gaser, Christian",
+      "orcid": "0000-0002-9940-099X"
     },
     {
       "affiliation": "ARAMIS LAB, Brain and Spine Institute (ICM), Paris, France.",
@@ -442,6 +447,11 @@
       "affiliation": "Department of Psychology, Stanford University; Parietal, INRIA",
       "name": "Durnez, Joke",
       "orcid": "0000-0001-9030-2202"
+    },
+    {
+      "affiliation": "McGovern Institute for Brain Research, Massachusetts Institute of Technology, Cambridge, MA, USA",
+      "name": "Gunalan, Kabilar",
+      "orcid": "0000-0001-6964-4865"
     },
     {
       "affiliation": "MPI CBS Leipzig, Germany",
@@ -924,16 +934,6 @@
       "affiliation": "Max Planck Institute for Human Cognitive and Brain Sciences, Leipzig, Germany.",
       "name": "Mihai, Paul Glad",
       "orcid": "0000-0001-5715-6442"
-    },
-    {
-      "affiliation": "McGovern Institute for Brain Research, Massachusetts Institute of Technology, Cambridge, MA, USA",
-      "name": "Gunalan, Kabilar",
-      "orcid": "0000-0001-6964-4865"
-    },
-    {
-      "affiliation": "Jena University Hospital, Germany",
-      "name": "Gaser, Christian",
-      "orcid": "0000-0002-9940-099X"
     },
     {
       "affiliation": "Department of Psychology, Stanford University",

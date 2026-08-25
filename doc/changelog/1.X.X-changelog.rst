@@ -1,9 +1,18 @@
-Upcoming release
-================
+1.12.0 (August 25, 2026)
+========================
+New feature release in the 1.12.x series.
 
-  * ENH: T1Prep interface (``nipype.interfaces.t1prep``) wrapping the
-    full pipeline, segmentation, surface-estimation, longitudinal realignment
-    and the ``cat_surf`` Python API
+This release adopts `SPEC-0 <https://scientific-python.org/specs/spec-0000/>`_ and drops
+support for Python < 3.12 and old versions of various scientific Python packages.
+
+  * FIX: DataGrabber._list_outputs TypeError when single file matches template (Fixes #3732) (https://github.com/nipy/nipype/pull/3755)
+  * FIX: SoftFileLock inheritance across fork() (https://github.com/nipy/nipype/pull/3760)
+  * FIX: cat12 - fix cobra/hammers field swap, add missing atlases and WMHstr parameter (https://github.com/nipy/nipype/pull/3752)
+  * ENH: Add T1Prep/CatSurf interfaces (https://github.com/nipy/nipype/pull/3753)
+  * ENH: Bedpostx and probtrackx gpu and multithread support (https://github.com/nipy/nipype/pull/3722)
+  * ENH: Support renamed binary (fsl-cluster) in FSL Cluster interface (https://github.com/nipy/nipype/pull/3759)
+  * DOC: Improve README (https://github.com/nipy/nipype/pull/3751)
+  * MNT: Consolidate CI jobs, update pins (https://github.com/nipy/nipype/pull/3764)
 
 
 1.11.0 (March 02, 2026)
