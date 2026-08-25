@@ -99,6 +99,7 @@ def test_Eddy_inputs():
         ),
         json=dict(
             argstr="--json=%s",
+            extensions=None,
             min_ver="6.0.1",
             requires=["mporder"],
             xor=["slice_order"],
@@ -150,6 +151,7 @@ def test_Eddy_inputs():
         ),
         out_base=dict(
             argstr="--out=%s",
+            extensions=None,
             usedefault=True,
         ),
         outlier_nstd=dict(
@@ -206,6 +208,7 @@ def test_Eddy_inputs():
         ),
         slice_order=dict(
             argstr="--slspec=%s",
+            extensions=None,
             min_ver="5.0.11",
             requires=["mporder"],
             xor=["json"],

@@ -11,6 +11,7 @@
 #
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ##
 """Helper to automagically generate ReST versions of examples"""
+
 import os
 import sys
 import re
@@ -36,7 +37,7 @@ def auto_image(line):
     lines = [
         line,
         ini_space + '   :width: 500\n',
-        #ini_space + '   :height: 350\n'
+        # ini_space + '   :height: 350\n'
     ]
     fspec = m.group(2)
     if fspec.endswith('.*'):
@@ -48,8 +49,7 @@ def auto_image(line):
 
 
 def exfile2rst(filename):
-    """Open a Python script and convert it into an ReST string.
-    """
+    """Open a Python script and convert it into an ReST string."""
     # output string
     s = ''
 
@@ -71,8 +71,7 @@ def exfile2rst(filename):
 
     for line in xfile:
         # skip header
-        if inheader and \
-          not (line.startswith('"""') or line.startswith("'''")):
+        if inheader and not (line.startswith('"""') or line.startswith("'''")):
             continue
         # determine end of header
         if inheader and (line.startswith('"""') or line.startswith("'''")):
@@ -81,11 +80,11 @@ def exfile2rst(filename):
         # strip comments and remove trailing whitespace
         if not indocs and last_line_empty:
             # first remove leading whitespace and store indent level
-            cleanline = line[:line.find('#')].lstrip()
+            cleanline = line[: line.find('#')].lstrip()
             indent_level = len(line) - len(cleanline) - 1
             cleanline = cleanline.rstrip()
         else:
-            cleanline = line[:line.find('#')].rstrip()
+            cleanline = line[: line.find('#')].rstrip()
 
         if not indocs and line == '\n':
             last_line_empty = True
@@ -93,15 +92,14 @@ def exfile2rst(filename):
             last_line_empty = False
 
         # if we have something that should go into the text
-        if indocs \
-          or (cleanline.startswith('"""') or cleanline.startswith("'''")):
+        if indocs or (cleanline.startswith('"""') or cleanline.startswith("'''")):
             proc_line = None
             # handle doc start
             if not indocs:
                 # guaranteed to start with """
-                if len(cleanline) > 3 \
-                  and (cleanline.endswith('"""') \
-                       or cleanline.endswith("'''")):
+                if len(cleanline) > 3 and (
+                    cleanline.endswith('"""') or cleanline.endswith("'''")
+                ):
                     # single line doc
                     code2doc = True
                     doc2code = True
@@ -127,8 +125,7 @@ def exfile2rst(filename):
                     # if the indentation is whitespace remove it, other wise
                     # keep it (accounts for some variation in docstring
                     # styles
-                    real_indent = \
-                            indent_level - len(line[:indent_level].lstrip())
+                    real_indent = indent_level - len(line[:indent_level].lstrip())
                     proc_line = line[real_indent:]
 
             if code2doc:
@@ -154,8 +151,7 @@ def exfile2rst(filename):
 
 
 def exfile2rstfile(filename, opts):
-    """
-    """
+    """ """
     #  doc filename
     dfilename = os.path.basename(filename[:-3]) + '.rst'
     dfilepath = os.path.join(opts.outdir, os.path.basename(dfilename))
@@ -190,10 +186,12 @@ def exfile2rstfile(filename, opts):
    This same script is also included in `%s <%s>`__ under the :file:`%s`
    directory.
 
-""" % (os.path.relpath(filename, opts.outdir),
-       "Nipype1 Examples Niflow",
-       "https://github.com/niflows/nipype1-examples",
-       "package/niflow/nipype1/examples")
+""" % (
+            os.path.relpath(filename, opts.outdir),
+            "Nipype1 Examples Niflow",
+            "https://github.com/niflows/nipype1-examples",
+            "package/niflow/nipype1/examples",
+        )
 
         dfile.write(msg)
 
@@ -203,7 +201,8 @@ def exfile2rstfile(filename, opts):
 def main():
     parser = OptionParser(
         usage="%prog [options] <filename|directory> [...]",
-        version="%prog 0.1", description="""\
+        version="%prog 0.1",
+        description="""\
 %prog converts Python scripts into restructered text (ReST) format suitable for
 integration into the Sphinx documentation framework. Its key feature is that it
 extracts stand-alone (unassigned) single, or multiline triple-quote docstrings
@@ -222,7 +221,8 @@ the respective indentation is removed in the ReST output.
 
 The parser algorithm automatically excludes file headers and starts with the
 first (module-level) docstring instead.
-""")
+""",
+    )
 
     # define options
     parser.add_option(
@@ -230,7 +230,8 @@ first (module-level) docstring instead.
         action='store_true',
         dest='verbose',
         default=False,
-        help='print status messages')
+        help='print status messages',
+    )
     parser.add_option(
         '-x',
         '--exclude',
@@ -240,7 +241,8 @@ first (module-level) docstring instead.
 Use this option to exclude single files from the to be parsed files. This is
 especially useful to exclude files when parsing complete directories. This
 option can be specified multiple times.
-""")
+""",
+    )
     parser.add_option(
         '-o',
         '--outdir',
@@ -250,7 +252,8 @@ option can be specified multiple times.
         default=None,
         help="""\
 Target directory to write the ReST output to. This is a required option.
-""")
+""",
+    )
     parser.add_option(
         '--no-sourceref',
         action='store_false',
@@ -258,7 +261,8 @@ Target directory to write the ReST output to. This is a required option.
         dest='sourceref',
         help="""\
 If specified, the source reference section will be suppressed.
-""")
+""",
+    )
     parser.add_option(
         '--project',
         type='string',
@@ -268,10 +272,11 @@ If specified, the source reference section will be suppressed.
         help="""\
 Name of the project that contains the examples. This name is used in the
 'seealso' source references. Default: ''
-""")
+""",
+    )
 
     # parse options
-    (opts, args) = parser.parse_args()  # read sys.argv[1:] by default
+    opts, args = parser.parse_args()  # read sys.argv[1:] by default
 
     # check for required options
     if opts.outdir is None:

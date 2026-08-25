@@ -37,9 +37,7 @@ class HelloWorld(MatlabCommand):
         script = """
         disp('Hello %s Python')
         two = 1 + 1
-        """ % (
-            self.inputs.name
-        )
+        """ % (self.inputs.name)
         return script
 
     def run(self, **inputs):

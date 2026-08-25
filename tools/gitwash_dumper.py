@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-""" Checkout gitwash repo into directory and do search replace on name """
+"""Checkout gitwash repo into directory and do search replace on name"""
+
 import os
 from os.path import join as pjoin
 import shutil
@@ -211,7 +212,7 @@ def main():
         default=None,
         metavar="PROJECT_ML_URL",
     )
-    (options, args) = parser.parse_args()
+    options, args = parser.parse_args()
     if len(args) < 2:
         parser.print_help()
         sys.exit()

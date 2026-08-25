@@ -113,8 +113,8 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         """validate and  process inputs into useful form.
         Returns a list of nilearn maskers and the list of corresponding label
         names."""
-        import nilearn.input_data as nl
         import nilearn.image as nli
+        from nilearn.maskers import NiftiLabelsMasker, NiftiMapsMasker
 
         label_data = nli.concat_imgs(self.inputs.label_files)
         maskers = []
@@ -122,16 +122,16 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
         # determine form of label files, choose appropriate nilearn masker
         if np.amax(label_data.dataobj) > 1:  # 3d label file
             n_labels = np.amax(label_data.dataobj)
-            maskers.append(nl.NiftiLabelsMasker(label_data))
+            maskers.append(NiftiLabelsMasker(label_data, dtype='f4'))
         else:  # 4d labels
             n_labels = label_data.shape[3]
             if self.inputs.incl_shared_variance:  # independent computation
                 maskers.extend(
-                    nl.NiftiMapsMasker(self._4d(img.dataobj, img.affine))
+                    NiftiMapsMasker(self._4d(img.dataobj, img.affine), dtype='f4')
                     for img in nli.iter_img(label_data)
                 )
             else:  # one computation fitting all
-                maskers.append(nl.NiftiMapsMasker(label_data))
+                maskers.append(NiftiMapsMasker(label_data, dtype='f4'))
 
         # check label list size
         if not np.isclose(int(n_labels), n_labels):
@@ -156,8 +156,8 @@ class SignalExtraction(NilearnBaseInterface, SimpleInterface):
                 np.rint(global_label_data).clip(0, 1).astype('u1')
             )  # binarize
             global_label_data = self._4d(global_label_data, label_data.affine)
-            global_masker = nl.NiftiLabelsMasker(
-                global_label_data, detrend=self.inputs.detrend
+            global_masker = NiftiLabelsMasker(
+                global_label_data, detrend=self.inputs.detrend, dtype='f4'
             )
             maskers.insert(0, global_masker)
             self.inputs.class_labels.insert(0, "GlobalSignal")

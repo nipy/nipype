@@ -18,7 +18,7 @@ documentation:
   installation: https://nipype.readthedocs.io/en/latest/users/install.html
   tutorial: https://miykael.github.io/nipype_tutorial/
 
-execution_environment: 
+execution_environment:
   resource_managers:
     - SLURM
     - Condor

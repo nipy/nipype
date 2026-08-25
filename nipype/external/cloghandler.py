@@ -160,6 +160,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         # Prevent multiple extensions on the lock file (Only handles the normal "*.log" case.)
         self.lock_file = "%s.lock" % filename
         self.stream_lock = SoftFileLock(self.lock_file)
+        self._stream_lock_pid = os.getpid()
 
         # For debug mode, swap out the "_degrade()" method with a more a verbose one.
         if debug:
@@ -171,11 +172,25 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
         else:
             self.stream = open(self.baseFilename, mode)
 
+    def _recreate_stream_lock_if_needed(self):
+        """Recreate the file lock if this handler has been inherited across a fork.
+
+        Recent versions of filelock detect when a SoftFileLock instance created in
+        one process is reused in another (after os.fork()) and raise RuntimeError.
+        Each process must therefore own its own SoftFileLock instance.
+        """
+        pid = os.getpid()
+
+        if pid != self._stream_lock_pid:
+            self.stream_lock = SoftFileLock(self.lock_file)
+            self._stream_lock_pid = pid
+
     def acquire(self):
-        """Acquire thread and file locks. Also re-opening log file when running
-        in 'degraded' mode."""
-        # handle thread lock
+        """Acquire thread and file locks.
+        Recreate the file lock if this handler was inherited across a fork.
+        """
         Handler.acquire(self)
+        self._recreate_stream_lock_if_needed()
         self.stream_lock.acquire()
         if self.stream.closed:
             self._openFile(self.mode)

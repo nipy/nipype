@@ -121,6 +121,10 @@ Nipype provides interfaces for the following **third-party** tools:
   * `SPM <api/generated/nipype.interfaces.spm.html>`__
     (Statistical Parametric Mapping) is a software package for the analysis of brain
     imaging data sequences.
+  * `T1Prep <api/generated/nipype.interfaces.t1prep.html>`__
+    is a T1-weighted MRI preprocessing pipeline that performs skull-stripping,
+    tissue segmentation (GM / WM / CSF), and cortical surface reconstruction using
+    deep-learning-based models (DeepMriPrep) and the CAT-Surface (cat-surf) library.
   * `VistaSoft <api/generated/nipype.interfaces.vista.html>`__
     contains Matlab code to perform a variety of analysis on MRI data, including
     functional MRI and diffusion MRI.
