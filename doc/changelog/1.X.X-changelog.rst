@@ -1,3 +1,11 @@
+Upcoming release
+================
+
+  * ENH: T1Prep interface (``nipype.interfaces.t1prep``) wrapping the
+    full pipeline, segmentation, surface-estimation, longitudinal realignment
+    and the ``cat_surf`` Python API
+
+
 1.11.0 (March 02, 2026)
 =======================
 Start of the 1.11.x series.
