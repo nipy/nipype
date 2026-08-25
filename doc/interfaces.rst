@@ -8,7 +8,7 @@ Interfaces and Workflows
 :Release: |version|
 :Date: |today|
 
-Previous versions: `1.11.0 <http://nipype.readthedocs.io/en/1.11.0/>`_ `1.10.0 <http://nipype.readthedocs.io/en/1.10.0/>`_
+Previous versions: `1.12.0 <http://nipype.readthedocs.io/en/1.12.0/>`_ `1.11.0 <http://nipype.readthedocs.io/en/1.11.0/>`_
 
 Workflows
 ---------
