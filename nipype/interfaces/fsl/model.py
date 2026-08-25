@@ -2055,6 +2055,7 @@ class Cluster(FSLCommand):
 
     input_spec = ClusterInputSpec
     output_spec = ClusterOutputSpec
+    # Renamed in FSL 6.0.6 (Nov 2022)
     _cmd = "fsl-cluster" if which("fsl-cluster") else "cluster"
 
     filemap = {
