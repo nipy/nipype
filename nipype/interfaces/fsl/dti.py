@@ -4,6 +4,7 @@
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
 was written to work with FSL version 4.1.4.
 """
+
 import os
 import warnings
 from shutil import which
@@ -456,14 +457,22 @@ class BEDPOSTX5(FSLXCommand):
         self.inputs.on_trait_change(self._num_threads_update, "num_threads")
 
     def _cuda_update(self):
-        if isdefined(self.inputs.use_gpu) and self.inputs.use_gpu and which("bedpostx_gpu") is not None:
+        if (
+            isdefined(self.inputs.use_gpu)
+            and self.inputs.use_gpu
+            and which("bedpostx_gpu") is not None
+        ):
             self._cmd = "bedpostx_gpu"
             self.inputs.num_threads = 1
         else:
             self._cmd = self._default_cmd
 
     def _num_threads_update(self):
-        if isdefined(self.inputs.use_gpu) and self.inputs.use_gpu and which("bedpostx_gpu") is not None:
+        if (
+            isdefined(self.inputs.use_gpu)
+            and self.inputs.use_gpu
+            and which("bedpostx_gpu") is not None
+        ):
             self.inputs.num_threads = 1
         self._num_threads = self.inputs.num_threads
         if not isdefined(self.inputs.num_threads):
@@ -1084,7 +1093,11 @@ class ProbTrackX2(ProbTrackX):
         self._cuda_update()
 
     def _cuda_update(self):
-        if isdefined(self.inputs.use_gpu) and self.inputs.use_gpu and which("probtrackx2_gpu") is not None:
+        if (
+            isdefined(self.inputs.use_gpu)
+            and self.inputs.use_gpu
+            and which("probtrackx2_gpu") is not None
+        ):
             self._cmd = "probtrackx2_gpu"
         else:
             self._cmd = self._default_cmd
