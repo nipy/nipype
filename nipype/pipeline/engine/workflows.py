@@ -127,7 +127,8 @@ class Workflow(EngineBase):
              and execute it remotely
         """
         if len(args) == 1:
-            connection_list = args[0]
+            # Connections can be modified in-place, so make a copy
+            connection_list = [(src, dst, list(conns)) for src, dst, conns in args[0]]
         elif len(args) == 4:
             connection_list = [(args[0], args[2], [(args[1], args[3])])]
         else:
