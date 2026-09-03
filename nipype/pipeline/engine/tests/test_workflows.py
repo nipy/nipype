@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine workflows module"""
 
+from copy import deepcopy
 from glob import glob
 import os
 from shutil import rmtree
@@ -32,6 +33,31 @@ def test_connect():
     assert mod1 in pipe._graph.nodes()
     assert mod2 in pipe._graph.nodes()
     assert pipe._graph.get_edge_data(mod1, mod2) == {"connect": [("output1", "input1")]}
+
+
+def _add_one(x):
+    return x + 1
+
+
+def test_connect_preserves_input_list():
+    """Regression test for connection list mutation.
+
+    This only occurs when the connection contains an inline function node.
+    """
+    pipe = pe.Workflow(name="pipe")
+    pipe.config["execution"]["poll_sleep_duration"] = 0.01
+    mod1 = pe.Node(EngineTestInterface(input1=2), name="mod1")
+    mod2 = pe.MapNode(EngineTestInterface(), iterfield="input1", name="mod2")
+
+    connection_list = [(mod1, mod2, [(('output1', _add_one), 'input1')])]
+    expected = [
+        (in_node, out_node, deepcopy(connections))
+        for in_node, out_node, connections in connection_list
+    ]
+    assert connection_list == expected
+
+    pipe.connect(connection_list)
+    assert connection_list == expected
 
 
 def test_add_nodes():
