@@ -386,6 +386,33 @@ def test_mcflirt_opt(setup_flirt):
             assert fnt.cmdline == " ".join([fnt.cmd, instr, outstr, settings[0]])
 
 
+@pytest.mark.parametrize("appended", [True, False])
+def test_mcflirt_mean_img_matches_disk(tmpdir, monkeypatch, appended):
+    """mean_img must follow the name mcflirt actually wrote.
+
+    mcflirt appends "_mean_reg" to the value of -out without stripping the
+    extension, giving prefix_mcf.nii.gz_mean_reg.nii.gz, but some builds have
+    been reported to insert the suffix before the extension instead (gh-3684).
+    Whichever file is on disk is the one that should be reported.
+    """
+    monkeypatch.setenv("FSLOUTPUTTYPE", "NIFTI_GZ")
+    tmpdir.chdir()
+    in_file = tmpdir.join("func.nii.gz")
+    in_file.write("")
+
+    mcflirt = fsl.MCFLIRT(in_file=str(in_file), mean_vol=True)
+    out_file = mcflirt._gen_outfilename()
+    assert out_file.endswith(".nii.gz")
+
+    if appended:
+        expected = out_file + "_mean_reg.nii.gz"
+    else:
+        expected = out_file[: -len(".nii.gz")] + "_mean_reg.nii.gz"
+    open(expected, "w").close()
+
+    assert mcflirt._list_outputs()["mean_img"] == expected
+
+
 @pytest.mark.skipif(no_fsl(), reason="fsl is not installed")
 def test_mcflirt_noinput():
     # Test error is raised when missing required args
