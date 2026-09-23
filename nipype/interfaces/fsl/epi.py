@@ -660,9 +660,15 @@ class EddyInputSpec(FSLCommandInputSpec):
         argstr="--dont_peas",
         desc="Do NOT perform a post-eddy alignment of shells",
     )
-    fwhm = traits.Float(
-        desc="FWHM for conditioning filter when estimating the parameters",
+    fwhm = traits.Either(
+        traits.Float,
+        traits.List(traits.Float),
+        desc=(
+            "FWHM for conditioning filter when estimating the parameters, either a "
+            "single value or one per iteration"
+        ),
         argstr="--fwhm=%s",
+        sep=",",
     )
     niter = traits.Int(
         5, usedefault=True, argstr="--niter=%s", desc="Number of iterations"
