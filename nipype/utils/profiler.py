@@ -184,6 +184,10 @@ def log_nodes_cb(node, status):
         "num_threads": node.n_procs,
     }
 
+    # cpu_percent is a percentage of one core, so 4 busy threads report 400
+    if status_dict["runtime_threads"] != "N/A":
+        status_dict["runtime_threads"] //= 100
+
     if status_dict["start"] is None or status_dict["finish"] is None:
         status_dict["error"] = True
 
