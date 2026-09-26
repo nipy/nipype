@@ -73,6 +73,7 @@ function generate_base_dockerfile() {
     --install afni ants apt-utils bzip2 convert3d file fsl-core \
               fsl-mni152-templates fusefat g++ git graphviz make python ruby \
               unzip xvfb git-annex-standalone liblzma-dev \
+              gfortran libreadline-dev libx11-dev libxt-dev libpng-dev libjpeg-dev libcairo2-dev libssl-dev libxml2-dev libudunits2-dev libgdal-dev libbz2-dev libzstd-dev liblzma-dev libpcre2-dev \
     --add-to-entrypoint "source /etc/fsl/fsl.sh && source /etc/afni/afni.sh" \
     --env ANTSPATH='/usr/lib/ants' \
           PATH='/usr/lib/ants:$PATH' \
@@ -87,7 +88,15 @@ function generate_main_dockerfile() {
     --label maintainer="The nipype developers https://github.com/nipy/nipype" \
     --env MKL_NUM_THREADS=1 \
           OMP_NUM_THREADS=1 \
-    --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=8 BUILD_DATE VCS_REF VERSION \
+    --arg PYTHON_VERSION_MAJOR=3 PYTHON_VERSION_MINOR=8 R_VERSION_MAJOR=4 R_VERSION_MINOR=1 R_VERSION_PATCH=0 R_CONFIGURE_OPTS=CONFIGURE_OPTIONS="--with-cairo --with-jpeglib --enable-R-shlib --with-blas --with-lapack" BUILD_DATE VCS_REF VERSION \
+    --run 'curl -LO https://cran.rstudio.com/src/base/R-${R_VERSION_MAJOR}/R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz
+  && tar zxvf R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz
+  && rm R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}.tar.gz 
+  && cd R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}
+  && ./configure ${CONFIGURE_OPTIONS}
+  && make && make install && cd .. && rm -rf R-${R_VERSION_MAJOR}.${R_VERSION_MINOR}.${R_VERSION_PATCH}
+  && echo '"'"'options(repos = c(CRAN = "https://cran.rstudio.com/"), download.file.method = "libcurl")'"'"' >> /usr/local/lib/R/etc/Rprofile.site
+  && Rscript -e "source('"'"'https://neuroconductor.org/neurocLite.R'"'"'); neuro_install(c('"'"'WhiteStripe'"'"'));"' \
     --user neuro \
     --run 'git config --global user.name nipybot
            && git config --global user.email "nipybot@gmail.com"' \
