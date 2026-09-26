@@ -3389,7 +3389,6 @@ class ZeropadInputSpec(AFNICommandInputSpec):
         copyfile=False,
     )
     out_file = File(
-        name_template="zeropad",
         desc="output dataset prefix name (default 'zeropad')",
         argstr="-prefix %s",
     )
@@ -3495,3 +3494,10 @@ class Zeropad(AFNICommand):
     _cmd = "3dZeropad"
     input_spec = ZeropadInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _list_outputs(self):
+        out_file = getattr(self.inputs, "out_file")
+
+        if not isdefined(out_file):
+            out_file = "zeropad+tlrc.BRIK"
+        return {"out_file": op.abspath(out_file)}
