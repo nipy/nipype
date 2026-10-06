@@ -11,8 +11,8 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
-  - repo: https://github.com/psf/black
-    rev: 87928e6d6761a4a6d22250e1fee5601b3998086e  # frozen: 26.5.1
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 96ae3e5802f3fe2d551e703e18f0a367d1a81ac2  # frozen: 26.10.0
     hooks:
       - id: black
   - repo: https://github.com/codespell-project/codespell
