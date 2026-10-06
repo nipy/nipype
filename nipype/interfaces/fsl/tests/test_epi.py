@@ -33,3 +33,22 @@ def test_eddy_correct2(create_files_in_directory):
 
     # test arguments for opt_map
     # eddy_correct class doesn't have opt_map{}
+
+
+def test_eddy_fwhm_list(create_files_in_directory):
+    """eddy accepts either one FWHM or one per iteration."""
+    filelist, outdir = create_files_in_directory
+    eddy = fsl.Eddy(
+        in_file=filelist[0],
+        in_mask=filelist[0],
+        in_index=filelist[0],
+        in_acqp=filelist[0],
+        in_bvec=filelist[0],
+        in_bval=filelist[0],
+    )
+
+    eddy.inputs.fwhm = [10.0, 8.0, 4.0, 2.0, 0.0]
+    assert "--fwhm=10.0,8.0,4.0,2.0,0.0" in eddy.cmdline
+
+    eddy.inputs.fwhm = 10.0
+    assert "--fwhm=10.0" in eddy.cmdline
