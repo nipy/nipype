@@ -626,8 +626,8 @@ class ThresholdInputSpec(SPMCommandInputSpec):
         desc=(
             "whether to use voxel-based FDR "
             "correction for initial threshold "
-            "(height_threshold_type has to be "
-            "set to q-value)"
+            "(height_threshold is then a q-value; "
+            "height_threshold_type is not used)"
         ),
     )
     use_topo_fdr = traits.Bool(
