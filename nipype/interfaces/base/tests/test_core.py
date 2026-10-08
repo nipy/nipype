@@ -10,6 +10,9 @@ from unittest import mock
 from .... import config
 from ....testing import example_data
 from ... import base as nib
+from ....pipeline import engine as pe
+from ....pipeline.engine.nodes import NodeExecutionError
+from ..support import Bunch
 from ..support import _inputs_help
 
 
@@ -624,3 +627,45 @@ def test_CommandLine_escape(tmp_path):
     command = CatCommand(in_file=str(test_file))
     result = command.run()
     assert result.runtime.stdout == "content"
+
+
+@pytest.mark.skipif(os.name != "posix", reason="requires POSIX signals")
+def test_CommandLine_killed_by_signal(tmp_path):
+    script = tmp_path / "die_by_signal"
+    script.write_text("#!/bin/sh\nkill -9 $$\n")
+    script.chmod(0o755)
+    env = {"PATH": f"{tmp_path}{os.pathsep}{os.environ['PATH']}"}
+
+    ci = nib.CommandLine(command="die_by_signal", environ=env, terminal_output="none")
+    with pytest.raises(RuntimeError, match=r"Return code: (-9|137)"):
+        ci.run()
+
+    node = pe.Node(ci, name="die", base_dir=str(tmp_path))
+    with pytest.raises(NodeExecutionError, match=r"Return code: (-9|137)"):
+        node.run()
+
+
+def test_CommandLine_nonzero_exit():
+    ci = nib.CommandLine(command="false", terminal_output="none")
+    with pytest.raises(RuntimeError, match="Return code: 1"):
+        ci.run()
+
+
+@pytest.mark.parametrize(
+    "returncode, hint",
+    [
+        (-9, "possibly terminated by signal SIGKILL"),
+        (-15, "SIGTERM"),
+        (137, None),
+        (1, None),
+    ],
+)
+def test_CommandLine_raise_exception_signal_hint(returncode, hint):
+    runtime = Bunch(cmdline="cmd", stdout="", stderr="", returncode=returncode)
+    with pytest.raises(RuntimeError) as excinfo:
+        nib.CommandLine(command="cmd").raise_exception(runtime)
+    assert f"Return code: {returncode}" in str(excinfo.value)
+    assert "see its documentation" in str(excinfo.value)
+    assert ("signal" in str(excinfo.value)) is (hint is not None)
+    if hint:
+        assert hint in str(excinfo.value)
