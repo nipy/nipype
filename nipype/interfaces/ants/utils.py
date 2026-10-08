@@ -847,8 +847,9 @@ class ComposeMultiTransformInputSpec(ANTSCommandInputSpec):
         desc="the name of the resulting transform.",
     )
     reference_image = File(
-        argstr="%s",
+        argstr="-R %s",
         position=2,
+        exists=True,
         desc="Reference image (only necessary when output is warpfield)",
     )
     transforms = InputMultiObject(
@@ -876,6 +877,10 @@ class ComposeMultiTransform(ANTSCommand):
     >>> compose_transform.inputs.transforms = ['struct_to_template.mat', 'func_to_struct.mat']
     >>> compose_transform.cmdline
     'ComposeMultiTransform 3 struct_to_template_composed.mat
+    struct_to_template.mat func_to_struct.mat'
+    >>> compose_transform.inputs.reference_image = 'T1.nii'
+    >>> compose_transform.cmdline
+    'ComposeMultiTransform 3 struct_to_template_composed.mat -R T1.nii
     struct_to_template.mat func_to_struct.mat'
 
     """

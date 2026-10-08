@@ -29,7 +29,7 @@ def test_ComposeMultiTransform_inputs():
             position=1,
         ),
         reference_image=dict(
-            argstr="%s",
+            argstr="-R %s",
             extensions=None,
             position=2,
         ),
