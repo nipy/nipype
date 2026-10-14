@@ -12,6 +12,7 @@ interfaces are found in the ``specs`` module.
 """
 
 import os
+import signal
 import subprocess as sp
 import shlex
 import simplejson as json
@@ -49,6 +50,7 @@ from .support import (
 )
 
 iflogger = logging.getLogger("nipype.interface")
+
 
 VALID_TERMINAL_OUTPUT = [
     "stream",
@@ -684,11 +686,19 @@ class CommandLine(BaseInterface):
         self._write_cmdline = value is True
 
     def raise_exception(self, runtime):
+        hint = ""
+        if runtime.returncode is not None and runtime.returncode < 0:
+            try:
+                hint = f" (possibly terminated by signal {signal.Signals(-runtime.returncode).name})"
+            except ValueError:
+                pass
         raise RuntimeError(
             (
                 "Command:\n{cmdline}\nStandard output:\n{stdout}\n"
-                "Standard error:\n{stderr}\nReturn code: {returncode}"
-            ).format(**runtime.dictcopy())
+                "Standard error:\n{stderr}\nReturn code: {returncode}{hint}\n"
+                "The meaning of a return code is defined by the application; "
+                "see its documentation."
+            ).format(hint=hint, **runtime.dictcopy())
         )
 
     def _get_environ(self):
@@ -768,6 +778,8 @@ class CommandLine(BaseInterface):
             output=self.terminal_output,
             write_cmdline=self.write_cmdline,
         )
+        if runtime.returncode not in correct_return_codes:
+            self.raise_exception(runtime)
         return runtime
 
     def _format_arg(self, name, trait_spec, value):
