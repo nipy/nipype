@@ -834,16 +834,20 @@ def get_dependencies(name, environ):
     """
     command = None
     if sys.platform == "darwin":
-        command = "otool -L `which %s`" % name
+        command = ["otool", "-L"]
     elif "linux" in sys.platform:
-        command = "ldd `which %s`" % name
+        command = ["ldd"]
     else:
         return "Platform %s not supported" % sys.platform
 
     deps = None
     try:
+        executable = which(name, env=environ)
+        if executable is None:
+            raise OSError(f"Command {name!r} not found")
+        command.append(executable)
         proc = sp.Popen(
-            command, stdout=sp.PIPE, stderr=sp.PIPE, shell=True, env=environ
+            command, stdout=sp.PIPE, stderr=sp.PIPE, shell=False, env=environ
         )
         o, e = proc.communicate()
         deps = o.rstrip()
