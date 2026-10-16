@@ -46,7 +46,9 @@ def test_get_dependencies_preserves_failure_result(missing):
     with (
         mock.patch.object(filemanip.sys, "platform", "linux"),
         mock.patch.object(filemanip, "which", return_value=executable),
-        mock.patch.object(filemanip.sp, "run", side_effect=OSError("unavailable")) as run,
+        mock.patch.object(
+            filemanip.sp, "run", side_effect=OSError("unavailable")
+        ) as run,
     ):
         result = filemanip.get_dependencies("tool", {})
 
