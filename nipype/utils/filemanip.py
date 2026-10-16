@@ -846,11 +846,15 @@ def get_dependencies(name, environ):
         if executable is None:
             raise OSError(f"Command {name!r} not found")
         command.append(executable)
-        proc = sp.Popen(
-            command, stdout=sp.PIPE, stderr=sp.PIPE, shell=False, env=environ
+        proc = sp.run(
+            command,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            shell=False,
+            env=environ,
+            check=False,
         )
-        o, e = proc.communicate()
-        deps = o.rstrip()
+        deps = proc.stdout.rstrip()
     except Exception as ex:
         deps = f"{command!r} failed"
         fmlogger.warning(f"Could not get dependencies of {name}s. Error:\n{ex}")
