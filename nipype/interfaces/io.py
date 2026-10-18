@@ -1311,6 +1311,11 @@ class DataGrabber(IOBase):
 
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = Directory(exists=True, desc="Root path common to templates.")
+    recursive = traits.Bool(
+        False,
+        usedefault=True,
+        desc="Allow ** in templates to match zero or more subdirectories.",
+    )
     sort_filelist = traits.Bool(
         True,
         usedefault=True,
@@ -1370,6 +1375,12 @@ class SelectFiles(IOBase):
 
     would match f0.nii or f1.nii, not f10.nii or f11.nii.
 
+    Set ``recursive=True`` to let ``**`` match zero or more subdirectories.
+    For example, ``{subject_id}/**/T1.nii`` can match both ``subj1/T1.nii``
+    and ``subj1/session1/struct/T1.nii``. Recursive matching is disabled by
+    default. If ``recursive`` is itself a template field, it retains its
+    template meaning and recursive matching remains disabled.
+
     """
 
     input_spec = SelectFilesInputSpec
@@ -1424,6 +1435,9 @@ class SelectFiles(IOBase):
         info = {
             k: v for k, v in list(self.inputs.__dict__.items()) if k in self._infields
         }
+        recursive = (
+            self.inputs.recursive if "recursive" not in self._infields else False
+        )
 
         force_lists = self.inputs.force_lists
         if isinstance(force_lists, bool):
@@ -1453,7 +1467,7 @@ class SelectFiles(IOBase):
 
             # Fill in the template and glob for files
             filled_template = template.format(**info)
-            filelist = glob.glob(filled_template)
+            filelist = glob.glob(filled_template, recursive=recursive)
 
             # Handle the case where nothing matched
             if not filelist:

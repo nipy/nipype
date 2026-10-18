@@ -11,6 +11,9 @@ def test_SelectFiles_inputs():
         raise_on_empty=dict(
             usedefault=True,
         ),
+        recursive=dict(
+            usedefault=True,
+        ),
         sort_filelist=dict(
             usedefault=True,
         ),

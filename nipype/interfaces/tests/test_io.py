@@ -218,6 +218,97 @@ def test_selectfiles_valueerror():
         sf.run()
 
 
+@pytest.fixture
+def selectfiles_tree(tmp_path):
+    paths = [
+        "sub-01/anat.nii.gz",
+        "sub-01/session2/anat.nii.gz",
+        "sub-01/session10/anat.nii.gz",
+        "sub-01/session10/nested/anat.nii.gz",
+    ]
+    for name in paths + ["sub-02/anat.nii.gz"]:
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
+    return tmp_path, [str(tmp_path / name) for name in paths]
+
+
+@pytest.mark.parametrize("recursive", [None, False, True])
+def test_selectfiles_recursive(selectfiles_tree, recursive):
+    """Recursive templates match zero or more levels only when enabled."""
+    base, paths = selectfiles_tree
+    options = {} if recursive is None else {"recursive": recursive}
+    sf = nio.SelectFiles(
+        {"image": "{subject_id}/**/anat.nii.gz"},
+        base_directory=str(base),
+        **options,
+    )
+    sf.inputs.subject_id = "sub-01"
+    expected = paths if recursive else paths[1:3]
+    assert sf.run().outputs.image == expected
+
+
+@pytest.mark.parametrize("recursive", [False, True])
+def test_selectfiles_recursive_directories(tmp_path, recursive):
+    directories = ["anat", "session/anat", "session/nested/anat"]
+    for name in directories:
+        (tmp_path / name).mkdir(parents=True)
+    (tmp_path / "other").mkdir()
+    (tmp_path / "other/anat").touch()
+    sf = nio.SelectFiles(
+        {"directory": op.join("**", "anat", "")},
+        base_directory=str(tmp_path),
+        recursive=recursive,
+        force_lists=True,
+    )
+    expected = directories if recursive else directories[1:2]
+    assert sf.run().outputs.directory == [
+        str(tmp_path / name) + os.sep for name in expected
+    ]
+
+
+@pytest.mark.parametrize("force_lists", [False, True, ["image"]])
+def test_selectfiles_recursive_single_match(tmp_path, force_lists):
+    path = tmp_path / "session/nested/anat.nii.gz"
+    path.parent.mkdir(parents=True)
+    path.touch()
+    sf = nio.SelectFiles(
+        {"image": "**/anat.nii.gz"},
+        base_directory=str(tmp_path),
+        recursive=True,
+        force_lists=force_lists,
+    )
+    expected = [str(path)] if force_lists else str(path)
+    assert sf.run().outputs.image == expected
+
+
+@pytest.mark.parametrize("raise_on_empty", [False, True])
+def test_selectfiles_recursive_empty(tmp_path, raise_on_empty):
+    sf = nio.SelectFiles(
+        {"image": "**/missing.nii.gz"},
+        base_directory=str(tmp_path),
+        recursive=True,
+        raise_on_empty=raise_on_empty,
+        force_lists=True,
+    )
+    if raise_on_empty:
+        with pytest.raises(OSError, match="No files were found"):
+            sf.run()
+    else:
+        with pytest.warns(UserWarning, match="No files were found"):
+            assert sf.run().outputs.image == []
+
+
+def test_selectfiles_recursive_template_field(selectfiles_tree):
+    """An existing template field named recursive retains its meaning."""
+    base, paths = selectfiles_tree
+    sf = nio.SelectFiles(
+        {"image": "{recursive}/**/anat.nii.gz"}, base_directory=str(base)
+    )
+    sf.inputs.recursive = "sub-01"
+    assert sf.run().outputs.image == paths[1:3]
+
+
 @pytest.mark.skipif(noboto, reason="boto library is not available")
 def test_s3datagrabber_communication(tmpdir):
     dg = nio.S3DataGrabber(
