@@ -164,3 +164,6 @@ def test_make_matlab_command(create_files_in_directory):
     dc.inputs.use_v8struct = False
     script = dc._make_matlab_command([contents])
     assert "jobs{1}.jobtype{1}.jobname{1}.contents(3) = 3;" in script
+    dc.inputs.mfile = False
+    script = dc._make_matlab_command([contents])
+    assert "load pyjobs_jobname;" in script
