@@ -589,7 +589,7 @@ class SPMCommand(BaseInterface):
                 "jobs": [
                     {
                         self.jobtype: [
-                            {self.jobname: self.reformat_dict_for_savemat(contents[0])}
+                            {self.jobname: self._reformat_dict_for_savemat(contents[0])}
                         ]
                     }
                 ]
