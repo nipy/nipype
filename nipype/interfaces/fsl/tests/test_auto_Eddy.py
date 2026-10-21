@@ -46,6 +46,7 @@ def test_Eddy_inputs():
         ),
         fwhm=dict(
             argstr="--fwhm=%s",
+            sep=",",
         ),
         in_acqp=dict(
             argstr="--acqp=%s",
