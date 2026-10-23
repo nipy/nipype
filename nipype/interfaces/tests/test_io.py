@@ -205,6 +205,87 @@ def test_selectfiles(tmpdir, SF_args, inputs_att, expected):
         assert getattr(res.outputs, key) == val
 
 
+@pytest.mark.parametrize("force_lists", [False, True, [], ["image"]])
+@pytest.mark.parametrize("sort_filelist", [False, True])
+def test_selectfiles_empty(tmp_path, force_lists, sort_filelist):
+    selector = nio.SelectFiles(
+        {"image": "missing*.nii"},
+        base_directory=str(tmp_path),
+        raise_on_empty=False,
+        force_lists=force_lists,
+        sort_filelist=sort_filelist,
+    )
+
+    with pytest.warns(
+        UserWarning, match="^No files were found matching image template:"
+    ) as warnings:
+        result = selector.run(cwd=str(tmp_path))
+
+    assert len(warnings) == 1
+    assert result.outputs.get() == {"image": []}
+
+
+@pytest.mark.parametrize("force_lists", [False, True, [], ["image"]])
+def test_selectfiles_empty_raises_by_default(tmp_path, force_lists):
+    selector = nio.SelectFiles(
+        {"image": "missing*.nii"},
+        base_directory=str(tmp_path),
+        force_lists=force_lists,
+    )
+
+    with pytest.raises(OSError, match="^No files were found matching image template:"):
+        selector.run(cwd=str(tmp_path))
+
+
+@pytest.mark.parametrize("force_lists", [False, True, [], ["image"]])
+@pytest.mark.parametrize("names", [("image1.nii",), ("image10.nii", "image2.nii")])
+@pytest.mark.parametrize("sort_filelist", [False, True])
+def test_selectfiles_nonempty_shape(tmp_path, force_lists, names, sort_filelist):
+    for name in names:
+        (tmp_path / name).touch()
+    selector = nio.SelectFiles(
+        {"image": "image*.nii"},
+        base_directory=str(tmp_path),
+        force_lists=force_lists,
+        sort_filelist=sort_filelist,
+    )
+
+    image = selector.run(cwd=str(tmp_path)).outputs.image
+    paths = [str(tmp_path / name) for name in names]
+    if len(names) == 1 and not force_lists:
+        expected = paths[0]
+    elif sort_filelist and len(names) > 1:
+        expected = [str(tmp_path / "image2.nii"), str(tmp_path / "image10.nii")]
+    else:
+        expected = glob.glob(str(tmp_path / "image*.nii"))
+    assert image == expected
+
+
+@pytest.mark.parametrize("force_lists", [False, True, [], ["image"]])
+def test_selectfiles_empty_with_existing_templates(tmp_path, force_lists):
+    for name in ("reference.nii", "run10.nii", "run2.nii"):
+        (tmp_path / name).touch()
+    selector = nio.SelectFiles(
+        {"image": "missing*.nii", "reference": "reference.nii", "runs": "run*.nii"},
+        base_directory=str(tmp_path),
+        raise_on_empty=False,
+        force_lists=force_lists,
+    )
+
+    with pytest.warns(
+        UserWarning, match="^No files were found matching image template:"
+    ) as warnings:
+        outputs = selector.run(cwd=str(tmp_path)).outputs.get()
+
+    reference = str(tmp_path / "reference.nii")
+    assert len(warnings) == 1
+    assert outputs == {
+        "image": [],
+        "reference": [reference] if force_lists is True else reference,
+        "runs": [str(tmp_path / "run2.nii"), str(tmp_path / "run10.nii")],
+    }
+
+
 def test_selectfiles_valueerror():
     """Test ValueError when force_lists has field that isn't in template."""
     base_dir = op.dirname(nipype.__file__)
