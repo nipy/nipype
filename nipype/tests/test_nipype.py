@@ -1,7 +1,43 @@
 import os
+import subprocess
+import sys
+from textwrap import dedent
+
 from .. import get_info
 from ..info import get_nipype_gitversion
 import pytest
+
+
+@pytest.mark.parametrize("redirect_stderr", (False, True))
+def test_import_faulthandler(tmp_path, redirect_stderr):
+    code = dedent(f"""
+        import faulthandler
+        import sys
+
+        faulthandler.disable()
+
+        class WriteOnlyStderr:
+            def write(self, value):
+                return sys.__stderr__.write(value)
+
+            def flush(self):
+                return sys.__stderr__.flush()
+
+        if {redirect_stderr!r}:
+            sys.stderr = WriteOnlyStderr()
+
+        import nipype
+
+        assert faulthandler.is_enabled() is {not redirect_stderr!r}
+        """)
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        env={**os.environ, "NIPYPE_NO_ET": "1", "NIPYPE_CONFIG_DIR": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_nipype_info():
