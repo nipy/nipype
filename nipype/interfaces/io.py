@@ -1471,7 +1471,7 @@ class SelectFiles(IOBase):
                 filelist = human_order_sorted(filelist)
 
             # Handle whether this must be a list or not
-            if field not in force_lists:
+            if filelist and field not in force_lists:
                 filelist = simplify_list(filelist)
 
             outputs[field] = filelist
