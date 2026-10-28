@@ -20,6 +20,7 @@ import numpy as np
 from ... import logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
+from ...utils.ram_estimator import RamEstimator
 from .base import DistributedPluginBase
 from ...utils.gpu_count import gpu_count
 
@@ -245,6 +246,44 @@ class MultiProcPlugin(DistributedPluginBase):
 
         return free_memory_gb, free_processors, free_gpu_slots
 
+    def _negotiate_ram(self, node):
+        """Apply the RAM plan of a node carrying a ``RamEstimator``.
+
+        The plan returned by ``RamEstimator.negotiate`` is negotiated against
+        ``self.memory_gb``: its tuned parameters are set on the node inputs and
+        its reservation on the node. Nodes without an estimator and MapNodes
+        submitted whole are left to ``Node.mem_gb_runtime``. On failure the
+        node keeps its static reservation.
+        """
+        estimator = getattr(node, "ram_estimator", None)
+        if (
+            not isinstance(estimator, RamEstimator)
+            or isinstance(node, MapNode)
+            or node._ram_estimated
+        ):
+            return
+        try:
+            node._get_inputs()
+            plan = estimator.negotiate(node.inputs, self.memory_gb)
+            traits = node.inputs.traits()
+            for key, value in plan.tuned_params.items():
+                if key == "environ" and isinstance(value, dict):
+                    if "environ" in traits:
+                        node.inputs.environ.update(value)
+                elif key in traits:
+                    setattr(node.inputs, key, value)
+            node._mem_gb = plan.mem_gb
+            node.ram_estimator_str = plan.debug_str
+            if plan.n_procs is not None:
+                node.n_procs = plan.n_procs
+        except Exception:
+            logger.warning(
+                "[MultiProc] RAM negotiation failed for %s, using static mem_gb",
+                node.fullname,
+                exc_info=True,
+            )
+        node._ram_estimated = True
+
     def _send_procs_to_workers(self, updatehash=False, graph=None):
         """
         Sends jobs to workers when system resources are available.
@@ -333,6 +372,8 @@ class MultiProcPlugin(DistributedPluginBase):
                     submit = self._submit_mapnode(jobid)
                     if not submit:
                         continue
+
+            self._negotiate_ram(self.procs[jobid])
 
             # Check requirements of this job
             next_job_gb = min(self.procs[jobid].mem_gb_runtime, self.memory_gb)
