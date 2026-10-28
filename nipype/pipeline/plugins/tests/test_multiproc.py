@@ -181,3 +181,57 @@ def test_error_run_without_submitting(tmp_path, plugin):
 
     with pytest.raises(RuntimeError):
         wf.run(plugin=plugin)
+
+
+def test_ram_estimator_negotiate(tmp_path):
+    from nipype.pipeline.plugins.multiproc import MultiProcPlugin
+    from nipype.utils.ram_estimator import RamEstimator, RamPlan
+
+    class TuningEstimator(RamEstimator):
+        def negotiate(self, inputs, ram_budget_gb):
+            return RamPlan(
+                mem_gb=min(4.0, ram_budget_gb),
+                tuned_params={"input1": 7, "environ": {"OMP_NUM_THREADS": "2"}},
+                n_procs=2,
+                debug_str="tuned",
+            )
+
+    node = pe.Node(SingleNodeTestInterface(), name="n1", base_dir=str(tmp_path))
+    node.ram_estimator = TuningEstimator()
+    cmd = pe.Node(nib.CommandLine("echo"), name="cmd", base_dir=str(tmp_path))
+    cmd.ram_estimator = TuningEstimator()
+    plugin = MultiProcPlugin(plugin_args={"n_procs": 2, "memory_gb": 3})
+    plugin._negotiate_ram(node)
+
+    # tuned inputs and reservation are applied to the node
+
+    assert node.inputs.input1 == 7
+    assert node.mem_gb_runtime == 3
+    assert node.n_procs == 2
+    assert node.ram_estimator_str == "tuned"
+
+    # environ is merged where the interface has it, and skipped otherwise
+    plugin._negotiate_ram(cmd)
+    assert cmd.inputs.environ["OMP_NUM_THREADS"] == "2"
+
+    # the default negotiate wraps __call__ without tuning
+    plan = RamEstimator(overhead_gb=1, min_gb=1).negotiate(node.inputs, 8)
+    assert plan.mem_gb == 1.0 and plan.tuned_params == {}
+
+
+def test_ram_estimator_negotiate_failure(tmp_path):
+    from nipype.pipeline.plugins.multiproc import MultiProcPlugin
+    from nipype.utils.ram_estimator import RamEstimator
+
+    class BrokenEstimator(RamEstimator):
+        def negotiate(self, inputs, ram_budget_gb):
+            raise ValueError("broken")
+
+    node = pe.Node(
+        SingleNodeTestInterface(), name="n1", mem_gb=1.5, base_dir=str(tmp_path)
+    )
+    node.ram_estimator = BrokenEstimator()
+    MultiProcPlugin(plugin_args={"n_procs": 2})._negotiate_ram(node)
+
+    # the static reservation is kept and the estimator is not run again
+    assert node.mem_gb_runtime == 1.5
