@@ -46,6 +46,11 @@ class ResourceMonitor(threading.Thread):
     """
     A ``Thread`` to monitor a specific PID with a certain frequency
     to a file
+
+    When ``fname`` is not given, the samples are written to a
+    ``.proc-<pid>_time-<time>_freq-<freq>`` file in the directory set by the
+    ``proc_dir`` option of the ``[monitoring]`` configuration section
+    (created if missing), or in the current working directory if unset.
     """
 
     def __init__(self, pid, freq=5, fname=None, python=True):
@@ -57,6 +62,10 @@ class ResourceMonitor(threading.Thread):
 
         if fname is None:
             fname = ".proc-%d_time-%s_freq-%0.2f" % (pid, time(), freq)
+            proc_dir = config.get("monitoring", "proc_dir")
+            if proc_dir:
+                os.makedirs(proc_dir, exist_ok=True)
+                fname = os.path.join(proc_dir, fname)
         self._fname = os.path.abspath(fname)
         self._logfile = open(self._fname, "w")
         self._freq = freq
