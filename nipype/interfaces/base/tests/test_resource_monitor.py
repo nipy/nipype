@@ -100,3 +100,22 @@ def test_function_profiling(tmpdir, mem_gb, n_procs, use_resource_monitor):
         abs(mem_gb - result.runtime.mem_peak_gb) < 0.3
     ), "estimated memory error above .3GB"
     assert int(result.runtime.cpu_percent / 100 + 0.2) >= n_procs
+
+
+def test_resource_monitor_proc_dir(tmpdir, monkeypatch):
+    """The .proc file goes to ``monitoring.proc_dir`` instead of the CWD"""
+    pytest.importorskip("psutil")
+    from ....utils.profiler import ResourceMonitor
+
+    cwd = tmpdir.mkdir("cwd")
+    proc_dir = tmpdir.join("logs", "proc")
+    cwd.chdir()
+
+    monkeypatch.setitem(config._sections["monitoring"], "proc_dir", str(proc_dir))
+    resmon = ResourceMonitor(os.getpid(), freq=0.2)
+    resmon.start()
+    resmon.stop()
+
+    assert os.path.dirname(resmon.fname) == str(proc_dir)
+    assert os.path.basename(resmon.fname).startswith(".proc-")
+    assert not cwd.listdir()
