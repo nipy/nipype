@@ -83,6 +83,7 @@ from .utils import (
     MRIsExpand,
     MRIsCombine,
 )
+from .synth import SynthStrip, SynthSeg, SynthMorphReg, SynthMorphApply
 from .longitudinal import RobustTemplate, FuseSegmentations
 from .registration import (
     MPRtoMNI305,
