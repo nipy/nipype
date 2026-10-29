@@ -56,7 +56,8 @@ def eddy_env(monkeypatch):
         (True, (), "eddy"),
         (False, ("eddy_cuda", "eddy", "eddy_cpu", "eddy_openmp"), "eddy_cpu"),
         (False, ("eddy", "eddy_openmp"), "eddy_openmp"),
-        (False, ("eddy",), "eddy_openmp"),
+        (False, ("eddy",), "eddy_cpu"),
+        (False, (), "eddy_cpu"),
     ],
 )
 def test_eddy_cmd_selection(eddy_env, use_cuda, binaries, expected):

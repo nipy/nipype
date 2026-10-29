@@ -903,8 +903,7 @@ class Eddy(FSLCommand):
 
     >>> from nipype.interfaces.fsl import Eddy
 
-    Running eddy on a CPU (``eddy_cpu``, or ``eddy_openmp`` on older FSL;
-    ``--nthr`` is added for FSL >= 6.0.7.8):
+    Running eddy on a CPU (``--nthr`` is added for FSL >= 6.0.7.8):
     >>> eddy = Eddy()
     >>> eddy.inputs.in_file = 'epi.nii'
     >>> eddy.inputs.in_mask  = 'epi_mask.nii'
@@ -913,17 +912,16 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    "eddy_... --flm=quadratic --ff=10.0 \
+    "eddy_cpu --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 ...--nvoxhp=1000 \
 --out='.../eddy_corrected' --slm=none"
 
-    Running eddy on an Nvidia GPU using cuda (``eddy_cuda`` if available,
-    otherwise the ``eddy`` wrapper):
+    Running eddy on an Nvidia GPU using cuda:
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    "eddy... --flm=quadratic --ff=10.0 \
+    "eddy --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --niter=5 ...--nvoxhp=1000 \
@@ -936,7 +934,7 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.slice2vol_interp = 'trilinear'
     >>> eddy.inputs.slice_order = 'epi_slspec.txt'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    "eddy... --flm=quadratic --ff=10.0 \
+    "eddy --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
 --interp=spline --resamp=jac --mporder=6 --niter=5 ...--nvoxhp=1000 \
@@ -946,7 +944,7 @@ class Eddy(FSLCommand):
 
     """
 
-    _cmd = "eddy_openmp"
+    _cmd = "eddy_cpu"
     _default_cmd = _cmd
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
@@ -970,13 +968,14 @@ class Eddy(FSLCommand):
 
         GPU: ``eddy_cuda`` if available, otherwise the ``eddy`` wrapper, which
         dispatches to the CUDA binary installed with FSL.
-        CPU: ``eddy_cpu`` if available, otherwise ``eddy_openmp`` (older FSL).
+        CPU: ``eddy_cpu``, or ``eddy_openmp`` if that is the only one available
+        (FSL < 6.0.6).
         """
         if self._cuda_requested:
             self._cmd = "eddy_cuda" if which("eddy_cuda") is not None else "eddy"
             self.inputs.num_threads = 1
-        elif which("eddy_cpu") is not None:
-            self._cmd = "eddy_cpu"
+        elif which("eddy_cpu") is None and which("eddy_openmp") is not None:
+            self._cmd = "eddy_openmp"
         else:
             self._cmd = self._default_cmd
         self._num_threads_update()
