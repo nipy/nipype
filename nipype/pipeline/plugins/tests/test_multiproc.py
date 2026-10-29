@@ -244,9 +244,10 @@ def test_unpicklable_node_fails(tmp_path, fail_on_hang):
     n1.inputs.input1 = 1
     n1.inputs.unpicklable = lambda: None
     wf.add_nodes([n1])
-    # A pklz crash file would need to pickle the node too
-    wf.config["execution"]["crashfile_format"] = "txt"
     wf.config["execution"]["crashdump_dir"] = str(tmp_path)
 
     with pytest.raises(RuntimeError):
         wf.run(plugin="MultiProc", plugin_args={"n_procs": 1})
+
+    # The node cannot be pickled into a pklz crash file either
+    assert len(list(tmp_path.glob("crash-*-n1-*.txt"))) == 1
