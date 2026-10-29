@@ -6,6 +6,7 @@ Test the resource management of MultiProc
 
 import sys
 import os
+import signal
 import pytest
 from nipype.pipeline import engine as pe
 from nipype.interfaces import base as nib
@@ -181,3 +182,72 @@ def test_error_run_without_submitting(tmp_path, plugin):
 
     with pytest.raises(RuntimeError):
         wf.run(plugin=plugin)
+
+
+class KilledWorkerInterface(SingleNodeTestInterface):
+    def _run_interface(self, runtime):
+        os.kill(os.getpid(), signal.SIGKILL)
+
+
+class UnpicklableInputSpec(InputSpecSingleNode):
+    unpicklable = nib.traits.Any(desc="a value that cannot be pickled")
+
+
+class UnpicklableInputInterface(SingleNodeTestInterface):
+    input_spec = UnpicklableInputSpec
+
+
+@pytest.fixture
+def fail_on_hang():
+    """Turn a hanging workflow run into a test failure."""
+
+    def _hang(signum, frame):
+        raise TimeoutError("MultiProc did not finish: it is waiting forever")
+
+    previous = signal.signal(signal.SIGALRM, _hang)
+    signal.alarm(60)
+    yield
+    signal.alarm(0)
+    signal.signal(signal.SIGALRM, previous)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="needs SIGKILL and SIGALRM")
+def test_killed_worker_fails_its_node(tmp_path, fail_on_hang):
+    wf = pe.Workflow(name="killed", base_dir=str(tmp_path))
+    # The "mem_thread" scheduler sorts ready jobs by mem_gb: with one
+    # processor n1 runs and kills its worker, breaking the pool, before n2 is
+    # submitted.
+    n1 = pe.Node(KilledWorkerInterface(), name="n1", mem_gb=0.1)
+    n2 = pe.Node(SingleNodeTestInterface(), name="n2", mem_gb=0.2)
+    n3 = pe.Node(SingleNodeTestInterface(), name="n3")
+    n1.inputs.input1 = 1
+    n2.inputs.input1 = 2
+    wf.connect(n1, "output1", n3, "input1")
+    wf.add_nodes([n2])
+    wf.config["execution"]["crashdump_dir"] = str(tmp_path)
+
+    with pytest.raises(RuntimeError, match="BrokenProcessPool"):
+        wf.run(
+            plugin="MultiProc",
+            plugin_args={"n_procs": 1, "memory_gb": 1, "scheduler": "mem_thread"},
+        )
+
+    # The independent node still ran, in a restarted pool; n1's dependent did not
+    assert (tmp_path / "killed" / "n2" / "result_n2.pklz").exists()
+    assert not (tmp_path / "killed" / "n3").exists()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="needs SIGALRM")
+def test_unpicklable_node_fails(tmp_path, fail_on_hang):
+    wf = pe.Workflow(name="unpicklable", base_dir=str(tmp_path))
+    n1 = pe.Node(UnpicklableInputInterface(), name="n1")
+    n1.inputs.input1 = 1
+    n1.inputs.unpicklable = lambda: None
+    wf.add_nodes([n1])
+    wf.config["execution"]["crashdump_dir"] = str(tmp_path)
+
+    with pytest.raises(RuntimeError):
+        wf.run(plugin="MultiProc", plugin_args={"n_procs": 1})
+
+    # The node cannot be pickled into a pklz crash file either
+    assert len(list(tmp_path.glob("crash-*-n1-*.txt"))) == 1

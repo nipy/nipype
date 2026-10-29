@@ -10,6 +10,7 @@ http://stackoverflow.com/a/8963618/1183453
 import os
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor, wait
+from concurrent.futures.process import BrokenProcessPool
 from traceback import format_exception
 import sys
 from logging import INFO
@@ -154,6 +155,11 @@ class MultiProcPlugin(DistributedPluginBase):
             self._cwd,
         )
 
+        self._start_pool()
+
+        self._stats = None
+
+    def _start_pool(self):
         try:
             mp_context = mp.get_context(self.plugin_args.get("mp_context"))
             self.pool = ProcessPoolExecutor(
@@ -168,14 +174,28 @@ class MultiProcPlugin(DistributedPluginBase):
             result_future = self.pool.submit(process_initializer, self._cwd)
             wait([result_future], timeout=5)
 
-        self._stats = None
-
     def _async_callback(self, args):
+        # A future fails when its task never returned (e.g., its worker was
+        # killed, breaking the pool, or the node could not be pickled):
+        # _get_result reports it, as an exception raised here would be lost
+        if args.cancelled() or args.exception() is not None:
+            return
         result = args.result()
         self._taskresult[result["taskid"]] = result
 
     def _get_result(self, taskid):
-        return self._taskresult.get(taskid)
+        result = self._taskresult.get(taskid)
+        if result is None:
+            future = self._task_obj.get(taskid)
+            if future is not None and future.done() and not future.cancelled():
+                error = future.exception()
+                if error is not None:
+                    result = {
+                        "result": None,
+                        "traceback": format_exception(error),
+                        "taskid": taskid,
+                    }
+        return result
 
     def _clear_task(self, taskid):
         del self._task_obj[taskid]
@@ -187,7 +207,15 @@ class MultiProcPlugin(DistributedPluginBase):
         if getattr(node.interface, "terminal_output", "") == "stream":
             node.interface.terminal_output = "allatonce"
 
-        result_future = self.pool.submit(run_node, node, updatehash, self._taskid)
+        try:
+            result_future = self.pool.submit(run_node, node, updatehash, self._taskid)
+        except BrokenProcessPool:
+            # A worker died abruptly: the tasks it took down fail on their own
+            # (see _get_result), the rest of the workflow runs in a new pool
+            logger.warning("[MultiProc] A worker died abruptly, restarting the pool.")
+            self.pool.shutdown(wait=False)
+            self._start_pool()
+            result_future = self.pool.submit(run_node, node, updatehash, self._taskid)
         result_future.add_done_callback(self._async_callback)
         self._task_obj[self._taskid] = result_future
 

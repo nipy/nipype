@@ -4,6 +4,7 @@
 
 import os
 import getpass
+import pickle
 from socket import gethostname
 import sys
 import uuid
@@ -64,7 +65,17 @@ another exception occurred:\n\n{}.""".format(exc).splitlines(keepends=True)
     if crashfile.endswith(".txt"):
         crash2txt(crashfile, dict(node=node, traceback=traceback))
     else:
-        savepkl(crashfile, dict(node=node, traceback=traceback), versioning=True)
+        try:
+            savepkl(crashfile, dict(node=node, traceback=traceback), versioning=True)
+        except (pickle.PicklingError, AttributeError, TypeError) as exc:
+            # The node cannot be pickled: keep the traceback on disk as text
+            crashfile = crashfile[: -len(".pklz")] + ".txt"
+            logger.warning(
+                "Could not pickle the crash info (%s), saving it to %s",
+                exc,
+                crashfile,
+            )
+            crash2txt(crashfile, dict(node=node, traceback=traceback))
     return crashfile
 
 
