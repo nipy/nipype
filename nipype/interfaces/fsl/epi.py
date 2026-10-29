@@ -9,10 +9,12 @@ import os
 import numpy as np
 import nibabel as nb
 import warnings
+from shutil import which
+from looseversion import LooseVersion
 
 from ...utils.filemanip import split_filename, fname_presuffix
 
-from ..base import traits, TraitedSpec, InputMultiPath, File, isdefined
+from ..base import traits, TraitedSpec, InputMultiPath, File, isdefined, Undefined
 from .base import FSLCommand, FSLCommandInputSpec, Info
 
 
@@ -795,7 +797,12 @@ class EddyInputSpec(FSLCommandInputSpec):
     )
 
     num_threads = traits.Int(
-        1, usedefault=True, nohash=True, desc="Number of openmp threads to use"
+        1,
+        usedefault=True,
+        nohash=True,
+        argstr="--nthr=%d",
+        desc="Number of threads to use (CPU version only; forced to 1 with "
+        "use_cuda). Also passed as --nthr on FSL >= 6.0.7.8",
     )
     is_shelled = traits.Bool(
         False,
@@ -896,7 +903,7 @@ class Eddy(FSLCommand):
 
     >>> from nipype.interfaces.fsl import Eddy
 
-    Running eddy on a CPU using OpenMP:
+    Running eddy on a CPU (``--nthr`` is added for FSL >= 6.0.7.8):
     >>> eddy = Eddy()
     >>> eddy.inputs.in_file = 'epi.nii'
     >>> eddy.inputs.in_mask  = 'epi_mask.nii'
@@ -905,19 +912,19 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    "eddy_openmp --flm=quadratic --ff=10.0 \
+    "eddy_cpu --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
+--interp=spline --resamp=jac --niter=5 ...--nvoxhp=1000 \
 --out='.../eddy_corrected' --slm=none"
 
     Running eddy on an Nvidia GPU using cuda:
     >>> eddy.inputs.use_cuda = True
     >>> eddy.cmdline # doctest: +ELLIPSIS
-    "eddy_cuda --flm=quadratic --ff=10.0 \
+    "eddy --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --niter=5 --nvoxhp=1000 \
+--interp=spline --resamp=jac --niter=5 ...--nvoxhp=1000 \
 --out='.../eddy_corrected' --slm=none"
 
     Running eddy with slice-to-volume motion correction:
@@ -927,17 +934,18 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.slice2vol_interp = 'trilinear'
     >>> eddy.inputs.slice_order = 'epi_slspec.txt'
     >>> eddy.cmdline          # doctest: +ELLIPSIS
-    "eddy_cuda --flm=quadratic --ff=10.0 \
+    "eddy --flm=quadratic --ff=10.0 \
 --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---interp=spline --resamp=jac --mporder=6 --niter=5 --nvoxhp=1000 \
+--interp=spline --resamp=jac --mporder=6 --niter=5 ...--nvoxhp=1000 \
 --out='.../eddy_corrected' --s2v_interp=trilinear --s2v_lambda=1 \
 --s2v_niter=5 --slspec=epi_slspec.txt --slm=none"
     >>> res = eddy.run()     # doctest: +SKIP
 
     """
 
-    _cmd = "eddy_openmp"
+    _cmd = "eddy_cpu"
+    _default_cmd = _cmd
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
@@ -945,16 +953,36 @@ class Eddy(FSLCommand):
 
     def __init__(self, **inputs):
         super().__init__(**inputs)
+        self.inputs.on_trait_change(self._use_cuda, "use_cuda")
         self.inputs.on_trait_change(self._num_threads_update, "num_threads")
         if not isdefined(self.inputs.num_threads):
             self.inputs.num_threads = self._num_threads
+        self._use_cuda()
+
+    @property
+    def _cuda_requested(self):
+        return isdefined(self.inputs.use_cuda) and bool(self.inputs.use_cuda)
+
+    def _use_cuda(self):
+        """Select the eddy executable according to ``use_cuda``.
+
+        GPU: ``eddy_cuda`` if available, otherwise the ``eddy`` wrapper, which
+        dispatches to the CUDA binary installed with FSL.
+        CPU: ``eddy_cpu``, or ``eddy_openmp`` if that is the only one available
+        (FSL < 6.0.6).
+        """
+        if self._cuda_requested:
+            self._cmd = "eddy_cuda" if which("eddy_cuda") is not None else "eddy"
+            self.inputs.num_threads = 1
+        elif which("eddy_cpu") is None and which("eddy_openmp") is not None:
+            self._cmd = "eddy_openmp"
         else:
-            self._num_threads_update()
-        self.inputs.on_trait_change(self._use_cuda, "use_cuda")
-        if isdefined(self.inputs.use_cuda):
-            self._use_cuda()
+            self._cmd = self._default_cmd
+        self._num_threads_update()
 
     def _num_threads_update(self):
+        if self._cuda_requested:
+            self.inputs.num_threads = 1
         self._num_threads = self.inputs.num_threads
         if not isdefined(self.inputs.num_threads):
             if "OMP_NUM_THREADS" in self.inputs.environ:
@@ -962,29 +990,18 @@ class Eddy(FSLCommand):
         else:
             self.inputs.environ["OMP_NUM_THREADS"] = str(self.inputs.num_threads)
 
-    def _use_cuda(self):
-        self._cmd = "eddy_cuda" if self.inputs.use_cuda else "eddy_openmp"
-
-    def _run_interface(self, runtime):
-        # If 'eddy_openmp' is missing, use 'eddy'
-        FSLDIR = os.getenv("FSLDIR", "")
-        cmd = self._cmd
-        if all(
-            (
-                FSLDIR != "",
-                cmd == "eddy_openmp",
-                not os.path.exists(os.path.join(FSLDIR, "bin", cmd)),
-            )
-        ):
-            self._cmd = "eddy"
-        runtime = super()._run_interface(runtime)
-
-        # Restore command to avoid side-effects
-        self._cmd = cmd
-        return runtime
+    @staticmethod
+    def _supports_nthr():
+        version = Info.version()
+        return version is not None and LooseVersion(version) >= LooseVersion("6.0.7.8")
 
     def _format_arg(self, name, spec, value):
-        if name == "in_topup_fieldcoef":
+        if name == "num_threads":
+            # --nthr exists only in the CPU build of FSL >= 6.0.7.8; older
+            # versions fail on it and rely on OMP_NUM_THREADS alone
+            if self._cuda_requested or not self._supports_nthr():
+                return None
+        elif name == "in_topup_fieldcoef":
             value = value.split("_fieldcoef")[0]
         elif name == "field":
             value = fname_presuffix(value, use_ext=False)
