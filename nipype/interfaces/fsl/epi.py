@@ -993,9 +993,7 @@ class Eddy(FSLCommand):
     @staticmethod
     def _supports_nthr():
         version = Info.version()
-        return version is not None and LooseVersion(version) >= LooseVersion(
-            "6.0.7.8"
-        )
+        return version is not None and LooseVersion(version) >= LooseVersion("6.0.7.8")
 
     def _format_arg(self, name, spec, value):
         if name == "num_threads":
