@@ -17,7 +17,7 @@ import gc
 
 from copy import deepcopy
 import numpy as np
-from ... import logging
+from ... import config, logging
 from ...utils.profiler import get_system_total_memory_gb
 from ..engine import MapNode
 from .base import DistributedPluginBase
@@ -151,10 +151,14 @@ except ImportError:
         Process = NonDaemonProcess
 
 
-def process_initializer(cwd):
+def process_initializer(cwd, monitoring=None):
     """Initializes the environment of the child process"""
     os.chdir(cwd)
     os.environ["NIPYPE_NO_ET"] = "1"
+    if monitoring:
+        # A worker that is not forked (e.g., spawn) starts from the default
+        # config, missing a resource monitor enabled at runtime
+        config.update_config({"monitoring": monitoring})
 
 
 class LegacyMultiProcPlugin(DistributedPluginBase):
@@ -228,7 +232,7 @@ class LegacyMultiProcPlugin(DistributedPluginBase):
                 processes=self.processors,
                 maxtasksperchild=maxtasks,
                 initializer=process_initializer,
-                initargs=(self._cwd,),
+                initargs=(self._cwd, dict(config._sections["monitoring"])),
             )
         except TypeError:
             # Python < 3.2 does not have maxtasksperchild

@@ -230,11 +230,14 @@ class NipypeConfig:
 
     def update_config(self, config_dict):
         """Extend internal dictionary with config_dict"""
-        for section in ["execution", "logging", "check"]:
+        for section in ["execution", "logging", "check", "monitoring"]:
             if section in config_dict:
                 for key, val in list(config_dict[section].items()):
                     if not key.startswith("__"):
                         self._config.set(section, key, str(val))
+        if "enabled" in config_dict.get("monitoring", {}):
+            # Refresh the cached value
+            self.resource_monitor = str(config_dict["monitoring"]["enabled"])
 
     def update_matplotlib(self):
         """Set backend on matplotlib from options"""
@@ -267,6 +270,7 @@ class NipypeConfig:
 
         if value is False:
             self._resource_monitor = False
+            self._config.set("monitoring", "enabled", "false")
         elif value is True:
             if not self._resource_monitor:
                 # Before setting self._resource_monitor check psutil

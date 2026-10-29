@@ -6,7 +6,9 @@ Test the resource management of MultiProc
 
 import sys
 import os
+import multiprocessing as mp
 import pytest
+from nipype import config
 from nipype.pipeline import engine as pe
 from nipype.interfaces import base as nib
 
@@ -181,3 +183,31 @@ def test_error_run_without_submitting(tmp_path, plugin):
 
     with pytest.raises(RuntimeError):
         wf.run(plugin=plugin)
+
+
+@pytest.fixture
+def resource_monitor():
+    """Enable the resource monitor at runtime, as an application would."""
+    pytest.importorskip("psutil")
+    enabled = config.resource_monitor
+    config.enable_resource_monitor()
+    yield
+    config.resource_monitor = enabled
+
+
+@pytest.mark.parametrize("mp_context", ["fork", "spawn"])
+def test_resource_monitor_in_workers(tmp_path, resource_monitor, mp_context):
+    if mp_context not in mp.get_all_start_methods():
+        pytest.skip(f"{mp_context} start method not available")
+    wf = pe.Workflow(name="monitored", base_dir=str(tmp_path))
+    n1 = pe.Node(SingleNodeTestInterface(), name="n1")
+    n1.inputs.input1 = 1
+    wf.add_nodes([n1])
+
+    execgraph = wf.run(
+        plugin="MultiProc", plugin_args={"n_procs": 1, "mp_context": mp_context}
+    )
+
+    # Only a monitored run records the peak memory use
+    runtime = list(execgraph.nodes())[0].result.runtime
+    assert hasattr(runtime, "mem_peak_gb")
