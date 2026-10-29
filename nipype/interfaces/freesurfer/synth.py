@@ -299,7 +299,6 @@ class SynthMorphReg(FSCommand):
                 use_ext=False,
                 newpath=os.getcwd(),
             )
-        return None
 
     def _list_outputs(self):
         outputs = super()._list_outputs()
