@@ -4,6 +4,7 @@ import os
 import sys
 import pytest
 from nipype import config
+from nipype.utils.config import NipypeConfig
 from unittest.mock import MagicMock
 
 try:
@@ -292,3 +293,24 @@ def test_debug_mode():
     assert logging.getLogger("nipype.workflow").level == wf_level
     assert logging.getLogger("nipype.interface").level == if_level
     assert logging.getLogger("nipype.utils").level == ut_level
+
+
+def test_update_config_monitoring():
+    pytest.importorskip("psutil")
+    cfg = NipypeConfig()
+    cfg.update_config({"monitoring": {"enabled": False}})
+    assert not cfg.resource_monitor
+
+    cfg.update_config({"monitoring": {"enabled": "true", "sample_frequency": "2"}})
+    assert cfg.resource_monitor
+    assert cfg.get("monitoring", "sample_frequency") == "2"
+
+
+def test_disable_resource_monitor_updates_config():
+    pytest.importorskip("psutil")
+    cfg = NipypeConfig()
+    cfg.enable_resource_monitor()
+    assert cfg.get("monitoring", "enabled") == "true"
+
+    cfg.disable_resource_monitor()
+    assert cfg.get("monitoring", "enabled") == "false"
