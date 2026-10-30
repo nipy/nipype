@@ -629,6 +629,22 @@ def test_CommandLine_escape(tmp_path):
     assert result.runtime.stdout == "content"
 
 
+def test_CommandLine_escape_list():
+    class InputSpec(nib.TraitedSpec):
+        in_list = nib.traits.List(nib.File(), argstr="%s", position=0)
+        in_multi = nib.InputMultiPath(nib.File(), argstr="%s", position=1)
+
+    class CatCommand(nib.CommandLine):
+        input_spec = InputSpec
+        _cmd = "cat"
+
+    files = ["test file.txt", "other.txt"]
+    command = CatCommand(in_list=files, in_multi=files)
+    assert command.cmdline == (
+        "cat 'test file.txt' other.txt 'test file.txt' other.txt"
+    )
+
+
 @pytest.mark.skipif(os.name != "posix", reason="requires POSIX signals")
 def test_CommandLine_killed_by_signal(tmp_path):
     script = tmp_path / "die_by_signal"

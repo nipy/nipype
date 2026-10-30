@@ -813,7 +813,7 @@ class CommandLine(BaseInterface):
                 if inner_traits and any(
                     t.is_trait_type(BasePath) for t in inner_traits
                 ):
-                    values = [shlex.quote(elt) for elt in value]
+                    value = [shlex.quote(elt) for elt in value]
 
             if argstr.endswith("..."):
                 # repeatable option
