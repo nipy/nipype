@@ -808,12 +808,12 @@ class CommandLine(BaseInterface):
             # type-checking code here as well
             sep = trait_spec.sep if trait_spec.sep is not None else " "
 
-            if argstr == '%s':
+            if argstr == "%s":
                 inner_traits = getattr(trait_spec, "inner_traits", None)
                 if inner_traits and any(
                     t.is_trait_type(BasePath) for t in inner_traits
                 ):
-                    values = [shlex.quote(elt) for elt in value]
+                    value = [shlex.quote(str(elt)) for elt in value]
 
             if argstr.endswith("..."):
                 # repeatable option

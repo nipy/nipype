@@ -3,6 +3,7 @@
 """Hand-written tests for nipype.interfaces.t1prep.preprocess."""
 
 import os
+import shlex
 import sys
 
 import pytest
@@ -29,7 +30,7 @@ def test_T1Prep_cmdline(in_t1):
     t.inputs.out_dir = "/tmp/derivatives"
     assert t.cmdline == (
         f"{sys.executable} -m t1prep.t1prep --bids --out-dir /tmp/derivatives "
-        f"{in_t1}"
+        f"{shlex.quote(in_t1)}"
     )
 
 
