@@ -16,10 +16,10 @@ from .base import CFFBaseInterface
 
 
 def _read_pickle(fname):
-    import pickle
+    import networkx as nx
+    from ...utils.filemanip import read_pickle
 
-    with open(fname, 'rb') as f:
-        return pickle.load(f)
+    return read_pickle(fname, nx.Graph)
 
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):

@@ -4,6 +4,7 @@ import nibabel as nb
 from looseversion import LooseVersion
 
 from ... import logging
+from ...utils.filemanip import read_pickle
 from ..base import TraitedSpec, BaseInterfaceInputSpec, File, isdefined, traits
 from .base import (
     DipyBaseInterface,
@@ -239,15 +240,15 @@ class StreamlineTractography(DipyBaseInterface):
         self._save_peaks = False
         if isdefined(self.inputs.in_peaks):
             IFLOGGER.info("Peaks file found, skipping ODF peaks search...")
-            f = gzip.open(self.inputs.in_peaks, "rb")
-            peaks = pickle.load(f)
-            f.close()
+            from dipy.direction.peaks import PeaksAndMetrics
+
+            peaks = read_pickle(self.inputs.in_peaks, PeaksAndMetrics)
         else:
             self._save_peaks = True
             IFLOGGER.info("Loading model and computing ODF peaks")
-            f = gzip.open(self.inputs.in_model, "rb")
-            odf_model = pickle.load(f)
-            f.close()
+            from dipy.direction.peaks import PeaksAndMetrics
+
+            odf_model = read_pickle(self.inputs.in_model, PeaksAndMetrics)
 
             peaks = peaks_from_model(
                 model=odf_model,

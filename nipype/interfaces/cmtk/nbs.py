@@ -8,6 +8,7 @@ import networkx as nx
 import pickle
 
 from ... import logging
+from ...utils.filemanip import read_pickle
 from ..base import (
     LibraryBaseInterface,
     BaseInterfaceInputSpec,
@@ -23,8 +24,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def _read_pickle(fname):
-    with open(fname, 'rb') as f:
-        return pickle.load(f)
+    return read_pickle(fname, nx.Graph)
 
 
 def ntwks_to_matrices(in_files, edge_key):

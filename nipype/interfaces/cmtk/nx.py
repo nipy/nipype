@@ -7,7 +7,7 @@ import numpy as np
 import networkx as nx
 
 from ... import logging
-from ...utils.filemanip import split_filename
+from ...utils.filemanip import split_filename, read_pickle
 from ..base import (
     BaseInterface,
     BaseInterfaceInputSpec,
@@ -23,8 +23,7 @@ iflogger = logging.getLogger("nipype.interface")
 
 
 def _read_pickle(fname):
-    with open(fname, 'rb') as f:
-        return pickle.load(f)
+    return read_pickle(fname, nx.Graph)
 
 
 def read_unknown_ntwk(ntwk):

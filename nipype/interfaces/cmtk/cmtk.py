@@ -8,7 +8,7 @@ import nibabel as nb
 import networkx as nx
 
 from ... import logging
-from ...utils.filemanip import split_filename
+from ...utils.filemanip import split_filename, read_pickle
 
 from ..base import (
     BaseInterface,
@@ -225,8 +225,7 @@ def cmat(
     # Add node information from specified parcellation scheme
     path, name, ext = split_filename(resolution_network_file)
     if ext == ".pck":
-        with open(resolution_network_file, 'rb') as f:
-            gp = pickle.load(f)
+        gp = read_pickle(resolution_network_file, nx.Graph)
     elif ext == ".graphml":
         gp = nx.read_graphml(resolution_network_file)
     else:
