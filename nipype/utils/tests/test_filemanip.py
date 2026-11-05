@@ -27,6 +27,7 @@ from ...utils.filemanip import (
     indirectory,
     loadpkl,
     savepkl,
+    read_pickle,
     path_resolve,
     write_rst_list,
     emptydirs,
@@ -692,3 +693,38 @@ def test_emptydirs_dangling_nfs(tmp_path):
     assert Path.exists(tmp_path / "base")
     assert not busyfile.exists()
     assert busyfile.parent.exists()  # Couldn't remove
+
+
+class _ReduceToOsSystem:
+    """__reduce__ that would run os.system if unpickled without restriction."""
+
+    marker = ""
+
+    def __reduce__(self):
+        return (os.system, (f"echo pwned > {_ReduceToOsSystem.marker}",))
+
+
+def test_read_pickle_allows_expected(tmp_path):
+    import pickle
+    from collections import OrderedDict
+
+    obj = OrderedDict([("a", 1), ("b", [1, 2, 3])])
+    fn = tmp_path / "ok.pkl"
+    with open(fn, "wb") as fobj:
+        pickle.dump(obj, fobj)
+
+    assert read_pickle(fn, OrderedDict) == obj
+
+
+def test_read_pickle_blocks_unsafe_globals(tmp_path):
+    import pickle
+
+    marker = tmp_path / "marker.txt"
+    _ReduceToOsSystem.marker = str(marker)
+    fn = tmp_path / "evil.pkl"
+    with open(fn, "wb") as fobj:
+        pickle.dump(_ReduceToOsSystem(), fobj)
+
+    with pytest.raises(pickle.UnpicklingError):
+        read_pickle(fn, _ReduceToOsSystem)
+    assert not marker.exists()

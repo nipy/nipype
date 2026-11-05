@@ -566,6 +566,68 @@ def load_json(filename):
     return data
 
 
+class _RestrictedUnpickler(pickle.Unpickler):
+    """Unpickler that resolves only an explicit allowlist of globals.
+
+    Permits the classes passed to :func:`read_pickle`, the scientific stack
+    they rely on, and a small set of safe builtin containers; any other global
+    raises :class:`pickle.UnpicklingError` before it is resolved.
+    """
+
+    _SAFE_MODULE_ROOTS = {
+        "networkx",
+        "numpy",
+        "scipy",
+        "collections",
+        "copyreg",
+        "functools",
+    }
+    _SAFE_BUILTINS = {
+        "set",
+        "frozenset",
+        "list",
+        "dict",
+        "tuple",
+        "bytearray",
+        "complex",
+        "slice",
+        "range",
+    }
+
+    def __init__(self, *args, allowed=(), **kwargs):
+        super().__init__(*args, **kwargs)
+        self._allowed_pairs = {(c.__module__, c.__qualname__) for c in allowed}
+        self._allowed_roots = set(self._SAFE_MODULE_ROOTS)
+        self._allowed_roots.update(c.__module__.split(".")[0] for c in allowed)
+
+    def find_class(self, module, name):
+        if (module, name) in self._allowed_pairs:
+            return super().find_class(module, name)
+        if module.split(".")[0] in self._allowed_roots:
+            return super().find_class(module, name)
+        if module in ("builtins", "__builtin__") and name in self._SAFE_BUILTINS:
+            return super().find_class(module, name)
+        raise pickle.UnpicklingError(
+            f"Refusing to unpickle unsafe global {module}.{name}"
+        )
+
+
+def read_pickle(filename, *expected_classes):
+    """Safely unpickle ``filename`` from a potentially untrusted interface input.
+
+    Only ``expected_classes``, the scientific stack they rely on
+    (networkx/numpy/scipy/collections) and safe builtin containers are
+    permitted; any other global raises :class:`pickle.UnpicklingError` before it
+    is resolved, so a crafted file cannot execute code on load. Transparently
+    handles gzip-compressed pickles.
+    """
+    with open(filename, "rb") as fobj:
+        magic = fobj.read(2)
+        fobj.seek(0)
+        stream = gzip.open(fobj, "rb") if magic == b"\x1f\x8b" else fobj
+        return _RestrictedUnpickler(stream, allowed=expected_classes).load()
+
+
 def loadcrash(infile, *args):
     if infile.endswith(("pkl", "pklz")):
         return loadpkl(infile)

@@ -3,7 +3,9 @@ import os.path as op
 import datetime
 import string
 
-from ...utils.filemanip import split_filename
+import networkx as nx
+
+from ...utils.filemanip import split_filename, read_pickle
 from ..base import (
     BaseInterfaceInputSpec,
     traits,
@@ -13,13 +15,6 @@ from ..base import (
     isdefined,
 )
 from .base import CFFBaseInterface
-
-
-def _read_pickle(fname):
-    import pickle
-
-    with open(fname, 'rb') as f:
-        return pickle.load(f)
 
 
 class CFFConverterInputSpec(BaseInterfaceInputSpec):
@@ -139,7 +134,7 @@ class CFFConverter(CFFBaseInterface):
             unpickled = []
             for ntwk in self.inputs.gpickled_networks:
                 _, ntwk_name, _ = split_filename(ntwk)
-                unpickled = _read_pickle(ntwk)
+                unpickled = read_pickle(ntwk, nx.Graph)
                 cnet = cf.CNetwork(name=ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
                 a.add_connectome_network(cnet)
