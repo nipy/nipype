@@ -23,17 +23,13 @@ from ..base import (
 iflogger = logging.getLogger("nipype.interface")
 
 
-def _read_pickle(fname):
-    return read_pickle(fname, nx.Graph)
-
-
 def ntwks_to_matrices(in_files, edge_key):
-    first = _read_pickle(in_files[0])
+    first = read_pickle(in_files[0], nx.Graph)
     files = len(in_files)
     nodes = len(first.nodes())
     matrix = np.zeros((nodes, nodes, files))
     for idx, name in enumerate(in_files):
-        graph = _read_pickle(name)
+        graph = read_pickle(name, nx.Graph)
         for u, v, d in graph.edges(data=True):
             try:
                 graph[u][v]["weight"] = d[
@@ -163,7 +159,7 @@ class NetworkBasedStatistic(LibraryBaseInterface):
         else:
             node_ntwk_name = self.inputs.in_group1[0]
 
-        node_network = _read_pickle(node_ntwk_name)
+        node_network = read_pickle(node_ntwk_name, nx.Graph)
         iflogger.info(
             "Populating node dictionaries with attributes from %s", node_ntwk_name
         )
