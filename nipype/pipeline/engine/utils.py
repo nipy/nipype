@@ -1328,7 +1328,7 @@ def export_graph(
     Indicates whether to use the specification graph or the
     execution graph. default [False]
 
-    show_connectioninfo : boolean
+    show_connectinfo : boolean
     Indicates whether to show the edge data on the graph. This
     makes the graph rather cluttered. default [False]
     """

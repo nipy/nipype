@@ -256,8 +256,6 @@ def draw_nodes(start, nodes_list, cores, minute_scale, space_between_minutes, co
     cores : integer
         the number of cores given to the workflow via the 'n_procs'
         plugin arg
-    total_duration : float
-        total duration of the workflow execution (in seconds)
     minute_scale : integer
         the scale, in minutes, at which to plot line markers for the
         gantt chart; for example, minute_scale=10 means there are lines

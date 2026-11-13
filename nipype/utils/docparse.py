@@ -175,7 +175,7 @@ def build_doc(doc, opts):
 
     Parameters
     ----------
-    rep_doc : string
+    doc : string
         Documentation string
     opts : dict
         Dictionary of option attributes and keys.  Use reverse_opt_map
