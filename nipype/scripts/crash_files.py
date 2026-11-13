@@ -27,9 +27,6 @@ def iter_tracebacks(logdir):
     logdir: str
         Path to the log folder.
 
-    field: str
-        Field name to be read from the crash file.
-
     Yields
     ------
     path_file: str
