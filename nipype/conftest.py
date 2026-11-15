@@ -29,13 +29,26 @@ def pytest_configure(config):
         assert tempfile.gettempdir() == new_base
         TMP_DATADIR = os.path.join(new_base, "data")
 
-    # xdist will result in this being run multiple times
-    if not os.path.exists(TMP_DATADIR):
+    # xdist runs this in the controller and then in every worker, and the
+    # workers share the controller's copy. The controller starts from a fresh
+    # copy, so files left by an earlier run (such as the folders the doctests
+    # create) can't change the results.
+    if _is_xdist_worker(config):
+        if not os.path.exists(TMP_DATADIR):
+            shutil.copytree(NIPYPE_DATADIR, TMP_DATADIR)
+    else:
+        shutil.rmtree(TMP_DATADIR, ignore_errors=True)
         shutil.copytree(NIPYPE_DATADIR, TMP_DATADIR)
 
 
 def pytest_unconfigure(config):
     shutil.rmtree(NIPYPE_TMPDIR)
+    if not _is_xdist_worker(config):
+        shutil.rmtree(TMP_DATADIR, ignore_errors=True)
+
+
+def _is_xdist_worker(config):
+    return hasattr(config, "workerinput")
 
 
 if "SUBJECTS_DIR" not in os.environ:
