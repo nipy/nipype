@@ -904,6 +904,29 @@ class MCFLIRT(FSLCommand):
                 return spec.argstr % value
         return super()._format_arg(name, spec, value)
 
+    def _gen_suffixed_output(self, out_file, suffix, output_dir):
+        """Return the path mcflirt used for a suffixed companion image.
+
+        mcflirt appends the suffix to the value of ``-out`` without stripping
+        an extension first (see ``save_volume(meanvol, outputfname +
+        "_mean_reg")`` in its source), which yields names of the form
+        ``prefix_mcf.nii.gz_mean_reg.nii.gz``. Some builds have instead been
+        observed to insert the suffix before the extension, which is what
+        nipype has assumed for FSL 6 since gh-3029. Rather than guess from the
+        version number, prefer whichever file is actually on disk, and fall
+        back to the version-based guess when neither exists yet.
+        """
+        appended = self._gen_fname(out_file + suffix + ".ext", cwd=output_dir)
+        inserted = self._gen_fname(out_file, suffix=suffix, cwd=output_dir)
+
+        for candidate in (appended, inserted):
+            if os.path.exists(candidate):
+                return candidate
+
+        if LooseVersion(Info.version()) < LooseVersion("6.0.0"):
+            return appended
+        return inserted
+
     def _list_outputs(self):
         outputs = self._outputs().get()
 
@@ -911,21 +934,12 @@ class MCFLIRT(FSLCommand):
         output_dir = os.path.dirname(outputs["out_file"])
 
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
-            if LooseVersion(Info.version()) < LooseVersion("6.0.0"):
-                # FSL <6.0 outputs have .nii.gz_variance.nii.gz as extension
-                outputs["variance_img"] = self._gen_fname(
-                    outputs["out_file"] + "_variance.ext", cwd=output_dir
-                )
-                outputs["std_img"] = self._gen_fname(
-                    outputs["out_file"] + "_sigma.ext", cwd=output_dir
-                )
-            else:
-                outputs["variance_img"] = self._gen_fname(
-                    outputs["out_file"], suffix="_variance", cwd=output_dir
-                )
-                outputs["std_img"] = self._gen_fname(
-                    outputs["out_file"], suffix="_sigma", cwd=output_dir
-                )
+            outputs["variance_img"] = self._gen_suffixed_output(
+                outputs["out_file"], "_variance", output_dir
+            )
+            outputs["std_img"] = self._gen_suffixed_output(
+                outputs["out_file"], "_sigma", output_dir
+            )
 
         # The mean image created if -stats option is specified ('meanvol')
         # is missing the top and bottom slices. Therefore we only expose the
@@ -934,15 +948,9 @@ class MCFLIRT(FSLCommand):
         # Note that the same problem holds for the std and variance image.
 
         if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
-            if LooseVersion(Info.version()) < LooseVersion("6.0.0"):
-                # FSL <6.0 outputs have .nii.gz_mean_img.nii.gz as extension
-                outputs["mean_img"] = self._gen_fname(
-                    outputs["out_file"] + "_mean_reg.ext", cwd=output_dir
-                )
-            else:
-                outputs["mean_img"] = self._gen_fname(
-                    outputs["out_file"], suffix="_mean_reg", cwd=output_dir
-                )
+            outputs["mean_img"] = self._gen_suffixed_output(
+                outputs["out_file"], "_mean_reg", output_dir
+            )
 
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs["out_file"])
