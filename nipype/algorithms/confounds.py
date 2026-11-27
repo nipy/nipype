@@ -1231,7 +1231,7 @@ def regress_poly(degree, data, remove_mean=True, axis=-1, failure_mode="error"):
         value_array = np.linspace(-1, 1, timepoints)
         X = np.hstack((X, polynomial_func(value_array)[:, np.newaxis]))
 
-    non_constant_regressors = X[:, :-1] if X.shape[1] > 1 else np.array([])
+    non_constant_regressors = X[:, 1:] if X.shape[1] > 1 else np.array([])
 
     # Calculate coefficients
     betas = np.linalg.pinv(X).dot(data.T)

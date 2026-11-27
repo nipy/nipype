@@ -4,10 +4,11 @@ import os
 
 import nibabel as nb
 import numpy as np
+from numpy.polynomial import Legendre
 
 import pytest
 from ...testing import utils
-from ..confounds import CompCor, TCompCor, ACompCor
+from ..confounds import CompCor, TCompCor, ACompCor, regress_poly
 
 
 def close_up_to_column_sign(a, b, rtol=1e-05, atol=1e-08, equal_nan=False):
@@ -183,6 +184,26 @@ class TestCompCor:
             ],
         )
 
+    def test_compcor_save_pre_filter_polynomial(self):
+        ccresult = CompCor(
+            num_components=6,
+            realigned_file=self.realigned_file,
+            mask_files=self.mask_files,
+            mask_index=0,
+            pre_filter="polynomial",
+            regress_poly_degree=2,
+            save_pre_filter=True,
+        ).run()
+
+        with open(ccresult.outputs.pre_filter_file) as pre_filter_file:
+            header = pre_filter_file.readline().rstrip().split("\t")
+            basis = np.loadtxt(pre_filter_file, delimiter="\t")
+
+        t = np.linspace(-1, 1, self.fake_data.shape[3])
+        expected = np.column_stack([Legendre.basis(1)(t), Legendre.basis(2)(t)])
+        assert header == ["Legendre00", "Legendre01"]
+        assert np.allclose(basis, expected)
+
     def test_tcompcor_asymmetric_dim(self):
         asymmetric_shape = (2, 3, 4, 5)
         asymmetric_data = utils.save_toy_nii(
@@ -304,3 +325,15 @@ class TestCompCor:
             [[[2, 4, 5, 7, 0], [1, 7, 0, 5, 4]], [[7, 3, 9, 0, 4], [9, 4, 1, 5, 0]]],
         ]
     )
+
+
+@pytest.mark.parametrize("degree", [0, 1, 2, 3])
+def test_regress_poly_non_constant_regressors(degree):
+    data = np.arange(10, dtype=float).reshape(2, 5)
+    _, basis = regress_poly(degree, data)
+    if degree == 0:
+        assert basis.size == 0
+    else:
+        t = np.linspace(-1, 1, data.shape[-1])
+        expected = np.column_stack([Legendre.basis(i + 1)(t) for i in range(degree)])
+        assert np.allclose(basis, expected)
